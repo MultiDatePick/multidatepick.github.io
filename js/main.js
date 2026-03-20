@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const banner = document.getElementById('announcementBanner');
     const bannerClose = document.getElementById('bannerClose');
     if (banner && bannerClose) {
-        // Check if previously dismissed
         if (sessionStorage.getItem('bannerDismissed') === 'true') {
             banner.classList.add('hidden');
         }
@@ -26,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
             nav.classList.toggle('open');
             toggle.classList.toggle('active');
         });
-        // Close on link click
         nav.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 nav.classList.remove('open');
@@ -40,9 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => {
             const item = btn.closest('.faq-item');
             const wasOpen = item.classList.contains('open');
-            // Close all
             document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-            // Toggle current
             if (!wasOpen) item.classList.add('open');
         });
     });
