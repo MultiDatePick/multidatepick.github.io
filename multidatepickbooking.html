@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>multiDatePickBooking — Salesforce Resource Booking Component | MultiDatePick</title>
+    <meta name="description" content="multiDatePickBooking lets Salesforce users book rooms, equipment, vehicles, and people across multiple dates with a visual time-slot grid and conflict detection.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="images/favicon.png" type="image/png">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="images/logo.png" alt="MultiDatePick Logo"><span>MultiDatePick</span></a>
+            <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/multidatepickdates.html">Dates</a></li>
+                <li><a href="/multidatepickdatetime.html">DateTime</a></li>
+                <li><a href="/multidatepickbooking.html">Booking</a></li>
+                <li><a href="#" class="nav-cta">Install from AppExchange</a></li>
+            </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+
+        <section class="guide-hero">
+            <div class="container">
+                <h1>multiDatePickBooking</h1>
+                <p class="subtitle">Book Resources Across Multiple Dates in Salesforce. Visual time-slot grid with real-time conflict detection for rooms, equipment, vehicles, and people.</p>
+                <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
+                    <a href="#" class="btn btn-primary btn-sm">Install from AppExchange</a>
+                    <a href="#" class="btn btn-secondary btn-sm">Download Sample Booking Flow XML</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="guide-content">
+            <div class="container">
+
+                <div class="img-placeholder">
+                    <span class="placeholder-icon">📋</span>
+                    <span>Component Screenshot / GIF — multiDatePickBooking in action</span>
+                    <span style="font-size:0.75rem;opacity:0.6;">Component-multiDatePickBooking-1024x1024.jpg</span>
+                </div>
+
+                <h2>Overview</h2>
+                <p>multiDatePickBooking is the most advanced component in the suite. It combines the calendar with a resource selection panel and a visual time-slot grid. Users pick a resource (or multiple resources), select dates, and then click available time slots to create bookings. The component queries your resource object for available items, checks for existing bookings to detect conflicts in real time, and creates booking records automatically.</p>
+                <p>Use this for conference room reservations, equipment checkout, vehicle scheduling, technician dispatch, or any scenario where a shared resource needs to be reserved on specific dates and times.</p>
+
+                <div class="toc">
+                    <h4>On This Page</h4>
+                    <ul>
+                        <li><a href="#bk-setup">Getting Started: Step-by-Step Setup</a></li>
+                        <li><a href="#bk-flow">Using in a Screen Flow</a></li>
+                        <li><a href="#bk-record">Using on a Lightning Record Page</a></li>
+                        <li><a href="#bk-conflicts">How Conflict Detection Works</a></li>
+                    </ul>
+                </div>
+
+                <h2 id="bk-setup">Getting Started: Step-by-Step Setup</h2>
+                <p>The Booking component requires <strong>two custom objects</strong>: a Resource object (what you are booking) and a Booking object (where reservation records are stored).</p>
+
+                <div class="step">
+                    <h4><span class="step-number">1</span> Create the Resource Object</h4>
+                    <p>This object stores the things people can book — conference rooms, projectors, vehicles, technicians, etc. Each record is one bookable resource.</p>
+                    <p>Go to <strong>Setup &gt; Object Manager &gt; Create &gt; Custom Object</strong>. For this example, we'll create <code>Room__c</code> for conference rooms. Name yours whatever fits (<code>Equipment__c</code>, <code>Vehicle__c</code>, <code>Staff__c</code>, etc.).</p>
+                    <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Resource object in Setup</span></div>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">2</span> Create Fields on the Resource Object</h4>
+                    <p>The resource object uses the standard Name field plus optional Time fields for business hours:</p>
+                    <ul>
+                        <li><strong>Name</strong> (standard field) — display name, e.g., "Conference Room A"</li>
+                        <li><strong>Business Hours Start</strong> (e.g., <code>Business_Hours_Start__c</code>, type: Time) — when the resource is available from, e.g., 08:00</li>
+                        <li><strong>Business Hours End</strong> (e.g., <code>Business_Hours_End__c</code>, type: Time) — when the resource is available until, e.g., 18:00</li>
+                    </ul>
+                    <p>After creating the fields, <strong>create a few resource records</strong> so the component has resources to show in the dropdown.</p>
+                    <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Resource records with business hours</span></div>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">3</span> Create the Booking Object</h4>
+                    <p>This object stores the actual reservations. Each time a user books a time slot for a resource, one Booking record is created.</p>
+                    <p>Go to <strong>Setup &gt; Object Manager &gt; Create &gt; Custom Object</strong>. Create <code>Room_Booking__c</code> (or <code>Equipment_Reservation__c</code>, <code>Vehicle_Checkout__c</code>, etc.).</p>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">4</span> Create Fields on the Booking Object</h4>
+                    <ul>
+                        <li><strong>Booking Date</strong> (<code>Booking_Date__c</code>, type: Date) — the date of the reservation</li>
+                        <li><strong>Resource Lookup</strong> (<code>Meeting_Room__c</code>, type: Lookup to your Resource object) — which resource is booked</li>
+                        <li><strong>Start Time</strong> (<code>Start_Time__c</code>, type: Time) — when the booking starts</li>
+                        <li><strong>End Time</strong> (<code>End_Time__c</code>, type: Time) — when the booking ends</li>
+                        <li><strong>Parent Lookup</strong> (e.g., <code>Travel__c</code>, type: Lookup) — optional, links to the parent record</li>
+                    </ul>
+                    <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Booking object fields</span></div>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">5</span> Add the Component to a Record Page or Flow</h4>
+                    <p>Drag <code>multiDatePickBooking</code> onto your Record Page or Flow Screen and configure the properties below. Make sure to map all the Resource and Booking fields correctly.</p>
+                    <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Booking component on a Record Page showing dropdown, calendar, and time grid</span></div>
+                </div>
+
+                <h2 id="bk-flow">Using in a Screen Flow</h2>
+                <p>The Booking component shares Display properties (Button Label, Calendar Title, Show Inline, Single Month View, Calendar Size, Week Starts Monday, Recurring Pattern) and Constraint properties (Max Dates, Allow Past Dates, Min/Max Date) with the other components. See the <a href="/multidatepickdates.html#dates-flow">multiDatePickDates page</a> for those.</p>
+                <p>The following properties are unique to Booking:</p>
+
+                <h3>Resource Configuration</h3>
+<table class="property-table">
+<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>resourceObjectApiName</code></td><td>String</td><td>—</td><td>API name of the object storing your bookable resources. Each record in this object = one bookable resource shown in the dropdown. Example: Room__c (for meeting rooms), Equipment__c (for equipment), Vehicle__c (for vehicles)</td></tr>
+<tr><td><code>resourceNameField</code></td><td>String</td><td>Name</td><td>API name of the field containing the resource's display name shown in the dropdown. Usually 'Name'. Example: Name</td></tr>
+<tr><td><code>businessHoursStartField</code></td><td>String</td><td>—</td><td>API name of the Time field on your resource object defining when it becomes available each day. Example: Business_Hours_Start__c (set to 08:00:00.000Z for 8:00 AM). Leave blank to use time slots for the full configured interval.</td></tr>
+<tr><td><code>businessHoursEndField</code></td><td>String</td><td>—</td><td>API name of the Time field on your resource object defining the last available time each day. Example: Business_Hours_End__c (set to 18:00:00.000Z for 6:00 PM).</td></tr>
+<tr><td><code>allowMultipleResources</code></td><td>Boolean</td><td>false</td><td>When ON, users can select multiple resources with checkboxes and book all of them simultaneously. The time grid shows only slots available for ALL selected resources. Example: Turn ON to book a room AND a projector at the same time.</td></tr>
+</tbody></table>
+
+                <h3>Booking Record Configuration</h3>
+<table class="property-table">
+<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>resourceBookingObject</code></td><td>String</td><td>—</td><td>API name of the object where booking records are created. One record is created per selected date per resource. Example: Room_Booking__c, Equipment_Reservation__c, Vehicle_Reservation__c. IMPORTANT: This must be a different object than any auto-save related object.</td></tr>
+<tr><td><code>bookingDateField</code></td><td>String</td><td>—</td><td>API name of the Date field on your booking object that stores which date was booked. Must be a Date type (not DateTime). Example: Booking_Date__c</td></tr>
+<tr><td><code>bookingResourceField</code></td><td>String</td><td>—</td><td>API name of the lookup field on your booking object that points to the resource being booked. Example: Room__c (a lookup from Room_Booking__c back to Room__c)</td></tr>
+<tr><td><code>bookingStartTimeField</code></td><td>String</td><td>—</td><td>API name of the Time field on the booking object storing the booked start time. Example: Start_Time__c. Leave blank if you only need date-level bookings without specific time slots.</td></tr>
+<tr><td><code>bookingEndTimeField</code></td><td>String</td><td>—</td><td>API name of the Time field on the booking object storing the booked end time. Example: End_Time__c. The system automatically calculates end time based on selected slots.</td></tr>
+<tr><td><code>relationshipFieldApiName</code></td><td>String</td><td>—</td><td>API name of the lookup field on the booking object that links each booking to the parent record (e.g., the current record in a Flow). Example: Travel__c (links Room_Booking__c to the Travel record being processed). Leave blank if bookings don't need to be associated with a specific parent record.</td></tr>
+</tbody></table>
+
+                <h3>Time Slot &amp; Display Configuration</h3>
+<table class="property-table">
+<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>timeInterval</code></td><td>Integer</td><td>30</td><td>Size of each bookable time slot in minutes. Options: 15, 30, or 60. Example: 30 creates slots of 9:00-9:30, 9:30-10:00, etc. Example: 60 creates 1-hour slots: 9:00-10:00, 10:00-11:00.</td></tr>
+<tr><td><code>availabilityLookAheadDays</code></td><td>Integer</td><td>180</td><td>Number of days to check for resource availability. Default: 180 days (~6 months). Increase for longer-term planning (e.g., 1095 for 3 years), but note this may impact performance with large datasets.</td></tr>
+</tbody></table>
+
+                <h3>Output Properties (Read-Only)</h3>
+<table class="property-table">
+<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>bookingSuccessCount</code> <span style="color:var(--orange);font-weight:600;">(Output)</span></td><td>Integer</td><td>—</td><td>OUTPUT: Number of booking records successfully created. Use in your Flow to show a confirmation message. Example: 'You successfully booked {bookingSuccessCount} time slots.'</td></tr>
+<tr><td><code>bookingConflictDates</code> <span style="color:var(--orange);font-weight:600;">(Output)</span></td><td>String[]</td><td>—</td><td>OUTPUT: List of dates where bookings could not be created due to conflicts with existing reservations. Use to inform the user which dates were unavailable. Example: ['2026-02-10', '2026-02-12']</td></tr>
+</tbody></table>
+
+
+                <h2 id="bk-record">Using on a Lightning Record Page</h2>
+                <p>The Booking component works on Record Pages with the same Resource and Booking configuration properties listed above. The <code>recordId</code> is automatically passed by Salesforce, so bookings are linked to the current record through the Parent Record Relationship Field.</p>
+                <p>Configure the Resource Object, Booking Object, and all field mappings in the App Builder property panel.</p>
+
+                <h2 id="bk-conflicts">How Conflict Detection Works</h2>
+                <p>When a user selects a resource and dates, the component automatically queries existing booking records for that resource on those dates. For each date, it generates time slots based on the resource's business hours and the configured interval.</p>
+                <p>If an existing booking overlaps with a generated time slot (the existing booking's start time is before the slot's end time AND the existing booking's end time is after the slot's start time), that slot is marked as <strong>unavailable</strong> and shown in pink/red on the grid.</p>
+                <p>When the user clicks the <strong>Book</strong> button, the system performs one final conflict check before inserting records. Any dates that fail the check are added to the <strong>Conflict Dates</strong> output and skipped. Successfully booked dates are counted in the <strong>Successful Bookings Count</strong> output.</p>
+                <p>For <strong>multiple resources</strong>, the system queries bookings for ALL selected resources and shows only slots that are free across every selected resource. This ensures that booking a room and a projector together only shows times when both are available.</p>
+
+                <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>GIF: Conflict detection in action — booked slots shown in pink, available in white</span></div>
+
+            </div>
+        </section>
+
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand"><a href="/" class="logo"><img src="images/logo-white.png" alt="MultiDatePick"><span>MultiDatePick</span></a><p>The multi-date selection component suite for Salesforce.</p></div>
+                <div class="footer-links"><h4>Components</h4><ul><li><a href="/multidatepickdates.html">multiDatePickDates</a></li><li><a href="/multidatepickdatetime.html">multiDatePickDateTime</a></li><li><a href="/multidatepickbooking.html">multiDatePickBooking</a></li></ul></div>
+                <div class="footer-links"><h4>Resources</h4><ul><li><a href="#">AppExchange Listing</a></li><li><a href="mailto:Support@MultiDatePick.com">Support</a></li></ul></div>
+            </div>
+            <div class="footer-bottom"><span>&copy; 2026 MultiDatePick. All rights reserved.</span><div class="footer-social"><a href="https://x.com/MultiDatePick" target="_blank">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank">YouTube</a></div></div>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+</html>

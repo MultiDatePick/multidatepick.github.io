@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>multiDatePickDateTime — Date and Time Selection for Salesforce Flows | MultiDatePick</title>
+    <meta name="description" content="multiDatePickDateTime combines multi-date selection with per-date time picking for Salesforce Screen Flows and Lightning Pages.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="images/favicon.png" type="image/png">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="images/logo.png" alt="MultiDatePick Logo"><span>MultiDatePick</span></a>
+            <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/multidatepickdates.html">Dates</a></li>
+                <li><a href="/multidatepickdatetime.html">DateTime</a></li>
+                <li><a href="/multidatepickbooking.html">Booking</a></li>
+                <li><a href="#" class="nav-cta">Install from AppExchange</a></li>
+            </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+
+        <section class="guide-hero">
+            <div class="container">
+                <h1>multiDatePickDateTime</h1>
+                <p class="subtitle">Schedule Dates and Times in Salesforce Flows. Combine multi-date selection with per-date time picking for appointments, sessions, and shifts.</p>
+                <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
+                    <a href="#" class="btn btn-primary btn-sm">Install from AppExchange</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="guide-content">
+            <div class="container">
+
+                <div class="img-placeholder">
+                    <span class="placeholder-icon">🕐</span>
+                    <span>Component Screenshot / GIF — multiDatePickDateTime in action</span>
+                    <span style="font-size:0.75rem;opacity:0.6;">Component-multiDatePickDateTime-1024x1024.jpg</span>
+                </div>
+
+                <h2>Overview</h2>
+                <p>multiDatePickDateTime extends the date selection calendar with time picking. After selecting dates, users assign a start time (and optionally an end time) to each one using dropdown menus or a visual time slot grid. You control the time interval (15, 30, or 60 minutes), the visible time range (e.g., 8:00 AM to 5:00 PM), and whether each date can have a different time or all dates share the same time.</p>
+                <p>Use this component when your Flow or Record Page needs both a date and a time — for appointment scheduling, session booking, shift planning, or any workflow where the time of day matters.</p>
+
+                <div class="toc">
+                    <h4>On This Page</h4>
+                    <ul>
+                        <li><a href="#dt-setup">Getting Started: Step-by-Step Setup</a></li>
+                        <li><a href="#dt-flow">Using in a Screen Flow</a></li>
+                        <li><a href="#dt-record">Using on a Lightning Record Page</a></li>
+                    </ul>
+                </div>
+
+                <h2 id="dt-setup">Getting Started: Step-by-Step Setup</h2>
+                <p>Follow these steps to get multiDatePickDateTime working in your org. The child object setup is similar to multiDatePickDates, but with additional Time fields.</p>
+
+                <div class="step">
+                    <h4><span class="step-number">1</span> Create the Child Object (for Record Pages)</h4>
+                    <p>If you plan to use this on a Lightning Record Page with auto-save, you need a child object. <strong>If you only plan to use it in Flows, skip to Step 3.</strong></p>
+                    <p>Go to <strong>Setup &gt; Object Manager &gt; Create &gt; Custom Object</strong>. For this example, we'll create an <code>Appointment__c</code> object. Name yours whatever fits (<code>Session__c</code>, <code>Shift__c</code>, <code>Schedule_Entry__c</code>, etc.).</p>
+                    <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Creating the Appointment object in Setup</span></div>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">2</span> Create the Fields on Your Child Object</h4>
+                    <p>Your child object needs a Date field, a relationship field, and optionally one or two Time fields for start and end times:</p>
+                    <ul>
+                        <li><strong>Date field</strong> (e.g., <code>Appointment_Date__c</code>) — stores the selected date</li>
+                        <li><strong>Lookup field</strong> (e.g., <code>Contact__c</code>) — links back to the parent record</li>
+                        <li><strong>Start Time field</strong> (e.g., <code>Start_Time__c</code>, type: Time) — stores the start time</li>
+                        <li><strong>End Time field</strong> (e.g., <code>End_Time__c</code>, type: Time) — stores the end time (optional)</li>
+                    </ul>
+                    <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Fields on the child object including Time fields</span></div>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">3</span> Add the Component to a Record Page or Flow</h4>
+                    <p>Same process as multiDatePickDates — drag the component onto a Record Page in App Builder or onto a Screen element in Flow Builder. Configure the properties below.</p>
+                </div>
+
+                <h2 id="dt-flow">Using in a Screen Flow</h2>
+                <p>multiDatePickDateTime shares all Display and Constraint properties with multiDatePickDates (Button Label, Calendar Title, Show Inline, Single Month View, Calendar Size, Day Headers, Week Start, Recurring Pattern, Selection Summary, Max Dates, Allow Past Dates, Min/Max Date, Pre-Selected Dates, Blocked Dates, Available Dates, Auto-Jump). See the <a href="/multidatepickdates.html#dates-flow">multiDatePickDates page</a> for full descriptions of those shared properties.</p>
+                <p>The following properties are unique to the DateTime component:</p>
+
+                <h3>Time Selection Properties</h3>
+<table class="property-table">
+<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>timeInterval</code></td><td>Integer</td><td>30</td><td>Minutes between time options in the dropdown. Options: 15, 30, or 60. Example: 15 shows 9:00 AM, 9:15 AM, 9:30 AM. Example: 60 shows 9:00 AM, 10:00 AM, 11:00 AM.</td></tr>
+<tr><td><code>minTime</code></td><td>String</td><td>—</td><td>Earliest time shown in the time dropdown. Use 24-hour format (HH:mm). Examples: 08:00 = 8:00 AM, 13:00 = 1:00 PM, 17:00 = 5:00 PM. Leave blank to start at 12:00 AM. Note: PM hours use 13–23 (e.g. 14:00 = 2:00 PM, 21:30 = 9:30 PM).</td></tr>
+<tr><td><code>maxTime</code></td><td>String</td><td>—</td><td>Latest time shown in the time dropdown. Use 24-hour format (HH:mm). Examples: 17:00 = 5:00 PM, 20:00 = 8:00 PM, 23:30 = 11:30 PM. Leave blank to end at 11:30 PM. Note: PM hours use 13–23 (e.g. 14:00 = 2:00 PM, 21:30 = 9:30 PM).</td></tr>
+<tr><td><code>timeDisplayMode</code></td><td>String</td><td>grid</td><td>How time is shown: 'grid' (visual slot grid — click/drag to select multiple slots per date, default) or 'dropdown' (lightning-input time pickers). Use 'Allow Different Times Per Date' to control shared vs. per-date pickers in dropdown mode. Example: grid</td></tr>
+<tr><td><code>allowDifferentTimes</code></td><td>Boolean</td><td>false</td><td>When ON and Time Display Mode is 'dropdown', each date gets its own time picker (dates are grouped by week). When OFF, all dates share one time. Has no effect when Time Display Mode is 'grid'. Default: OFF (shared time for all dates).</td></tr>
+<tr><td><code>enableEndTime</code></td><td>Boolean</td><td>false</td><td>When true, shows a separate End Time dropdown alongside Start Time. Outputs both startTime and endTime in selectedDatesWithTimesJson.</td></tr>
+</tbody></table>
+
+                <h3>Conflict Checking Properties</h3>
+<table class="property-table">
+<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+</tbody></table>
+
+                <h3>Output Controls</h3>
+<table class="property-table">
+<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>outputAsJson</code></td><td>Boolean</td><td>false</td><td>When ON, also populates 'Date Ranges JSON Output' with consecutive dates grouped into ranges (without time data). Turn ON if you also need to use the MultiDatePickParser for range-based processing.</td></tr>
+</tbody></table>
+
+                <h3>Output Properties (Read-Only)</h3>
+<table class="property-table">
+<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>selectedDates</code> <span style="color:var(--orange);font-weight:600;">(Output)</span></td><td>String[]</td><td>—</td><td>OUTPUT: Array of selected dates in ISO format, without time. Example: ['2026-03-01', '2026-03-08', '2026-03-15']</td></tr>
+<tr><td><code>selectedDatesWithTimesJson</code> <span style="color:var(--orange);font-weight:600;">(Output)</span></td><td>String</td><td>—</td><td>OUTPUT: JSON string with each date and its selected time. Pass to MultiDatePickParser in your Flow to loop through. Example: {"data":[{"id":1,"fromDate":"2026-03-01","toDate":"2026-03-01","startTime":"09:00","endTime":"09:00"}]}</td></tr>
+<tr><td><code>selectedDateRangesJson</code> <span style="color:var(--orange);font-weight:600;">(Output)</span></td><td>String</td><td>—</td><td>OUTPUT: JSON of consecutive dates grouped into ranges without time. Only populated when 'Also Output Date Ranges JSON' is ON. Example: {"data":[{"id":1,"fromDate":"2026-03-01","toDate":"2026-03-03"}]}</td></tr>
+</tbody></table>
+
+
+                <h2 id="dt-record">Using on a Lightning Record Page</h2>
+                <p>multiDatePickDateTime supports all the same Record Page auto-save properties as multiDatePickDates (Related Object, Date Field, Relationship Field, Preload, Blocked Dates). See the <a href="/multidatepickdates.html#dates-record">multiDatePickDates page</a> for those. The following additional properties are available for time fields:</p>
+
+                <h3>Record Page Time &amp; Save Properties</h3>
+<table class="property-table">
+<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>startTimeField</code></td><td>String</td><td>—</td><td>API name of the field on the related object where the selected start time will be saved. Example: Start_Time__c. Leave blank if your object has no time fields.</td></tr>
+<tr><td><code>endTimeField</code></td><td>String</td><td>—</td><td>API name of the field on the related object where the selected end time will be saved. Example: End_Time__c. Only used when Enable End Time is ON. Leave blank if not needed.</td></tr>
+<tr><td><code>saveButtonLabel</code></td><td>String</td><td>Save</td><td>Text on the save button.</td></tr>
+<tr><td><code>enableConflictCheck</code></td><td>Boolean</td><td>false</td><td>When ON, checks for time conflicts against existing records in the configured Related Object. Conflicting time slots are shown as unavailable (blocked), matching the same visual behavior as the Booking component. Requires: Related Object API Name, Date Field API Name, Start Time Field API Name, and End Time Field API Name to be configured.</td></tr>
+<tr><td><code>conflictLookAheadDays</code></td><td>Integer</td><td>180</td><td>How many days ahead to check for time conflicts when Enable Conflict Checking is ON. Only selected dates within this window are queried from Salesforce. Default: 180 (6 months). Reduce for better performance on high-volume objects (e.g., 30 or 60). Dates beyond this window are shown as available without a conflict check.</td></tr>
+<tr><td><code>skipConflictsOnSave</code></td><td>Boolean</td><td>false</td><td>Only applies when Time Display Mode is 'grid' and Allow Different Times Per Date is OFF (shared grid mode). When ON, each selected date is checked for time conflicts at save time. Dates with conflicts are skipped (not saved) and shown with a RED strikethrough on the calendar. Non-conflicting dates are saved normally and shown with a grey strikethrough. Requires: Related Object API Name, Date Field API Name, Start Time Field API Name, and End Time Field API Name. Default: OFF (save all dates without conflict checking).</td></tr>
+</tbody></table>
+
+
+                <div class="callout">
+                    <span class="callout-icon">⚠️</span>
+                    <div><strong>Additive Save:</strong> The component uses the additive save method on Record Pages — it inserts new date records with their associated times but does not delete existing records. This allows multiple records per date (e.g., two different appointment times on the same day).</div>
+                </div>
+
+                <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: DateTime component on a Record Page with time dropdowns</span></div>
+
+            </div>
+        </section>
+
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand"><a href="/" class="logo"><img src="images/logo-white.png" alt="MultiDatePick"><span>MultiDatePick</span></a><p>The multi-date selection component suite for Salesforce.</p></div>
+                <div class="footer-links"><h4>Components</h4><ul><li><a href="/multidatepickdates.html">multiDatePickDates</a></li><li><a href="/multidatepickdatetime.html">multiDatePickDateTime</a></li><li><a href="/multidatepickbooking.html">multiDatePickBooking</a></li></ul></div>
+                <div class="footer-links"><h4>Resources</h4><ul><li><a href="#">AppExchange Listing</a></li><li><a href="mailto:Support@MultiDatePick.com">Support</a></li></ul></div>
+            </div>
+            <div class="footer-bottom"><span>&copy; 2026 MultiDatePick. All rights reserved.</span><div class="footer-social"><a href="https://x.com/MultiDatePick" target="_blank">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank">YouTube</a></div></div>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+</html>
