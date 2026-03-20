@@ -1,59 +1,75 @@
-// ═══════════════════════════════════════════════════════════════════
-// MultiDatePick Website — Shared JavaScript
-// ═══════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════
+   MultiDatePick Website — main.js
+   ═══════════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ─── HEADER SCROLL EFFECT ────────────────────────────────────────
-    const header = document.querySelector('.site-header');
-    if (header) {
-        window.addEventListener('scroll', () => {
-            header.classList.toggle('scrolled', window.scrollY > 10);
+    /* ── Announcement Banner Dismiss ── */
+    const banner = document.getElementById('announcementBanner');
+    const bannerClose = document.getElementById('bannerClose');
+    if (banner && bannerClose) {
+        // Check if previously dismissed
+        if (sessionStorage.getItem('bannerDismissed') === 'true') {
+            banner.classList.add('hidden');
+        }
+        bannerClose.addEventListener('click', () => {
+            banner.classList.add('hidden');
+            sessionStorage.setItem('bannerDismissed', 'true');
         });
     }
 
-    // ─── MOBILE NAV TOGGLE ───────────────────────────────────────────
-    const navToggle = document.querySelector('.nav-toggle');
-    const navLinks = document.querySelector('.nav-links');
-    if (navToggle && navLinks) {
-        navToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('open');
+    /* ── Mobile Nav Toggle ── */
+    const toggle = document.querySelector('.nav-toggle');
+    const nav = document.querySelector('.site-header nav');
+    if (toggle && nav) {
+        toggle.addEventListener('click', () => {
+            nav.classList.toggle('open');
+            toggle.classList.toggle('active');
         });
         // Close on link click
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => navLinks.classList.remove('open'));
+        nav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                nav.classList.remove('open');
+                toggle.classList.remove('active');
+            });
         });
     }
 
-    // ─── FAQ ACCORDION ───────────────────────────────────────────────
+    /* ── FAQ Accordion ── */
     document.querySelectorAll('.faq-question').forEach(btn => {
         btn.addEventListener('click', () => {
-            const item = btn.parentElement;
+            const item = btn.closest('.faq-item');
             const wasOpen = item.classList.contains('open');
             // Close all
             document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-            // Toggle clicked
+            // Toggle current
             if (!wasOpen) item.classList.add('open');
         });
     });
 
-    // ─── SCROLL ANIMATIONS ───────────────────────────────────────────
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
+    /* ── Fade-In on Scroll ── */
+    const fadeEls = document.querySelectorAll('.fade-in');
+    if (fadeEls.length) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        fadeEls.forEach(el => observer.observe(el));
+    }
+
+    /* ── Smooth scroll for anchor links ── */
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-    // ─── ACTIVE NAV LINK ─────────────────────────────────────────────
-    const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
-    document.querySelectorAll('.nav-links a:not(.nav-cta)').forEach(link => {
-        const href = link.getAttribute('href').replace(/\/$/, '') || '/';
-        if (href === currentPath || (currentPath.includes(href) && href !== '/')) {
-            link.classList.add('active');
-        }
     });
+
 });
