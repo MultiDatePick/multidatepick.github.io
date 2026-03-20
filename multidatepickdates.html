@@ -9,6 +9,11 @@
     <link rel="icon" href="images/favicon.png" type="image/png">
 </head>
 <body>
+    <!-- ═══════════════ ANNOUNCEMENT BANNER ═══════════════ -->
+    <div class="announcement-banner" id="announcementBanner">
+        🚀 Coming Soon to AppExchange — 2026
+        <button class="banner-close" id="bannerClose" aria-label="Dismiss banner">✕</button>
+    </div>
     <header class="site-header">
         <div class="header-inner">
             <a href="/" class="logo"><img src="images/logo.png" alt="MultiDatePick Logo"><span>MultiDatePick</span></a>
@@ -218,6 +223,41 @@
                 </table>
 
                 <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Flow with MultiDatePickParser action and Loop element</span></div>
+
+                <h3>Example Use Cases</h3>
+                <p>Here are real-world examples of how the <code>MultiDatePickParser</code>, <code>MultiDatePickEntry</code>, and <code>MultiDatePickEntryCollection</code> work together in production Flows:</p>
+
+                <div class="step">
+                    <h4><span class="step-number">1</span> Travel &amp; Expense — Create Per-Diem Records for Each Date Range</h4>
+                    <p>An employee selects their travel dates using <code>multiDatePickDates</code> with JSON output enabled. The Flow passes the JSON to <code>MultiDatePickParser</code>, then uses a <strong>Transform</strong> element to map each <code>MultiDatePickEntry</code> to a <code>Travel_Details__c</code> record — setting <code>fromDate</code> → <code>Travel_Date__c</code> and linking it back to the parent <code>Travel_Request__c</code> via a lookup. Each parsed entry becomes one travel detail line item.</p>
+                    <p><strong>Key fields used:</strong> <code>fromDate</code>, <code>toDate</code>, <code>id</code></p>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">2</span> Maintenance Scheduling — One Schedule Record Per Date Range</h4>
+                    <p>A maintenance manager selects multiple maintenance windows (e.g., "March 10–12" and "March 17–19") on an asset record. The Flow parses the JSON into a <code>MultiDatePickEntryCollection</code>, uses a <strong>Transform</strong> element to map <code>fromDate</code> → <code>Maintenance_Start_Date__c</code> and <code>toDate</code> → <code>Maintenance_End_Date__c</code>, then loops through to create one <code>Maintenance_Schedule__c</code> record per date range. The asset status is updated to "Under Maintenance" after all records are created.</p>
+                    <p><strong>Key fields used:</strong> <code>fromDate</code>, <code>toDate</code>, <code>id</code></p>
+                    <p><strong>Pattern:</strong> Parser → Transform → Loop → Create Records → Update Parent Status</p>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">3</span> Training Session Scheduling — Multi-Week Session Blocks</h4>
+                    <p>A training coordinator selects date ranges for a multi-week training program (e.g., "Week 1: April 7–11" and "Week 2: April 14–18"). The Flow parses the ranges, maps them to <code>Training_Schedule__c</code> records using <code>fromDate</code> → <code>Session_Start_Date__c</code> and <code>toDate</code> → <code>Session_End_Date__c</code>, and auto-generates a record name from the date range plus the training title. The parent <code>Training_Session__c</code> status is updated to "Scheduled".</p>
+                    <p><strong>Key fields used:</strong> <code>fromDate</code>, <code>toDate</code>, <code>id</code></p>
+                    <p><strong>Pattern:</strong> Parser → Transform → Loop → Create Records → Update Parent Status</p>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">4</span> Appointment Scheduling — Dates with Times</h4>
+                    <p>Use <code>multiDatePickDateTime</code> to let a client pick appointment dates and times. The JSON output includes <code>startTime</code> and <code>endTime</code> for each date. Parse with <code>MultiDatePickParser</code>, then loop through the collection to create <code>Appointment__c</code> records with both the date and time fields populated. This pattern works for medical appointments, consultations, interview scheduling, or any scenario where each date needs its own time slot.</p>
+                    <p><strong>Key fields used:</strong> <code>fromDate</code>, <code>toDate</code>, <code>startTime</code>, <code>endTime</code></p>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">5</span> Validation &amp; Error Handling — Using Collection Metadata</h4>
+                    <p>After calling <code>MultiDatePickParser</code>, check the <code>MultiDatePickEntryCollection.success</code> field in a Decision element before proceeding. If <code>success</code> is <code>false</code>, display the <code>errorMessage</code> to the user and route them back to the date selection screen. Use <code>totalCount</code> to show a confirmation message like "You selected {totalCount} date ranges — continue?" before creating records.</p>
+                    <p><strong>Key fields used:</strong> <code>success</code>, <code>errorMessage</code>, <code>totalCount</code>, <code>data</code></p>
+                </div>
 
             </div>
         </section>
