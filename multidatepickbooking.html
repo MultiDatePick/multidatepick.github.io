@@ -72,6 +72,7 @@
                         <li><a href="#bk-flow">Using in a Screen Flow</a></li>
                         <li><a href="#bk-record">Using on a Lightning Record Page</a></li>
                         <li><a href="#bk-conflicts">How Conflict Detection Works</a></li>
+                        <li><a href="#bk-outputs">Using Booking Outputs in Your Flow</a></li>
                     </ul>
                 </div>
 
@@ -176,6 +177,40 @@
                 <p>For <strong>multiple resources</strong>, the system queries bookings for ALL selected resources and shows only slots that are free across every selected resource. This ensures that booking a room and a projector together only shows times when both are available.</p>
 
                 <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>GIF: Conflict detection in action — booked slots shown in pink, available in white</span></div>
+
+                <h2 id="bk-outputs">Using Booking Outputs in Your Flow</h2>
+                <p>The Booking component handles record creation internally — it inserts booking records directly when the user clicks Book. The <code>MultiDatePickParser</code> is not used here. Instead, after the Booking component runs, two output variables tell your Flow what happened: how many slots were successfully booked and which dates had conflicts. Wire them to Flow variables in the component's output properties, then use them in the elements that follow.</p>
+
+                <h3>Output Variables</h3>
+                <table class="property-table">
+                    <thead><tr><th>Output Variable</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>bookingSuccessCount</code></td><td>Integer</td><td>Number of booking records successfully created. Wire to an Integer variable in your Flow.</td></tr>
+                        <tr><td><code>bookingConflictDates</code></td><td>String[]</td><td>Dates where bookings could not be created due to conflicts. Wire to a Text Collection variable. Empty if all bookings succeeded.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="callout callout-blue">
+                    <span class="callout-icon">💡</span>
+                    <div><strong>Tip:</strong> Wire both outputs even if you only plan to use one. Having <code>bookingConflictDates</code> available lets you add conflict handling later without editing the screen element.</div>
+                </div>
+
+                <h3>Example Use Cases</h3>
+                <p>Here are real-world examples of how to use the Booking component's outputs to drive downstream automation in your Flow:</p>
+
+                <div class="step">
+                    <h4><span class="step-number">1</span> Field Service — Auto-Create Work Orders After Booking</h4>
+                    <p>A field service dispatcher books a technician across multiple dates using <code>multiDatePickBooking</code>. After the component runs, <code>bookingSuccessCount</code> confirms how many slots were reserved. The Flow uses <code>bookingSuccessCount</code> in a Decision element — if greater than 0, it enters a Loop that runs <code>bookingSuccessCount</code> times and creates one <code>WorkOrder</code> record per iteration, each linked to the <code>Asset__c</code> and the technician's resource record. The Asset status is updated to "Service Scheduled" after the loop. This pattern turns a visual booking action into a complete work order pipeline without any custom code.</p>
+                    <p><strong>Key outputs used:</strong> <code>bookingSuccessCount</code></p>
+                    <p><strong>Pattern:</strong> Booking Component → Decision (count &gt; 0) → Loop → Create Work Orders → Update Asset Status</p>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">2</span> Facilities — Confirmation Email After Room Booking</h4>
+                    <p>An employee books a conference room for a series of meeting dates using <code>multiDatePickBooking</code>. After booking completes, the Flow uses <code>bookingSuccessCount</code> in a text formula variable to build a personalized confirmation message: "Your room has been reserved for {bookingSuccessCount} session(s). Please check your calendar for details." The Flow passes this message to a Send Email action, notifying the employee and any attendees. If <code>bookingConflictDates</code> is not empty, a separate email branch notifies the employee which dates could not be booked so they can follow up.</p>
+                    <p><strong>Key outputs used:</strong> <code>bookingSuccessCount</code>, <code>bookingConflictDates</code></p>
+                    <p><strong>Pattern:</strong> Booking Component → Build Confirmation Text → Send Email → Conflict Branch (if bookingConflictDates not empty) → Send Conflict Notice Email</p>
+                </div>
 
             </div>
         </section>

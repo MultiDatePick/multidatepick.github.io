@@ -59,6 +59,7 @@
                         <li><a href="#dt-setup">Getting Started: Step-by-Step Setup</a></li>
                         <li><a href="#dt-flow">Using in a Screen Flow</a></li>
                         <li><a href="#dt-record">Using on a Lightning Record Page</a></li>
+                        <li><a href="#dt-parser">Using the MultiDatePickParser</a></li>
                     </ul>
                 </div>
 
@@ -150,6 +151,74 @@
                 </div>
 
                 <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: DateTime component on a Record Page with time dropdowns</span></div>
+
+                <h2 id="dt-parser">Using the MultiDatePickParser in Your Flow</h2>
+                <p>The <code>MultiDatePickParser</code> is an Apex invocable action included in the package. It takes the JSON output from the component and converts it into a collection of <code>MultiDatePickEntry</code> objects that you can loop through in your Flow. For DateTime, the key difference is that you pass <code>selectedDatesWithTimesJson</code> (not <code>selectedDateRangesJson</code>), and each <code>MultiDatePickEntry</code> will have <code>startTime</code> and <code>endTime</code> populated.</p>
+
+                <div class="step">
+                    <h4>Step-by-Step Flow Setup</h4>
+                    <ol>
+                        <li>Add the <code>multiDatePickDateTime</code> component to a Screen element. Turn ON "Enable End Time" if you need both start and end times. Wire <code>selectedDatesWithTimesJson</code> to a Text variable (e.g., <code>{!dateTimesJson}</code>).</li>
+                        <li>After the Screen element, add an <strong>Action</strong> element. Search for <strong>"Parse Date Entries from JSON"</strong>. Pass <code>{!dateTimesJson}</code> as the input.</li>
+                        <li>Store the output in a variable of type <strong>Apex-Defined</strong>, class: <code>MultiDatePickEntryCollection</code> (e.g., <code>{!parsedCollection}</code>).</li>
+                        <li>Add a <strong>Loop</strong> element. Set the collection to <code>{!parsedCollection.data}</code>. This loops through each <code>MultiDatePickEntry</code>.</li>
+                        <li>Inside the loop, access: <code>{!currentEntry.fromDate}</code>, <code>{!currentEntry.startTime}</code>, <code>{!currentEntry.endTime}</code>.</li>
+                    </ol>
+                </div>
+
+                <h3>MultiDatePickEntry Fields</h3>
+                <table class="property-table">
+                    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>id</code></td><td>Integer</td><td>Sequential identifier for each entry (1, 2, 3...)</td></tr>
+                        <tr><td><code>fromDate</code></td><td>Date</td><td>The date for this entry</td></tr>
+                        <tr><td><code>toDate</code></td><td>Date</td><td>End date (same as fromDate for DateTime entries)</td></tr>
+                        <tr><td><code>startTime</code></td><td>Time</td><td>Start time assigned to this date</td></tr>
+                        <tr><td><code>endTime</code></td><td>Time</td><td>End time assigned to this date (populated when Enable End Time is ON)</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>MultiDatePickEntryCollection Fields</h3>
+                <table class="property-table">
+                    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>data</code></td><td>List&lt;MultiDatePickEntry&gt;</td><td>The list of date/time entries. Use this as the collection in your Flow Loop element.</td></tr>
+                        <tr><td><code>totalCount</code></td><td>Integer</td><td>Number of entries in the collection.</td></tr>
+                        <tr><td><code>success</code></td><td>Boolean</td><td>Whether the parsing was successful.</td></tr>
+                        <tr><td><code>errorMessage</code></td><td>String</td><td>Error details if parsing failed (null on success).</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="callout callout-blue">
+                    <span class="callout-icon">💡</span>
+                    <div><strong>Tip:</strong> Unlike multiDatePickDates where you enable "Group Consecutive Dates as JSON Ranges", the DateTime component automatically populates <code>selectedDatesWithTimesJson</code> with time data. Just wire that output to a Text variable and pass it to the parser.</div>
+                </div>
+
+                <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Flow with MultiDatePickParser action and Loop element for DateTime</span></div>
+
+                <h3>Example Use Cases</h3>
+                <p>Here are real-world examples of how the <code>MultiDatePickParser</code> works with <code>multiDatePickDateTime</code> to create records with both dates and times:</p>
+
+                <div class="step">
+                    <h4><span class="step-number">1</span> Staffing &amp; Recruiting — Shift Assignment</h4>
+                    <p>A recruiting agency is placing a worker at a client site. A staffing coordinator opens a Flow on the <code>Placement__c</code> record, uses <code>multiDatePickDateTime</code> with <code>allowDifferentTimes</code> ON and <code>enableEndTime</code> ON to select the worker's upcoming shift dates and assign a start and end time for each one. The Flow passes <code>selectedDatesWithTimesJson</code> to <code>MultiDatePickParser</code>. The parser returns a collection where each entry has <code>fromDate</code>, <code>startTime</code>, and <code>endTime</code>. A Loop creates one <code>Shift__c</code> record per entry, setting <code>Shift_Date__c</code>, <code>Start_Time__c</code>, and <code>End_Time__c</code>, and linking each record back to the <code>Placement__c</code> via a lookup. The worker's placement status is updated to "Shifts Assigned" after the loop completes.</p>
+                    <p><strong>Key fields used:</strong> <code>fromDate</code>, <code>startTime</code>, <code>endTime</code></p>
+                    <p><strong>Pattern:</strong> Screen (DateTime) → MultiDatePickParser → Loop → Create Shift Records → Update Placement Status</p>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">2</span> Education — Instructor Session Scheduling</h4>
+                    <p>An instructor sets up tutoring or office hours sessions for a course across multiple weeks. Each session falls on a different day and at a different time. Using <code>multiDatePickDateTime</code> with <code>allowDifferentTimes</code> ON, the instructor picks dates and assigns a unique start and end time to each one. The Flow parses <code>selectedDatesWithTimesJson</code>, then loops through the collection to create <code>Session__c</code> records linked to the <code>Course__c</code> — each record capturing <code>Session_Date__c</code>, <code>Start_Time__c</code>, and <code>End_Time__c</code>. The <code>Course__c</code> status is updated to "Sessions Scheduled" after all records are created.</p>
+                    <p><strong>Key fields used:</strong> <code>fromDate</code>, <code>startTime</code>, <code>endTime</code></p>
+                    <p><strong>Pattern:</strong> Screen (DateTime) → MultiDatePickParser → Loop → Create Session Records → Update Course Status</p>
+                </div>
+
+                <div class="step">
+                    <h4><span class="step-number">3</span> Medical/Healthcare — Patient Follow-Up Appointments</h4>
+                    <p>A care coordinator schedules a series of follow-up appointments for a patient after a procedure. Each follow-up is on a different date and at a specific time. Using <code>multiDatePickDateTime</code> with <code>allowDifferentTimes</code> ON, the coordinator picks the dates and assigns a time to each. The Flow passes <code>selectedDatesWithTimesJson</code> to <code>MultiDatePickParser</code> and loops through the entries to create <code>Appointment__c</code> records linked to the patient's Case — setting <code>Appointment_Date__c</code>, <code>Start_Time__c</code>, and <code>End_Time__c</code> on each. The Case status is updated to "Follow-Ups Scheduled" after the loop completes.</p>
+                    <p><strong>Key fields used:</strong> <code>fromDate</code>, <code>startTime</code>, <code>endTime</code></p>
+                    <p><strong>Pattern:</strong> Screen (DateTime) → MultiDatePickParser → Loop → Create Appointment Records → Update Case Status</p>
+                </div>
 
             </div>
         </section>
