@@ -1,0 +1,135 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.setup-grid { display: flex; gap: 20px; align-items: flex-start; padding: 8px 0 0; }
+.panel { border-radius: var(--border-radius-lg); border: 1px solid var(--color-border-tertiary); overflow: hidden; flex: 1; min-width: 0; }
+.panel-header { padding: 10px 14px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; background: var(--color-background-secondary); color: var(--color-text-primary); border-bottom: 1px solid var(--color-border-tertiary); }
+.panel-header .icon { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; color: #fff; }
+.obj-panel .icon { background: #534AB7; }
+.prop-panel .icon { background: #0F6E56; }
+.obj-name { padding: 12px 14px 6px; font-size: 15px; font-weight: 500; color: var(--color-text-primary); display: flex; align-items: center; gap: 6px; }
+.obj-name .api { font-size: 11px; font-weight: 400; color: var(--color-text-tertiary); font-family: var(--font-mono); }
+.field-list { padding: 4px 14px 14px; }
+.field-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; margin-bottom: 3px; font-size: 13px; }
+.field-row .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.field-row .fname { font-weight: 500; }
+.field-row .ftype { font-size: 11px; color: var(--color-text-tertiary); font-family: var(--font-mono); margin-left: auto; flex-shrink: 0; }
+.c-obj { background: rgba(127,119,221,0.08); }
+.c-obj .dot { background: #534AB7; }
+.c-obj .fname { color: #3C3489; }
+.c-date { background: rgba(29,158,117,0.08); }
+.c-date .dot { background: #0F6E56; }
+.c-date .fname { color: #085041; }
+.c-rel { background: rgba(216,90,48,0.08); }
+.c-rel .dot { background: #993C1D; }
+.c-rel .fname { color: #712B13; }
+.c-time { background: rgba(55,138,221,0.08); }
+.c-time .dot { background: #185FA5; }
+.c-time .fname { color: #0C447C; }
+.c-neutral { background: transparent; }
+.c-neutral .dot { background: var(--color-border-secondary); }
+@media (prefers-color-scheme: dark) {
+  .c-obj { background: rgba(127,119,221,0.12); }
+  .c-obj .fname { color: #AFA9EC; }
+  .c-date { background: rgba(29,158,117,0.12); }
+  .c-date .fname { color: #5DCAA5; }
+  .c-rel { background: rgba(216,90,48,0.12); }
+  .c-rel .fname { color: #F0997B; }
+  .c-time { background: rgba(55,138,221,0.12); }
+  .c-time .fname { color: #85B7EB; }
+}
+.prop-section { padding: 8px 14px; border-bottom: 1px solid var(--color-border-tertiary); }
+.prop-section:last-child { border-bottom: none; }
+.prop-section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-tertiary); margin-bottom: 6px; font-weight: 500; }
+.prop-row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; margin-bottom: 3px; font-size: 13px; }
+.prop-row .plabel { color: var(--color-text-secondary); flex-shrink: 0; }
+.prop-row .pval { font-weight: 500; font-family: var(--font-mono); font-size: 12px; margin-left: auto; text-align: right; flex-shrink: 0; }
+.prop-row.c-obj .pval { color: #3C3489; }
+.prop-row.c-date .pval { color: #085041; }
+.prop-row.c-rel .pval { color: #712B13; }
+.prop-row.c-time .pval { color: #0C447C; }
+@media (prefers-color-scheme: dark) {
+  .prop-row.c-obj .pval { color: #AFA9EC; }
+  .prop-row.c-date .pval { color: #5DCAA5; }
+  .prop-row.c-rel .pval { color: #F0997B; }
+  .prop-row.c-time .pval { color: #85B7EB; }
+}
+.prop-row .arrow-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.toggle-row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; margin-bottom: 3px; font-size: 13px; color: var(--color-text-secondary); }
+.toggle-pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; margin-left: auto; background: rgba(29,158,117,0.12); color: #0F6E56; }
+@media (prefers-color-scheme: dark) { .toggle-pill { color: #5DCAA5; } }
+.connector-col { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; flex-shrink: 0; padding-top: 80px; gap: 18px; }
+.conn-arrow { font-size: 16px; line-height: 1; }
+.conn-arrow.purple { color: #534AB7; }
+.conn-arrow.teal { color: #0F6E56; }
+.conn-arrow.coral { color: #993C1D; }
+.conn-arrow.blue { color: #185FA5; }
+.title-bar { text-align: center; margin-bottom: 12px; }
+.title-bar h2 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
+.title-bar .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 10px; border-radius: 10px; background: rgba(29,158,117,0.12); color: #0F6E56; margin-bottom: 6px; }
+@media (prefers-color-scheme: dark) { .title-bar .badge { color: #5DCAA5; } }
+.title-bar p { font-size: 13px; color: var(--color-text-secondary); }
+.legend { display: flex; gap: 14px; justify-content: center; margin-bottom: 14px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.scenario { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px 16px; margin-top: 16px; background: var(--color-background-secondary); }
+.scenario-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px; }
+.scenario p { font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; }
+.scenario code { font-family: var(--font-mono); font-size: 11px; background: var(--color-background-tertiary); padding: 1px 5px; border-radius: 4px; }
+.example-note { font-size: 11px; color: var(--color-text-tertiary); text-align: center; margin-top: 4px; font-style: italic; }
+@media (max-width: 580px) { .setup-grid { flex-direction: column; gap: 12px; } .connector-col { display: none; } }
+</style>
+<div class="title-bar">
+  <div class="badge">Date &amp; time component</div>
+  <h2>Quick start</h2>
+  <p>Wire these 5 fields to save dates with start/end times from a record page</p>
+</div>
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#534AB7"></div>Object name</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#0F6E56"></div>Date field</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#993C1D"></div>Relationship field</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#185FA5"></div>Time fields</div>
+</div>
+<div class="setup-grid">
+  <div class="panel obj-panel">
+    <div class="panel-header"><div class="icon">SF</div>Your Salesforce object</div>
+    <div class="obj-name">Appointment__c <span class="api">(example)</span></div>
+    <div class="field-list">
+      <div class="field-row c-date"><div class="dot"></div><span class="fname">Appointment_Date__c</span><span class="ftype">Date</span></div>
+      <div class="field-row c-time"><div class="dot"></div><span class="fname">Start_Time__c</span><span class="ftype">Time</span></div>
+      <div class="field-row c-time"><div class="dot"></div><span class="fname">End_Time__c</span><span class="ftype">Time</span></div>
+      <div class="field-row c-rel"><div class="dot"></div><span class="fname">Contact__c</span><span class="ftype">Lookup</span></div>
+      <div class="field-row c-neutral"><div class="dot"></div><span class="fname">Name</span><span class="ftype">Auto Number</span></div>
+      <div class="field-row c-neutral"><div class="dot"></div><span class="fname">Notes__c</span><span class="ftype">Text</span></div>
+    </div>
+  </div>
+  <div class="connector-col">
+    <div><div class="conn-arrow purple">&#x25B6;</div></div>
+    <div><div class="conn-arrow teal">&#x25B6;</div></div>
+    <div><div class="conn-arrow blue">&#x25B6;</div></div>
+    <div><div class="conn-arrow blue">&#x25B6;</div></div>
+    <div><div class="conn-arrow coral">&#x25B6;</div></div>
+  </div>
+  <div class="panel prop-panel">
+    <div class="panel-header"><div class="icon">&#x2699;</div>Component properties</div>
+    <div class="prop-section">
+      <div class="prop-section-label">Required to save</div>
+      <div class="prop-row c-obj"><div class="arrow-dot" style="background:#534AB7"></div><span class="plabel">Related Object API Name</span><span class="pval">Appointment__c</span></div>
+      <div class="prop-row c-date"><div class="arrow-dot" style="background:#0F6E56"></div><span class="plabel">Date Field API Name</span><span class="pval">Appointment_Date__c</span></div>
+      <div class="prop-row c-time"><div class="arrow-dot" style="background:#185FA5"></div><span class="plabel">Start Time Field API Name</span><span class="pval">Start_Time__c</span></div>
+      <div class="prop-row c-time"><div class="arrow-dot" style="background:#185FA5"></div><span class="plabel">End Time Field API Name</span><span class="pval">End_Time__c</span></div>
+      <div class="prop-row c-rel"><div class="arrow-dot" style="background:#993C1D"></div><span class="plabel">Relationship Field API Name</span><span class="pval">Contact__c</span></div>
+    </div>
+    <div class="prop-section">
+      <div class="prop-section-label">Recommended</div>
+      <div class="toggle-row">Load Existing Dates<span class="toggle-pill">ON</span></div>
+      <div class="toggle-row">Show Inline<span class="toggle-pill">ON</span></div>
+      <div class="toggle-row">Enable End Time<span class="toggle-pill">ON</span></div>
+    </div>
+  </div>
+</div>
+<div class="example-note">Object and field names above are examples — use your own custom or standard objects</div>
+<div class="scenario">
+  <div class="scenario-title">How it works</div>
+  <p>Drop this component onto any record page. It works just like the Dates component, but also saves a start time (and optionally an end time) on each record. Pick any object with a date field and time fields — the component handles the rest. Enable "Conflict Checking" to automatically block time slots that overlap with existing records.</p>
+</div>
