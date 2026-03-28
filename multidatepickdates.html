@@ -53,203 +53,196 @@
                 <div class="toc">
                     <h4>On This Page</h4>
                     <ul>
-                        <li><a href="#dates-setup">Getting Started: Step-by-Step Setup</a></li>
-                        <li><a href="#dates-flow">Using in a Screen Flow</a></li>
-                        <li><a href="#dates-record">Using on a Lightning Record Page</a></li>
-                        <li><a href="#dates-parser">Using the MultiDatePickParser</a></li>
+                        <li><a href="#record-page">Using on a Record Page</a>
+                            <ul>
+                                <li><a href="#rp-need">What You Need First</a></li>
+                                <li><a href="#rp-drop">Drop It In</a></li>
+                                <li><a href="#rp-output">What Comes Out</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#flow">Using in a Flow</a>
+                            <ul>
+                                <li><a href="#flow-need">What You Need First</a></li>
+                                <li><a href="#flow-drop">Drop It In</a></li>
+                                <li><a href="#flow-output">What Comes Out</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#all-properties">All Properties</a></li>
                     </ul>
                 </div>
 
-                <h2 id="dates-setup">Getting Started: Step-by-Step Setup</h2>
-                <p>Follow these steps to get multiDatePickDates working in your org. This covers both Record Page and Flow usage.</p>
+                <!-- ════════════════════════════════════════════════ -->
+                <!--  RECORD PAGE                                     -->
+                <!-- ════════════════════════════════════════════════ -->
+                <h2 id="record-page">Using on a Record Page</h2>
 
-                <div class="step">
-                    <h4><span class="step-number">1</span> Create the Child Object (for Record Pages)</h4>
-                    <p>If you plan to use multiDatePickDates on a Lightning Record Page with auto-save, you need a child object to store the selected dates. Each selected date becomes one record in this object. <strong>If you only plan to use it in Flows, skip to Step 3.</strong></p>
-                    <p>Go to <strong>Setup &gt; Object Manager &gt; Create &gt; Custom Object</strong>. For this example, we'll create a <code>Travel_Date__c</code> object to store dates related to a <code>Travel__c</code> parent record. You can name yours whatever fits your use case (<code>Appointment_Date__c</code>, <code>Project_Milestone__c</code>, etc.).</p>
-                    <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Creating the child object in Salesforce Setup</span></div>
+                <div class="subsection" id="rp-need">
+                    <div class="subsection-header">
+                        <span class="subsection-badge badge-purple">1</span>
+                        <h3>What You Need First</h3>
+                    </div>
+                    <p>Create a dedicated child object to store selected dates. It only needs two custom fields — a Date field and a Lookup back to the parent record. For example, a <code>Trip_Date__c</code> object with these fields:</p>
+                    <table class="field-table">
+                        <thead><tr><th>Field</th><th>Type</th><th>Purpose</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>Date__c</code></td><td>Date</td><td>Stores the selected date</td></tr>
+                            <tr><td><code>Trip__c</code></td><td>Lookup</td><td>Links back to the parent record</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="callout callout-blue">
+                        <span class="callout-icon">💡</span>
+                        <div><strong>Note:</strong> <code>{!recordId}</code> is passed automatically on Record Pages — you don't need to wire it manually.</div>
+                    </div>
                 </div>
 
-                <div class="step">
-                    <h4><span class="step-number">2</span> Create the Fields on Your Child Object</h4>
-                    <p>Your child object needs exactly two custom fields:</p>
-                    <ul>
-                        <li><strong>Date field</strong> (e.g., <code>Date__c</code>) — stores the selected date</li>
-                        <li><strong>Lookup or Master-Detail field</strong> (e.g., <code>Travel__c</code>) — links back to the parent record</li>
+                <div class="subsection" id="rp-drop">
+                    <div class="subsection-header">
+                        <span class="subsection-badge badge-green">2</span>
+                        <h3>Drop It In</h3>
+                    </div>
+                    <p>Drag <code>multiDatePickDates</code> onto your Record Page in App Builder and configure these key properties:</p>
+                    <ul class="prop-list">
+                        <li><code>relatedObjectApiName</code> — API name of your date object, e.g. <code>Trip_Date__c</code></li>
+                        <li><code>dateFieldApiName</code> — the Date field on that object, e.g. <code>Date__c</code></li>
+                        <li><code>relationshipFieldApiName</code> — the Lookup field back to the parent, e.g. <code>Trip__c</code></li>
+                        <li><code>showInline</code> — set to ON to show the calendar directly on the page (recommended)</li>
+                        <li><code>preloadExistingDates</code> — set to ON to show previously saved dates when the page loads</li>
+                        <li><code>saveButtonLabel</code> — customize the save button text, e.g. "Save Dates"</li>
                     </ul>
-                    <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Fields on the child object</span></div>
                 </div>
 
-                <div class="step">
-                    <h4><span class="step-number">3</span> Add the Component to a Record Page</h4>
-                    <p>Open the parent record page (e.g., <code>Travel__c</code>) in App Builder. Drag <code>multiDatePickDates</code> from the custom components panel onto the page. Fill in the properties listed in the <a href="#dates-record">Record Page Properties</a> section below.</p>
-                    <p>Save and activate the page. That's it — users can now select dates on the calendar and click Save to create date records.</p>
-                    <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Component on a Record Page in App Builder</span></div>
+                <div class="subsection" id="rp-output">
+                    <div class="subsection-header">
+                        <span class="subsection-badge badge-teal">3</span>
+                        <h3>What Comes Out</h3>
+                    </div>
+                    <div class="callout callout-green">
+                        <span class="callout-icon">✅</span>
+                        <div><strong>Auto-saved records.</strong> When a user picks dates and clicks Save, one record is created per date on the object you specified, each linked to the current record via the Lookup field. Turn on "Load Existing Dates" to show previously saved dates as pre-selected on the calendar. The component uses an additive save — it creates new records but does not delete existing ones.</div>
+                    </div>
                 </div>
 
-                <div class="step">
-                    <h4><span class="step-number">4</span> Add the Component to a Screen Flow (Alternative)</h4>
-                    <p>If you are using multiDatePickDates in a Flow instead of (or in addition to) a Record Page:</p>
-                    <ol>
-                        <li>Open Flow Builder and create or edit a Screen Flow.</li>
-                        <li>Add a Screen element and drag <code>multiDatePickDates</code> from the component palette onto the screen.</li>
-                        <li>Set the Button Label and Calendar Title to match your use case.</li>
-                        <li>Create a <strong>Text Collection</strong> variable (e.g., <code>{!selectedDatesOutput}</code>) and wire it to the "Selected Dates (Output)" property.</li>
-                        <li>Optionally turn ON "Group Consecutive Dates as JSON Ranges" and wire the JSON output to a Text variable, then use the <code>MultiDatePickParser</code> action after the screen to loop through entries.</li>
-                        <li>No objects or fields are needed for Flow-only usage — the component outputs dates to your Flow variables and you decide what to do with them.</li>
-                    </ol>
-                    <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Component in Flow Builder</span></div>
+
+                <!-- ════════════════════════════════════════════════ -->
+                <!--  FLOW                                            -->
+                <!-- ════════════════════════════════════════════════ -->
+                <div class="section-divider"></div>
+                <h2 id="flow">Using in a Flow</h2>
+
+                <div class="subsection" id="flow-need">
+                    <div class="subsection-header">
+                        <span class="subsection-badge badge-purple">1</span>
+                        <h3>What You Need First</h3>
+                    </div>
+                    <p>If you want the component to auto-save records, set up the same child object as the Record Page section above (Date field + Lookup). Then create a Flow variable to capture the selected dates:</p>
+                    <table class="field-table">
+                        <thead><tr><th>Variable Name</th><th>Type</th><th>Collection?</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>{!selectedDates}</code></td><td>Text</td><td>Yes</td><td>Captures all selected dates as ISO strings</td></tr>
+                            <tr><td><code>{!dateRangesJson}</code></td><td>Text</td><td>No</td><td>Optional — for grouped date ranges via MultiDatePickParser</td></tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <h2 id="dates-flow">Using in a Screen Flow</h2>
-                <p>To use multiDatePickDates in a Flow, add a Screen element and drag the component from the custom component palette onto your screen. Configure the properties below in the Flow Builder sidebar.</p>
-
-                <div class="callout callout-blue">
-                    <span class="callout-icon">💡</span>
-                    <div><strong>Tip:</strong> Create your Flow variables first, then wire them to the output properties. You need a <strong>Text Collection</strong> variable for Selected Dates and optionally a <strong>Text</strong> variable for JSON output.</div>
+                <div class="subsection" id="flow-drop">
+                    <div class="subsection-header">
+                        <span class="subsection-badge badge-green">2</span>
+                        <h3>Drop It In</h3>
+                    </div>
+                    <p>Add a Screen element in Flow Builder, drag <code>multiDatePickDates</code> onto it, and configure:</p>
+                    <ul class="prop-list">
+                        <li><code>label</code> — button text that opens the picker, e.g. "Choose Travel Dates"</li>
+                        <li><code>modalTitle</code> — title at the top of the calendar modal, e.g. "Pick Your Dates"</li>
+                        <li><code>showInline</code> — set to ON to embed the calendar directly in the screen</li>
+                        <li><code>relatedObjectApiName</code> — your date object, e.g. <code>Trip_Date__c</code> (for auto-save)</li>
+                        <li><code>dateFieldApiName</code> — the Date field, e.g. <code>Date__c</code></li>
+                        <li><code>relationshipFieldApiName</code> — the Lookup field, e.g. <code>Trip__c</code></li>
+                        <li><code>selectedDates</code> (Output) — wire to your <code>{!selectedDates}</code> Text Collection variable</li>
+                        <li><code>outputAsJson</code> — set to ON if you want grouped date ranges, then wire <code>selectedDateRangesJson</code> to <code>{!dateRangesJson}</code></li>
+                    </ul>
                 </div>
 
-                <h3>Display Properties</h3>
-<table class="property-table">
-<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td><code>label</code></td><td>String</td><td>Select Dates</td><td>Text shown on the button that opens the date picker. Example: 'Choose Your Travel Dates' or 'Add Appointment Dates'</td></tr>
-<tr><td><code>modalTitle</code></td><td>String</td><td>Select Dates</td><td>Title displayed at the top of the calendar modal. Example: 'Pick Your Vacation Dates'</td></tr>
-<tr><td><code>showInline</code></td><td>Boolean</td><td>false</td><td>When ON, the calendar is always visible without needing to click a button. Useful when the calendar is the main content of the screen. When OFF, a button opens the calendar in a popup.</td></tr>
-<tr><td><code>singleMonthView</code></td><td>Boolean</td><td>false</td><td>When ON, shows only one month at a time. When OFF, shows two side-by-side months for easier range selection.</td></tr>
-<tr><td><code>calendarSize</code></td><td>String</td><td>medium</td><td>Controls the overall size of the calendar. Options: 'small' (compact, good for tight spaces), 'medium' (default, works everywhere), 'large' (bigger cells, better for touch screens). Example: large</td></tr>
-<tr><td><code>abbreviateDayHeaders</code></td><td>Boolean</td><td>false</td><td>When ON, shows abbreviated day headers as single letters: S M T W T F S. When OFF, shows 3-letter abbreviations: Sun Mon Tue Wed Thu Fri Sat.</td></tr>
-<tr><td><code>weekStartsOnMonday</code></td><td>Boolean</td><td>false</td><td>When ON, the calendar week begins on Monday (ISO standard, common in Europe). When OFF, the week begins on Sunday (US standard).</td></tr>
-<tr><td><code>showRecurringPattern</code></td><td>Boolean</td><td>true</td><td>When ON, shows an 'Add Recurring Pattern' button that lets users quickly select all weekdays, weekends, or specific days of the week up to an end date.</td></tr>
-<tr><td><code>showSelectedSummary</code></td><td>Boolean</td><td>true</td><td>When ON, displays a summary below the button showing how many dates are selected (e.g., '3 dates selected'). When OFF, this is hidden.</td></tr>
-<tr><td><code>showDoneButtonInline</code></td><td>Boolean</td><td>true</td><td>When ON, shows a Done button that collapses the calendar to a summary view. When OFF, calendar stays expanded. Recommended: ON for Flow (gives visual confirmation), OFF for Lightning Pages.</td></tr>
-</tbody></table>
-
-                <h3>Constraint Properties</h3>
-<table class="property-table">
-<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td><code>maxSelections</code></td><td>Integer</td><td>0</td><td>The maximum number of dates a user can select. Set to 0 for unlimited. Example: Set to 7 to limit users to a 1-week vacation selection.</td></tr>
-<tr><td><code>allowPastDates</code></td><td>Boolean</td><td>true</td><td>When ON, users can select any past date. When OFF, only today and future dates are selectable. Example: Turn OFF for booking future appointments.</td></tr>
-<tr><td><code>minDate</code></td><td>Date</td><td>—</td><td>The earliest date users can select. Dates before this are greyed out. Example: Set to today's date to prevent past date selection with a specific cutoff.</td></tr>
-<tr><td><code>maxDate</code></td><td>Date</td><td>—</td><td>The latest date users can select. Dates after this are greyed out. Example: Set to one year from today to limit far-future bookings.</td></tr>
-<tr><td><code>defaultDates</code></td><td>String[]</td><td>—</td><td>Dates that are already selected when the calendar opens. Provide as ISO format strings (YYYY-MM-DD). Example: 2026-01-15, 2026-01-16</td></tr>
-<tr><td><code>disabledDates</code></td><td>String[]</td><td>—</td><td>Specific dates that cannot be selected (shown greyed out). Use for holidays, blackout dates, or unavailable days. Provide as ISO format (YYYY-MM-DD). Example: 2026-12-25, 2026-01-01</td></tr>
-<tr><td><code>availableDates</code></td><td>String[]</td><td>—</td><td>ONLY these dates are selectable. All others are disabled and greyed out. Provide in ISO format (YYYY-MM-DD).</td></tr>
-<tr><td><code>autoJumpToFirstAvailable</code></td><td>Boolean</td><td>false</td><td>When ON and 'Only These Dates Are Selectable' is set, the calendar automatically opens to the month containing the first available date instead of the current month.</td></tr>
-</tbody></table>
-
-                <h3>Output Controls</h3>
-<table class="property-table">
-<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td><code>outputAsJson</code></td><td>Boolean</td><td>false</td><td>When ON, populates 'Date Ranges JSON Output' with consecutive dates grouped together. Example: selecting Feb 10, 11, 12 produces one range {fromDate: '2026-02-10', toDate: '2026-02-12'}. Required if you want to use the MultiDatePickParser action to loop through ranges in your Flow.</td></tr>
-</tbody></table>
-
-                <h3>Output Properties (Read-Only)</h3>
-<table class="property-table">
-<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td><code>selectedDates</code> <span style="color:var(--orange);font-weight:600;">(Output)</span></td><td>String[]</td><td>—</td><td>OUTPUT: Array of all selected dates in ISO format (YYYY-MM-DD). Use this in your Flow to loop through selected dates, create records, or pass to the next screen. Example value: ['2026-02-10', '2026-02-11', '2026-02-14']</td></tr>
-<tr><td><code>selectedDateRangesJson</code> <span style="color:var(--orange);font-weight:600;">(Output)</span></td><td>String</td><td>—</td><td>OUTPUT: JSON string of consecutive dates grouped into ranges. Only populated when 'Group Consecutive Dates as JSON Ranges' is ON. Pass this to the MultiDatePickParser Apex action to loop through ranges. Example: {"data":[{"id":1,"fromDate":"2026-02-10","toDate":"2026-02-12"}]}</td></tr>
-</tbody></table>
-
-
-                <h2 id="dates-record">Using on a Lightning Record Page</h2>
-                <p>To use multiDatePickDates on a Record Page, open the page in App Builder, drag the component from the custom components panel, and configure the properties below. When configured with auto-save fields, the component automatically creates related records as users select dates.</p>
-
-                <div class="callout">
-                    <span class="callout-icon">⚠️</span>
-                    <div><strong>Important:</strong> The component uses an additive save method — it creates new records for newly selected dates but does <strong>not</strong> delete existing records when dates are deselected. Users must delete unwanted records directly on the related list. This prevents accidental data loss.</div>
+                <div class="subsection" id="flow-output">
+                    <div class="subsection-header">
+                        <span class="subsection-badge badge-teal">3</span>
+                        <h3>What Comes Out</h3>
+                    </div>
+                    <div class="callout callout-green">
+                        <span class="callout-icon">✅</span>
+                        <div><strong>Dates in your Flow variable + auto-saved records.</strong> <code>{!selectedDates}</code> holds an array like <code>["2026-07-10", "2026-07-14"]</code> — loop through it for additional logic. If you configured the Related Object fields, the component also auto-saves one record per date. For grouped ranges, turn on JSON output and feed <code>{!dateRangesJson}</code> to the <strong>MultiDatePickParser</strong> invocable action to get loopable <code>fromDate</code>/<code>toDate</code> entries.</div>
+                    </div>
                 </div>
 
-                <p>All Display and Constraint properties from the Flow section above are also available on Record Pages. The following are additional properties specific to the Record Page context:</p>
 
-                <h3>Record Page Auto-Save Properties</h3>
-<table class="property-table">
-<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td><code>saveButtonLabel</code></td><td>String</td><td>Save</td><td>Text on the save button. Example: 'Save Dates', 'Confirm Selection'</td></tr>
-<tr><td><code>relatedObjectApiName</code></td><td>String</td><td>—</td><td>API name of the object where each selected date is saved as a record. Example: Travel_Date__c or Event. Each selected date creates one record in this object.</td></tr>
-<tr><td><code>dateFieldApiName</code></td><td>String</td><td>—</td><td>API name of the Date field on the related object that stores the selected date. Example: Date__c or ActivityDate</td></tr>
-<tr><td><code>relationshipFieldApiName</code></td><td>String</td><td>—</td><td>API name of the lookup field on the related object that links back to the current record. Example: Travel__c (lookup from Travel_Date__c to the parent Travel record)</td></tr>
-<tr><td><code>preloadExistingDates</code></td><td>Boolean</td><td>false</td><td>When ON, queries existing related date records and shows them in the calendar. Requires Related Object, Date Field, and Relationship Field to be configured.</td></tr>
-<tr><td><code>preloadMode</code></td><td>String</td><td>editable</td><td>Controls how existing dates appear. 'editable': dates load selected and can be changed. 'readonly': dates appear greyed out and cannot be removed. Example: editable</td></tr>
-<tr><td><code>blockedDatesSourceObject</code></td><td>String</td><td>—</td><td>API name of an object to query for dates that should be blocked/unavailable. Example: Event (blocks calendar days that already have Events on this record).</td></tr>
-<tr><td><code>blockedDatesDateField</code></td><td>String</td><td>—</td><td>API name of the Date field on the blocked dates object. Example: ActivityDate</td></tr>
-<tr><td><code>blockedDatesFilterField</code></td><td>String</td><td>—</td><td>Optional: API name of a lookup field on the blocked object to filter results by the current record. Leave blank to block these dates globally. Example: WhoId</td></tr>
-</tbody></table>
+                <!-- ════════════════════════════════════════════════ -->
+                <!--  ALL PROPERTIES (collapsed)                      -->
+                <!-- ════════════════════════════════════════════════ -->
+                <details class="accordion-details" id="all-properties">
+                    <summary>All Properties Reference</summary>
+                    <div class="accordion-body">
 
+                        <h3>Display Properties</h3>
+                        <table class="property-table">
+                        <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                        <tr><td><code>label</code></td><td>String</td><td>Select Dates</td><td>Text shown on the button that opens the date picker.</td></tr>
+                        <tr><td><code>modalTitle</code></td><td>String</td><td>Select Dates</td><td>Title displayed at the top of the calendar modal.</td></tr>
+                        <tr><td><code>showInline</code></td><td>Boolean</td><td>false</td><td>When ON, the calendar is always visible without needing to click a button.</td></tr>
+                        <tr><td><code>singleMonthView</code></td><td>Boolean</td><td>false</td><td>When ON, shows only one month at a time instead of two side-by-side.</td></tr>
+                        <tr><td><code>calendarSize</code></td><td>String</td><td>medium</td><td>Controls calendar size: 'small', 'medium', or 'large'.</td></tr>
+                        <tr><td><code>abbreviateDayHeaders</code></td><td>Boolean</td><td>false</td><td>When ON, shows single-letter day headers (S M T W T F S).</td></tr>
+                        <tr><td><code>weekStartsOnMonday</code></td><td>Boolean</td><td>false</td><td>When ON, the calendar week begins on Monday.</td></tr>
+                        <tr><td><code>showRecurringPattern</code></td><td>Boolean</td><td>true</td><td>When ON, shows the 'Add Recurring Pattern' button.</td></tr>
+                        <tr><td><code>showSelectedSummary</code></td><td>Boolean</td><td>true</td><td>When ON, displays a summary showing how many dates are selected.</td></tr>
+                        <tr><td><code>showDoneButtonInline</code></td><td>Boolean</td><td>true</td><td>When ON, shows a Done button that collapses the calendar to a summary.</td></tr>
+                        </tbody></table>
 
-                <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Record Page with component saving dates</span></div>
+                        <h3>Constraint Properties</h3>
+                        <table class="property-table">
+                        <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                        <tr><td><code>maxSelections</code></td><td>Integer</td><td>0</td><td>Maximum dates a user can select. 0 = unlimited.</td></tr>
+                        <tr><td><code>allowPastDates</code></td><td>Boolean</td><td>true</td><td>When OFF, only today and future dates are selectable.</td></tr>
+                        <tr><td><code>minDate</code></td><td>Date</td><td>—</td><td>Earliest selectable date.</td></tr>
+                        <tr><td><code>maxDate</code></td><td>Date</td><td>—</td><td>Latest selectable date.</td></tr>
+                        <tr><td><code>defaultDates</code></td><td>String[]</td><td>—</td><td>Pre-selected dates in ISO format (YYYY-MM-DD).</td></tr>
+                        <tr><td><code>disabledDates</code></td><td>String[]</td><td>—</td><td>Dates that cannot be selected (shown greyed out).</td></tr>
+                        <tr><td><code>availableDates</code></td><td>String[]</td><td>—</td><td>Only these dates are selectable; all others are disabled.</td></tr>
+                        <tr><td><code>autoJumpToFirstAvailable</code></td><td>Boolean</td><td>false</td><td>When ON with Available Dates set, opens to the month of the first available date.</td></tr>
+                        </tbody></table>
 
-                <h2 id="dates-parser">Using the MultiDatePickParser in Your Flow</h2>
-                <p>The <code>MultiDatePickParser</code> is an Apex invocable action included in the package. It takes the JSON output from the component and converts it into a collection of <code>MultiDatePickEntry</code> objects that you can loop through in your Flow.</p>
+                        <h3>Output Controls</h3>
+                        <table class="property-table">
+                        <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                        <tr><td><code>outputAsJson</code></td><td>Boolean</td><td>false</td><td>When ON, populates Date Ranges JSON Output with consecutive dates grouped together.</td></tr>
+                        </tbody></table>
 
-                <div class="step">
-                    <h4>Step-by-Step Flow Setup</h4>
-                    <ol>
-                        <li>Add the <code>multiDatePickDates</code> component to a Screen element. Turn ON "Group Consecutive Dates as JSON Ranges". Wire the Date Ranges JSON Output to a Text variable (e.g., <code>{!dateRangesJson}</code>).</li>
-                        <li>After the Screen element, add an <strong>Action</strong> element. Search for <strong>"Parse Date Entries from JSON"</strong>. Pass <code>{!dateRangesJson}</code> as the input.</li>
-                        <li>Store the output in a variable of type <strong>Apex-Defined</strong>, class: <code>MultiDatePickEntryCollection</code> (e.g., <code>{!parsedCollection}</code>).</li>
-                        <li>Add a <strong>Loop</strong> element. Set the collection to <code>{!parsedCollection.data}</code>. This loops through each <code>MultiDatePickEntry</code>.</li>
-                        <li>Inside the loop, access the current item's fields: <code>{!currentEntry.fromDate}</code>, <code>{!currentEntry.toDate}</code>, <code>{!currentEntry.startTime}</code>, <code>{!currentEntry.endTime}</code>, <code>{!currentEntry.id}</code>.</li>
-                    </ol>
-                </div>
+                        <h3>Output Properties (Read-Only)</h3>
+                        <table class="property-table">
+                        <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+                        <tbody>
+                        <tr><td><code>selectedDates</code></td><td>String[]</td><td>Array of all selected dates in ISO format.</td></tr>
+                        <tr><td><code>selectedDateRangesJson</code></td><td>String</td><td>JSON string of consecutive dates grouped into ranges. Only populated when outputAsJson is ON.</td></tr>
+                        </tbody></table>
 
-                <h3>MultiDatePickEntry Fields</h3>
-                <table class="property-table">
-                    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>id</code></td><td>Integer</td><td>Sequential identifier for each entry (1, 2, 3...)</td></tr>
-                        <tr><td><code>fromDate</code></td><td>Date</td><td>Start date of the range</td></tr>
-                        <tr><td><code>toDate</code></td><td>Date</td><td>End date of the range (same as fromDate for single dates)</td></tr>
-                        <tr><td><code>startTime</code></td><td>Time</td><td>Start time (only populated by multiDatePickDateTime)</td></tr>
-                        <tr><td><code>endTime</code></td><td>Time</td><td>End time (only populated by multiDatePickDateTime)</td></tr>
-                    </tbody>
-                </table>
+                        <h3>Record Page Auto-Save Properties</h3>
+                        <table class="property-table">
+                        <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+                        <tbody>
+                        <tr><td><code>saveButtonLabel</code></td><td>String</td><td>Save</td><td>Text on the save button.</td></tr>
+                        <tr><td><code>relatedObjectApiName</code></td><td>String</td><td>—</td><td>API name of the object where each selected date is saved as a record.</td></tr>
+                        <tr><td><code>dateFieldApiName</code></td><td>String</td><td>—</td><td>API name of the Date field on the related object.</td></tr>
+                        <tr><td><code>relationshipFieldApiName</code></td><td>String</td><td>—</td><td>API name of the lookup field that links back to the current record.</td></tr>
+                        <tr><td><code>preloadExistingDates</code></td><td>Boolean</td><td>false</td><td>When ON, queries existing related date records and shows them in the calendar.</td></tr>
+                        <tr><td><code>preloadMode</code></td><td>String</td><td>editable</td><td>'editable' or 'readonly'. Controls how existing dates appear.</td></tr>
+                        <tr><td><code>blockedDatesSourceObject</code></td><td>String</td><td>—</td><td>API name of an object to query for dates that should be blocked.</td></tr>
+                        <tr><td><code>blockedDatesDateField</code></td><td>String</td><td>—</td><td>Date field on the blocked dates object.</td></tr>
+                        <tr><td><code>blockedDatesFilterField</code></td><td>String</td><td>—</td><td>Optional lookup field on the blocked object to filter by current record.</td></tr>
+                        </tbody></table>
 
-                <h3>MultiDatePickEntryCollection Fields</h3>
-                <table class="property-table">
-                    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>data</code></td><td>List&lt;MultiDatePickEntry&gt;</td><td>The list of date entries. Use this as the collection in your Flow Loop element.</td></tr>
-                        <tr><td><code>totalCount</code></td><td>Integer</td><td>Number of entries in the collection.</td></tr>
-                        <tr><td><code>success</code></td><td>Boolean</td><td>Whether the parsing was successful.</td></tr>
-                        <tr><td><code>errorMessage</code></td><td>String</td><td>Error details if parsing failed (null on success).</td></tr>
-                    </tbody>
-                </table>
-
-                <div class="img-placeholder short"><span class="placeholder-icon">🖼️</span><span>Screenshot: Flow with MultiDatePickParser action and Loop element</span></div>
-
-                <h3>Example Use Cases</h3>
-                <p>Here are real-world examples of how the <code>MultiDatePickParser</code>, <code>MultiDatePickEntry</code>, and <code>MultiDatePickEntryCollection</code> work together in production Flows:</p>
-
-                <div class="step">
-                    <h4><span class="step-number">1</span> Travel &amp; Expense — Create Per-Diem Records for Each Date Range</h4>
-                    <p>An employee selects their travel dates using <code>multiDatePickDates</code> with JSON output enabled. The Flow passes the JSON to <code>MultiDatePickParser</code>, then uses a <strong>Transform</strong> element to map each <code>MultiDatePickEntry</code> to a <code>Travel_Details__c</code> record — setting <code>fromDate</code> → <code>Travel_Date__c</code> and linking it back to the parent <code>Travel_Request__c</code> via a lookup. Each parsed entry becomes one travel detail line item.</p>
-                    <p><strong>Key fields used:</strong> <code>fromDate</code>, <code>toDate</code>, <code>id</code></p>
-                </div>
-
-                <div class="step">
-                    <h4><span class="step-number">2</span> Maintenance Scheduling — One Schedule Record Per Date Range</h4>
-                    <p>A maintenance manager selects multiple maintenance windows (e.g., "March 10–12" and "March 17–19") on an asset record. The Flow parses the JSON into a <code>MultiDatePickEntryCollection</code>, uses a <strong>Transform</strong> element to map <code>fromDate</code> → <code>Maintenance_Start_Date__c</code> and <code>toDate</code> → <code>Maintenance_End_Date__c</code>, then loops through to create one <code>Maintenance_Schedule__c</code> record per date range. The asset status is updated to "Under Maintenance" after all records are created.</p>
-                    <p><strong>Key fields used:</strong> <code>fromDate</code>, <code>toDate</code>, <code>id</code></p>
-                    <p><strong>Pattern:</strong> Parser → Transform → Loop → Create Records → Update Parent Status</p>
-                </div>
-
-                <div class="step">
-                    <h4><span class="step-number">3</span> Training Session Scheduling — Multi-Week Session Blocks</h4>
-                    <p>A training coordinator selects date ranges for a multi-week training program (e.g., "Week 1: April 7–11" and "Week 2: April 14–18"). The Flow parses the ranges, maps them to <code>Training_Schedule__c</code> records using <code>fromDate</code> → <code>Session_Start_Date__c</code> and <code>toDate</code> → <code>Session_End_Date__c</code>, and auto-generates a record name from the date range plus the training title. The parent <code>Training_Session__c</code> status is updated to "Scheduled".</p>
-                    <p><strong>Key fields used:</strong> <code>fromDate</code>, <code>toDate</code>, <code>id</code></p>
-                    <p><strong>Pattern:</strong> Parser → Transform → Loop → Create Records → Update Parent Status</p>
-                </div>
-
-                <div class="step">
-                    <h4><span class="step-number">4</span> Validation &amp; Error Handling — Using Collection Metadata</h4>
-                    <p>After calling <code>MultiDatePickParser</code>, check the <code>MultiDatePickEntryCollection.success</code> field in a Decision element before proceeding. If <code>success</code> is <code>false</code>, display the <code>errorMessage</code> to the user and route them back to the date selection screen. Use <code>totalCount</code> to show a confirmation message like "You selected {totalCount} date ranges — continue?" before creating records.</p>
-                    <p><strong>Key fields used:</strong> <code>success</code>, <code>errorMessage</code>, <code>totalCount</code>, <code>data</code></p>
-                </div>
+                    </div>
+                </details>
 
             </div>
         </section>
