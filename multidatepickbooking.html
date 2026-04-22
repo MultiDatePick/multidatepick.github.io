@@ -29,6 +29,27 @@
         "description": "The most advanced resource booking Lightning Web Component for Salesforce. Visual time-slot grid with real-time conflict detection, capacity tracking with live badges, status colors, inline edit mode, business hours per resource, multiple resource selection, and 60+ configurable properties. Works in Screen Flows, Lightning Record Pages, App Pages, Home Pages, and Experience Sites."
     }
     </script>
+    <style>
+        .diagram-wrap{background:white;border:1px solid #E2E8F0;border-radius:12px;padding:28px;margin:24px 0 32px;}
+        .diagram-row{display:grid;gap:0;align-items:start;margin-bottom:20px;}
+        .diagram-two-col{grid-template-columns:1fr 60px 1fr;}
+        .diagram-bottom-single{display:grid;grid-template-columns:1fr;gap:16px;max-width:420px;margin-left:auto;margin-right:auto;}
+        .obj-box{border-radius:10px;overflow:hidden;}.obj-header{padding:12px 16px;font-weight:700;font-size:.85rem;letter-spacing:.3px;}.obj-body{padding:16px;}
+        .obj-field{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;margin-bottom:4px;font-size:.78rem;font-family:'Fira Code','Cascadia Code','Consolas',monospace;}
+        .obj-field .field-label{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:.72rem;color:#64748B;margin-left:auto;white-space:nowrap;}
+        .obj-orange{border:2px solid #FB923C;}.obj-orange .obj-header{background:linear-gradient(135deg,#F97316,#EA580C);color:white;}.obj-orange .obj-body{background:#FFF7ED;}.obj-orange .obj-field{background:rgba(249,115,22,0.08);}
+        .obj-green{border:2px solid #34D399;}.obj-green .obj-header{background:linear-gradient(135deg,#10B981,#059669);color:white;}.obj-green .obj-body{background:#ECFDF5;}.obj-green .obj-field{background:rgba(16,185,129,0.08);}
+        .obj-red{border:2px solid #F87171;}.obj-red .obj-header{background:linear-gradient(135deg,#EF4444,#DC2626);color:white;}.obj-red .obj-body{background:#FEF2F2;}.obj-red .obj-field{background:rgba(239,68,68,0.08);}
+        .lookup-orange-green{background:linear-gradient(90deg,rgba(249,115,22,0.12) 0%,rgba(249,115,22,0.12) 40%,rgba(16,185,129,0.18) 100%) !important;border-left:3px solid #F97316;border-right:3px solid #10B981;}
+        .lookup-red-orange{background:linear-gradient(90deg,rgba(239,68,68,0.12) 0%,rgba(239,68,68,0.12) 40%,rgba(249,115,22,0.18) 100%) !important;border-left:3px solid #EF4444;border-right:3px solid #F97316;}
+        .connector{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:60px;gap:6px;}
+        .connector-line{width:2px;height:30px;background:#CBD5E1;}.connector-dot{width:10px;height:10px;border-radius:50%;background:#94A3B8;}
+        .connector-label{font-size:.68rem;color:#94A3B8;font-weight:600;text-transform:uppercase;letter-spacing:.5px;writing-mode:vertical-lr;text-orientation:mixed;}
+        .badge-tag{display:inline-block;background:rgba(255,255,255,0.25);color:white;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;margin-left:8px;}
+        .prop-name{font-weight:700;color:#1E293B;}
+        .diagram-callout{background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:16px 20px;margin-top:20px;font-size:.88rem;color:#9A3412;line-height:1.6;}.diagram-callout strong{color:#C2410C;}
+        @media(max-width:700px){.diagram-two-col{grid-template-columns:1fr;gap:16px;}.connector{flex-direction:row;padding:0;}.connector-line{width:30px;height:2px;}.connector-label{writing-mode:horizontal-tb;}}
+    </style>
 </head>
 <body>
     <div class="announcement-banner" id="announcementBanner">
@@ -83,6 +104,57 @@
                         <li><a href="#flow">Flow Setup</a></li>
                         <li><a href="#all-properties">All Properties Reference</a></li>
                     </ul>
+                </div>
+
+                <!-- ── Object Mapping Diagram ── -->
+                <h3 style="margin-top:32px;margin-bottom:4px;color:var(--blue-900);">Object &amp; Field Mapping</h3>
+                <p style="color:var(--gray-500);font-size:.9rem;margin-bottom:0;">When configuring this component on a Lightning Page or via the Setup Wizard, these are the object and field API names you'll need to provide.</p>
+                <div class="diagram-wrap">
+                    <div class="diagram-row diagram-two-col">
+                        <div class="obj-box obj-orange">
+                            <div class="obj-header">Your Record Object</div>
+                            <div class="obj-body">
+                                <div class="obj-field"><span class="prop-name">Related_Object__c</span><span class="field-label">Object API Name</span></div>
+                                <div class="obj-field"><span class="prop-name">Date_Field__c</span><span class="field-label">Date field</span></div>
+                                <div class="obj-field"><span class="prop-name">Relationship_Field__c</span><span class="field-label">Lookup to parent</span></div>
+                                <div class="obj-field lookup-orange-green"><span class="prop-name">Booking_Resource_Field__c</span><span class="field-label">Lookup to resource</span></div>
+                                <div class="obj-field"><span class="prop-name">Start_Time_Field__c</span><span class="field-label">Time field</span></div>
+                                <div class="obj-field"><span class="prop-name">End_Time_Field__c</span><span class="field-label">Time field</span></div>
+                                <div class="obj-field"><span class="prop-name">Status_Field__c</span><span class="field-label">Picklist field (optional)</span></div>
+                                <div class="obj-field"><span class="prop-name">Hover_Fields__c</span><span class="field-label">Popover detail fields (optional)</span></div>
+                            </div>
+                        </div>
+                        <div class="connector">
+                            <div class="connector-dot"></div>
+                            <div class="connector-line"></div>
+                            <div class="connector-label">linked via<br>lookup</div>
+                            <div class="connector-line"></div>
+                            <div class="connector-dot"></div>
+                        </div>
+                        <div class="obj-box obj-green">
+                            <div class="obj-header">Your Resource Object</div>
+                            <div class="obj-body">
+                                <div class="obj-field"><span class="prop-name">Resource_Object__c</span><span class="field-label">Object API Name</span></div>
+                                <div class="obj-field"><span class="prop-name">Resource_Name_Field__c</span><span class="field-label">Display name</span></div>
+                                <div class="obj-field"><span class="prop-name">Business_Hours_Start_Field__c</span><span class="field-label">Time field</span></div>
+                                <div class="obj-field"><span class="prop-name">Business_Hours_End_Field__c</span><span class="field-label">Time field</span></div>
+                                <div class="obj-field"><span class="prop-name">Capacity_Field__c</span><span class="field-label">Number field (optional)</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="diagram-bottom-single">
+                        <div class="obj-box obj-red">
+                            <div class="obj-header">Blocked Dates Object <span class="badge-tag">Optional</span></div>
+                            <div class="obj-body">
+                                <div class="obj-field"><span class="prop-name">Blocked_Dates_Source_Object__c</span><span class="field-label">Object API Name</span></div>
+                                <div class="obj-field"><span class="prop-name">Blocked_Dates_Date_Field__c</span><span class="field-label">Date field</span></div>
+                                <div class="obj-field lookup-red-orange"><span class="prop-name">Blocked_Dates_Filter_Field__c</span><span class="field-label">Lookup to parent (optional)</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="diagram-callout">
+                        <strong>Important:</strong> Replace the <span style="background:rgba(249,115,22,0.2);padding:2px 6px;border-radius:3px;font-weight:600;">orange values</span> with your record object and field API names, and the <span style="background:rgba(16,185,129,0.15);padding:2px 6px;border-radius:3px;font-weight:600;color:#065F46;">green values</span> with your resource object and fields. If you use blocked dates, replace the <span style="background:rgba(239,68,68,0.15);padding:2px 6px;border-radius:3px;font-weight:600;color:#991B1B;">red values</span> too. Everything else works as-is.
+                    </div>
                 </div>
 
                 <!-- ════════════════════════════════════════════════ -->
