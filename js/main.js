@@ -68,4 +68,54 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    /* ── Image Lightbox / Expand ── */
+    const expandSvg = '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+
+    // Wrap every [data-zoomable] image with a container + expand button
+    document.querySelectorAll('img[data-zoomable]').forEach(img => {
+        const wrap = document.createElement('div');
+        wrap.className = 'zoomable-wrap';
+        img.parentNode.insertBefore(wrap, img);
+        wrap.appendChild(img);
+
+        const btn = document.createElement('button');
+        btn.className = 'zoom-btn';
+        btn.setAttribute('aria-label', 'Expand image');
+        btn.innerHTML = expandSvg;
+        wrap.appendChild(btn);
+
+        function openLightbox() {
+            const overlay = document.getElementById('lightbox');
+            const lbImg = overlay.querySelector('img');
+            lbImg.src = img.src;
+            lbImg.alt = img.alt;
+            overlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); openLightbox(); });
+        img.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); openLightbox(); });
+    });
+
+    // Create the lightbox overlay (once)
+    if (document.querySelectorAll('img[data-zoomable]').length) {
+        const overlay = document.createElement('div');
+        overlay.id = 'lightbox';
+        overlay.className = 'lightbox-overlay';
+        overlay.innerHTML = '<button class="lightbox-close" aria-label="Close"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><img src="" alt="">';
+        document.body.appendChild(overlay);
+
+        function closeLightbox() {
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        overlay.addEventListener('click', closeLightbox);
+        overlay.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+        overlay.querySelector('img').addEventListener('click', e => e.stopPropagation());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && overlay.classList.contains('open')) closeLightbox();
+        });
+    }
+
 });
