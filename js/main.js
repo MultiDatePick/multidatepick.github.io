@@ -97,22 +97,70 @@ document.addEventListener('DOMContentLoaded', () => {
         img.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); openLightbox(); });
     });
 
-    // Create the lightbox overlay (once)
-    if (document.querySelectorAll('img[data-zoomable]').length) {
+    // Wrap every [data-zoomable-svg] SVG with a container + expand button
+    // (data-shape diagrams that should open in the lightbox at full size)
+    document.querySelectorAll('svg[data-zoomable-svg]').forEach(svg => {
+        const wrap = document.createElement('div');
+        wrap.className = 'zoomable-wrap';
+        svg.parentNode.insertBefore(wrap, svg);
+        wrap.appendChild(svg);
+
+        const btn = document.createElement('button');
+        btn.className = 'zoom-btn';
+        btn.setAttribute('aria-label', 'Expand diagram');
+        btn.innerHTML = expandSvg;
+        wrap.appendChild(btn);
+
+        function openLightbox() {
+            const overlay = document.getElementById('lightbox');
+            const lbImg = overlay.querySelector('img');
+            const lbSvgHost = overlay.querySelector('.lightbox-svg-host');
+            // Hide the img, show the SVG host
+            lbImg.style.display = 'none';
+            lbSvgHost.style.display = 'flex';
+            // Clone so the original stays in the page
+            lbSvgHost.innerHTML = '';
+            const clone = svg.cloneNode(true);
+            clone.removeAttribute('data-zoomable-svg');
+            clone.style.cursor = 'default';
+            clone.style.maxWidth = '720px';
+            clone.style.width = '100%';
+            clone.style.height = 'auto';
+            lbSvgHost.appendChild(clone);
+            overlay.classList.add('open');
+            overlay.classList.add('open-svg');
+            document.body.style.overflow = 'hidden';
+        }
+
+        btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); openLightbox(); });
+        svg.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); openLightbox(); });
+    });
+
+    // Create the lightbox overlay (once) — used by both img and SVG zoom paths
+    const hasAnyZoomable = document.querySelectorAll('img[data-zoomable], svg[data-zoomable-svg]').length;
+    if (hasAnyZoomable) {
         const overlay = document.createElement('div');
         overlay.id = 'lightbox';
         overlay.className = 'lightbox-overlay';
-        overlay.innerHTML = '<button class="lightbox-close" aria-label="Close"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><img src="" alt="">';
+        overlay.innerHTML = '<button class="lightbox-close" aria-label="Close"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><img src="" alt=""><div class="lightbox-svg-host" style="display:none;"></div>';
         document.body.appendChild(overlay);
 
         function closeLightbox() {
             overlay.classList.remove('open');
+            overlay.classList.remove('open-svg');
             document.body.style.overflow = '';
+            // Reset display states for next open
+            const lbImg = overlay.querySelector('img');
+            const lbSvgHost = overlay.querySelector('.lightbox-svg-host');
+            lbImg.style.display = '';
+            lbSvgHost.style.display = 'none';
+            lbSvgHost.innerHTML = '';
         }
 
         overlay.addEventListener('click', closeLightbox);
         overlay.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
         overlay.querySelector('img').addEventListener('click', e => e.stopPropagation());
+        overlay.querySelector('.lightbox-svg-host').addEventListener('click', e => e.stopPropagation());
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape' && overlay.classList.contains('open')) closeLightbox();
         });
