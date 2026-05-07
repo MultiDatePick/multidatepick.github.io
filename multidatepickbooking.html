@@ -157,6 +157,33 @@
                     <div class="diagram-callout">
                         <strong>Important:</strong> Replace the <span style="background:rgba(249,115,22,0.2);padding:2px 6px;border-radius:3px;font-weight:600;">orange values</span> with your record object and field API names, and the <span style="background:rgba(16,185,129,0.15);padding:2px 6px;border-radius:3px;font-weight:600;color:#065F46;">green values</span> with your resource object and fields. If you use blocked dates, replace the <span style="background:rgba(239,68,68,0.15);padding:2px 6px;border-radius:3px;font-weight:600;color:#991B1B;">red values</span> too. Everything else works as-is.
                     </div>
+
+                    <!-- Multi-field resource filter highlight -->
+                    <div style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:2px solid #34D399;border-radius:12px;padding:24px 28px;margin-top:24px;">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                            <span style="background:#10B981;color:white;font-size:.7rem;font-weight:800;letter-spacing:.5px;padding:4px 10px;border-radius:6px;text-transform:uppercase;">Power Feature</span>
+                            <h3 style="margin:0;color:#065F46;font-size:1.15rem;">Filter the resources by ANY field — including multiple fields</h3>
+                        </div>
+                        <p style="color:#065F46;margin:0 0 16px;line-height:1.6;">Don't show every resource record to every user. <code>resourceFilterField</code> + <code>resourceFilterValue</code> let you scope the picker to exactly the resources you want — by checkbox, picklist, text, or any combination.</p>
+                        <div style="background:white;border-radius:8px;padding:16px 20px;margin-top:8px;">
+                            <table style="width:100%;font-size:.85rem;border-collapse:collapse;">
+                                <thead>
+                                    <tr style="border-bottom:2px solid #D1FAE5;">
+                                        <th style="text-align:left;padding:8px 4px;color:#065F46;font-weight:700;width:35%;">Use case</th>
+                                        <th style="text-align:left;padding:8px 4px;color:#065F46;font-weight:700;">Filter Field</th>
+                                        <th style="text-align:left;padding:8px 4px;color:#065F46;font-weight:700;">Filter Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody style="color:#374151;">
+                                    <tr style="border-bottom:1px solid #F3F4F6;"><td style="padding:8px 4px;">Only active resources</td><td style="padding:8px 4px;"><code>Active__c</code></td><td style="padding:8px 4px;"><code>true</code></td></tr>
+                                    <tr style="border-bottom:1px solid #F3F4F6;"><td style="padding:8px 4px;">Only ground-floor rooms</td><td style="padding:8px 4px;"><code>Floor__c</code></td><td style="padding:8px 4px;"><code>Ground Floor</code></td></tr>
+                                    <tr style="border-bottom:1px solid #F3F4F6;"><td style="padding:8px 4px;">North or South building</td><td style="padding:8px 4px;"><code>Building__c</code></td><td style="padding:8px 4px;"><code>North,South</code></td></tr>
+                                    <tr style="background:rgba(16,185,129,0.06);"><td style="padding:8px 4px;font-weight:600;">🔥 Two fields combined (AND)</td><td style="padding:8px 4px;"><code>Type__c;Building__c</code></td><td style="padding:8px 4px;"><code>Conference Room;North,South</code></td></tr>
+                                </tbody>
+                            </table>
+                            <p style="margin:14px 0 0;font-size:.78rem;color:#6B7280;font-style:italic;">Separators: <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;">,</code> = OR within one field (IN clause). <code style="background:#F3F4F6;padding:1px 5px;border-radius:3px;">;</code> = AND across multiple fields. Field counts on each side of <code>;</code> must match.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- ════════════════════════════════════════════════ -->
@@ -302,8 +329,8 @@
                         <li><code>capacityField</code> — optional capacity field, e.g. <code>Capacity__c</code></li>
                         <li><code>capacityAggregation</code> — picklist: <code>Combined</code> (default) or <code>Distinct</code>. Controls how X/Y occupancy is computed when multiple resources are selected. <strong>Combined</strong> sums bookings AND capacities across resources — best when each resource is independent inventory (4 records across 4 rooms with capacity 5 each = 4/20). <strong>Distinct</strong> counts unique events (records sharing the same date + start + end across resources count as ONE) and uses the MAX single-resource capacity — best when one event spans multiple resources simultaneously (4 records across 4 rooms = 1/5).</li>
                         <li><code>allowMultipleResources</code> — ON to let users book multiple resources at once</li>
-                        <li><code>resourceFilterField</code> — optional. API name of a field on the resource object used to limit which resources appear in the picker. Pair with <code>resourceFilterValue</code></li>
-                        <li><code>resourceFilterValue</code> — optional. Value(s) the filter field must equal. Booleans use <code>true</code>/<code>false</code>; comma-separate text or picklist values for an IN-style match. Examples: <code>true</code>, <code>Conference Room</code>, <code>North,South</code></li>
+                        <li><code>resourceFilterField</code> — optional. API name of a field on the resource object used to limit which resources appear in the picker. Pair with <code>resourceFilterValue</code>. Use <code>;</code> to combine multiple fields (AND). Examples: <code>Active__c</code>, <code>Type__c;Building__c</code></li>
+                        <li><code>resourceFilterValue</code> — optional. Value(s) the filter field must equal. <code>,</code> between values within ONE field = OR (IN clause); <code>;</code> between values = AND across multiple fields. Booleans use <code>true</code>/<code>false</code>. Examples: <code>true</code>, <code>Conference Room</code>, <code>North,South</code>, <code>Conference Room;North,South</code> (Type = Conference Room AND Building IN North or South)</li>
                     </ul>
 
                     <p class="prop-group-label">Booking Object Settings</p>
