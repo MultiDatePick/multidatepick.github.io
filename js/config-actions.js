@@ -194,7 +194,7 @@
 
         var recordCreateInputs = '';
         recordCreateInputs +=
-            '        <!-- ✏️ UPDATE: Change the field names below to match YOUR Salesforce object -->\n' +
+            '        <!-- >>> UPDATE: Change the field names below to match YOUR Salesforce object -->\n' +
             '        <inputAssignments>\n' +
             '            <field>' + xmlEscape(dateField) + '</field>\n' +
             '            <value><elementReference>Loop_Entries.fromDate</elementReference></value>\n' +
@@ -225,7 +225,7 @@
 
         if (nameField && defaultName) {
             recordCreateInputs += '\n' +
-            '        <!-- ✏️ UPDATE: Record name field and value -->\n' +
+            '        <!-- >>> UPDATE: Record name field and value -->\n' +
             '        <inputAssignments>\n' +
             '            <field>' + xmlEscape(nameField) + '</field>\n' +
             '            <value><stringValue>' + xmlEscape(defaultName) + '</stringValue></value>\n' +
@@ -233,7 +233,7 @@
         }
 
         recordCreateInputs += '\n' +
-            '        <!-- ✏️ UPDATE: Change this lookup field to link records to the parent -->\n' +
+            '        <!-- >>> UPDATE: Change this lookup field to link records to the parent -->\n' +
             '        <!--\n' +
             '        <inputAssignments>\n' +
             '            <field>' + xmlEscape(relField) + '</field>\n' +
@@ -359,7 +359,7 @@ inputParams + '\n' +
 '\n' +
 '    <!-- ═══════════════════════════════════════════════════════\n' +
 '         RECORD CREATE — Create one record per date entry\n' +
-'         ✏️ UPDATE the object name and field mappings below\n' +
+'         >>> UPDATE the object name and field mappings below\n' +
 '         to match your Salesforce org.\n' +
 '         ═══════════════════════════════════════════════════════ -->\n' +
 '\n' +
@@ -372,7 +372,7 @@ inputParams + '\n' +
 '            <targetReference>Loop_Entries</targetReference>\n' +
 '        </connector>\n' +
 recordCreateInputs + '\n' +
-'        <!-- ✏️ UPDATE: Change this to YOUR Salesforce object API name -->\n' +
+'        <!-- >>> UPDATE: Change this to YOUR Salesforce object API name -->\n' +
 '        <object>' + xmlEscape(relObj) + '</object>\n' +
 '    </recordCreates>\n' +
 '\n' +
@@ -458,7 +458,7 @@ recordCreateInputs + '\n' +
 '         records automatically via Apex — no loop or record\n' +
 '         create needed.\n' +
 '\n' +
-'         ✏️ UPDATE: Change resourceObjectApiName, bookingResourceField,\n' +
+'         >>> UPDATE: Change resourceObjectApiName, bookingResourceField,\n' +
 '         and the related object/field properties below to match\n' +
 '         your Salesforce org.\n' +
 '         ═══════════════════════════════════════════════════════ -->\n' +
@@ -477,11 +477,11 @@ recordCreateInputs + '\n' +
 '            <name>BookingPicker</name>\n' +
 '            <extensionName>' + extensionName + '</extensionName>\n' +
 '            <fieldType>ComponentInstance</fieldType>\n' +
-'            <!-- ✏️ UPDATE: These properties configure the booking component.\n' +
+'            <!-- >>> UPDATE: These properties configure the booking component.\n' +
 '                 Change resourceObjectApiName and resourceBookingObject\n' +
 '                 to match your Salesforce objects. -->\n' +
 inputParams + '\n' +
-'            <!-- ✏️ UPDATE: These tell the component which object to create booking records on -->\n' +
+'            <!-- >>> UPDATE: These tell the component which object to create booking records on -->\n' +
 '            <inputParameters>\n' +
 '                <name>resourceBookingObject</name>\n' +
 '                <value><stringValue>' + xmlEscape(relObj) + '</stringValue></value>\n' +
@@ -598,7 +598,7 @@ inputParams + '\n' +
                     '<strong>1.</strong> In your project folder, create a new file under <code>force-app/main/default/flows/</code> — name it <code>' + configName + '.flow-meta.xml</code><br>' +
                     '<strong>2.</strong> Paste the XML and save<br>' +
                     '<strong>3.</strong> Deploy with <code>sf project deploy start --source-path force-app/main/default/flows/' + configName + '.flow-meta.xml</code><br>' +
-                    '<strong>4.</strong> Open the Flow in Flow Builder and look for lines marked <strong>✏️ UPDATE</strong> — change the object and field names to match your org',
+                    '<strong>4.</strong> Open the Flow in Flow Builder and look for lines marked <strong>>>> UPDATE</strong> — change the object and field names to match your org',
                     12000
                 );
             })
