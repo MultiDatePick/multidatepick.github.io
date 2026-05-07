@@ -115,47 +115,47 @@
                     <h2>See it in action</h2>
                     <p>Real screenshots from the product. Every feature here ships in the package.</p>
                 </div>
-                <div class="mdp-carousel" data-autoplay-ms="6000" aria-label="MultiDatePick feature screenshots">
+                <div class="mdp-carousel" data-autoplay-ms="8000" aria-label="MultiDatePick feature screenshots">
                     <div class="mdp-carousel__viewport">
                         <ol class="mdp-carousel__track">
                             <li class="mdp-carousel__slide is-active">
-                                <img src="images/marketing/all-three-clean.png" alt="All three MultiDatePick components on one record page" loading="eager">
+                                <img src="images/marketing/all-three-clean.png" alt="All three MultiDatePick components on one record page" loading="eager" data-zoomable>
                                 <p class="mdp-carousel__caption"><strong>Three Components, One Suite</strong> — Dates, DateTime, and Booking working together on a single record page.</p>
                             </li>
                             <li class="mdp-carousel__slide">
-                                <img src="images/marketing/booking-grid-clean.png" alt="Resource booking time-slot grid with capacity badges" loading="lazy">
+                                <img src="images/marketing/booking-grid-clean.png" alt="Resource booking time-slot grid with capacity badges" loading="lazy" data-zoomable>
                                 <p class="mdp-carousel__caption"><strong>Resource Booking Grid</strong> — pick a date, see business hours, click a slot to book. Conflict detection built in.</p>
                             </li>
                             <li class="mdp-carousel__slide">
-                                <img src="images/marketing/capacity-booking-clean.png" alt="Capacity booking with X/Y badges on every slot" loading="lazy">
+                                <img src="images/marketing/capacity-booking-clean.png" alt="Capacity booking with X/Y badges on every slot" loading="lazy" data-zoomable>
                                 <p class="mdp-carousel__caption"><strong>Capacity Tracking</strong> — multiple bookings per slot with live X/Y badges. Color shifts open → filling → full.</p>
                             </li>
                             <li class="mdp-carousel__slide">
-                                <img src="images/marketing/dates-status-colors-clean.png" alt="Date calendar with pastel status color fills on each cell" loading="lazy">
+                                <img src="images/marketing/dates-status-colors-clean.png" alt="Date calendar with pastel status color fills on each cell" loading="lazy" data-zoomable>
                                 <p class="mdp-carousel__caption"><strong>Status Colors on the Calendar</strong> — map any picklist value to a color. The whole calendar becomes a visual dashboard.</p>
                             </li>
                             <li class="mdp-carousel__slide">
-                                <img src="images/marketing/datetime-grid-clean.png" alt="DateTime time-slot grid with selected slots highlighted" loading="lazy">
+                                <img src="images/marketing/datetime-grid-clean.png" alt="DateTime time-slot grid with selected slots highlighted" loading="lazy" data-zoomable>
                                 <p class="mdp-carousel__caption"><strong>DateTime Time-Slot Grid</strong> — pick dates, pick time blocks. 15/30/60 minute intervals, period grouping, consolidated time spans.</p>
                             </li>
                             <li class="mdp-carousel__slide">
-                                <img src="images/marketing/edit-mode-clean.png" alt="Bulk edit mode with the records panel showing inline edits" loading="lazy">
+                                <img src="images/marketing/edit-mode-clean.png" alt="Bulk edit mode with the records panel showing inline edits" loading="lazy" data-zoomable>
                                 <p class="mdp-carousel__caption"><strong>Edit Mode — Manage Records Inline</strong> — change status, move dates, reassign resources, delete bookings without leaving the page.</p>
                             </li>
                             <li class="mdp-carousel__slide">
-                                <img src="images/marketing/hover-popover-clean.png" alt="Hover popover showing booking details on a calendar date" loading="lazy">
+                                <img src="images/marketing/hover-popover-clean.png" alt="Hover popover showing booking details on a calendar date" loading="lazy" data-zoomable>
                                 <p class="mdp-carousel__caption"><strong>Rich Hover Popovers</strong> — configure which fields appear on hover. Field-level details without a single click.</p>
                             </li>
                             <li class="mdp-carousel__slide">
-                                <img src="images/marketing/setup-wizard-clean.png" alt="Setup wizard component-type picker with live preview pane" loading="lazy">
+                                <img src="images/marketing/setup-wizard-clean.png" alt="Setup wizard component-type picker with live preview pane" loading="lazy" data-zoomable>
                                 <p class="mdp-carousel__caption"><strong>Setup Wizard</strong> — pick a component type, map fields, deploy. No code, no docs, no XML.</p>
                             </li>
                             <li class="mdp-carousel__slide">
-                                <img src="images/marketing/status-filter-clean.png" alt="Status filter pills above the calendar showing colored chips" loading="lazy">
+                                <img src="images/marketing/status-filter-clean.png" alt="Status filter pills above the calendar showing colored chips" loading="lazy" data-zoomable>
                                 <p class="mdp-carousel__caption"><strong>Status Filter Pills</strong> — toggle which statuses appear with one click. Calendar and grid update live.</p>
                             </li>
                             <li class="mdp-carousel__slide">
-                                <img src="images/marketing/two-month-clean.png" alt="Two-month calendar view with both months visible side by side" loading="lazy">
+                                <img src="images/marketing/two-month-clean.png" alt="Two-month calendar view with both months visible side by side" loading="lazy" data-zoomable>
                                 <p class="mdp-carousel__caption"><strong>Two-Month View</strong> — see this month and next month at the same time. Better for planning multi-week ranges.</p>
                             </li>
                         </ol>
@@ -1187,7 +1187,16 @@
             dots[n].classList.add('is-active');
             current = n;
         }
-        function start() { stop(); timerId = setInterval(function () { show(current + 1); }, autoMs); }
+        function start() {
+            stop();
+            timerId = setInterval(function () {
+                // Skip the advance while the lightbox is open (an image got
+                // clicked and zoomed) — otherwise the carousel quietly cycles
+                // behind the overlay and the user closes onto a different slide.
+                if (document.querySelector('.lightbox-overlay.open')) return;
+                show(current + 1);
+            }, autoMs);
+        }
         function stop()  { if (timerId) { clearInterval(timerId); timerId = null; } }
 
         if (prevBtn) prevBtn.addEventListener('click', function () { show(current - 1); start(); });
