@@ -33,13 +33,22 @@
         .ug-component-card.datetime { border-color: #60A5FA; }
         .ug-component-card.booking { border-color: #F97316; }
 
-        .ug-axes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0 28px; }
-        .ug-axis-card { background: #FFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 18px; }
-        .ug-axis-card h4 { margin: 0 0 8px; font-size: .95rem; color: #0F2D52; padding-bottom: 6px; border-bottom: 2px solid; }
-        .ug-axis-card p { font-size: .85rem; color: #374151; margin: 6px 0; }
-        .ug-axis-time h4 { border-bottom-color: #F97316; }
-        .ug-axis-resource h4 { border-bottom-color: #3B82F6; }
-        .ug-axis-range h4 { border-bottom-color: #22C55E; }
+        .ug-axes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 20px 0 28px; }
+        .ug-axis-card { background: #FFF; border: 1px solid #E5E7EB; border-top: 4px solid; border-radius: 8px; padding: 16px 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+        .ug-axis-card h4 { margin: 0 0 12px; font-size: .95rem; color: #0F2D52; padding-bottom: 6px; }
+        .ug-axis-card p { font-size: .87rem; color: #374151; margin: 8px 0; line-height: 1.45; }
+        .ug-axis-card p strong { color: #0F2D52; }
+        .ug-axis-time { border-top-color: #F97316; }
+        .ug-axis-resource { border-top-color: #3B82F6; }
+        .ug-axis-range { border-top-color: #22C55E; }
+
+        .ug-examples-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin: 18px 0 28px; }
+        .ug-example-card { background: #F8FAFC; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 18px; }
+        .ug-example-card .ug-example-scenario { margin: 0 0 6px; font-weight: 700; color: #0F2D52; font-size: .92rem; }
+        .ug-example-card .ug-example-picks { margin: 6px 0; font-size: .82rem; color: #475569; line-height: 1.55; }
+        .ug-example-card .ug-example-picks strong { color: #1E293B; }
+        .ug-example-card .ug-example-result { margin: 8px 0 0; padding-top: 8px; border-top: 1px solid #E5E7EB; font-size: .85rem; color: #0F2D52; }
+        .ug-example-card .ug-example-result strong { color: #9A3412; }
 
         .ug-shape-grid-table { font-size: .87rem; }
         .ug-shape-grid-table td { vertical-align: top; }
@@ -170,21 +179,45 @@
 
                 <div class="ug-axes-grid">
                     <div class="ug-axis-card ug-axis-time">
-                        <h4>Time axis</h4>
+                        <h4>Step 1 &mdash; Time</h4>
                         <p><strong>Dates</strong> &mdash; no times, just dates</p>
                         <p><strong>DateTime / Booking</strong> &mdash; each record has a time block (start &amp; end)</p>
-                        <p><strong>+ <code>consolidateTimeSpan</code></strong> &mdash; one parent for the time range, sub-block children for any gaps</p>
+                        <p style="margin-left:14px;border-left:2px solid #FED7AA;padding-left:10px;color:#9A3412;"><strong>Add-on:</strong> <code>consolidateTimeSpan</code> &mdash; one parent for the full time range, sub-block children for any gaps inside it.</p>
                     </div>
                     <div class="ug-axis-card ug-axis-resource">
-                        <h4>Resource axis</h4>
+                        <h4>Step 2 &mdash; Resource</h4>
                         <p><strong>None</strong> &mdash; Dates / DateTime, or Booking without a resource</p>
                         <p><strong>Single resource</strong> &mdash; Booking with a resource picker dropdown</p>
                         <p><strong>Multi-resource</strong> &mdash; Booking with checkboxes, one record per checked resource</p>
                     </div>
                     <div class="ug-axis-card ug-axis-range">
-                        <h4>Range axis</h4>
+                        <h4>Step 3 &mdash; Range</h4>
                         <p><strong>Per-click</strong> &mdash; each selected date becomes its own record. Five clicks = five records.</p>
                         <p><strong>Per-range</strong> &mdash; contiguous dates consolidate into one record with start + end. Requires <code>endDateField</code>.</p>
+                    </div>
+                </div>
+
+                <h3>Worked examples &mdash; how the pick-one model produces a pattern</h3>
+                <div class="ug-examples-grid">
+                    <div class="ug-example-card">
+                        <p class="ug-example-scenario">PTO request</p>
+                        <p class="ug-example-picks"><strong>Time:</strong> Dates &middot; <strong>Resource:</strong> None &middot; <strong>Range:</strong> Per-range</p>
+                        <p class="ug-example-result">&rarr; <strong>Per-range</strong> &mdash; Mon&ndash;Fri PTO becomes one record with start=Mon, end=Fri.</p>
+                    </div>
+                    <div class="ug-example-card">
+                        <p class="ug-example-scenario">Conference room reservation</p>
+                        <p class="ug-example-picks"><strong>Time:</strong> DateTime &middot; <strong>Resource:</strong> Single &middot; <strong>Range:</strong> Per-click</p>
+                        <p class="ug-example-result">&rarr; <strong>Single-resource booking</strong> &mdash; one record per date &times; time block, tied to the picked room.</p>
+                    </div>
+                    <div class="ug-example-card">
+                        <p class="ug-example-scenario">Multi-room training across 3 rooms</p>
+                        <p class="ug-example-picks"><strong>Time:</strong> DateTime &middot; <strong>Resource:</strong> Multi &middot; <strong>Range:</strong> Per-range</p>
+                        <p class="ug-example-result">&rarr; <strong>Multi-resource range</strong> &mdash; one record per room covering the full date range with shared start/end times.</p>
+                    </div>
+                    <div class="ug-example-card">
+                        <p class="ug-example-scenario">Full-day training with lunch break</p>
+                        <p class="ug-example-picks"><strong>Time:</strong> DateTime + <code>consolidateTimeSpan</code> &middot; <strong>Resource:</strong> None &middot; <strong>Range:</strong> Per-range (implicit)</p>
+                        <p class="ug-example-result">&rarr; <strong>Parent + sub-blocks</strong> &mdash; one parent record for the 9 AM&ndash;5 PM range, sub-block child for the 12 PM lunch gap.</p>
                     </div>
                 </div>
 
