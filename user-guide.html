@@ -33,18 +33,19 @@
         .ug-component-card.datetime { border-color: #60A5FA; }
         .ug-component-card.booking { border-color: #F97316; }
 
-        .ug-shape-axis { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin: 24px 0; }
-        @media (max-width: 760px) { .ug-shape-axis { grid-template-columns: 1fr; } }
-        .ug-shape-col { display: flex; flex-direction: column; gap: 14px; }
-        .ug-shape-col-header { padding: 14px 18px; border-radius: 8px; }
-        .ug-shape-col-header h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
-        .ug-shape-col-header p { margin: 0; font-size: .85rem; color: #475569; }
-        .ug-shape-col-header-single { background: #FFF7ED; border-left: 4px solid #F97316; }
-        .ug-shape-col-header-range { background: #EFF6FF; border-left: 4px solid #3B82F6; }
-        .ug-shape-card { background: #FFF; border: 1px solid #E5E7EB; border-left: 4px solid #F97316; border-radius: 8px; padding: 14px 18px; }
-        .ug-shape-card-range { border-left-color: #3B82F6; }
-        .ug-shape-card h4 { margin: 0 0 6px; font-size: 1rem; color: #0F2D52; }
-        .ug-shape-card p { font-size: .9rem; color: #374151; margin: 6px 0; }
+        .ug-axes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0 28px; }
+        .ug-axis-card { background: #FFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 18px; }
+        .ug-axis-card h4 { margin: 0 0 8px; font-size: .95rem; color: #0F2D52; padding-bottom: 6px; border-bottom: 2px solid; }
+        .ug-axis-card p { font-size: .85rem; color: #374151; margin: 6px 0; }
+        .ug-axis-time h4 { border-bottom-color: #F97316; }
+        .ug-axis-resource h4 { border-bottom-color: #3B82F6; }
+        .ug-axis-range h4 { border-bottom-color: #22C55E; }
+
+        .ug-shape-grid-table { font-size: .87rem; }
+        .ug-shape-grid-table td { vertical-align: top; }
+        .ug-shape-grid-table td.ug-grid-named { background: #FFF7ED; border-left: 3px solid #F97316; }
+        .ug-grid-sub { font-size: .78rem; color: #64748B; font-weight: 400; }
+        .ug-shape-grid-table th .ug-grid-sub { display: block; color: #475569; font-weight: 400; font-size: .76rem; margin-top: 2px; }
 
         .ug-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: .9rem; }
         .ug-table th, .ug-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #E5E7EB; vertical-align: top; }
@@ -104,7 +105,7 @@
                 <h2>Contents</h2>
                 <ol>
                     <li><a href="#components">The three components</a></li>
-                    <li><a href="#shapes">The six data shapes</a></li>
+                    <li><a href="#shapes">Data shapes</a></li>
                     <li><a href="#wizard">Setup Wizard walkthrough</a></li>
                     <li><a href="#save-modes">Click to Save vs Flow-Managed Save</a></li>
                     <li><a href="#status">Status colors & edit mode</a></li>
@@ -164,54 +165,73 @@
 
             <!-- ───── SECTION 2: DATA SHAPES ───── -->
             <section id="shapes" class="ug-section">
-                <h2>2. The six data shapes &mdash; when to use each</h2>
-                <p>Same components, different ways records get saved. The big question is whether each click produces its own record or whether multiple clicks consolidate into one:</p>
+                <h2>2. Data shapes &mdash; when to use each</h2>
+                <p>Data shape is the combination of three independent choices. Pick any combination &mdash; the wrapper supports them all. The common patterns have names; everything else just works.</p>
 
-                <div class="ug-shape-axis">
-                    <div class="ug-shape-col">
-                        <div class="ug-shape-col-header ug-shape-col-header-single">
-                            <h3>One record per click</h3>
-                            <p>Each selection produces its own record. Five clicks = five records.</p>
-                        </div>
-                        <div class="ug-shape-card">
-                            <h4>Per-date</h4>
-                            <p>1 selected date &rarr; 1 child record.</p>
-                            <p><strong>Use for:</strong> RSVPs, attendance, daily check-ins.</p>
-                        </div>
-                        <div class="ug-shape-card">
-                            <h4>Per-block</h4>
-                            <p>1 date &times; 1 time block = 1 record. Available on DateTime and Booking.</p>
-                            <p><strong>Use for:</strong> Daily timesheets, shift segments, training blocks.</p>
-                        </div>
-                        <div class="ug-shape-card">
-                            <h4>Single-resource booking</h4>
-                            <p>1 record per date &times; time block, tied to a single resource lookup. Booking only.</p>
-                            <p><strong>Use for:</strong> Conference room reservations, trainer scheduling, asset rentals.</p>
-                        </div>
-                        <div class="ug-shape-card">
-                            <h4>Multi-resource booking</h4>
-                            <p>1 record per resource &times; date &times; time block. Booking only, with resource checkboxes.</p>
-                            <p><strong>Use for:</strong> Multi-resource events, parallel team meetings, team field service routes.</p>
-                        </div>
+                <div class="ug-axes-grid">
+                    <div class="ug-axis-card ug-axis-time">
+                        <h4>Time axis</h4>
+                        <p><strong>Dates</strong> &mdash; no times, just dates</p>
+                        <p><strong>DateTime / Booking</strong> &mdash; each record has a time block (start &amp; end)</p>
+                        <p><strong>+ <code>consolidateTimeSpan</code></strong> &mdash; one parent for the time range, sub-block children for any gaps</p>
                     </div>
-
-                    <div class="ug-shape-col">
-                        <div class="ug-shape-col-header ug-shape-col-header-range">
-                            <h3>One record per range</h3>
-                            <p>Multiple contiguous clicks consolidate into one record with a start + end. Fewer records, range semantics.</p>
-                        </div>
-                        <div class="ug-shape-card ug-shape-card-range">
-                            <h4>Per-range</h4>
-                            <p>Contiguous dates collapse to one record with a start + end field. Requires <code>endDateField</code> mapped.</p>
-                            <p><strong>Use for:</strong> PTO, travel, multi-night stays, multi-day vehicle rentals.</p>
-                        </div>
-                        <div class="ug-shape-card ug-shape-card-range">
-                            <h4>Parent + sub-blocks</h4>
-                            <p>One parent record spans the full range; gaps inside become sub-block children. Requires <code>consolidateTimeSpan</code>.</p>
-                            <p><strong>Use for:</strong> Training with lunch breaks, field service routes with travel between stops.</p>
-                        </div>
+                    <div class="ug-axis-card ug-axis-resource">
+                        <h4>Resource axis</h4>
+                        <p><strong>None</strong> &mdash; Dates / DateTime, or Booking without a resource</p>
+                        <p><strong>Single resource</strong> &mdash; Booking with a resource picker dropdown</p>
+                        <p><strong>Multi-resource</strong> &mdash; Booking with checkboxes, one record per checked resource</p>
+                    </div>
+                    <div class="ug-axis-card ug-axis-range">
+                        <h4>Range axis</h4>
+                        <p><strong>Per-click</strong> &mdash; each selected date becomes its own record. Five clicks = five records.</p>
+                        <p><strong>Per-range</strong> &mdash; contiguous dates consolidate into one record with start + end. Requires <code>endDateField</code>.</p>
                     </div>
                 </div>
+
+                <h3>The grid &mdash; every combination</h3>
+                <p style="font-size:.88rem;color:#64748B;margin:8px 0 12px;">Orange cells have named shapes (the common patterns). White cells are also valid &mdash; pick the row for time/resource, then choose per-click or per-range based on whether <code>endDateField</code> is mapped.</p>
+
+                <table class="ug-table ug-shape-grid-table">
+                    <thead>
+                        <tr>
+                            <th style="width:34%;">Time + Resource</th>
+                            <th style="width:33%;">Per-click<br><span class="ug-grid-sub">(no <code>endDateField</code>)</span></th>
+                            <th style="width:33%;">Per-range<br><span class="ug-grid-sub">(<code>endDateField</code> mapped)</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Dates</strong><br><span class="ug-grid-sub">No time. Component: <code>multiDatePickDates</code></span></td>
+                            <td class="ug-grid-named"><strong>Per-date</strong><br>1 date &rarr; 1 record.<br><em>Use for:</em> RSVPs, attendance, daily check-ins.</td>
+                            <td class="ug-grid-named"><strong>Per-range</strong><br>Contiguous dates &rarr; 1 record with start + end.<br><em>Use for:</em> PTO, travel, multi-night stays.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DateTime</strong><br><span class="ug-grid-sub">Time block per record. Component: <code>multiDatePickDateTime</code></span></td>
+                            <td class="ug-grid-named"><strong>Per-block</strong><br>1 date &times; 1 time block = 1 record.<br><em>Use for:</em> Timesheets, shift segments, training blocks.</td>
+                            <td>Range with shared time block. Contiguous dates with consistent times &rarr; 1 record.<br><em>Use for:</em> Multi-day training with same start/end each day.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DateTime + consolidateTimeSpan</strong><br><span class="ug-grid-sub">Parent record + sub-block children for gaps</span></td>
+                            <td colspan="2" class="ug-grid-named"><strong>Parent + sub-blocks</strong><br>One parent record spans the full time range; gaps inside become sub-block children. (Range is implicit &mdash; the consolidation IS the range.)<br><em>Use for:</em> Training with lunch breaks, field service routes with travel between stops.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Booking, single resource</strong><br><span class="ug-grid-sub">One resource picker. Component: <code>multiDatePickBooking</code></span></td>
+                            <td class="ug-grid-named"><strong>Single-resource booking</strong><br>1 record per date &times; time block, tied to the resource.<br><em>Use for:</em> Conference rooms, trainer scheduling.</td>
+                            <td>Single-resource range. Contiguous dates with same time on one resource &rarr; 1 record per range.<br><em>Use for:</em> Multi-night hotel-room reservation, multi-day equipment checkout.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Booking, multi-resource</strong><br><span class="ug-grid-sub">Resource checkboxes (<code>allowMultipleResources</code>)</span></td>
+                            <td class="ug-grid-named"><strong>Multi-resource booking</strong><br>1 record per resource &times; date &times; time block.<br><em>Use for:</em> Parallel team meetings, multi-room training.</td>
+                            <td>Multi-resource range. Contiguous dates with same time across N resources &rarr; N records (one per resource).<br><em>Use for:</em> Multi-day training booked across 3 rooms simultaneously.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Booking + consolidateTimeSpan</strong><br><span class="ug-grid-sub">Parent booking + sub-block gap children</span></td>
+                            <td colspan="2">Booking parent + sub-blocks. Combines resource lookup with the parent / sub-block pattern.<br><em>Use for:</em> Resource booked all day with documented breaks (lab equipment with maintenance windows).</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p style="font-size:.88rem;color:#64748B;margin:14px 0 0;"><strong>Bottom line:</strong> the 6 named shapes are common patterns, not a closed list. Any combination of the 3 axes works. If your scenario doesn't match a named pattern, configure the axes individually &mdash; the wrapper figures it out.</p>
             </section>
 
             <!-- ───── SECTION 3: SETUP WIZARD ───── -->
