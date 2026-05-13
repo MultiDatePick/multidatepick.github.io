@@ -89,11 +89,11 @@
             </div>
         </section>
 
-        <!-- ═══════════════ TIER 1: SESSIONS ═══════════════ -->
+        <!-- ═══════════════ SESSIONS ═══════════════ -->
         <section class="section section-alt" id="sessions">
             <div class="container">
                 <div class="section-header">
-                    <h2>Tier 1 &mdash; Multi-Day Event Scheduling</h2>
+                    <h2>Multi-Day Event Scheduling</h2>
                     <p>Track every date a Campaign touches. Roll the MIN/MAX back up to <code>Campaign.StartDate</code> &amp; <code>EndDate</code> so native Salesforce Campaign reports work without changes.</p>
                 </div>
 
@@ -122,7 +122,7 @@
             </div>
         </section>
 
-        <!-- ═══════════════ TIER 3: ATTENDANCE ═══════════════ -->
+        <!-- ═══════════════ ATTENDANCE ═══════════════ -->
         <section class="section" id="attendance">
             <div class="container">
                 <div class="section-header">
@@ -162,11 +162,11 @@
             </div>
         </section>
 
-        <!-- ═══════════════ V1.1 — WRITE-BACK ═══════════════ -->
+        <!-- ═══════════════ WRITE-BACK ═══════════════ -->
         <section class="section section-alt">
             <div class="container" style="max-width:960px;">
                 <div class="section-header">
-                    <h2>CampaignMember Write-Back <span style="font-size:.65em;color:var(--orange);font-weight:600;vertical-align:middle;background:#FFEDD5;padding:4px 10px;border-radius:12px;margin-left:8px;">v1.1</span></h2>
+                    <h2>CampaignMember Write-Back</h2>
                     <p>Make the standard Salesforce reports work. When an attendance record flips to Attending, the bundled trigger updates <code>CampaignMember.Status</code> so <code>HasResponded</code>, <code>FirstRespondedDate</code>, and "Members Responded" reports reflect attendance reality.</p>
                 </div>
 
@@ -175,21 +175,28 @@
                     <p style="font-size:.95rem;color:var(--gray-700);">Without the write-back, MultiDatePick is a parallel data set: rich per-day attendance lives in your child object, but standard Salesforce Campaign dashboards see nothing. With the write-back, every attendance Attending update fires through to the standard CampaignMember.Status &mdash; Salesforce auto-derives <code>HasResponded=true</code> and stamps <code>FirstRespondedDate</code>. <strong>Standard reports just start working.</strong></p>
 
                     <h3 style="color:var(--blue-900);margin:24px 0 14px;">How to enable</h3>
+                    <p style="font-size:.95rem;color:var(--gray-700);">The Setup Wizard exposes the full write-back configuration in the <strong>Campaign Member Writeback (Optional)</strong> section &mdash; visible whenever the wizard detects an attendance-style related object. No need to edit Custom Metadata Types directly:</p>
                     <ol style="font-size:.92rem;line-height:1.7;color:var(--gray-700);">
-                        <li>Open your MDP_Config__mdt record (Setup &rarr; Custom Metadata Types &rarr; MDP Configs)</li>
-                        <li>Check <strong>Enable CampaignMember Write-Back</strong></li>
-                        <li>Set <strong>Attendee Lookup Field</strong> to your Contact-lookup field name (default <code>Contact__c</code>)</li>
+                        <li>Open the Setup Wizard (Setup &rarr; App Manager &rarr; MultiDatePick Setup, or the bundled tab)</li>
+                        <li>Configure your attendance object &amp; fields in Step 2. The wizard auto-surfaces the writeback section.</li>
+                        <li>Toggle <strong>Enable Writeback</strong>, set <strong>Attendee Lookup Field</strong> to your Contact-or-Lead lookup name (default <code>Contact__c</code>), and save.</li>
                     </ol>
 
                     <h3 style="color:var(--blue-900);margin:24px 0 14px;">Optional tuning</h3>
                     <ul style="font-size:.92rem;line-height:1.65;color:var(--gray-700);">
-                        <li><strong>Write-Back Attendance Statuses</strong> &mdash; CSV of attendance values that trigger write-back. Default: <code>Attending</code>.</li>
-                        <li><strong>CampaignMember Attending Status</strong> &mdash; the <code>CampaignMember.Status</code> value to set. Leave blank to auto-detect the Campaign's default Responded status.</li>
-                        <li><strong>Auto-Create CampaignMembers</strong> &mdash; when ON, attendance records whose Contact isn't already a CampaignMember trigger creation. When OFF, write-back silently skips those Contacts.</li>
+                        <li><strong>Trigger Status Values</strong> &mdash; CSV of attendance status values that fire the write-back. Default: <code>Attending</code>. Add comma-separated values to fire on multiple (e.g. <code>Attending,Tentative</code>).</li>
+                        <li><strong>CampaignMember Status to Set</strong> &mdash; the <code>CampaignMember.Status</code> value to set when write-back fires. Default <code>Responded</code> (exists on every Campaign with HasResponded flagged). Must match a Member Status value on every Campaign you'll use.</li>
+                        <li><strong>Auto-Create Campaign Members</strong> &mdash; when ON, attendance records whose attendee isn't already on the Campaign trigger CampaignMember creation. When OFF, write-back silently skips those.</li>
                     </ul>
 
+                    <h3 style="color:var(--blue-900);margin:24px 0 14px;">Contact or Lead &mdash; polymorphic by default</h3>
+                    <p style="font-size:.95rem;color:var(--gray-700);">The bundled write-back handles BOTH Contact-based and Lead-based attendees out of the box. Point the <strong>Attendee Lookup Field</strong> at whichever lookup matches your schema (Contact or Lead). The runtime detects each record's attendee type from its Id prefix (Contact = <code>003</code>, Lead = <code>00Q</code>) and writes to <code>CampaignMember.ContactId</code> or <code>CampaignMember.LeadId</code> accordingly. Mixed-type batches in a single trigger fire are supported.</p>
+
                     <div style="background:#FEF3C7;border-left:4px solid #F59E0B;border-radius:6px;padding:14px 18px;margin-top:18px;font-size:.88rem;color:#78350F;">
-                        <strong>Required permissions:</strong> the user (or integration user / Site Guest User) writing attendance records needs Edit on <code>CampaignMember.Status</code>. Write-back fails gracefully when permissions are missing &mdash; it logs a warning and silently skips, never blocking the underlying attendance save.
+                        <strong>Required permissions:</strong> the user (or integration user / Site Guest User) writing attendance records needs Edit on <code>CampaignMember.Status</code>. The bundled <code>MultiDatePick</code> permission set intentionally does <em>not</em> grant this on standard objects &mdash; add it to your existing user permission sets. Write-back fails gracefully when permissions are missing: it logs a warning and silently skips, never blocking the underlying attendance save.
+                    </div>
+                    <div style="background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:6px;padding:14px 18px;margin-top:12px;font-size:.88rem;color:#1E40AF;">
+                        <strong>CampaignMember Status values are per-Campaign:</strong> each Campaign has its own Member Status list (Setup &rarr; Campaign Member Statuses on that Campaign). Confirm your target Status exists on every Campaign you'll use, and flag it HasResponded=true so standard Salesforce reports pick it up. The default <code>Responded</code> already has this set on every Campaign.
                     </div>
                 </div>
             </div>
@@ -214,7 +221,7 @@
                     </div>
                     <div class="feature-card">
                         <h3>Two Deep Dive flows</h3>
-                        <p><strong>Deep Dive &mdash; Campaign Event Scheduling</strong> covers Tier 1 (multi-day sessions). <strong>Deep Dive &mdash; Campaign Attendance</strong> covers Tier 3 (per-attendee + write-back). Both ship in the package; admins launch from the App Launcher.</p>
+                        <p><strong>Deep Dive &mdash; Campaign Event Scheduling</strong> walks the multi-day sessions pattern. <strong>Deep Dive &mdash; Campaign Attendance</strong> walks per-attendee tracking + write-back. Both ship in the package; admins launch from the App Launcher.</p>
                     </div>
                     <div class="feature-card">
                         <h3>Intro flow integration</h3>
@@ -230,9 +237,63 @@
                 <div class="section-header">
                     <h2>Why dual Campaign + Contact lookups, not CampaignMember?</h2>
                 </div>
-                <p style="font-size:.95rem;color:var(--gray-700);">Salesforce platform doesn't allow custom-object Lookup fields to target the <code>CampaignMember</code> standard junction object &mdash; we hit that wall during v1.0 design. The bundled attendance object uses dual <code>Campaign__c</code> + <code>Contact__c</code> lookups instead, which gives the same expressive power and is fully platform-supported.</p>
-                <p style="font-size:.95rem;color:var(--gray-700);margin-top:14px;">For Lead-attendee tracking, add a <code>Lead__c</code> lookup field to your attendance object (Salesforce doesn't support polymorphic Lead-or-Contact lookups natively on custom objects).</p>
-                <p style="font-size:.95rem;color:var(--gray-700);margin-top:14px;">The v1.1 write-back layer interacts with CampaignMember via Apex SOQL + DML &mdash; the platform restriction is narrow (no Lookup target), not broad (no interaction).</p>
+                <p style="font-size:.95rem;color:var(--gray-700);">Salesforce platform doesn't allow custom-object Lookup fields to target the <code>CampaignMember</code> standard junction object &mdash; we hit that wall during initial design. The bundled attendance object uses dual <code>Campaign__c</code> + <code>Contact__c</code> lookups instead, which gives the same expressive power and is fully platform-supported.</p>
+                <p style="font-size:.95rem;color:var(--gray-700);margin-top:14px;">For Lead-attendee tracking, add a <code>Lead__c</code> lookup field to your attendance object alongside <code>Contact__c</code>. Salesforce doesn't support polymorphic Lead-or-Contact lookups natively on custom objects, so admins typically pick one or the other per attendance object. The bundled write-back runtime supports either &mdash; point the wizard's <strong>Attendee Lookup Field</strong> at whichever lookup matches your schema.</p>
+                <p style="font-size:.95rem;color:var(--gray-700);margin-top:14px;">The write-back layer interacts with CampaignMember via Apex SOQL + DML &mdash; the platform restriction is narrow (no Lookup target), not broad (no interaction).</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ EXAMPLE FLEXIPAGES ═══════════════ -->
+        <section class="section section-alt">
+            <div class="container" style="max-width:1100px;">
+                <div class="section-header">
+                    <h2>Example Campaign record pages</h2>
+                    <p>Drop the wrapper on a Campaign record page and configure via the Setup Wizard. Below are example layouts admins commonly build &mdash; from a minimal single-component placement to a fully-loaded Campaign hub.</p>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:24px;">
+                    <div style="background:white;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+                        <div style="aspect-ratio:16/10;background:#F1F5F9;display:flex;align-items:center;justify-content:center;color:#64748B;font-size:.82rem;font-style:italic;text-align:center;padding:14px;border-bottom:1px dashed #CBD5E1;">
+                            Screenshot coming soon
+                        </div>
+                        <div style="padding:18px 22px;">
+                            <h3 style="color:var(--blue-900);margin:0 0 8px;font-size:1.05rem;">Minimal Campaign hub</h3>
+                            <p style="margin:0;font-size:.88rem;color:var(--gray-700);line-height:1.55;"><code>multiDatePickDates</code> placed on a Campaign record page with a child <code>Session__c</code> object. Captures every date the Campaign touches; rollup keeps <code>Campaign.StartDate</code> &amp; <code>EndDate</code> in sync.</p>
+                        </div>
+                    </div>
+
+                    <div style="background:white;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+                        <div style="aspect-ratio:16/10;background:#F1F5F9;display:flex;align-items:center;justify-content:center;color:#64748B;font-size:.82rem;font-style:italic;text-align:center;padding:14px;border-bottom:1px dashed #CBD5E1;">
+                            Screenshot coming soon
+                        </div>
+                        <div style="padding:18px 22px;">
+                            <h3 style="color:var(--blue-900);margin:0 0 8px;font-size:1.05rem;">Sub-Campaign hierarchy</h3>
+                            <p style="margin:0;font-size:.88rem;color:var(--gray-700);line-height:1.55;">Parent Campaign with <code>includeChildCampaignDates</code> ON. Calendar aggregates dates from every descendant Campaign in the hierarchy &mdash; useful for parent Campaigns that have sub-Campaigns per city, session, or track.</p>
+                        </div>
+                    </div>
+
+                    <div style="background:white;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+                        <div style="aspect-ratio:16/10;background:#F1F5F9;display:flex;align-items:center;justify-content:center;color:#64748B;font-size:.82rem;font-style:italic;text-align:center;padding:14px;border-bottom:1px dashed #CBD5E1;">
+                            Screenshot coming soon
+                        </div>
+                        <div style="padding:18px 22px;">
+                            <h3 style="color:var(--blue-900);margin:0 0 8px;font-size:1.05rem;">Per-attendee attendance</h3>
+                            <p style="margin:0;font-size:.88rem;color:var(--gray-700);line-height:1.55;">Two wrappers on the same page: <code>multiDatePickDates</code> for sessions (child <code>Session__c</code>) plus a second wrapper for per-attendee tracking against <code>MDP_Campaign_Attendance__c</code>. Both visible without scrolling on a desktop layout.</p>
+                        </div>
+                    </div>
+
+                    <div style="background:white;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+                        <div style="aspect-ratio:16/10;background:#F1F5F9;display:flex;align-items:center;justify-content:center;color:#64748B;font-size:.82rem;font-style:italic;text-align:center;padding:14px;border-bottom:1px dashed #CBD5E1;">
+                            Screenshot coming soon
+                        </div>
+                        <div style="padding:18px 22px;">
+                            <h3 style="color:var(--blue-900);margin:0 0 8px;font-size:1.05rem;">Full Campaign hub with write-back</h3>
+                            <p style="margin:0;font-size:.88rem;color:var(--gray-700);line-height:1.55;">Sessions + attendance + write-back enabled, plus a "Members Responded" report chart on the same record page. Standard Salesforce reports populated entirely by attendance saves &mdash; no manual CampaignMember updates.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p style="margin-top:24px;text-align:center;font-size:.88rem;color:var(--gray-500);font-style:italic;">Example flexipages with full XML + screenshots will be added with the upcoming MultiDatePick User Guide.</p>
             </div>
         </section>
 
