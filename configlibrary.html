@@ -47,25 +47,81 @@
         .badge-shape-multi-resource  { background:#CCFBF1; color:#115E59; }
         .badge-shape-parent-subblock { background:#FED7AA; color:#9A3412; }
 
-        /* ── Shape filter pills ── */
-        .shape-filter-bar { display:flex; flex-wrap:wrap; gap:8px; margin:24px 0 28px; align-items:center; }
-        .shape-filter-label { font-size:.78rem; font-weight:700; color:var(--gray-500); letter-spacing:.04em; text-transform:uppercase; margin-right:6px; }
-        .shape-filter-pill {
+        /* ── Q&A filter (mirrors the in-org Setup Wizard's 3 questions) ── */
+        .qa-filter {
+            background:white; border:1px solid #E2E8F0; border-radius:14px;
+            padding:24px 24px 18px; margin:24px 0 28px;
+            box-shadow:0 2px 12px rgba(15,23,42,.04);
+        }
+        .qa-filter-header { margin-bottom:18px; }
+        .qa-filter-title { margin:0; font-size:1.15rem; font-weight:700; color:var(--blue-900); }
+        .qa-filter-intro { margin:4px 0 0; font-size:.85rem; color:var(--gray-500); }
+        .qa-filter-grid {
+            display:grid; gap:16px;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+        }
+        @media(max-width:900px) {
+            .qa-filter-grid { grid-template-columns:1fr; }
+        }
+        .qa-question {
+            background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px;
+            padding:14px 14px 12px;
+        }
+        .qa-question-head {
+            display:flex; align-items:center; gap:8px;
+            margin-bottom:10px;
+        }
+        .qa-step-num {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:22px; height:22px; border-radius:50%;
+            background:#0176d3; color:white; font-size:.74rem; font-weight:700;
+            flex-shrink:0;
+        }
+        .qa-prompt {
+            font-size:.85rem; font-weight:700; color:var(--blue-900); line-height:1.3;
+        }
+        .qa-answers { display:flex; flex-direction:column; gap:6px; }
+        .qa-answer {
+            text-align:left; background:white; border:1px solid #CBD5E1;
+            border-radius:8px; padding:8px 10px; font-size:.8rem;
+            color:var(--gray-700); cursor:pointer; transition:all .12s ease;
+            display:flex; flex-direction:column; gap:1px; line-height:1.3;
+            font-family:inherit;
+        }
+        .qa-answer:hover { border-color:#0176d3; }
+        .qa-answer strong {
+            font-size:.82rem; font-weight:700; color:var(--blue-900);
+        }
+        .qa-answer .qa-sub {
+            font-size:.72rem; color:var(--gray-500); font-weight:400;
+        }
+        .qa-answer.qa-answer--selected {
+            background:#0176d3; border-color:#0176d3;
+            box-shadow:0 2px 6px rgba(1,118,211,.25);
+        }
+        .qa-answer.qa-answer--selected strong,
+        .qa-answer.qa-answer--selected .qa-sub { color:white; }
+        .qa-answer.qa-answer--disabled {
+            opacity:.5; cursor:not-allowed; background:#F1F5F9;
+        }
+        .qa-answer.qa-answer--disabled:hover { border-color:#CBD5E1; }
+        .qa-filter-footer {
+            display:flex; align-items:center; justify-content:space-between;
+            margin-top:16px; padding-top:14px; border-top:1px solid #E2E8F0;
+            flex-wrap:wrap; gap:10px;
+        }
+        .qa-filter-status { font-size:.85rem; color:var(--gray-700); }
+        .qa-filter-status strong { color:#0176d3; font-size:1rem; }
+        .qa-clear-btn {
             background:white; border:1px solid #CBD5E1; color:var(--gray-700);
-            border-radius:999px; padding:6px 14px; font-size:.85rem; font-weight:600;
-            cursor:pointer; transition:all .15s ease;
+            border-radius:6px; padding:6px 14px; font-size:.8rem; font-weight:600;
+            cursor:pointer; transition:all .12s ease; font-family:inherit;
         }
-        .shape-filter-pill:hover { border-color:#0176d3; color:#0176d3; }
-        .shape-filter-pill.active {
-            background:#0176d3; border-color:#0176d3; color:white;
-            box-shadow:0 2px 6px rgba(1,118,211,.3);
+        .qa-clear-btn:hover { border-color:#0176d3; color:#0176d3; }
+        .qa-locked-note {
+            font-size:.7rem; color:#92400E; background:#FEF3C7;
+            border-radius:4px; padding:4px 8px; margin-top:6px; line-height:1.3;
         }
-        .shape-filter-pill .pill-count {
-            display:inline-block; background:rgba(255,255,255,.25);
-            color:inherit; padding:1px 8px; border-radius:999px;
-            font-size:.72rem; margin-left:6px; font-weight:700;
-        }
-        .shape-filter-pill:not(.active) .pill-count { background:#F1F5F9; color:var(--gray-500); }
         .config-card.shape-hidden { display:none !important; }
         .config-grid:has(.config-card:not(.shape-hidden)) ~ .empty-section-msg { display:none; }
         .empty-section-msg { display:none; padding:40px 20px; text-align:center; color:var(--gray-500); font-size:.9rem; font-style:italic; }
@@ -379,17 +435,56 @@
             </div>
         </section>
 
-        <!-- ═══════════════ SHAPE FILTER BAR ═══════════════ -->
+        <!-- ═══════════════ Q&A FILTER (mirrors the in-org wizard's 3 questions) ═══════════════ -->
         <section class="section section-alt" id="shape-filter-section" style="padding:24px 0 0;">
             <div class="container">
-                <div class="shape-filter-bar" id="shapeFilterBar">
-                    <span class="shape-filter-label">Filter by data shape:</span>
-                    <button type="button" class="shape-filter-pill active" data-filter="all">All <span class="pill-count" id="count-all">0</span></button>
-                    <button type="button" class="shape-filter-pill" data-filter="per-date">One Record per Date <span class="pill-count" id="count-per-date">0</span></button>
-                    <button type="button" class="shape-filter-pill" data-filter="per-range">One Record per Date Range <span class="pill-count" id="count-per-range">0</span></button>
-                    <button type="button" class="shape-filter-pill" data-filter="per-block">One Record per Time Block <span class="pill-count" id="count-per-block">0</span></button>
-                    <button type="button" class="shape-filter-pill" data-filter="multi-resource">Multi-Resource <span class="pill-count" id="count-multi-resource">0</span></button>
-                    <button type="button" class="shape-filter-pill" data-filter="parent-subblock">Parent + Sub-Blocks <span class="pill-count" id="count-parent-subblock">0</span></button>
+                <div class="qa-filter" id="qaFilter">
+                    <div class="qa-filter-header">
+                        <h3 class="qa-filter-title">Find your config</h3>
+                        <p class="qa-filter-intro">Answer the 3 questions to narrow the list — same questions the in-org Setup Wizard asks. Skip any question to keep that dimension open.</p>
+                    </div>
+                    <div class="qa-filter-grid">
+                        <!-- Q1: Time -->
+                        <div class="qa-question" data-question="q1">
+                            <div class="qa-question-head">
+                                <span class="qa-step-num">1</span>
+                                <span class="qa-prompt">Do you need to capture times?</span>
+                            </div>
+                            <div class="qa-answers">
+                                <button type="button" class="qa-answer" data-q="q1" data-value="dates"><strong>No, just dates</strong><span class="qa-sub">No start/end times</span></button>
+                                <button type="button" class="qa-answer" data-q="q1" data-value="time"><strong>Yes, with start &amp; end times</strong><span class="qa-sub">Each record has a date plus a time block</span></button>
+                                <button type="button" class="qa-answer" data-q="q1" data-value="time-gaps"><strong>Yes, with gaps inside the day</strong><span class="qa-sub">Parent record + sub-block children for any breaks</span></button>
+                            </div>
+                        </div>
+                        <!-- Q2: Resource -->
+                        <div class="qa-question" data-question="q2">
+                            <div class="qa-question-head">
+                                <span class="qa-step-num">2</span>
+                                <span class="qa-prompt">Do you need a resource picker?</span>
+                            </div>
+                            <div class="qa-answers">
+                                <button type="button" class="qa-answer" data-q="q2" data-value="none"><strong>No resource</strong><span class="qa-sub">Records aren't tied to a specific room/person/asset</span></button>
+                                <button type="button" class="qa-answer" data-q="q2" data-value="single"><strong>One resource at a time</strong><span class="qa-sub">Picker dropdown — user picks one per booking</span></button>
+                                <button type="button" class="qa-answer" data-q="q2" data-value="multi"><strong>Multiple resources</strong><span class="qa-sub">Checkboxes — one record per checked resource × date</span></button>
+                            </div>
+                        </div>
+                        <!-- Q3: Range -->
+                        <div class="qa-question" data-question="q3">
+                            <div class="qa-question-head">
+                                <span class="qa-step-num">3</span>
+                                <span class="qa-prompt">Should adjacent dates consolidate?</span>
+                            </div>
+                            <div class="qa-answers">
+                                <button type="button" class="qa-answer" data-q="q3" data-value="per-click"><strong>No — each date is its own record</strong><span class="qa-sub">5 clicks = 5 records. Best for attendance, daily check-ins.</span></button>
+                                <button type="button" class="qa-answer" data-q="q3" data-value="per-range"><strong>Yes — Mon–Fri becomes ONE record</strong><span class="qa-sub">Contiguous dates collapse. Best for PTO, multi-night stays.</span></button>
+                            </div>
+                            <div class="qa-locked-note" id="qaQ3LockedNote" style="display:none;">Locked to <strong>Yes</strong> — Parent + sub-blocks always consolidate the span.</div>
+                        </div>
+                    </div>
+                    <div class="qa-filter-footer">
+                        <div class="qa-filter-status">Showing <strong id="qaVisibleCount">0</strong> of <span id="qaTotalCount">0</span> configs</div>
+                        <button type="button" class="qa-clear-btn" id="qaClearBtn">Clear all filters</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1160,7 +1255,7 @@
     <script src="js/main.js"></script>
     <script src="js/config-actions.js"></script>
     <script>
-        // ── Shape badge injection + filter pill behavior ──
+        // ── Shape badge injection + Q&A filter behavior (mirrors wizard's 3 questions) ──
         (function() {
             const SHAPE_LABELS = {
                 'per-date':        'One Record per Date',
@@ -1170,16 +1265,114 @@
                 'parent-subblock': 'Parent + Sub-Blocks'
             };
 
+            // Component badge → simple keyword. Read from each card's
+            // .config-badge.badge-dates / .badge-datetime / .badge-booking
+            function deriveComponent(card) {
+                if (card.querySelector('.badge-booking'))  return 'booking';
+                if (card.querySelector('.badge-datetime')) return 'datetime';
+                return 'dates'; // default → Date wrapper
+            }
+
+            // Map (component, shape) → (q1, q2, q3) wizard answers.
+            // Mirrors qaInferShape() in multiDatePickSetup.js, run in reverse.
+            // Cards can override any axis with explicit data-q1/q2/q3 attrs.
+            function deriveQA(card) {
+                const explicit = {
+                    q1: card.getAttribute('data-q1'),
+                    q2: card.getAttribute('data-q2'),
+                    q3: card.getAttribute('data-q3')
+                };
+                const component = deriveComponent(card);
+                const shape = card.getAttribute('data-shape');
+                let derived = { q1: null, q2: null, q3: null };
+                if (shape === 'parent-subblock') {
+                    derived = {
+                        q1: 'time-gaps',
+                        q2: component === 'booking' ? 'single' : 'none',
+                        q3: 'per-range'   // implicit
+                    };
+                } else if (shape === 'multi-resource') {
+                    derived = { q1: 'time', q2: 'multi', q3: 'per-click' };
+                } else if (shape === 'per-block') {
+                    derived = {
+                        q1: 'time',
+                        q2: component === 'booking' ? 'single' : 'none',
+                        q3: 'per-click'
+                    };
+                } else if (shape === 'per-date') {
+                    derived = {
+                        q1: 'dates',
+                        q2: component === 'booking' ? 'single' : 'none',
+                        q3: 'per-click'
+                    };
+                } else if (shape === 'per-range') {
+                    derived = {
+                        q1: component === 'dates' ? 'dates' : 'time',
+                        q2: component === 'booking' ? 'single' : 'none',
+                        q3: 'per-range'
+                    };
+                }
+                return {
+                    q1: explicit.q1 || derived.q1,
+                    q2: explicit.q2 || derived.q2,
+                    q3: explicit.q3 || derived.q3
+                };
+            }
+
+            // Filter state — null = "no preference" (wildcard)
+            const state = { q1: null, q2: null, q3: null };
+
+            function applyFilter(cards) {
+                let visible = 0;
+                cards.forEach(card => {
+                    const qa = card._qa;
+                    // q1='time-gaps' overrides q3 (it's implicitly per-range).
+                    // When user picks q3 but card is time-gaps, still show it.
+                    const q3Effective = qa.q1 === 'time-gaps' ? null : qa.q3;
+
+                    const match =
+                        (state.q1 === null || state.q1 === qa.q1) &&
+                        (state.q2 === null || state.q2 === qa.q2) &&
+                        (state.q3 === null || state.q3 === qa.q3 || qa.q1 === 'time-gaps');
+
+                    if (match) {
+                        card.classList.remove('shape-hidden');
+                        visible++;
+                    } else {
+                        card.classList.add('shape-hidden');
+                    }
+                });
+                const visEl = document.getElementById('qaVisibleCount');
+                if (visEl) visEl.textContent = visible;
+            }
+
+            function updateSelectedClasses() {
+                document.querySelectorAll('.qa-answer').forEach(btn => {
+                    const q = btn.getAttribute('data-q');
+                    const v = btn.getAttribute('data-value');
+                    btn.classList.toggle('qa-answer--selected', state[q] === v);
+                });
+                // Q3 lock: when Q1='time-gaps', Q3 is implicitly per-range. Show
+                // the locked note and disable Q3 pills visually so the user
+                // doesn't try to "uncheck" range.
+                const q3Locked = state.q1 === 'time-gaps';
+                const lockedNote = document.getElementById('qaQ3LockedNote');
+                if (lockedNote) lockedNote.style.display = q3Locked ? 'block' : 'none';
+                document.querySelectorAll('.qa-answer[data-q="q3"]').forEach(btn => {
+                    btn.classList.toggle('qa-answer--disabled', q3Locked);
+                });
+            }
+
             function init() {
                 const cards = document.querySelectorAll('.config-card[data-shape]');
-                const counts = { all: cards.length };
+                const totalEl = document.getElementById('qaTotalCount');
+                if (totalEl) totalEl.textContent = cards.length;
 
-                // Inject the shape badge after the existing component badge,
-                // and tally counts per shape.
+                // Inject the shape badge after the existing component badge
+                // (kept from the old filter for at-a-glance shape labeling).
                 cards.forEach(card => {
+                    card._qa = deriveQA(card);
                     const shape = card.getAttribute('data-shape');
-                    counts[shape] = (counts[shape] || 0) + 1;
-
                     const existingBadge = card.querySelector('.config-badge');
                     if (!existingBadge || card.querySelector('.badge-shape')) return;
                     const shapeBadge = document.createElement('span');
@@ -1188,28 +1381,38 @@
                     existingBadge.insertAdjacentElement('afterend', shapeBadge);
                 });
 
-                // Populate pill counts.
-                Object.keys(counts).forEach(k => {
-                    const el = document.getElementById('count-' + k);
-                    if (el) el.textContent = counts[k];
-                });
-
-                // Pill click handler — toggles shape-hidden on cards.
-                const pills = document.querySelectorAll('.shape-filter-pill');
-                pills.forEach(pill => {
-                    pill.addEventListener('click', () => {
-                        pills.forEach(p => p.classList.remove('active'));
-                        pill.classList.add('active');
-                        const filter = pill.getAttribute('data-filter');
-                        cards.forEach(card => {
-                            if (filter === 'all' || card.getAttribute('data-shape') === filter) {
-                                card.classList.remove('shape-hidden');
-                            } else {
-                                card.classList.add('shape-hidden');
-                            }
-                        });
+                // Q&A pill click — toggle off if already selected, else set.
+                document.querySelectorAll('.qa-answer').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (btn.classList.contains('qa-answer--disabled')) return;
+                        const q = btn.getAttribute('data-q');
+                        const v = btn.getAttribute('data-value');
+                        if (state[q] === v) {
+                            state[q] = null;          // re-click = unselect
+                        } else {
+                            state[q] = v;
+                        }
+                        // When Q1 toggles off time-gaps, clear Q3 lock.
+                        // When Q1 picks time-gaps, force Q3 to its locked value.
+                        if (q === 'q1') {
+                            if (v === 'time-gaps' && state.q1 === v) state.q3 = null;
+                        }
+                        updateSelectedClasses();
+                        applyFilter(cards);
                     });
                 });
+
+                // Clear all filters button
+                const clearBtn = document.getElementById('qaClearBtn');
+                if (clearBtn) clearBtn.addEventListener('click', () => {
+                    state.q1 = state.q2 = state.q3 = null;
+                    updateSelectedClasses();
+                    applyFilter(cards);
+                });
+
+                // Initial render (no filters applied → show all)
+                updateSelectedClasses();
+                applyFilter(cards);
             }
 
             if (document.readyState === 'loading') {
