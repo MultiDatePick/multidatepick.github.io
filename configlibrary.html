@@ -258,11 +258,52 @@
         <section class="guide-hero">
             <div class="container">
                 <h1>Config Library</h1>
-                <p class="subtitle">24 ready-to-import JSON configurations for real-world scheduling use cases. Download a file, paste it into the Setup Wizard, and deploy in seconds — no manual property setup required.</p>
+                <p class="subtitle">32 ready-to-import configs covering 45+ real-world scheduling scenarios. Answer 3 quick questions below to find your match — or browse by component. Paste the JSON into the Setup Wizard and deploy in seconds.</p>
                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
-                    <a href="#dates-configs" class="btn btn-primary">Date Selection</a>
-                    <a href="#datetime-configs" class="btn btn-secondary">Date &amp; Time</a>
-                    <a href="#booking-configs" class="btn btn-secondary">Resource Booking</a>
+                    <a href="#shape-filter-section" class="btn btn-primary">⚡ Find My Config</a>
+                    <a href="#dates-configs" class="btn btn-secondary">Browse All</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ Q&A FILTER (mirrors the in-org wizard's 3 questions) ═══════════════ -->
+        <section class="section section-alt" id="shape-filter-section" style="padding:24px 0 0;">
+            <div class="container">
+                <div class="qa-filter" id="qaFilter">
+                    <div class="qa-filter-header">
+                        <h3 class="qa-filter-title">Find your config</h3>
+                        <p class="qa-filter-intro">Answer the 3 questions to narrow the list — same questions the in-org Setup Wizard asks. Skip any question to keep that dimension open.</p>
+                    </div>
+                    <div class="qa-filter-grid">
+                        <div class="qa-question">
+                            <div class="qa-question-head"><span class="qa-step-num">1</span><span class="qa-prompt">Do you need to capture times?</span></div>
+                            <div class="qa-answers">
+                                <button type="button" class="qa-answer" data-q="q1" data-value="dates"><strong>No, just dates</strong><span class="qa-sub">No start/end times</span></button>
+                                <button type="button" class="qa-answer" data-q="q1" data-value="time"><strong>Yes, with start &amp; end times</strong><span class="qa-sub">Each record has a date plus a time block</span></button>
+                                <button type="button" class="qa-answer" data-q="q1" data-value="time-gaps"><strong>Yes, with gaps inside the day</strong><span class="qa-sub">Parent record + sub-block children for any breaks</span></button>
+                            </div>
+                        </div>
+                        <div class="qa-question">
+                            <div class="qa-question-head"><span class="qa-step-num">2</span><span class="qa-prompt">Do you need a resource picker?</span></div>
+                            <div class="qa-answers">
+                                <button type="button" class="qa-answer" data-q="q2" data-value="none"><strong>No resource</strong><span class="qa-sub">Records aren't tied to a specific room/person/asset</span></button>
+                                <button type="button" class="qa-answer" data-q="q2" data-value="single"><strong>One resource at a time</strong><span class="qa-sub">Picker dropdown — user picks one per booking</span></button>
+                                <button type="button" class="qa-answer" data-q="q2" data-value="multi"><strong>Multiple resources</strong><span class="qa-sub">Checkboxes — one record per checked resource × date</span></button>
+                            </div>
+                        </div>
+                        <div class="qa-question">
+                            <div class="qa-question-head"><span class="qa-step-num">3</span><span class="qa-prompt">Should adjacent dates consolidate?</span></div>
+                            <div class="qa-answers">
+                                <button type="button" class="qa-answer" data-q="q3" data-value="per-click"><strong>No — each date is its own record</strong><span class="qa-sub">5 selected dates = 5 records. Best for attendance, daily check-ins.</span></button>
+                                <button type="button" class="qa-answer" data-q="q3" data-value="per-range"><strong>Yes — Mon-Fri becomes ONE record</strong><span class="qa-sub">Contiguous dates collapse. Best for PTO, multi-night stays.</span></button>
+                            </div>
+                            <div class="qa-locked-note" id="qaQ3LockedNote" style="display:none;">Locked to <strong>Yes</strong> — Parent + sub-blocks always consolidate the span.</div>
+                        </div>
+                    </div>
+                    <div class="qa-filter-footer">
+                        <div class="qa-filter-status">Showing <strong id="qaVisibleCount">0</strong> of <span id="qaTotalCount">0</span> configs</div>
+                        <button type="button" class="qa-clear-btn" id="qaClearBtn">Clear all filters</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -469,60 +510,6 @@
                     </div>
                 </div>
 
-            </div>
-        </section>
-
-        <!-- ═══════════════ Q&A FILTER (mirrors the in-org wizard's 3 questions) ═══════════════ -->
-        <section class="section section-alt" id="shape-filter-section" style="padding:24px 0 0;">
-            <div class="container">
-                <div class="qa-filter" id="qaFilter">
-                    <div class="qa-filter-header">
-                        <h3 class="qa-filter-title">Find your config</h3>
-                        <p class="qa-filter-intro">Answer the 3 questions to narrow the list — same questions the in-org Setup Wizard asks. Skip any question to keep that dimension open.</p>
-                    </div>
-                    <div class="qa-filter-grid">
-                        <!-- Q1: Time -->
-                        <div class="qa-question" data-question="q1">
-                            <div class="qa-question-head">
-                                <span class="qa-step-num">1</span>
-                                <span class="qa-prompt">Do you need to capture times?</span>
-                            </div>
-                            <div class="qa-answers">
-                                <button type="button" class="qa-answer" data-q="q1" data-value="dates"><strong>No, just dates</strong><span class="qa-sub">No start/end times</span></button>
-                                <button type="button" class="qa-answer" data-q="q1" data-value="time"><strong>Yes, with start &amp; end times</strong><span class="qa-sub">Each record has a date plus a time block</span></button>
-                                <button type="button" class="qa-answer" data-q="q1" data-value="time-gaps"><strong>Yes, with gaps inside the day</strong><span class="qa-sub">Parent record + sub-block children for any breaks</span></button>
-                            </div>
-                        </div>
-                        <!-- Q2: Resource -->
-                        <div class="qa-question" data-question="q2">
-                            <div class="qa-question-head">
-                                <span class="qa-step-num">2</span>
-                                <span class="qa-prompt">Do you need a resource picker?</span>
-                            </div>
-                            <div class="qa-answers">
-                                <button type="button" class="qa-answer" data-q="q2" data-value="none"><strong>No resource</strong><span class="qa-sub">Records aren't tied to a specific room/person/asset</span></button>
-                                <button type="button" class="qa-answer" data-q="q2" data-value="single"><strong>One resource at a time</strong><span class="qa-sub">Picker dropdown — user picks one per booking</span></button>
-                                <button type="button" class="qa-answer" data-q="q2" data-value="multi"><strong>Multiple resources</strong><span class="qa-sub">Checkboxes — one record per checked resource × date</span></button>
-                            </div>
-                        </div>
-                        <!-- Q3: Range -->
-                        <div class="qa-question" data-question="q3">
-                            <div class="qa-question-head">
-                                <span class="qa-step-num">3</span>
-                                <span class="qa-prompt">Should adjacent dates consolidate?</span>
-                            </div>
-                            <div class="qa-answers">
-                                <button type="button" class="qa-answer" data-q="q3" data-value="per-click"><strong>No — each date is its own record</strong><span class="qa-sub">5 selected dates = 5 records. Best for attendance, daily check-ins.</span></button>
-                                <button type="button" class="qa-answer" data-q="q3" data-value="per-range"><strong>Yes — Mon–Fri becomes ONE record</strong><span class="qa-sub">Contiguous dates collapse. Best for PTO, multi-night stays.</span></button>
-                            </div>
-                            <div class="qa-locked-note" id="qaQ3LockedNote" style="display:none;">Locked to <strong>Yes</strong> — Parent + sub-blocks always consolidate the span.</div>
-                        </div>
-                    </div>
-                    <div class="qa-filter-footer">
-                        <div class="qa-filter-status">Showing <strong id="qaVisibleCount">0</strong> of <span id="qaTotalCount">0</span> configs</div>
-                        <button type="button" class="qa-clear-btn" id="qaClearBtn">Clear all filters</button>
-                    </div>
-                </div>
             </div>
         </section>
 
