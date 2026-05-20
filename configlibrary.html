@@ -102,7 +102,7 @@
             box-shadow:0 1px 3px rgba(249,115,22,.4);
         }
         .qa-prompt {
-            font-size:.85rem; font-weight:700; color:var(--blue-900); line-height:1.3;
+            font-size:1rem; font-weight:700; color:var(--blue-900); line-height:1.3;
         }
         .qa-answers { display:flex; flex-direction:column; gap:6px; }
         .qa-answer {
@@ -1390,13 +1390,22 @@
                     btn.classList.toggle('qa-answer--selected', state[q] === v);
                 });
                 // Q3 lock: when Q1='time-gaps', Q3 is implicitly per-range. Show
-                // the locked note and disable Q3 pills visually so the user
-                // doesn't try to "uncheck" range.
+                // the locked note + highlight the implicitly-chosen "Yes" answer
+                // (per-range) in the same orange-selected styling, AND disable
+                // the other Q3 pills so the user can't toggle off the lock.
                 const q3Locked = state.q1 === 'time-gaps';
                 const lockedNote = document.getElementById('qaQ3LockedNote');
                 if (lockedNote) lockedNote.style.display = q3Locked ? 'block' : 'none';
                 document.querySelectorAll('.qa-answer[data-q="q3"]').forEach(btn => {
-                    btn.classList.toggle('qa-answer--disabled', q3Locked);
+                    const isLockedValue = (btn.getAttribute('data-value') === 'per-range');
+                    if (q3Locked) {
+                        // Force the implicit answer to look selected; fade the others.
+                        btn.classList.toggle('qa-answer--selected', isLockedValue);
+                        btn.classList.toggle('qa-answer--disabled', !isLockedValue);
+                    } else {
+                        btn.classList.remove('qa-answer--disabled');
+                        // --selected was already managed by the main loop above
+                    }
                 });
             }
 
