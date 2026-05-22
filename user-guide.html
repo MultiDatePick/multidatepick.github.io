@@ -377,7 +377,7 @@
                 </div>
 
                 <h3>Step 2 &mdash; Object &amp; Fields</h3>
-                <p>The big one. Pick the related object (e.g. <code>MDP_Schedule__c</code> or your own), the Date Field, the Relationship Field back to the parent, and any optional fields (End Date for ranges, Sub-Block fields for parent+sub-block shape).</p>
+                <p>The big one. Pick the related object (e.g. <code>Schedule__c</code> or your own), the Date Field, the Relationship Field back to the parent, and any optional fields (End Date for ranges, Sub-Block fields for parent+sub-block shape).</p>
                 <div class="ug-screenshot">
                     <figure>
                         <img src="images/user-guide/UG-04-wizard-step2-object-fields.png" alt="Setup Wizard Step 2 showing object and field pickers — Related Object, Date Field, Relationship Field, End Date Field, and the Placement chooser for the page surface" loading="lazy" data-zoomable>
@@ -591,39 +591,39 @@
 //   Loop over .data, access .fromDate, .toDate, .startTime, .endTime per entry</pre>
 
                 <h3>Rollup MIN/MAX child dates to a parent field</h3>
-                <p>A Record-Triggered Flow on the child object can roll up MIN/MAX dates to the parent. Example for <code>MDP_Schedule__c</code> rolling up to <code>MDP_Event__c.Start_Date__c</code> / <code>End_Date__c</code>:</p>
-                <pre class="ug-code-block">trigger MDPScheduleRollup on MDP_Schedule__c (after insert, after update, after delete) {
+                <p>A Record-Triggered Flow on the child object can roll up MIN/MAX dates to the parent. Example for <code>Schedule__c</code> rolling up to <code>Event__c.Start_Date__c</code> / <code>End_Date__c</code>:</p>
+                <pre class="ug-code-block">trigger MDPScheduleRollup on Schedule__c (after insert, after update, after delete) {
     Set&lt;Id&gt; eventIds = new Set&lt;Id&gt;();
     if (Trigger.new != null) {
-        for (MDP_Schedule__c s : Trigger.new) if (s.MDP_Event__c != null) eventIds.add(s.MDP_Event__c);
+        for (Schedule__c s : Trigger.new) if (s.Event__c != null) eventIds.add(s.Event__c);
     }
     if (Trigger.old != null) {
-        for (MDP_Schedule__c s : Trigger.old) if (s.MDP_Event__c != null) eventIds.add(s.MDP_Event__c);
+        for (Schedule__c s : Trigger.old) if (s.Event__c != null) eventIds.add(s.Event__c);
     }
     if (eventIds.isEmpty()) return;
 
     Map&lt;Id, Date&gt; minByEvent = new Map&lt;Id, Date&gt;();
     Map&lt;Id, Date&gt; maxByEvent = new Map&lt;Id, Date&gt;();
     for (AggregateResult ar : [
-        SELECT MDP_Event__c eventId, MIN(Schedule_Date__c) minD, MAX(Schedule_Date__c) maxD
-        FROM MDP_Schedule__c
-        WHERE MDP_Event__c IN :eventIds
-        GROUP BY MDP_Event__c
+        SELECT Event__c eventId, MIN(Schedule_Date__c) minD, MAX(Schedule_Date__c) maxD
+        FROM Schedule__c
+        WHERE Event__c IN :eventIds
+        GROUP BY Event__c
     ]) {
         Id eid = (Id) ar.get('eventId');
         minByEvent.put(eid, (Date) ar.get('minD'));
         maxByEvent.put(eid, (Date) ar.get('maxD'));
     }
 
-    List&lt;MDP_Event__c&gt; toUpdate = new List&lt;MDP_Event__c&gt;();
+    List&lt;Event__c&gt; toUpdate = new List&lt;Event__c&gt;();
     for (Id eid : eventIds) {
-        toUpdate.add(new MDP_Event__c(Id = eid,
+        toUpdate.add(new Event__c(Id = eid,
             Start_Date__c = minByEvent.get(eid),
             End_Date__c = maxByEvent.get(eid)));
     }
     Database.update(toUpdate, false);
 }</pre>
-                <p>Replace <code>MDP_Schedule__c</code> / <code>MDP_Event__c</code> / <code>Schedule_Date__c</code> / etc. with your own schema.</p>
+                <p>Replace <code>Schedule__c</code> / <code>Event__c</code> / <code>Schedule_Date__c</code> / etc. with your own schema.</p>
             </section>
 
             <!-- ───── SECTION 10: SECURITY ───── -->
