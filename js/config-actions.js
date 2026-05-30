@@ -52,7 +52,11 @@
     function getComponentType(card) {
         var badge = card.querySelector('.config-badge');
         if (!badge) return 'Dates';
-        var text = badge.textContent.trim().toLowerCase();
+        // Normalize: lowercase + collapse whitespace so "Date Time", "DateTime",
+        // and "datetime" all match. Without the whitespace strip, the 9 badges
+        // that read "Date Time" (with a space) fell through to "Dates" and
+        // generated a Dates-only Flow XML for every DateTime config.
+        var text = badge.textContent.trim().toLowerCase().replace(/\s+/g, '');
         if (text === 'booking') return 'Booking';
         if (text === 'datetime') return 'DateTime';
         return 'Dates';
@@ -132,6 +136,17 @@
         addBool('autoJumpToFirstAvailable', cfg.Auto_Jump_To_First_Available__c);
         addNumber('maxSelections', cfg.Max_Selections__c);
         addString('endDateField', cfg.End_Date_Field__c);
+        addString('minDate', cfg.Min_Date__c);
+        addString('maxDate', cfg.Max_Date__c);
+        addBool('preloadExistingDates', cfg.Preload_Existing_Dates__c);
+        addString('preloadMode', cfg.Preload_Mode__c);
+        addString('saveButtonLabel', cfg.Save_Button_Label__c);
+        addString('editButtonLabel', cfg.Edit_Button_Label__c);
+        addString('editRecordDisplay', cfg.Edit_Record_Display__c);
+        addString('statusFieldLabel', cfg.Status_Field_Label__c);
+        addString('blockedDatesSourceObject', cfg.Blocked_Dates_Source_Object__c);
+        addString('blockedDatesDateField', cfg.Blocked_Dates_Date_Field__c);
+        addString('blockedDatesFilterField', cfg.Blocked_Dates_Filter_Field__c);
 
         // DateTime / Booking time props
         if (componentType === 'DateTime' || componentType === 'Booking') {
@@ -166,6 +181,22 @@
             addBool('showAvailabilityCount', cfg.Show_Availability_Count__c);
             addBool('disableTimeSlotGrid', cfg.Disable_Time_Slot_Grid__c);
             addBool('allowMultipleResources', cfg.Allow_Multiple_Resources__c);
+            addString('resourceFilterField', cfg.Resource_Filter_Field__c);
+            addString('resourceFilterValue', cfg.Resource_Filter_Value__c);
+            addString('capacityAggregation', cfg.Capacity_Aggregation__c);
+            addString('resourceBookButtonLabel', cfg.Resource_Book_Button_Label__c);
+        }
+
+        // Sub-block (DateTime + Booking)
+        if (componentType === 'DateTime' || componentType === 'Booking') {
+            addString('subBlockObjectApiName', cfg.Sub_Block_Object_Api_Name__c);
+            addString('subBlockParentLookupField', cfg.Sub_Block_Parent_Lookup_Field__c);
+            addString('subBlockDateField', cfg.Sub_Block_Date_Field__c);
+            addString('subBlockStartTimeField', cfg.Sub_Block_Start_Time_Field__c);
+            addString('subBlockEndTimeField', cfg.Sub_Block_End_Time_Field__c);
+            addString('subBlockNameField', cfg.Sub_Block_Name_Field__c);
+            addString('subBlockModeButtonLabel', cfg.Sub_Block_Mode_Button_Label__c);
+            addBool('showSubBlockButton', cfg.Show_Sub_Block_Button__c);
         }
 
         // Record name
