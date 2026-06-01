@@ -36,6 +36,9 @@
         .config-card .config-desc { font-size:.85rem; color:var(--gray-500); flex:1; margin-bottom:16px; }
         .config-card .config-props { font-size:.78rem; color:var(--gray-600); margin-bottom:16px; line-height:1.6; }
         .config-card .config-props code { background:var(--blue-50); padding:1px 5px; border-radius:3px; font-size:.75rem; }
+        .config-card .config-note { background:#FFFBEB; border-left:3px solid #F59E0B; padding:8px 12px; margin:-4px 0 14px; font-size:.78rem; color:#78350F; border-radius:3px; line-height:1.5; }
+        .config-card .config-note strong { color:#92400E; font-weight:700; }
+        .config-card .config-note code { background:rgba(245,158,11,.12); padding:1px 4px; border-radius:3px; font-size:.74rem; color:#78350F; }
         .config-badge { display:inline-block; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; padding:3px 8px; border-radius:4px; margin-bottom:10px; }
         .badge-dates { background:#DBEAFE; color:#1E40AF; }
         .badge-datetime { background:#EDE9FE; color:#5B21B6; }
@@ -370,6 +373,9 @@
                         <span class="config-badge badge-dates">Date</span>
                         <h4>Facility Blackout Dates</h4>
                         <p class="config-desc">Administrators mark facility closure or blackout dates. Existing closures are preloaded in read-only mode so they can't be accidentally removed. Status colors distinguish between active, planned, and resolved closures.</p>
+                        <div class="config-note">
+                            <strong>Self-referencing pattern:</strong> blocked dates pull from the same <code>Schedule__c</code> table as the bookings themselves. Records in that table block selection on their date. Point <code>blockedDatesSourceObject</code> at a different object if you'd rather separate closures from bookings.
+                        </div>
                         <div class="config-props">
                             <strong>Key properties:</strong><br>
                             <code>endDateField</code> date range consolidation,
@@ -427,10 +433,13 @@
                     <div class="config-card" data-config-file="Content_Publishing_Calendar.json" data-shape="per-date">
                         <span class="config-badge badge-dates">Date</span>
                         <h4>Content Publishing Calendar</h4>
-                        <p class="config-desc">Marketing teams plan content publishing schedules linked to campaigns. Company holidays are blocked so no one schedules content on closed days. Hover tooltips show the title, channel, and author for each scheduled date.</p>
+                        <p class="config-desc">Marketing teams plan content publishing schedules linked to campaigns. Holidays and blackout dates block content scheduling on closed days. Hover tooltips show the title, channel, and author for each scheduled date.</p>
+                        <div class="config-note">
+                            <strong>Self-referencing pattern:</strong> blocked dates pull from the same <code>Schedule__c</code> table by default — records flagged in that table block selection. Swap <code>blockedDatesSourceObject</code> for your own holidays object (e.g. <code>Company_Holiday__c</code>) if you keep closures separately.
+                        </div>
                         <div class="config-props">
                             <strong>Key properties:</strong><br>
-                            <code>blockedDatesSourceObject</code> Company_Holiday__c,
+                            <code>blockedDatesSourceObject</code> Schedule__c,
                             <code>statusColors</code> Draft/Scheduled/Published/Cancelled,
                             <code>hideBookingsWithStatus</code>,
                             <code>hoverFields</code> Title/Channel/Author,
@@ -626,6 +635,9 @@
                         <span class="config-badge badge-datetime">Date Time</span>
                         <h4>Maintenance Windows</h4>
                         <p class="config-desc">IT teams schedule overnight maintenance windows for assets and infrastructure. Conflict behavior is set to "warn" instead of "block" — teams can intentionally overlap maintenance if needed. Hover fields show change number, description, and impact assessment.</p>
+                        <div class="config-note">
+                            <strong>Overnight time range:</strong> <code>minTime</code> 22:00 → <code>maxTime</code> 06:00 crosses midnight. Slot generation handles this; verify the calendar renders the way you expect before training admins.
+                        </div>
                         <div class="config-props">
                             <strong>Key properties:</strong><br>
                             <code>timeInterval</code> 60 min,
@@ -714,6 +726,9 @@
                         <span class="config-badge badge-datetime">Date Time</span>
                         <h4>Compliance Rest Periods</h4>
                         <p class="config-desc">For shifts with mandated rest periods (DOT, healthcare, manufacturing). The shift saves as one parent record covering the full envelope; required rest periods become child sub-block records that auditors can review. 15-minute granularity for fine-grained rest tracking.</p>
+                        <div class="config-note">
+                            <strong>Sub-Blocks:</strong> rest periods are stored as child records on the bundled <code>Sub_Block__c</code> object — no extra schema setup required. Point <code>subBlockObjectApiName</code> at your own child object if you'd rather use a custom name.
+                        </div>
                         <div class="config-props">
                             <strong>Key properties:</strong><br>
                             <code>consolidateTimeSpan</code>,
@@ -789,6 +804,9 @@
                         <span class="config-badge badge-booking">Booking</span>
                         <h4>Desk Hoteling</h4>
                         <p class="config-desc">Employees reserve shared desks in a hybrid workplace. The time slot grid is disabled — desks are booked for the full day. Capacity tracking shows how many seats remain at shared tables. Two-month view helps plan weeks ahead.</p>
+                        <div class="config-note">
+                            <strong>Date-only Booking:</strong> <code>disableTimeSlotGrid</code> removes the hourly slot grid entirely. Best when bookings are full-day and capacity is the only constraint. Combine with <code>capacityField</code> to model any shared inventory (desks, lockers, parking spots).
+                        </div>
                         <div class="config-props">
                             <strong>Key properties:</strong><br>
                             <code>disableTimeSlotGrid</code> (full-day booking),
@@ -876,6 +894,9 @@
                         <span class="config-badge badge-booking">Booking</span>
                         <h4>Athletic Facility Booking</h4>
                         <p class="config-desc">Gyms, courts, and fields with capacity limits. Extended hours (6 AM – 10 PM) cover early-morning and evening sessions. Multiple resources enabled so members can book a court and a batting cage in one flow.</p>
+                        <div class="config-note">
+                            <strong>Multi-resource mode:</strong> <code>allowMultipleResources</code> swaps the single-resource dropdown for checkboxes. The time grid renders combined capacity across whatever resources the user has selected, and bookings can span multiple resources atomically.
+                        </div>
                         <div class="config-props">
                             <strong>Key properties:</strong><br>
                             <code>capacityField</code>,
@@ -898,6 +919,9 @@
                         <span class="config-badge badge-booking">Booking</span>
                         <h4>Multi-Site Workshop</h4>
                         <p class="config-desc">A trainer leads ONE session that runs simultaneously across linked rooms (overflow seating, hybrid sites, livestream studios). With <code>capacityAggregation</code> = <strong>Distinct</strong>, picking 4 rooms for a 2 PM session shows <strong>1/MAX-cap</strong> — one event, not four — so the count tracks distinct sessions rather than per-room inventory.</p>
+                        <div class="config-note">
+                            <strong>When to pick Distinct vs Combined:</strong> use <strong>Distinct</strong> when one logical event uses several resources together (a workshop running in 4 rooms = 1 booking). Use the default <strong>Combined</strong> when resources contribute independently (a catering bundle with 3 ovens + 2 warmers sums to 5 used).
+                        </div>
                         <div class="config-props">
                             <strong>Key properties:</strong><br>
                             <code>capacityField</code>,
@@ -919,6 +943,9 @@
                         <span class="config-badge badge-booking">Booking</span>
                         <h4>Active Conference Rooms (Filtered Picker)</h4>
                         <p class="config-desc">Showcases <code>resourceFilterField</code> + <code>resourceFilterValue</code> with the <strong>multi-field AND</strong> syntax — picker shows only resources where <code>Active__c = true</code> AND <code>Type__c = 'Conference Room'</code>. The semicolon separator combines both filters; admins can swap in any field/value pair from the resource object.</p>
+                        <div class="config-note">
+                            <strong>Filter syntax cheatsheet:</strong> <code>;</code> between fields = AND, <code>,</code> between values = OR. Field count on each side of <code>;</code> must match. Examples: <code>Type__c=Conference Room</code> · <code>Building__c=North,South</code> (OR) · <code>Type__c;Building__c=Conference Room;North,South</code> (AND with OR inside the second field).
+                        </div>
                         <div class="config-props">
                             <strong>Key properties:</strong><br>
                             <code>resourceFilterField</code> <strong>Active__c;Type__c</strong>,
@@ -940,6 +967,9 @@
                         <span class="config-badge badge-booking">Booking</span>
                         <h4>Catering Equipment Bundle</h4>
                         <p class="config-desc">Reserve multiple independent pieces of equipment (ovens, warmers, serving stations, beverage carts) for the same event. Each item has its own capacity, and <code>capacityAggregation</code> = <strong>Combined</strong> sums everything — so 3 ovens used out of 5 oven inventory + 2 warmers used out of 4 reads as <strong>5/9</strong> across the bundle.</p>
+                        <div class="config-note">
+                            <strong>Multi-resource + Combined capacity (default):</strong> sums bookings AND capacities across the checked resources. The "5/9" badge tells operators they have 4 spots left across the whole bundle without having to mentally add up per-resource counts.
+                        </div>
                         <div class="config-props">
                             <strong>Key properties:</strong><br>
                             <code>capacityField</code>,
@@ -984,6 +1014,9 @@
                         <span class="config-badge badge-booking">Booking</span>
                         <h4>Multi-Day Vehicle Rental</h4>
                         <p class="config-desc">Customers reserve a vehicle for multiple consecutive days. Adjacent days collapse into a single reservation record per vehicle — a Mon-Fri rental creates one record (start: Mon, end: Fri), not five separate daily records. No time slots since the rental spans full days.</p>
+                        <div class="config-note">
+                            <strong>Date-span Booking without a time grid:</strong> <code>endDateField</code> + <code>disableTimeSlotGrid</code> together model a multi-day rental as a single record with start/end. Saves reporting joins downstream — one Mon→Fri rental is one row, not five.
+                        </div>
                         <div class="config-props">
                             <strong>Key properties:</strong><br>
                             <code>endDateField</code> for date-range collapse on Booking,
@@ -1005,6 +1038,9 @@
                         <span class="config-badge badge-booking">Booking</span>
                         <h4>Trainer Day With Breaks</h4>
                         <p class="config-desc">Trainers book a full day on a resource (room, vehicle, equipment). The day saves as one parent record from the first slot to the last; lunch and breaks become child sub-block records. Click "Mark as Break" to flag a slot manually, or just leave gaps and they auto-detect.</p>
+                        <div class="config-note">
+                            <strong>Sub-Blocks on Booking:</strong> the bundled <code>Sub_Block__c</code> child object stores break records linked to the parent Schedule via <code>subBlockParentLookupField</code>. No extra schema setup required — both objects ship in the package.
+                        </div>
                         <div class="config-props">
                             <strong>Key properties:</strong><br>
                             <code>consolidateTimeSpan</code>,
@@ -1026,6 +1062,9 @@
                         <span class="config-badge badge-booking">Booking</span>
                         <h4>Field Service Visit With Travel</h4>
                         <p class="config-desc">Field technicians schedule visits where on-site time and travel-between-stops both matter. The visit envelope saves as one parent record; gaps between picked slots become child sub-block records labeled as travel. Track on-site time vs. drive time separately on the same booking.</p>
+                        <div class="config-note">
+                            <strong>Heaviest config in the library:</strong> full Sub-Block support on Booking — schedule, resource, and sub-block objects all bundled with the package. Reporting can roll up on-site time vs. drive time without custom joins.
+                        </div>
                         <div class="config-props">
                             <strong>Key properties:</strong><br>
                             <code>consolidateTimeSpan</code>,
