@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home, App &amp; Experience Site Pages — Static Record Id Setup | MultiDatePick for Salesforce</title>
+    <meta name="description" content="Put MultiDatePick on a Salesforce App Page, Home Page, or Experience Site. Learn how the Static Record Id property gives the calendar a parent record off the record page, the exact requirements for the Save button, surface-specific configuration, use cases, and troubleshooting.">
+    <meta name="keywords" content="Salesforce App Page calendar, Salesforce Home Page component, Experience Site date picker, Static Record Id, Salesforce community calendar, MultiDatePick App Page Home Page">
+    <link rel="canonical" href="https://multidatepick.com/home-app-experience.html">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="images/favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <meta property="og:title" content="MultiDatePick on App Pages, Home Pages &amp; Experience Sites">
+    <meta property="og:description" content="How the Static Record Id property lets the calendar save off the record page — with surface-specific config, use cases, and troubleshooting.">
+    <meta property="og:image" content="https://multidatepick.github.io/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/home-app-experience.html">
+    <meta property="og:type" content="article">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="MultiDatePick on App Pages, Home Pages &amp; Experience Sites">
+    <meta name="twitter:description" content="The Static Record Id property, the Save-button requirements, surface-specific config, use cases, and troubleshooting.">
+    <meta name="twitter:image" content="https://multidatepick.github.io/images/twitter-card.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to add MultiDatePick to an App Page, Home Page, or Experience Site",
+        "description": "Use the Static Record Id property to give the MultiDatePick calendar a parent record on surfaces that have no record context, then configure object and field mapping so the Save button appears.",
+        "step": [
+            { "@type": "HowToStep", "name": "Create or pick a parent record", "text": "Create the parent record the dates will attach to, then copy its 15-18 character record Id." },
+            { "@type": "HowToStep", "name": "Place the component", "text": "Add MultiDatePick to your App Page, Home Page, or Experience Site in the Lightning App Builder or Experience Builder." },
+            { "@type": "HowToStep", "name": "Set Static Record Id", "text": "Paste the parent record Id into the Static Record Id property, then map the related object, date field, and relationship field." },
+            { "@type": "HowToStep", "name": "Grant access", "text": "Assign the MultiDatePick permission set (and Experience Site member/guest access) so the user can read and write the records." }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <div class="announcement-banner" id="announcementBanner">
+        Coming Soon to AppExchange — 2026
+        <button class="banner-close" id="bannerClose" aria-label="Dismiss banner" type="button">&times;</button>
+    </div>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="images/logo.png" alt="MultiDatePick"></a>
+            <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/gettingstarted.html">Getting Started</a></li>
+                <li><a href="/multidatepickdates.html">Date</a></li>
+                <li><a href="/multidatepickdatetime.html">Date Time</a></li>
+                <li><a href="/multidatepickbooking.html">Booking</a></li>
+                <li><a href="/configlibrary.html">Config Library</a></li>
+                <li><a href="mailto:support@multidatepick.com?subject=Notify%20me%20when%20MultiDatePick%20launches%20on%20AppExchange" class="nav-cta">Notify Me at Launch</a></li>
+            </ul></nav>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <!-- HERO -->
+        <section class="guide-hero">
+            <div class="container">
+                <h1>App Pages, Home Pages &amp; Experience Sites</h1>
+                <p class="subtitle">MultiDatePick works on every Lightning surface — not just record pages. The trick is one property: <strong>Static Record Id</strong>. Here's how it works, the exact requirements for the Save button, surface-by-surface setup, use cases, and troubleshooting.</p>
+                <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
+                    <a href="#save-checklist" class="btn btn-primary">Save-Button Checklist</a>
+                    <a href="#use-cases" class="btn btn-secondary">See Use Cases</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONCEPT -->
+        <section class="section">
+            <div class="container">
+                <h2>Why these surfaces are different</h2>
+                <p>MultiDatePick saves the dates you pick as records on a related object, each one linked back to a <strong>parent record</strong>. The component just needs to know <em>which</em> parent.</p>
+                <ul>
+                    <li><strong>On a record page</strong> (e.g. an Event record), Salesforce automatically hands the component the current record's Id — the <code>recordId</code>. Nothing extra to configure; it just works.</li>
+                    <li><strong>On an App Page, Home Page, or Experience Site</strong>, there is no "current record." Salesforce passes nothing. With no parent, the component has nowhere to save — so it <strong>hides the Save button by design</strong> rather than show one that fails on click.</li>
+                </ul>
+                <div class="callout callout-blue">
+                    <strong>The fix is the <code>Static Record Id</code> property.</strong> You paste a specific parent record's Id into it, and the component behaves exactly as if it were sitting on that record's page. (It's "Static Record <em>Id</em>" — a property you set in the builder. It is <em>not</em> a "Static Resource," which is a separate Salesforce feature for uploaded files.)
+                </div>
+                <figure style="margin:24px 0;text-align:center;">
+                    <img src="images/placement/static-record-id-panel.png" alt="Lightning App Builder property panel with the Static Record Id field highlighted" style="max-width:100%;border:1px solid #d6e4f0;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.08);">
+                    <figcaption style="color:#5a6b7b;font-size:.85rem;margin-top:8px;">Setting <strong>Static Record Id</strong> in the Lightning App Builder property panel.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- SAVE CHECKLIST -->
+        <section class="section section-alt">
+            <div class="container">
+                <h2 id="save-checklist">What makes the Save button appear</h2>
+                <p>The Save button shows only when <strong>all four</strong> of these are in place. Miss one and it stays hidden:</p>
+                <div class="table-wrap">
+                <table>
+                    <tr><th style="width:5%;">#</th><th style="width:33%;">Requirement</th><th style="width:31%;">On a Record Page</th><th style="width:31%;">On App / Home / Experience</th></tr>
+                    <tr><td>1</td><td><strong>Parent record context</strong></td><td>Automatic (<code>recordId</code>)</td><td><strong>Set <code>Static Record Id</code></strong></td></tr>
+                    <tr><td>2</td><td>Related Object API Name</td><td>Required</td><td>Required</td></tr>
+                    <tr><td>3</td><td>Date Field API Name</td><td>Required</td><td>Required</td></tr>
+                    <tr><td>4</td><td>Relationship Field API Name</td><td>Required</td><td>Required</td></tr>
+                </table>
+                </div>
+                <p style="color:#5a6b7b;font-size:.9rem;">This is intentional: a partial setup used to render a button that errored on click. Now the component waits until it can actually save.</p>
+            </div>
+        </section>
+
+        <!-- SURFACE-SPECIFIC CONFIG -->
+        <section class="section">
+            <div class="container">
+                <h2>Surface-specific configuration</h2>
+                <p>The four requirements above are the same everywhere. What differs is <em>where you place it</em> and <em>who needs access</em>.</p>
+
+                <div class="features-grid" style="margin-top:20px;">
+
+                    <div class="feature-card">
+                        <h3>App Page</h3>
+                        <p>A standalone page inside a Lightning app — great as a shared "hub."</p>
+                        <ul>
+                            <li>Build in <strong>Lightning App Builder</strong> → New → App Page.</li>
+                            <li>Set <code>Static Record Id</code> + the three field properties.</li>
+                            <li><strong>Activate</strong> → add it to one or more Lightning apps (it becomes a tab).</li>
+                            <li>Users need the <strong>MultiDatePick permission set</strong> for object access.</li>
+                        </ul>
+                        <figure style="margin:14px 0 0;text-align:center;">
+                            <img src="images/placement/app-page.png" alt="MultiDatePick calendar on a Salesforce App Page" style="max-width:100%;border:1px solid #d6e4f0;border-radius:8px;">
+                        </figure>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>Home Page</h3>
+                        <p>A widget on the Lightning Home Page — a personal or team launchpad.</p>
+                        <ul>
+                            <li>Build in <strong>Lightning App Builder</strong> → New → Home Page.</li>
+                            <li>Set <code>Static Record Id</code> + the three field properties.</li>
+                            <li><strong>Activate</strong> as the org default Home page, or per-app via App Manager → Pages.</li>
+                            <li>Tip: <code>preloadMode = readonly</code> turns it into a read-only "what's scheduled" view.</li>
+                        </ul>
+                        <figure style="margin:14px 0 0;text-align:center;">
+                            <img src="images/placement/home-page.png" alt="MultiDatePick calendar on a Salesforce Home Page" style="max-width:100%;border:1px solid #d6e4f0;border-radius:8px;">
+                        </figure>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>Experience Site</h3>
+                        <p>A page in an Experience Cloud (community) site — for customers, partners, or members.</p>
+                        <ul>
+                            <li>Place it in <strong>Experience Builder</strong> (it appears under Custom Components).</li>
+                            <li>Set <code>Static Record Id</code> + the three field properties.</li>
+                            <li><strong>Access is the key step:</strong> the site's member profile (or the guest user, for public pages) needs read/create on the objects and fields — grant it via the profile or a permission set, plus a <strong>sharing rule</strong> so members can see/create the records.</li>
+                            <li>Publish the site after activating.</li>
+                        </ul>
+                        <figure style="margin:14px 0 0;text-align:center;">
+                            <img src="images/placement/experience-site.png" alt="MultiDatePick calendar on a Salesforce Experience Site page" style="max-width:100%;border:1px solid #d6e4f0;border-radius:8px;">
+                        </figure>
+                    </div>
+
+                </div>
+
+                <div class="callout" style="margin-top:24px;">
+                    <strong>One Static Record Id, or one per visitor?</strong> A static Id points everyone at the <em>same</em> parent record — perfect for a shared hub. To attach to each visitor's <em>own</em> record (their Account, Case, or Contact), drive the page from a Flow that sets the parent dynamically, or use the <code>parentRecordIdField</code> property to resolve the parent from a lookup. See the <a href="/flowcheatsheet.html">Flow Cheat Sheet</a>.
+                </div>
+            </div>
+        </section>
+
+        <!-- USE CASES -->
+        <section class="section section-alt">
+            <div class="container">
+                <h2 id="use-cases">Use cases for off-record-page placement</h2>
+                <p>Four common patterns that live on an App Page, Home Page, or Experience Site rather than a record page:</p>
+
+                <div class="usecases-grid grid-2col" style="margin-top:20px;">
+
+                    <div class="usecase fade-in">
+                        <h4>1. Internal Booking Hub <span style="color:#0b5cab;font-size:.8em;">· App Page</span></h4>
+                        <p>A company-wide "Book a Room / Reserve Equipment" app page. Everyone lands on the same <strong>Booking</strong> calendar, picks dates and time slots, and the bookings roll up to one shared parent record. <code>Static Record Id</code> points at that central record; <code>capacityField</code> shows live "3/10" availability so two people don't grab the same slot.</p>
+                    </div>
+
+                    <div class="usecase fade-in">
+                        <h4>2. Customer Self-Service Scheduling <span style="color:#0b5cab;font-size:.8em;">· Experience Site</span></h4>
+                        <p>Customers log into your community and choose appointment, delivery, or service dates themselves — no phone call. The <strong>Booking</strong> or <strong>Date Time</strong> component sits on an Experience page; <code>Static Record Id</code> (or a Flow) ties each selection to the customer's Case or Order. Member-profile access + a sharing rule let them create the records.</p>
+                    </div>
+
+                    <div class="usecase fade-in">
+                        <h4>3. Personal Availability Widget <span style="color:#0b5cab;font-size:.8em;">· Home Page</span></h4>
+                        <p>A "Mark My Availability" or "Request Time Off" widget right on the Lightning Home Page. Employees tap the dates they're out, and the <strong>Date</strong> component writes them to a team or HR record via <code>Static Record Id</code>. Add <code>statusColors</code> so Pending vs. Approved requests read at a glance.</p>
+                    </div>
+
+                    <div class="usecase fade-in">
+                        <h4>4. Event &amp; Cohort Registration <span style="color:#0b5cab;font-size:.8em;">· Experience Site / App Page</span></h4>
+                        <p>Attendees or members pick the sessions, classes, or cohort dates they want to join. The <strong>Date Time</strong> component on a community or app page records each selection against the Event or Campaign through <code>Static Record Id</code>. <code>maxSelections</code> caps how many sessions one person can register for.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- TROUBLESHOOTING -->
+        <section class="section">
+            <div class="container">
+                <h2 id="troubleshooting">Troubleshooting</h2>
+                <div class="table-wrap">
+                <table>
+                    <tr><th style="width:42%;">Symptom</th><th>Most likely cause &amp; fix</th></tr>
+                    <tr><td><strong>The Save button never appears</strong></td><td>One of the four requirements is missing. On App/Home/Experience, the usual culprit is an empty <code>Static Record Id</code>. Confirm all three field properties are filled too.</td></tr>
+                    <tr><td><strong>Calendar loads, but saving does nothing / errors</strong></td><td>The user can't access the objects. Assign the <strong>MultiDatePick permission set</strong> (or, on an Experience Site, grant the member/guest profile read/create on the objects and fields).</td></tr>
+                    <tr><td><strong>"Field does not exist" on save</strong></td><td>A field/object API name is misspelled or missing its managed-package prefix. In a managed install, names look like <code>mdpick__Schedule_Date__c</code>.</td></tr>
+                    <tr><td><strong>Community members can't see records they created</strong></td><td>Experience Site sharing. Add a sharing rule (or set org-wide defaults) so the member or guest user can see the records on the related object.</td></tr>
+                    <tr><td><strong>Saves, but nothing shows next time</strong></td><td>Turn on <code>preloadExistingDates</code> so the component loads existing records for that parent when it opens.</td></tr>
+                    <tr><td><strong>Static Record Id "isn't valid"</strong></td><td>It must be a real 15- or 18-character Id of the <em>parent</em> object — the one your <code>Relationship Field API Name</code> points to — not some other record.</td></tr>
+                </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT -->
+        <section class="section section-alt" style="padding:48px 0;">
+            <div class="container" style="text-align:center;">
+                <h2 style="font-size:1.5rem;color:var(--blue-900);margin-bottom:12px;">Placing it somewhere we didn't cover?</h2>
+                <p style="color:var(--gray-500);margin-bottom:20px;font-size:.95rem;">Tell us the surface and the parent object — happy to help you wire it up.</p>
+                <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                    <a href="mailto:Support@MultiDatePick.com" class="btn btn-primary">Email Support@MultiDatePick.com</a>
+                    <a href="/gettingstarted.html" class="btn btn-secondary">Back to Getting Started</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/" class="logo"><img src="images/logo.png" alt="MultiDatePick"></a>
+                    <p>The multi-date selection component suite for Salesforce Flows and Lightning Pages.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Components</h4>
+                    <ul>
+                        <li><a href="/multidatepickdates.html">Date</a></li>
+                        <li><a href="/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/multidatepickbooking.html">Booking</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="/gettingstarted.html">Getting Started</a></li>
+                        <li><a href="/home-app-experience.html">App / Home / Experience Pages</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                        <li><a href="/user-guide.html">User Guide</a></li>
+                        <li><a href="/accessibility.html">Accessibility</a></li>
+                        <li><a href="mailto:Support@MultiDatePick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. All rights reserved.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a>
+                    <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
