@@ -33,6 +33,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /* ── Components dropdown (click to open) ── */
+    const closeDropdowns = () => {
+        document.querySelectorAll('.nav-dropdown.is-open').forEach(dd => {
+            dd.classList.remove('is-open');
+            const t = dd.querySelector('.nav-dropdown-toggle');
+            if (t) t.setAttribute('aria-expanded', 'false');
+        });
+    };
+    document.querySelectorAll('.nav-dropdown-toggle').forEach(tg => {
+        const dd = tg.closest('.nav-dropdown');
+        tg.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const willOpen = !dd.classList.contains('is-open');
+            closeDropdowns();
+            if (willOpen) { dd.classList.add('is-open'); tg.setAttribute('aria-expanded', 'true'); }
+        });
+    });
+    document.addEventListener('click', closeDropdowns);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDropdowns(); });
+
     /* ── FAQ Accordion ── */
     document.querySelectorAll('.faq-question').forEach(btn => {
         btn.addEventListener('click', () => {
