@@ -625,12 +625,14 @@ inputParams + '\n' +
             .then(function () {
                 showToast(
                     'Flow XML Copied',
-                    'To import this Flow into Salesforce:<br>' +
-                    '<strong>1.</strong> In your project folder, create a new file under <code>force-app/main/default/flows/</code> — name it <code>' + configName + '.flow-meta.xml</code><br>' +
+                    'You\'ll deploy this XML to your org with VS Code + the Salesforce CLI.<br>' +
+                    '<a href="/deploy-flow-vscode.html" target="_blank" rel="noopener">&rarr; Full step-by-step: Deploy a Flow from VS Code</a><br><br>' +
+                    '<strong>Quick version:</strong><br>' +
+                    '<strong>1.</strong> Create <code>force-app/main/default/flows/' + configName + '.flow-meta.xml</code><br>' +
                     '<strong>2.</strong> Paste the XML and save<br>' +
-                    '<strong>3.</strong> Deploy with <code>sf project deploy start --source-path force-app/main/default/flows/' + configName + '.flow-meta.xml</code><br>' +
-                    '<strong>4.</strong> Open the Flow in Flow Builder and look for lines marked <strong>>>> UPDATE</strong> — change the object and field names to match your org',
-                    12000
+                    '<strong>3.</strong> Deploy: <code>sf project deploy start --source-dir force-app/main/default/flows/' + configName + '.flow-meta.xml</code><br>' +
+                    '<strong>4.</strong> In Flow Builder, update the lines marked <strong>&gt;&gt;&gt; UPDATE</strong> to match your org',
+                    15000
                 );
             })
             .catch(function () {
