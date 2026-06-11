@@ -148,16 +148,21 @@
         addString('blockedDatesDateField', cfg.Blocked_Dates_Date_Field__c);
         addString('blockedDatesFilterField', cfg.Blocked_Dates_Filter_Field__c);
 
-        // DateTime / Booking time props
+        // DateTime / Booking shared time props
         if (componentType === 'DateTime' || componentType === 'Booking') {
             addNumber('timeInterval', cfg.Time_Interval__c);
-            addString('minTime', cfg.Min_Time__c);
-            addString('maxTime', cfg.Max_Time__c);
-            addBool('enableEndTime', cfg.Enable_End_Time__c);
             addBool('allowDifferentTimes', cfg.Allow_Different_Times__c);
             addBool('groupTimeSlotsByPeriod', cfg.Group_Time_Slots_By_Period__c);
             addBool('consolidateTimeSpan', cfg.Consolidate_Time_Span__c);
             addBool('appendDateTimeToName', cfg.Append_DateTime_To_Name__c);
+        }
+
+        // DateTime-only time props (Booking uses businessHoursStart/EndField on the
+        // resource record, not these wrapper-level overrides)
+        if (componentType === 'DateTime') {
+            addString('minTime', cfg.Min_Time__c);
+            addString('maxTime', cfg.Max_Time__c);
+            addBool('enableEndTime', cfg.Enable_End_Time__c);
             addString('timeDisplayMode', cfg.Time_Display_Mode__c);
         }
 
@@ -322,6 +327,7 @@
 '         The user picks dates (and times, if DateTime) on this screen.\n' +
 '         ═══════════════════════════════════════════════════════ -->\n' +
 '\n' +
+'    <!-- All <screens> blocks must be contiguous (Flow XML schema requirement) -->\n' +
 '    <screens>\n' +
 '        <name>Screen_Main</name>\n' +
 '        <label>' + xmlEscape(flowLabel) + '</label>\n' +
@@ -342,6 +348,20 @@ inputParams + '\n' +
 '                <assignToReference>varJsonOutput</assignToReference>\n' +
 '                <name>' + jsonOutputName + '</name>\n' +
 '            </outputParameters>\n' +
+'        </fields>\n' +
+'    </screens>\n' +
+'\n' +
+'    <screens>\n' +
+'        <name>Screen_Done</name>\n' +
+'        <label>Done</label>\n' +
+'        <locationX>176</locationX>\n' +
+'        <locationY>842</locationY>\n' +
+'        <showHeader>false</showHeader>\n' +
+'        <showFooter>true</showFooter>\n' +
+'        <fields>\n' +
+'            <name>txt_Success</name>\n' +
+'            <fieldText>&lt;p&gt;&lt;b&gt;Your dates have been saved.&lt;/b&gt;&lt;/p&gt;</fieldText>\n' +
+'            <fieldType>DisplayText</fieldType>\n' +
 '        </fields>\n' +
 '    </screens>\n' +
 '\n' +
@@ -406,24 +426,6 @@ recordCreateInputs + '\n' +
 '        <!-- >>> UPDATE: Change this to YOUR Salesforce object API name -->\n' +
 '        <object>' + xmlEscape(relObj) + '</object>\n' +
 '    </recordCreates>\n' +
-'\n' +
-'    <!-- ═══════════════════════════════════════════════════════\n' +
-'         CONFIRMATION SCREEN\n' +
-'         ═══════════════════════════════════════════════════════ -->\n' +
-'\n' +
-'    <screens>\n' +
-'        <name>Screen_Done</name>\n' +
-'        <label>Done</label>\n' +
-'        <locationX>176</locationX>\n' +
-'        <locationY>842</locationY>\n' +
-'        <showHeader>false</showHeader>\n' +
-'        <showFooter>true</showFooter>\n' +
-'        <fields>\n' +
-'            <name>txt_Success</name>\n' +
-'            <fieldText>&lt;p&gt;&lt;b&gt;Your dates have been saved.&lt;/b&gt;&lt;/p&gt;</fieldText>\n' +
-'            <fieldType>DisplayText</fieldType>\n' +
-'        </fields>\n' +
-'    </screens>\n' +
 '\n' +
 '</Flow>';
     }
@@ -494,6 +496,7 @@ recordCreateInputs + '\n' +
 '         your Salesforce org.\n' +
 '         ═══════════════════════════════════════════════════════ -->\n' +
 '\n' +
+'    <!-- All <screens> blocks must be contiguous (Flow XML schema requirement) -->\n' +
 '    <screens>\n' +
 '        <name>Screen_Booking</name>\n' +
 '        <label>' + xmlEscape(flowLabel) + '</label>\n' +
@@ -545,38 +548,6 @@ inputParams + '\n' +
 '        </fields>\n' +
 '    </screens>\n' +
 '\n' +
-'    <!-- ═══════════════════════════════════════════════════════\n' +
-'         DECISION — Did bookings succeed?\n' +
-'         ═══════════════════════════════════════════════════════ -->\n' +
-'\n' +
-'    <decisions>\n' +
-'        <name>Decision_CheckResult</name>\n' +
-'        <label>Check Booking Result</label>\n' +
-'        <locationX>176</locationX>\n' +
-'        <locationY>350</locationY>\n' +
-'        <defaultConnector>\n' +
-'            <targetReference>Screen_NoBookings</targetReference>\n' +
-'        </defaultConnector>\n' +
-'        <defaultConnectorLabel>No Bookings</defaultConnectorLabel>\n' +
-'        <rules>\n' +
-'            <name>rule_HasBookings</name>\n' +
-'            <conditionLogic>and</conditionLogic>\n' +
-'            <conditions>\n' +
-'                <leftValueReference>varBookingSuccessCount</leftValueReference>\n' +
-'                <operator>GreaterThan</operator>\n' +
-'                <rightValue><numberValue>0.0</numberValue></rightValue>\n' +
-'            </conditions>\n' +
-'            <connector>\n' +
-'                <targetReference>Screen_Success</targetReference>\n' +
-'            </connector>\n' +
-'            <label>Has Bookings</label>\n' +
-'        </rules>\n' +
-'    </decisions>\n' +
-'\n' +
-'    <!-- ═══════════════════════════════════════════════════════\n' +
-'         CONFIRMATION SCREENS\n' +
-'         ═══════════════════════════════════════════════════════ -->\n' +
-'\n' +
 '    <screens>\n' +
 '        <name>Screen_Success</name>\n' +
 '        <label>Booking Confirmed</label>\n' +
@@ -604,6 +575,34 @@ inputParams + '\n' +
 '            <fieldType>DisplayText</fieldType>\n' +
 '        </fields>\n' +
 '    </screens>\n' +
+'\n' +
+'    <!-- ═══════════════════════════════════════════════════════\n' +
+'         DECISION — Did bookings succeed?\n' +
+'         ═══════════════════════════════════════════════════════ -->\n' +
+'\n' +
+'    <decisions>\n' +
+'        <name>Decision_CheckResult</name>\n' +
+'        <label>Check Booking Result</label>\n' +
+'        <locationX>176</locationX>\n' +
+'        <locationY>350</locationY>\n' +
+'        <defaultConnector>\n' +
+'            <targetReference>Screen_NoBookings</targetReference>\n' +
+'        </defaultConnector>\n' +
+'        <defaultConnectorLabel>No Bookings</defaultConnectorLabel>\n' +
+'        <rules>\n' +
+'            <name>rule_HasBookings</name>\n' +
+'            <conditionLogic>and</conditionLogic>\n' +
+'            <conditions>\n' +
+'                <leftValueReference>varBookingSuccessCount</leftValueReference>\n' +
+'                <operator>GreaterThan</operator>\n' +
+'                <rightValue><numberValue>0.0</numberValue></rightValue>\n' +
+'            </conditions>\n' +
+'            <connector>\n' +
+'                <targetReference>Screen_Success</targetReference>\n' +
+'            </connector>\n' +
+'            <label>Has Bookings</label>\n' +
+'        </rules>\n' +
+'    </decisions>\n' +
 '\n' +
 '</Flow>';
     }
