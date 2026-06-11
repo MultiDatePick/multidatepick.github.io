@@ -484,7 +484,7 @@
         <tr data-components="dates datetime booking"><td><code>hoverFields</code></td><td>&check;</td><td>&check;</td><td>&check;</td><td>String</td><td>&mdash;</td><td>Comma-separated list of field API names to display when hovering over a calendar date that has existing records. Fields are queried from the Child Object. Supports relationship fields. Only shows data when existing records are loaded (via Load Existing Dates). Example: Name, Status__c, Notes__c. Leave blank to disable hover popovers.</td></tr>
         <tr data-components="dates datetime booking"><td><code>enableEditMode</code></td><td>&check;</td><td>&check;</td><td>&check;</td><td>Boolean</td><td>true</td><td>When ON, the Edit toggle appears (the only requirement, on all three components) so users can click existing dates to edit the date or delete the record. A configured Status Field is optional &mdash; it adds an in-editor status dropdown.</td></tr>
         <tr data-components="dates datetime booking"><td><code>hideBookingsWithStatus</code></td><td>&check;</td><td>&check;</td><td>&check;</td><td>String</td><td>&mdash;</td><td>Comma-separated list of status values whose records are hidden from the calendar. Hidden records are excluded from visual rendering. Records remain in Salesforce. Requires Status Field. Example: Cancelled, Rejected</td></tr>
-        <tr data-components="dates datetime booking"><td><code>statusColors</code></td><td>&check;</td><td>&check;</td><td>&check;</td><td>String</td><td>&mdash;</td><td>Comma-separated mapping of status values to hex colors. Format: Value:#hex. Status colors are shown on calendar date cells. Requires Status Field. Example: Confirmed:#0176d3, Tentative:#fbbf24, Pending:#60a5fa, Cancelled:#a1a8b5</td></tr>
+        <tr data-components="dates datetime booking"><td><code>statusColors</code></td><td>&check;</td><td>&check;</td><td>&check;</td><td>String</td><td>&mdash;</td><td>Comma-separated mapping of status values to hex colors. Format: Value:#hex. Status colors are shown on calendar date cells. Requires Status Field. Example: Confirmed:#22C55E, Tentative:#fbbf24, Pending:#60a5fa, Cancelled:#a1a8b5</td></tr>
         <tr data-components="dates datetime booking"><td><code>editButtonLabel</code></td><td>&check;</td><td>&check;</td><td>&check;</td><td>String</td><td>&mdash;</td><td>Custom label for the Edit Mode toggle button. Defaults to 'Edit Dates' if left blank.</td></tr>
         <tr class="prop-cat-header" data-components="dates datetime booking"><td colspan="7"><strong>Time slots</strong></td></tr>
         <tr data-components="datetime"><td><code>timeDisplayMode</code></td><td></td><td>&check;</td><td></td><td>String</td><td>grid</td><td>How time is presented. 'grid' (default): visual slot grid where users click or drag to select time blocks. 'dropdown': lightning-input time pickers. Use 'Allow Different Times Per Date' to control shared vs. per-date pickers in dropdown mode.</td></tr>
@@ -673,7 +673,7 @@
                 </div>
 
                 <h3>Step 4 &mdash; Status &amp; Display</h3>
-                <p>Status Field (for color-coding), Status Colors mapping (e.g. <code>Confirmed:#0176d3, Tentative:#fbbf24</code>), Edit Mode toggle, display options, sub-block button label.</p>
+                <p>Status Field (for color-coding), Status Colors mapping (e.g. <code>Confirmed:#22C55E, Tentative:#fbbf24</code>), Edit Mode toggle, display options, sub-block button label.</p>
                 <div class="ug-screenshot">
                     <figure>
                         <img src="images/user-guide/UG-06-wizard-step4-status-display.png" alt="Setup Wizard Step 4 — Status Field, Status Colors mapping with color swatches, Edit Mode toggle, and other display options" loading="lazy" data-zoomable>
@@ -757,7 +757,7 @@
                 <p>Map any picklist field on your child object to colors. The wrapper paints the calendar (and grid, if you choose) accordingly. Configure:</p>
                 <ul>
                     <li><code>statusField</code> = <code>Status__c</code> (or your picklist API name)</li>
-                    <li><code>statusColors</code> = <code>Confirmed:#0176d3, Tentative:#fbbf24, Pending:#60a5fa, Cancelled:#a1a8b5</code></li>
+                    <li><code>statusColors</code> = <code>Confirmed:#22C55E, Tentative:#fbbf24, Pending:#60a5fa, Cancelled:#a1a8b5</code></li>
                     <li><code>statusColorDisplay</code> = <code>calendar</code>, <code>grid</code>, or <code>both</code></li>
                     <li><code>hideBookingsWithStatus</code> = <code>Cancelled</code> (CSV) to suppress those records from the calendar AND capacity counts</li>
                 </ul>
@@ -803,7 +803,7 @@
                 </ul>
 
                 <h3>Conflict detection</h3>
-                <p><code>conflictLookAheadDays</code> controls how many days ahead the LWC scans for overlapping bookings. <code>conflictBehavior</code> controls what happens when conflicts are found: <code>block</code> (refuse to save, conflicting dates highlighted), <code>skip</code> (save proceeds, conflicting dates are skipped and reported in <code>bookingConflictDates</code>), or <code>allow</code> (no conflict checking).</p>
+                <p><code>conflictLookAheadDays</code> controls how many days ahead the LWC scans for overlapping bookings. <code>conflictBehavior</code> controls what happens when conflicts are found: <code>block</code> (refuse to save, conflicting dates highlighted); <code>skip</code> &mdash; for BATCH / multi-date selection. The user picks many dates/slots at once; the component saves the ones that are open and silently skips the ones already taken (best for "grab whatever's still open" across many dates), reporting the skipped conflicts in <code>bookingConflictDates</code>. (For a single date, <code>block</code> already prevents picking a taken slot, so <code>skip</code>'s value is the multi-date batch case.) Or <code>allow</code> (no conflict checking).</p>
             </section>
 
             <!-- ───── SECTION 7: FAQ ───── -->
@@ -819,7 +819,7 @@
                     <dd>In Flow Builder, explicitly set the prop to <code>{!$GlobalConstant.False}</code> &mdash; don't rely on the JS default. Salesforce Flow passes <code>null</code> for unset Boolean props, which doesn't trigger the wrapper's "false" branch the way you'd expect.</dd>
 
                     <dt id="gotcha-status-colors-not-applying">My status colors aren't applying</dt>
-                    <dd>Three things to check: (a) is <code>statusField</code> the exact picklist API name (case-sensitive, no quotes around the name)? (b) Does <code>statusColors</code> use the format <code>Status:#hex, Status:#hex</code> with NO quotes around values? Admins sometimes paste <code>'Confirmed':'#0176d3'</code> &mdash; that breaks the parse silently. (c) Is the picklist value actually populated on the records?</dd>
+                    <dd>Three things to check: (a) is <code>statusField</code> the exact picklist API name (case-sensitive, no quotes around the name)? (b) Does <code>statusColors</code> use the format <code>Status:#hex, Status:#hex</code> with NO quotes around values? Admins sometimes paste <code>'Confirmed':'#22C55E'</code> &mdash; that breaks the parse silently. (c) Is the picklist value actually populated on the records?</dd>
 
                     <dt id="gotcha-wrong-field-values-on-save">The wrapper saves but records have wrong field values</dt>
                     <dd>Check <code>recordNameField</code> &mdash; if you mapped a long-text field, the wrapper writes the auto-generated name there but the field may be too short. Also check <code>appendDateTimeToName</code>: if ON, the wrapper appends the selected date/time to the record name &mdash; surprising if you didn't expect it.</dd>
