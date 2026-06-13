@@ -370,7 +370,7 @@ inputParams + '\n' +
 '\n' +
 '    <!-- ═══════════════════════════════════════════════════════\n' +
 '         ACTION — Parse JSON into loopable entries\n' +
-'         This calls the mdpick.MultiDatePickParser Apex action.\n' +
+'         This calls the mdpick__MultiDatePickParser Apex action.\n' +
 '         No changes needed here.\n' +
 '         ═══════════════════════════════════════════════════════ -->\n' +
 '\n' +
