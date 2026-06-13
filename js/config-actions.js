@@ -316,7 +316,7 @@
 '    <variables>\n' +
 '        <name>varParsedEntries</name>\n' +
 '        <dataType>Apex</dataType>\n' +
-'        <apexClass>MultiDatePickEntryCollection</apexClass>\n' +
+'        <apexClass>mdpick__MultiDatePickEntryCollection</apexClass>\n' +
 '        <isCollection>false</isCollection>\n' +
 '        <isInput>false</isInput>\n' +
 '        <isOutput>false</isOutput>\n' +
@@ -367,7 +367,7 @@ inputParams + '\n' +
 '\n' +
 '    <!-- ═══════════════════════════════════════════════════════\n' +
 '         ACTION — Parse JSON into loopable entries\n' +
-'         This calls the MultiDatePickParser Apex action.\n' +
+'         This calls the mdpick.MultiDatePickParser Apex action.\n' +
 '         No changes needed here.\n' +
 '         ═══════════════════════════════════════════════════════ -->\n' +
 '\n' +
@@ -376,7 +376,7 @@ inputParams + '\n' +
 '        <label>Parse Selected Dates</label>\n' +
 '        <locationX>176</locationX>\n' +
 '        <locationY>350</locationY>\n' +
-'        <actionName>MultiDatePickParser</actionName>\n' +
+'        <actionName>mdpick__MultiDatePickParser</actionName>\n' +
 '        <actionType>apex</actionType>\n' +
 '        <connector>\n' +
 '            <targetReference>Loop_Entries</targetReference>\n' +
