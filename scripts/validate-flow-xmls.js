@@ -102,7 +102,8 @@ for (const cf of configFiles) {
     const configName = cf.replace('.json', '');
     const flowFile = path.join('force-app', 'main', 'default', 'flows', configName + '.flow-meta.xml');
     try {
-        const cmd = `sf project deploy validate --source-dir "${flowFile}" --target-org resilient-badger --json`;
+        const targetOrg = process.env.TARGET_ORG || 'resilient-badger';
+        const cmd = `sf project deploy validate --source-dir "${flowFile}" --target-org ${targetOrg} --json`;
         const raw = execSync(cmd, {
             cwd: TMP_DIR,
             encoding: 'utf-8',

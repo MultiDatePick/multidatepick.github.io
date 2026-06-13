@@ -77,9 +77,12 @@
     function buildFlowXml(configData, componentType, configName) {
         var apiName = configName.replace(/[^A-Za-z0-9_]/g, '_');
         var flowLabel = configName.replace(/_/g, ' ');
-        var extensionName = componentType === 'Booking' ? 'c:multiDatePickBooking'
-                          : componentType === 'DateTime' ? 'c:multiDatePickDateTime'
-                          : 'c:multiDatePickDates';
+        // Use mdpick: namespace prefix — customers install the managed package
+        // (per CLAUDE.md Lesson #108). The bare c: form only works in unpackaged
+        // dev orgs which is not the website audience.
+        var extensionName = componentType === 'Booking' ? 'mdpick:multiDatePickBooking'
+                          : componentType === 'DateTime' ? 'mdpick:multiDatePickDateTime'
+                          : 'mdpick:multiDatePickDates';
 
         var inputParams = buildInputParams(configData, componentType);
 
