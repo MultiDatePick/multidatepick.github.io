@@ -812,6 +812,63 @@
                 <h2>7. Blocking dates, times &amp; resources (closures)</h2>
                 <p>Any calendar can read a list of <strong>closures</strong> from another object and grey out (block) the dates &mdash; or specific time slots, or specific resources &mdash; they cover, so users can only book when you're actually open. You point a few properties at the closure object and the component does the rest. Whole-day blocking works on all three components; the time and resource granularity is for the Booking tier (DateTime &amp; Booking), which has a time grid.</p>
 
+                <h3 id="block-vs-hide">Blocking vs. hiding &mdash; what's the difference?</h3>
+                <p>Two features sound alike but do opposite things. <strong>Blocking</strong> takes availability <em>away</em> &mdash; a date or slot is shown but can't be booked. <strong>Hiding</strong> takes records <em>out of view</em> &mdash; certain saved bookings disappear, which actually <em>frees</em> the slot back up.</p>
+                <table class="ug-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Blocking (closures)</th>
+                            <th>Hiding (by status)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>What it controls</strong></td>
+                            <td>Availability &mdash; which dates / times / resources can be booked</td>
+                            <td>Visibility &mdash; which existing booking records appear</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Property</strong></td>
+                            <td><code>blockedDatesSourceObject</code> (+ date / time / resource fields)</td>
+                            <td><code>hideBookingsWithStatus</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Driven by</strong></td>
+                            <td>A closure / holiday list &mdash; a separate object, or your booking object filtered</td>
+                            <td>A status value on the booking records themselves</td>
+                        </tr>
+                        <tr>
+                            <td><strong>What the user sees</strong></td>
+                            <td>The slot is still there &mdash; struck-through, greyed, unclickable</td>
+                            <td>The record is gone from the calendar entirely</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Effect on capacity</strong></td>
+                            <td><em>Removes</em> availability &mdash; you can't book there</td>
+                            <td><em>Frees</em> availability &mdash; the hidden record stops counting</td>
+                        </tr>
+                        <tr>
+                            <td><strong>The data</strong></td>
+                            <td>No booking exists there &mdash; you're marking it off-limits</td>
+                            <td>Records still exist in Salesforce, just not shown</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Reach for it when&hellip;</strong></td>
+                            <td>Holidays, maintenance windows, a closed room or region</td>
+                            <td>Cancelled / Rejected bookings shouldn't clutter the grid or count against capacity</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="ug-callout">
+                    <strong>The very same status can do either &mdash; what decides is the feature you wire it to.</strong> Take a <code>Cancelled</code> booking:
+                    <ul style="margin:8px 0 0; padding-left:20px;">
+                        <li><code>hideBookingsWithStatus = Cancelled</code> &rarr; the cancelled booking <strong>disappears</strong> and its slot opens back up for someone else.</li>
+                        <li>Closure source = your booking object filtered to <code>Status__c = Cancelled</code> &rarr; the cancelled booking <strong>blocks</strong> its date so nobody can rebook it.</li>
+                    </ul>
+                    <span style="display:block; margin-top:8px;">Hide when the dead record should free the slot; block when it should keep the slot off-limits.</span>
+                </div>
+
                 <h3>The blocked-dates properties</h3>
                 <ul>
                     <li><code>blockedDatesSourceObject</code> &mdash; the object holding your closures (a dedicated <code>Office_Closure__c</code>, or your booking object itself).</li>
@@ -865,6 +922,9 @@
 
                     <dt id="gotcha-hide-cancelled-from-capacity">How do I hide Cancelled records from the capacity grid?</dt>
                     <dd>Set <code>hideBookingsWithStatus=Cancelled</code> (or comma-separated list like <code>Cancelled,Rejected</code>). This filters Cancelled records from BOTH the calendar AND the capacity count.</dd>
+
+                    <dt id="gotcha-block-vs-hide">What's the difference between blocking and hiding?</dt>
+                    <dd>Different goals. <strong>Blocking</strong> (closures, via <code>blockedDatesSourceObject</code>) makes a date / time / resource visible but <em>unbookable</em> &mdash; for holidays, maintenance, or a closed room. <strong>Hiding</strong> (<code>hideBookingsWithStatus</code>) removes certain records (e.g. Cancelled) from the calendar and capacity math, which <em>frees</em> the slot back up. The same <code>Cancelled</code> status can do either, depending on which one you wire it to &mdash; see <a href="#block-vs-hide">Blocking vs. hiding</a> in &sect;7 for the full comparison.</dd>
 
                     <dt id="gotcha-edit-mode-toggle-missing">The edit mode toggle isn't appearing</dt>
                     <dd>The Edit toggle is gated by a single property: set <code>enableEditMode=true</code> on the wrapper. That's the only requirement, and it works identically on all three components. A configured <code>statusField</code> is NOT required to show the toggle &mdash; it only adds a status dropdown inside the editor. If the toggle isn't appearing, <code>enableEditMode</code> is unset (or saved as <code>false</code> in your page or CMT config).</dd>
