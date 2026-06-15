@@ -545,6 +545,29 @@
                         </div>
                     </div>
 
+                    <!-- 10 — Office Closure Calendar (pairs with DateTime config "Holiday Aware Appointment Booking") -->
+                    <div class="config-card" data-config-file="Office_Closure_Calendar.json" data-shape="per-date">
+                        <span class="config-badge badge-dates">Date</span>
+                        <h4>Office Closure Calendar</h4>
+                        <p class="config-desc">A dedicated closure manager. An office or facility manager picks the dates the office is closed — holidays, planned closures, weather days, maintenance windows — and saves them as a flat list of records that other MultiDatePick configs can <em>respect</em> as blocked dates.</p>
+                        <div class="config-note">
+                            <strong>Pairs with <code>Holiday Aware Appointment Booking</code>:</strong> the records this config writes (with <code>Status__c = Cancelled</code>) are picked up by the appointment booker via the value-filter trio — <code>blockedDatesSourceObject</code> + <code>blockedDatesFilterField</code> + <code>blockedDatesFilterValue</code>. Multiple blocker categories (holidays, maintenance, equipment-only) can coexist in the same table — each consumer calendar picks which category applies.
+                        </div>
+                        <div class="config-props">
+                            <strong>Key properties:</strong><br>
+                            <code>endDateField</code> for multi-day ranges,
+                            <code>defaultRecordName</code> Office Closed,
+                            <code>defaultStatusValue</code> Cancelled (the "blocker" flag),
+                            <code>twoMonthView</code>,
+                            <code>enableEditMode</code>,
+                            <code>showRecurringPattern</code>
+                        </div>
+                        <div class="config-btn-group">
+                            <button class="btn btn-outline btn-sm btn-copy-json">Copy JSON</button>
+                            <button class="btn btn-primary btn-sm btn-copy-flow">Copy Flow XML</button>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="empty-section-msg">No Date configs match this filter.</div>
             </div>
@@ -752,6 +775,30 @@
                             <code>timeInterval</code> 15 min,
                             <code>statusColors</code> Compliant/Review/Flagged,
                             <code>allowPastDates</code>
+                        </div>
+                        <div class="config-btn-group">
+                            <button class="btn btn-outline btn-sm btn-copy-json">Copy JSON</button>
+                            <button class="btn btn-primary btn-sm btn-copy-flow">Copy Flow XML</button>
+                        </div>
+                    </div>
+
+                    <!-- 10 — Holiday Aware Appointment Booking (pairs with Dates config "Office Closure Calendar") -->
+                    <div class="config-card" data-config-file="Holiday_Aware_Appointment_Booking.json" data-shape="per-block">
+                        <span class="config-badge badge-datetime">Date Time</span>
+                        <h4>Holiday Aware Appointment Booking</h4>
+                        <p class="config-desc">End-user appointment picker that automatically greys out dates the office is closed. Reads its block list from <code>Office Closure Calendar</code> records via the value-filter trio (<code>blockedDatesSourceObject</code> + <code>blockedDatesFilterField</code> + <code>blockedDatesFilterValue</code>), so customers can only book on days that are actually open.</p>
+                        <div class="config-note">
+                            <strong>Pairs with <code>Office Closure Calendar</code>:</strong> the manager-facing closures config writes <code>Status__c = Cancelled</code> records into <code>Schedule__c</code>. This config reads them via <code>blockedDatesFilterField = Status__c</code> + <code>blockedDatesFilterValue = Cancelled</code> and also hides them from its own preloaded view (<code>hideBookingsWithStatus = Cancelled</code>) so users only see real appointments.
+                        </div>
+                        <div class="config-props">
+                            <strong>Key properties:</strong><br>
+                            <code>blockedDatesSourceObject</code> Schedule__c,
+                            <code>blockedDatesFilterField</code> Status__c,
+                            <code>blockedDatesFilterValue</code> Cancelled,
+                            <code>hideBookingsWithStatus</code> Cancelled,
+                            <code>conflictBehavior</code> block,
+                            <code>consolidateTimeSpan</code>,
+                            <code>timeInterval</code> 30 min
                         </div>
                         <div class="config-btn-group">
                             <button class="btn btn-outline btn-sm btn-copy-json">Copy JSON</button>
