@@ -165,6 +165,7 @@
                     <li><a href="#save-modes">Click to Save vs Flow-Managed Save</a></li>
                     <li><a href="#status">Status colors & edit mode</a></li>
                     <li><a href="#booking">Resource booking</a></li>
+                    <li><a href="#blocking">Blocking dates, times &amp; resources</a></li>
                     <li><a href="#faq">Common gotchas (FAQ)</a></li>
                     <li><a href="#schema">Object &amp; field mapping</a></li>
                     <li><a href="#apex">Apex sample code</a></li>
@@ -806,9 +807,47 @@
                 <p><code>conflictLookAheadDays</code> controls how many days ahead the LWC scans for overlapping bookings. <code>conflictBehavior</code> controls what happens when conflicts are found: <code>block</code> (refuse to save, conflicting dates highlighted); <code>skip</code> &mdash; for BATCH / multi-date selection. The user picks many dates/slots at once; the component saves the ones that are open and silently skips the ones already taken (best for "grab whatever's still open" across many dates), reporting the skipped conflicts in <code>bookingConflictDates</code>. (For a single date, <code>block</code> already prevents picking a taken slot, so <code>skip</code>'s value is the multi-date batch case.) Or <code>allow</code> (no conflict checking).</p>
             </section>
 
-            <!-- ───── SECTION 7: FAQ ───── -->
+            <!-- ───── SECTION 7: BLOCKING ───── -->
+            <section id="blocking" class="ug-section">
+                <h2>7. Blocking dates, times &amp; resources (closures)</h2>
+                <p>Any calendar can read a list of <strong>closures</strong> from another object and grey out (block) the dates &mdash; or specific time slots, or specific resources &mdash; they cover, so users can only book when you're actually open. You point a few properties at the closure object and the component does the rest. Whole-day blocking works on all three components; the time and resource granularity is for the Booking tier (DateTime &amp; Booking), which has a time grid.</p>
+
+                <h3>The blocked-dates properties</h3>
+                <ul>
+                    <li><code>blockedDatesSourceObject</code> &mdash; the object holding your closures (a dedicated <code>Office_Closure__c</code>, or your booking object itself).</li>
+                    <li><code>blockedDatesDateField</code> &mdash; the Date field on that object.</li>
+                    <li><code>blockedDatesFilterField</code> + <code>blockedDatesFilterValue</code> &mdash; optional scope. With a value set, only closures where <code>field = value</code> apply (e.g. <code>Status__c = Cancelled</code>, or <code>Region__c = North</code>). This is how one shared closure table serves many calendars.</li>
+                    <li><code>blockedDatesStartTimeField</code> + <code>blockedDatesEndTimeField</code> &mdash; optional Time fields. When a closure record carries both, only that time range is blocked (partial-day); leave them blank for a whole-day block. <em>(DateTime &amp; Booking.)</em></li>
+                    <li><code>blockedDatesResourceField</code> &mdash; optional lookup. When a closure's resource matches the calendar's selected resource, only that resource is closed; blank closes all resources. <em>(Booking.)</em></li>
+                </ul>
+
+                <h3>Three levels of granularity</h3>
+                <ol>
+                    <li><strong>Whole-day</strong> &mdash; a closure with no times blocks the entire date. The date is greyed and unselectable. All three components.</li>
+                    <li><strong>Partial-day (specific hours)</strong> &mdash; a closure with a start + end time blocks just those slots; the rest of the day stays bookable. Closed slots render struck-through and can't be picked.</li>
+                    <li><strong>Per-resource</strong> &mdash; a closure pointing at a specific resource closes only that resource at that time; the others stay free. In a single-resource view it's struck-through; in the combined multi-resource view it shows a small corner flag (the slot is still bookable for the open resources).</li>
+                </ol>
+
+                <h3>Two patterns for the closure object</h3>
+                <ul>
+                    <li><strong>Same object, flagged by status</strong> &mdash; point <code>blockedDatesSourceObject</code> at your booking object and filter <code>Status__c = Cancelled</code>, so cancelled bookings double as closures. Simplest, but every calendar on that object shares the same closures. (See the <em>Holiday Aware Appointment Booking</em> config in the <a href="configlibrary.html">Config Library</a>.)</li>
+                    <li><strong>Dedicated closure object</strong> &mdash; an <code>Office_Closure__c</code> with a Date, optional Start/End Time, a <code>Region__c</code> tag, and an optional <code>Resource__c</code> lookup. The cleanest way to scope closures per location <em>and</em> per resource &mdash; each calendar filters by its region, and a closure can target one resource. (See the <em>Time-Aware Resource Closures</em> config.)</li>
+                </ul>
+
+                <h3>How blocked slots behave</h3>
+                <ul>
+                    <li><strong>Visual:</strong> a fully-closed slot renders struck-through and greyed; a slot closed for only some of your selected resources/dates shows a corner flag.</li>
+                    <li><strong>Selection:</strong> a fully-closed slot can't be clicked or dragged over.</li>
+                    <li><strong>Save:</strong> you can never save a booking onto a closed (resource, date, time). In multi-resource mode the save carves out just the closed resource at that slot &mdash; the open resources still book. A closure always wins, even when <code>conflictBehavior = allow</code>.</li>
+                </ul>
+
+                <h3>Scoping one closure table to many calendars</h3>
+                <p>Give your closure object a tag field (Region, Location, Building&hellip;) and put the same field on your resources. Then each calendar sets <code>resourceFilterField</code>/<code>resourceFilterValue</code> to show only its location's resources, and <code>blockedDatesFilterField</code>/<code>blockedDatesFilterValue</code> to read only its location's closures. One table, every calendar scoped correctly.</p>
+            </section>
+
+            <!-- ───── SECTION 8: FAQ ───── -->
             <section id="faq" class="ug-section">
-                <h2>7. Common gotchas (FAQ)</h2>
+                <h2>8. Common gotchas (FAQ)</h2>
                 <p>Real questions admins have hit. Skim these BEFORE filing a support ticket.</p>
 
                 <dl class="ug-faq">
@@ -844,9 +883,9 @@
                 </dl>
             </section>
 
-            <!-- ───── SECTION 8: SCHEMA ───── -->
+            <!-- ───── SECTION 9: SCHEMA ───── -->
             <section id="schema" class="ug-section">
-                <h2>8. Object &amp; field mapping</h2>
+                <h2>9. Object &amp; field mapping</h2>
                 <p>Each component page has the full Object/Field Mapping diagram. Quick links:</p>
                 <ul>
                     <li><a href="/multidatepickdates.html#object-mapping">multiDatePickDates &mdash; schema mapping</a></li>
@@ -856,9 +895,9 @@
                 <p>Each diagram shows what wrapper prop maps to what object/field. The wrapper is fully object-agnostic &mdash; the bundled object/field names (<code>Schedule__c</code>, <code>Event__c</code>, <code>Resource__c</code>, <code>Sub_Block__c</code>) are just defaults. Point any wrapper prop at any custom object with the right field shape.</p>
             </section>
 
-            <!-- ───── SECTION 9: APEX SAMPLES ───── -->
+            <!-- ───── SECTION 10: APEX SAMPLES ───── -->
             <section id="apex" class="ug-section">
-                <h2>9. Apex sample code</h2>
+                <h2>10. Apex sample code</h2>
 
                 <h3>Reading <code>selectedDates</code> in a Flow</h3>
                 <p>Use the bundled <strong>Parse Date Entries from JSON</strong> invocable action to convert the wrapper's JSON output into a Flow-loopable collection.</p>
@@ -904,9 +943,9 @@
                 <p>Replace <code>Schedule__c</code> / <code>Event__c</code> / <code>Schedule_Date__c</code> / etc. with your own schema.</p>
             </section>
 
-            <!-- ───── SECTION 10: SECURITY ───── -->
+            <!-- ───── SECTION 11: SECURITY ───── -->
             <section id="security" class="ug-section">
-                <h2>10. Security &amp; accessibility</h2>
+                <h2>11. Security &amp; accessibility</h2>
                 <ul>
                     <li><strong>AppExchange Security Reviewed.</strong> The package passes Salesforce's Security Review and the <code>sf code-analyzer</code> AppExchange + Recommended:Security rule sets with zero violations.</li>
                     <li><strong>FLS-aware:</strong> every Apex method validates object + field access before SOQL/DML via <code>validateObjectAndFieldAccess</code>. All DML runs under <code>Database.insert(records, AccessLevel.USER_MODE)</code> so user permission checks are enforced at the database layer, not just the controller.</li>
@@ -915,9 +954,9 @@
                 </ul>
             </section>
 
-            <!-- ───── SECTION 11: HELP ───── -->
+            <!-- ───── SECTION 12: HELP ───── -->
             <section id="help" class="ug-section">
-                <h2>11. Questions or bugs?</h2>
+                <h2>12. Questions or bugs?</h2>
                 <p>Found a gap in this guide, or something broken in the package? We want to hear about it.</p>
                 <p><strong>Email:</strong> <a href="mailto:support@multidatepick.com">support@multidatepick.com</a></p>
             </section>
