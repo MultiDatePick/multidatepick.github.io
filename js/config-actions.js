@@ -158,6 +158,12 @@
             addBool('groupTimeSlotsByPeriod', cfg.Group_Time_Slots_By_Period__c);
             addBool('consolidateTimeSpan', cfg.Consolidate_Time_Span__c);
             addBool('appendDateTimeToName', cfg.Append_DateTime_To_Name__c);
+            // Time Grid Only — hide the calendar, show just the slot grid for one
+            // implied date (DateTime + Booking). Implied-date priority:
+            // timeGridDate (explicit) → timeGridDateField (host-record Date field) → today.
+            addBool('timeGridOnly', cfg.Time_Grid_Only__c);
+            addString('timeGridDate', cfg.Time_Grid_Date__c);
+            addString('timeGridDateField', cfg.Time_Grid_Date_Field__c);
         }
 
         // DateTime-only time props (Booking uses businessHoursStart/EndField on the

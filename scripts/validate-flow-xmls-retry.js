@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const RETRY = ['Interview_Scheduling', 'Maintenance_Windows', 'Meeting_Room_Booking', 'Tutoring_Sessions'];
+const RETRY = ['Interview_Scheduling', 'Maintenance_Windows', 'Meeting_Room_Booking', 'Single_Day_Time_Blocks'];
 const TMP_DIR = path.resolve(__dirname, '..', 'tmp', 'flow-validate');
 
 const results = { pass: [], fail: [] };
