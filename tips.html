@@ -116,6 +116,7 @@
                     <a href="#status">Status colors &amp; filtering</a>
                     <a href="#limits">Limiting selections</a>
                     <a href="#public-demo">Public guest demos</a>
+                    <a href="#which-record">Which record (static vs Flow)</a>
                 </nav>
             </div>
         </section>
@@ -210,12 +211,47 @@
                 <ol style="color:var(--gray-700,#374151);line-height:1.7;padding-left:22px;">
                     <li><strong>Object permissions</strong> — give the site Guest User Read (and Create, if guests submit) on each object. <em>(Guest licenses can't Edit — a "manage/edit" view is read-only for guests.)</em></li>
                     <li><strong>Field-level security</strong> on every field the component touches — including resource business-hours fields and closure time fields. A missing FLS makes the resource/blocked-date query fail.</li>
-                    <li><strong>Sharing rules</strong> — a guest sharing rule (Read) so the Guest User can actually see the records. Object + field access alone isn't enough; "Secure guest user record access" forces this.</li>
+                    <li><strong>Sharing rules</strong> — a guest sharing rule (Read) so the Guest User can actually see the records. Object + field access alone isn't enough; "Secure guest user record access" forces this. Two things trip people up here: <strong>(a)</strong> the object's <strong>external org-wide default must be Private</strong> for a guest sharing rule to take effect — on a Public Read/Write object the rule is a silent no-op; and <strong>(b)</strong> a guest sharing rule <strong>deployed via metadata doesn't auto-recalculate</strong> — click <em>Recalculate</em> once in Setup → Sharing Settings (rules created in the UI recalc on their own). If object + FLS + Apex access all look right but the guest still sees an empty calendar, it's almost always the recalc.</li>
                     <li><strong>Apex class access</strong> to <code>MultiDatePickController</code> on the guest profile or permission set — the component loads its data through it.</li>
                     <li><strong>Activate the site</strong> — publishing and activating are separate steps; make sure the site is activated so guests get the live experience.</li>
                 </ol>
                 <div class="callout"><div><strong>Tip:</strong> complete all five before testing as a guest. Apex class access (step 4) and site activation (step 5) are the two most commonly overlooked.</div></div>
                 <div class="callout"><div><strong>Combining components:</strong> you can place several components on one page (e.g. an owner "block times" calendar above a customer booker). They don't live-sync, so add a "refresh" prompt or button between sections so a block made above shows as greyed below.</div></div>
+                <div class="callout"><div><strong>Which record do guests see?</strong> On a public page you set a fixed <code>staticRecordId</code>, so <strong>every guest shares the same record</strong> — perfect for a demo sandbox. For per-user records (each person seeing only theirs) you'd drive the record from a Flow instead — see the next section.</div></div>
+            </div>
+        </section>
+
+        <!-- ═══════════ WHICH RECORD ═══════════ -->
+        <section class="section section-alt" id="which-record">
+            <div class="container" style="max-width:860px;">
+                <div class="section-header">
+                    <h2>Which record the component uses — <code>staticRecordId</code> vs. Flow</h2>
+                    <p>How the calendar knows <em>which</em> parent record to load and save against — and when to hardcode it versus resolve it dynamically.</p>
+                </div>
+                <p>The component chooses its parent record in this order:</p>
+                <table class="tip-table">
+                    <tr><th>Source</th><th>When it applies</th></tr>
+                    <tr><td><code>recordId</code> (automatic)</td><td>On a <strong>Lightning record page</strong>, Salesforce injects the record being viewed. Nothing to configure — the calendar hangs off that record.</td></tr>
+                    <tr><td><code>staticRecordId</code> (hardcoded)</td><td>On surfaces with <strong>no record context</strong> — App Pages, Home Pages, Experience site pages. You enter one fixed record Id, and <strong>every visitor sees the same record.</strong></td></tr>
+                    <tr><td>A <strong>Flow</strong> (dynamic)</td><td>When the record must be chosen <strong>at runtime</strong> — per logged-in user, from a URL parameter, or from an on-screen selection. The Flow resolves the Id and passes it into the component.</td></tr>
+                </table>
+
+                <h3 style="color:var(--blue-900,#0F2D52);margin-top:26px;">When <code>staticRecordId</code> is the right call</h3>
+                <ul style="color:var(--gray-700,#374151);line-height:1.7;">
+                    <li><strong>Public "try it live" demos</strong> — one shared sandbox record everyone plays with. A hardcoded Id is exactly right.</li>
+                    <li><strong>A single, org-wide calendar</strong> — one "Company Closures" record, or one shared resource everyone books, that never changes per user.</li>
+                    <li><strong>A fixed anchor on an App or Home page</strong> — a dashboard-style calendar that always points at the same master record.</li>
+                </ul>
+                <p style="font-size:.95rem;">Rule of thumb: reach for <code>staticRecordId</code> when the answer to <em>"whose record is this?"</em> is <em>"the same one for everybody."</em></p>
+
+                <h3 style="color:var(--blue-900,#0F2D52);margin-top:26px;">When to use a Flow instead</h3>
+                <ul style="color:var(--gray-700,#374151);line-height:1.7;">
+                    <li><strong>Per-user records</strong> — each person should see only their own (e.g. every contractor lands on their own PTO calendar). A Screen Flow does <code>Get Records</code> where the owner or a linked Contact = <code>{!$User.Id}</code>, stores the Id, and passes it to the component.</li>
+                    <li><strong>URL-driven</strong> — a Flow input variable reads <code>?id=…</code> from the link, so one page serves many records (works for guests too — no login needed).</li>
+                    <li><strong>Pick-first flows</strong> — screen 1 lets the user search or choose (an employee, a room, a client); screen 2 shows that record's calendar.</li>
+                </ul>
+                <div class="callout"><div><strong>How the Flow passes it in:</strong> drop the component on a Flow screen and every property — including <code>recordId</code> — becomes a Flow input. Bind <code>recordId</code> to the variable your Flow resolved. Same component, same field mappings; the only difference from <code>staticRecordId</code> is that the Id is computed at runtime instead of typed in once.</div></div>
+                <div class="callout"><div><strong>Guest sites &amp; per-user records:</strong> on a no-login public site, "the logged-in user" is a single shared guest, so <code>$User</code>-based per-user resolution doesn't apply. For a public site, either share one record via <code>staticRecordId</code> (simplest) or drive it from a URL parameter through a Flow. True per-user calendars need authenticated users.</div></div>
             </div>
         </section>
 
