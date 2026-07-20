@@ -116,6 +116,7 @@
                     <a href="#status">Status colors &amp; filtering</a>
                     <a href="#limits">Limiting selections</a>
                     <a href="#public-pages">Public guest pages</a>
+                    <a href="#permissions">Permissions &amp; FLS</a>
                     <a href="#which-record">Which record (static vs Flow)</a>
                 </nav>
             </div>
@@ -221,8 +222,37 @@
             </div>
         </section>
 
+        <!-- ═══════════ PERMISSIONS ═══════════ -->
+        <section class="section section-alt" id="permissions">
+            <div class="container" style="max-width:860px;">
+                <div class="section-header">
+                    <h2>Permissions &amp; field-level security</h2>
+                    <p>The components run Apex in the user's own context (USER_MODE), so <strong>whoever uses the calendar must have the right object, field, and record access</strong> — on a public page that's the site Guest User; on a record page it's the logged-in user. This is the most common setup snag.</p>
+                </div>
+
+                <p>In a permission set (or profile) for those users, grant:</p>
+                <ul style="color:var(--gray-700,#374151);line-height:1.7;padding-left:22px;">
+                    <li><strong>Object access</strong> — Read + Create on the booking/schedule object, plus any resource, closure, or child objects the component queries.</li>
+                    <li><strong>Field-level security — mind read vs. edit:</strong> <strong>Read</strong> on every field the calendar <em>displays</em> (the date, status, and each hover field); <strong>Edit</strong> on every field it <em>writes</em> — the date, start/end time, status, any second status/category field, the record-name field, and the relationship lookup to the parent. <strong>A field the component writes but the user can't edit will fail the save</strong>, even when reads look fine.</li>
+                    <li><strong>Access to referenced records</strong> — saving sets lookups (the parent via the relationship field, and the resource). The user needs at least <strong>Read</strong> on those target records, or the insert throws <code>INSUFFICIENT_ACCESS_ON_CROSS_REFERENCE_ENTITY</code>.</li>
+                    <li><strong>Apex class access</strong> to <code>MultiDatePickController</code>.</li>
+                </ul>
+
+                <table class="tip-table">
+                    <tr><th>Error you see</th><th>What's missing</th></tr>
+                    <tr><td>Record won't open / insufficient privileges</td><td>Object Read (or record-level sharing) on the parent object.</td></tr>
+                    <tr><td>"No read access to field <em>X</em> on object <em>Y</em>"</td><td><strong>Read</strong> FLS on a field the calendar displays (a status, hover, or date/time field).</td></tr>
+                    <tr><td>"…time group(s) failed to save" / "Failed to create bookings: Insert failed"</td><td><strong>Edit</strong> FLS on a field the save writes — often a status, second-status, or time field added later.</td></tr>
+                    <tr><td><code>INSUFFICIENT_ACCESS_ON_CROSS_REFERENCE_ENTITY</code></td><td>No access to a <em>referenced</em> record — the parent the lookup points to, or the resource.</td></tr>
+                </table>
+
+                <div class="callout"><div><strong>Even System Administrators need FLS on custom fields.</strong> The calendar enforces field security in the running user's context, so a brand-new custom field is invisible to <em>everyone</em> — admins included — until a permission set grants it. If a field seems to "not exist" at save time, it's almost always FLS, not a missing field.</div></div>
+                <div class="callout"><div><strong>Guests + standard objects (Contact / Account) are hard.</strong> Guest access to Contacts is heavily restricted (Contact is usually "Controlled by Parent," and an account-less Contact can't be shared to a guest at all). If a <em>public</em> page's booking links to a Contact or Account, expect cross-reference errors. Prefer a <strong>custom object</strong> for the parent your guests book against — or drive the page from an authenticated Flow (next section), where the logged-in user already has the access.</div></div>
+            </div>
+        </section>
+
         <!-- ═══════════ WHICH RECORD ═══════════ -->
-        <section class="section section-alt" id="which-record">
+        <section class="section" id="which-record">
             <div class="container" style="max-width:860px;">
                 <div class="section-header">
                     <h2>Which record the component uses — <code>staticRecordId</code> vs. Flow</h2>
