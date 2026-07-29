@@ -125,10 +125,31 @@
         <section class="section">
             <div class="container" style="max-width:880px;">
 
-                <figure class="sc-shot">
-                    <img src="images/marketing/all-three-clean.png" alt="MultiDatePick Salesforce calendar suite: Dates, DateTime, and Booking components on one Lightning record page" loading="lazy" data-zoomable>
-                    <figcaption>Three components, one package: Dates, DateTime, and Booking on a single Salesforce record page.</figcaption>
-                </figure>
+                <div class="mdp-carousel" data-autoplay-ms="7000" aria-label="MultiDatePick component screenshots">
+                    <div class="mdp-carousel__viewport">
+                        <ol class="mdp-carousel__track">
+                            <li class="mdp-carousel__slide is-active">
+                                <img src="images/marketing/dates-status-colors-clean.png" alt="MultiDatePick Dates component: a Salesforce multi-date calendar with status colors on each cell" loading="lazy" data-zoomable>
+                                <p class="mdp-carousel__caption"><strong>Dates</strong> - pick many days, ranges, and recurring patterns, with status colors on the calendar. Click to enlarge.</p>
+                            </li>
+                            <li class="mdp-carousel__slide">
+                                <img src="images/marketing/datetime-grid-clean.png" alt="MultiDatePick DateTime component: per-date time-slot grid for Salesforce scheduling" loading="lazy" data-zoomable>
+                                <p class="mdp-carousel__caption"><strong>Date Time</strong> - assign per-date time slots on a visual grid at 15, 30, or 60 minute intervals. Click to enlarge.</p>
+                            </li>
+                            <li class="mdp-carousel__slide">
+                                <img src="images/marketing/booking-grid-clean.png" alt="MultiDatePick Booking component: resource booking grid with capacity badges and conflict detection" loading="lazy" data-zoomable>
+                                <p class="mdp-carousel__caption"><strong>Booking</strong> - reserve resources with capacity tracking, availability, and conflict detection. Click to enlarge.</p>
+                            </li>
+                        </ol>
+                    </div>
+                    <button class="mdp-carousel__btn mdp-carousel__btn--prev" type="button" aria-label="Previous slide">&lsaquo;</button>
+                    <button class="mdp-carousel__btn mdp-carousel__btn--next" type="button" aria-label="Next slide">&rsaquo;</button>
+                    <div class="mdp-carousel__dots" role="tablist" aria-label="Slide navigation">
+                        <button type="button" class="mdp-carousel__dot is-active" aria-label="Slide 1" data-index="0"></button>
+                        <button type="button" class="mdp-carousel__dot" aria-label="Slide 2" data-index="1"></button>
+                        <button type="button" class="mdp-carousel__dot" aria-label="Slide 3" data-index="2"></button>
+                    </div>
+                </div>
 
                 <h2>Salesforce was built to store a date, not to schedule</h2>
                 <p class="sc-lead">Out of the box, your entire date toolbox is two things: a <strong>Date field</strong> that holds one day, and a pair of Date fields that hold a single <strong>start and end</strong> range. That is it. The moment a user needs anything a real calendar does, it falls apart.</p>
@@ -269,5 +290,51 @@
     </footer>
 
     <script src="js/main.js"></script>
+    <!-- Component carousel - vanilla JS, auto-advance + pause on hover (same as the home page) -->
+    <script>
+    (function () {
+        var carousel = document.querySelector('.mdp-carousel');
+        if (!carousel) return;
+        var slides   = carousel.querySelectorAll('.mdp-carousel__slide');
+        var dots     = carousel.querySelectorAll('.mdp-carousel__dot');
+        var prevBtn  = carousel.querySelector('.mdp-carousel__btn--prev');
+        var nextBtn  = carousel.querySelector('.mdp-carousel__btn--next');
+        var current  = 0;
+        var timerId  = null;
+        var autoMs   = parseInt(carousel.getAttribute('data-autoplay-ms') || '6000', 10);
+        function show(idx) {
+            var n = ((idx % slides.length) + slides.length) % slides.length;
+            slides[current].classList.remove('is-active');
+            dots[current].classList.remove('is-active');
+            slides[n].classList.add('is-active');
+            dots[n].classList.add('is-active');
+            current = n;
+        }
+        function start() {
+            stop();
+            timerId = setInterval(function () {
+                if (document.querySelector('.lightbox-overlay.open')) return;
+                show(current + 1);
+            }, autoMs);
+        }
+        function stop()  { if (timerId) { clearInterval(timerId); timerId = null; } }
+        if (prevBtn) prevBtn.addEventListener('click', function () { show(current - 1); start(); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { show(current + 1); start(); });
+        Array.prototype.forEach.call(dots, function (dot, i) {
+            dot.addEventListener('click', function () { show(i); start(); });
+        });
+        carousel.addEventListener('mouseenter', stop);
+        carousel.addEventListener('mouseleave', start);
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) stop(); else start();
+        });
+        carousel.addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowLeft')  { show(current - 1); start(); }
+            if (e.key === 'ArrowRight') { show(current + 1); start(); }
+        });
+        carousel.setAttribute('tabindex', '0');
+        start();
+    })();
+    </script>
 </body>
 </html>
