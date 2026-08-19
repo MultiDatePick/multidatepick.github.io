@@ -187,3 +187,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+/* ── Live demo click tracking ───────────────────────────────────────────
+ * The demo links point at an external Salesforce Experience site, so the
+ * UTM params on them only help if that org reports on them. This fires a
+ * GA4 event on OUR side so the click is counted regardless, and records
+ * which page sent it. Delegated, so it covers links added later.
+ * ------------------------------------------------------------------- */
+document.addEventListener('click', function (e) {
+    var link = e.target.closest('a[href*="orgfarm-71fc21cee4"]');
+    if (!link) return;
+    if (typeof gtag !== 'function') return;
+    var src = '';
+    try { src = new URL(link.href).searchParams.get('utm_content') || ''; } catch (err) { src = ''; }
+    gtag('event', 'live_demo_click', {
+        source_page: src || location.pathname,
+        link_text: (link.textContent || '').trim().slice(0, 60)
+    });
+});
