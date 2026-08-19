@@ -214,6 +214,48 @@
                     <li>Blackout and unavailable dates</li>
                     <li>Training and compliance sessions</li>
                 </ul>
+                <h2 style="margin-top:44px;">The configuration, in full</h2>
+
+                <p>Nothing here is code. These are properties you set in Lightning App Builder, or inputs you set on the component inside a Screen Flow. Point them at your own objects; the names below are only an example schema.</p>
+
+                <div class="sc-config">
+                    <div class="sc-config__head">Booking component &mdash; provider record page</div>
+                    <table>
+                        <tr><td>relatedObjectApiName</td><td><code>Assignment__c</code> &mdash; the record each booking creates</td></tr>
+                        <tr><td>relationshipFieldApiName</td><td><code>Provider__c</code> &mdash; the lookup back to the page's record</td></tr>
+                        <tr><td>dateFieldApiName</td><td><code>Assignment_Date__c</code></td></tr>
+                        <tr><td>recordNameField</td><td><code>Assignment_Name__c</code></td></tr>
+                        <tr><td>resourceObjectApiName</td><td><code>Job__c</code> &mdash; <strong>the resource is the job</strong>, not a room or a person</td></tr>
+                        <tr><td>resourceNameField</td><td><code>Name</code></td></tr>
+                        <tr><td>bookingResourceField</td><td><code>Job__c</code> &mdash; the lookup on the assignment</td></tr>
+                        <tr><td>capacityField</td><td><code>Openings_Per_Day__c</code> on the job, so a shift needing four people stays open until it has four</td></tr>
+                        <tr><td>businessHoursStartField<br>businessHoursEndField</td><td><code>Shift_Start__c</code> / <code>Shift_End__c</code> on the job, so nights and days differ per role</td></tr>
+                        <tr><td>statusField</td><td><code>Status__c</code></td></tr>
+                        <tr><td>statusColors</td><td><code>Submitted:#60a5fa;Confirmed:#22C55E;Credentialing:#fbbf24;Worked:#a855f7;Cancelled:#a1a8b5</code></td></tr>
+                        <tr><td>secondStatusField</td><td><code>Shift_Type__c</code> &mdash; day, night or call, shown alongside status</td></tr>
+                        <tr><td>enableEditMode</td><td><code>true</code> &mdash; recruiters reassign and cancel inline</td></tr>
+                        <tr><td>twoMonthView</td><td><code>true</code> &mdash; assignments cross month boundaries constantly</td></tr>
+                        <tr><td>preloadExistingDates</td><td><code>true</code>, with <code>preloadMode = editable</code></td></tr>
+                    </table>
+                    <div class="sc-config__note"><strong>In a Screen Flow</strong>, the same inputs apply, plus <code>recordId</code> pointing at the provider. Set every Boolean explicitly with <code>$GlobalConstant.True</code> or <code>$GlobalConstant.False</code>: a blank Boolean in Flow is null, not false, and the component cannot tell the difference.</div>
+                </div>
+
+                <div class="sc-config">
+                    <div class="sc-config__head">Candidate availability &mdash; the simpler Date component</div>
+                    <table>
+                        <tr><td>relatedObjectApiName</td><td><code>Availability__c</code></td></tr>
+                        <tr><td>relationshipFieldApiName</td><td><code>Provider__c</code></td></tr>
+                        <tr><td>dateFieldApiName</td><td><code>Available_Date__c</code></td></tr>
+                        <tr><td>showRecurringPattern</td><td><code>true</code> &mdash; "every other Tuesday" without a paper calendar</td></tr>
+                        <tr><td>endDateField</td><td>set it to consolidate consecutive days into one record with a start and end; leave it blank for one record per day</td></tr>
+                        <tr><td>statusField</td><td><code>Status__c</code>, so tentative and confirmed availability read differently</td></tr>
+                    </table>
+                    <div class="sc-config__note"><code>endDateField</code> is the single most consequential property here. It decides whether six weeks of Monday-to-Friday availability is 30 records or 6, and changing it later means migrating data, not just editing a page.</div>
+                </div>
+
+                <p>Once a configuration works, save it from the Setup Wizard and it becomes a <code>Config__mdt</code> record. Every other placement then needs one property: <code>configName</code>. See <a href="/blog/salesforce-calendar-setup-wizard.html">how the wizard builds it</a>.</p>
+
+
                 <div class="sc-related">
                     <h3>Related</h3>
                     <ul>

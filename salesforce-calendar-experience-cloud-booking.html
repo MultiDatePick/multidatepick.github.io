@@ -169,6 +169,37 @@
                 </div>
                 <h2 style="margin-top:44px;">Guest users, honestly</h2>
                 <p>Public guest access works, and there are two Salesforce platform rules to plan around rather than fight. Guests can read and create records but never edit or delete them, which is a Salesforce licensing limit that applies to every app on the platform, not something this one imposes. Plan guest-facing pages as create-only. And guest-created records need a default owner set on the site, or the insert fails. Both are one-time setup steps, and both are covered in the user guide.</p>
+                <h2 style="margin-top:44px;">The configuration, in full</h2>
+
+                <p>Experience Cloud placement is the same component with one extra property, because a public page has no record context to inherit.</p>
+
+                <div class="sc-config">
+                    <div class="sc-config__head">Experience Builder &mdash; public booking page</div>
+                    <table>
+                        <tr><td>staticRecordId</td><td><strong>the property that makes this work.</strong> App Pages, Home Pages and Experience Sites have no automatic <code>recordId</code>, so you name the parent record everyone books against</td></tr>
+                        <tr><td>relatedObjectApiName</td><td><code>Booking__c</code></td></tr>
+                        <tr><td>relationshipFieldApiName</td><td>the lookup back to that parent</td></tr>
+                        <tr><td>dateFieldApiName</td><td><code>Booking_Date__c</code></td></tr>
+                        <tr><td>resourceObjectApiName</td><td>whatever visitors choose between: an advisor, a room, a piece of equipment</td></tr>
+                        <tr><td>capacityField</td><td>so a session with twenty seats closes at twenty rather than at one</td></tr>
+                        <tr><td>businessHoursStartField<br>businessHoursEndField</td><td>on the resource, so you publish only the hours you actually offer</td></tr>
+                        <tr><td>conflictBehavior</td><td><code>block</code> &mdash; on a public page a clash must never save</td></tr>
+                        <tr><td>enableEditMode</td><td><code>false</code> for guests. Guest users cannot edit or delete records anyway, so leaving it on promises something the platform will not deliver</td></tr>
+                        <tr><td>preloadExistingDates</td><td><code>true</code> with <code>preloadMode = readonly</code> if you want visitors to see what is already taken without touching it</td></tr>
+                    </table>
+                    <div class="sc-config__note"><strong>If everyone should not share one parent record</strong>, drive the page from a Screen Flow instead and pass <code>recordId</code>, or use <code>parentRecordIdField</code> to resolve the parent from a lookup on the running user's record.</div>
+                </div>
+
+                <div class="sc-config">
+                    <div class="sc-config__head">Two org-level settings, not component properties</div>
+                    <table>
+                        <tr><td>Default record owner</td><td>Experience Workspaces &rarr; Administration &rarr; Preferences &rarr; Record Ownership. Guests cannot own records, so without this every insert fails with a transfer error</td></tr>
+                        <tr><td>Guest sharing rule</td><td>guests need read access to the resource and parent records they reference, or the insert is rejected on the cross-reference</td></tr>
+                    </table>
+                    <div class="sc-config__note">Both are one-time setup, and both fail in ways that look like a component bug rather than a permission gap. Covered in <a href="/home-app-experience.html">App, Home &amp; Experience Pages</a>.</div>
+                </div>
+
+
                 <div class="sc-related">
                     <h3>Related</h3>
                     <ul>

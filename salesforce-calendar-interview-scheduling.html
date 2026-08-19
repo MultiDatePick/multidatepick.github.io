@@ -176,6 +176,40 @@
                 </figure>
                 <h2 style="margin-top:44px;">Or drive it from a Screen Flow</h2>
                 <p>If interview scheduling already lives inside a recruiting flow, the calendar goes in the flow. The selection comes back as <code>selectedDatesWithTimesJson</code>, conflicts come back as <code>bookingConflictDates</code>, and the flow decides what to do next: send the invite, update the submittal, notify the panel.</p>
+                <h2 style="margin-top:44px;">The configuration, in full</h2>
+
+                <p>Point these at your own objects. The names below are an example schema, and none of it is code.</p>
+
+                <div class="sc-config">
+                    <div class="sc-config__head">Booking component &mdash; candidate record page</div>
+                    <table>
+                        <tr><td>relatedObjectApiName</td><td><code>Interview__c</code></td></tr>
+                        <tr><td>relationshipFieldApiName</td><td><code>Candidate__c</code></td></tr>
+                        <tr><td>dateFieldApiName</td><td><code>Interview_Date__c</code></td></tr>
+                        <tr><td>bookingStartTimeField<br>bookingEndTimeField</td><td><code>Start_Time__c</code> / <code>End_Time__c</code></td></tr>
+                        <tr><td>resourceObjectApiName</td><td><code>Interviewer__c</code> &mdash; or a panel record, if several people sit in</td></tr>
+                        <tr><td>bookingResourceField</td><td><code>Interviewer__c</code> on the interview</td></tr>
+                        <tr><td>businessHoursStartField<br>businessHoursEndField</td><td>on the interviewer, so each person's availability window is their own</td></tr>
+                        <tr><td>timeInterval</td><td><code>45</code> &mdash; interviews rarely fit a 30-minute grid</td></tr>
+                        <tr><td>groupTimeSlotsByPeriod</td><td><code>true</code> &mdash; morning / afternoon / evening, so a dense day stays scannable</td></tr>
+                        <tr><td>conflictBehavior</td><td><code>block</code> to refuse a clash outright, <code>skip</code> to save the free slots and report the rest</td></tr>
+                        <tr><td>capacityField</td><td>only if a slot takes several interviewers. A panel of three is a capacity question, not a conflict</td></tr>
+                        <tr><td>enableEditMode</td><td><code>true</code> &mdash; reschedule and reassign without deleting</td></tr>
+                    </table>
+                    <div class="sc-config__note"><strong>conflictBehavior is the property that matters most here.</strong> <code>block</code> is right when every slot is deliberate. <code>skip</code> is the humane default when someone selects several dates at once and two happen to clash: the other ones still save, and <code>bookingConflictDates</code> tells the flow exactly which did not.</div>
+                </div>
+
+                <div class="sc-config">
+                    <div class="sc-config__head">Screen Flow &mdash; recruiter scheduling a round</div>
+                    <table>
+                        <tr><td>recordId</td><td>the candidate record, from a flow variable</td></tr>
+                        <tr><td>Outputs</td><td><code>selectedDatesWithTimesJson</code> for the slots picked, <code>bookingSuccessCount</code> and <code>bookingConflictDates</code> for what actually saved</td></tr>
+                        <tr><td>Parser</td><td>the <code>MultiDatePickParser</code> invocable action turns that JSON into a loopable collection with <code>fromDate</code>, <code>startTime</code>, <code>endTime</code>, <code>resourceId</code></td></tr>
+                    </table>
+                    <div class="sc-config__note">That is what makes a flow able to send the invite, update the submittal and notify the panel in the same run. Set Booleans with <code>$GlobalConstant.True</code> / <code>False</code>; a blank Boolean is null, not false.</div>
+                </div>
+
+
                 <div class="sc-related">
                     <h3>Related</h3>
                     <ul>

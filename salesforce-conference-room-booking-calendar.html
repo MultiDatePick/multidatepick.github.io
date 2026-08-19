@@ -174,6 +174,40 @@
                     <img src="images/marketing/salesforce-calendar-capacity.png" alt="Salesforce desk hoteling calendar with capacity badges showing how many spaces remain in each slot" loading="lazy" data-zoomable>
                     <figcaption>Capacity badges for desk hoteling, where a zone takes several people per slot.</figcaption>
                 </figure>
+                <h2 style="margin-top:44px;">The configuration, in full</h2>
+
+                <p>Two variants, because a meeting room and a desk zone are the same component with one property changed.</p>
+
+                <div class="sc-config">
+                    <div class="sc-config__head">Meeting room &mdash; one booking per slot</div>
+                    <table>
+                        <tr><td>relatedObjectApiName</td><td><code>Room_Booking__c</code></td></tr>
+                        <tr><td>relationshipFieldApiName</td><td><code>Requester__c</code> or the parent record the page sits on</td></tr>
+                        <tr><td>dateFieldApiName</td><td><code>Booking_Date__c</code></td></tr>
+                        <tr><td>bookingStartTimeField<br>bookingEndTimeField</td><td><code>Start_Time__c</code> / <code>End_Time__c</code></td></tr>
+                        <tr><td>resourceObjectApiName</td><td><code>Room__c</code></td></tr>
+                        <tr><td>bookingResourceField</td><td><code>Room__c</code> on the booking</td></tr>
+                        <tr><td>businessHoursStartField<br>businessHoursEndField</td><td>on the room, so the 24-hour lab and the 9-to-5 boardroom behave differently on the same grid</td></tr>
+                        <tr><td>resourceFilterField<br>resourceFilterValue</td><td>narrow the picker by building, floor or capacity. Comma separates OR, semicolon separates AND</td></tr>
+                        <tr><td>blockedDatesSourceObject</td><td>point at your closure records so maintenance days grey out automatically</td></tr>
+                        <tr><td>conflictBehavior</td><td><code>block</code> &mdash; a room genuinely cannot take two bookings</td></tr>
+                    </table>
+                </div>
+
+                <div class="sc-config">
+                    <div class="sc-config__head">Desk hoteling &mdash; several people per slot</div>
+                    <table>
+                        <tr><td>capacityField</td><td><code>Desks_Available__c</code> on the zone. This one property is the whole difference: the slot shows a live X/Y badge and stays open until it fills</td></tr>
+                        <tr><td>capacityAggregation</td><td><code>Combined</code> to sum capacity across selected zones, <code>Distinct</code> to count one event shared across zones once</td></tr>
+                        <tr><td>showAvailabilityCount</td><td><code>true</code> &mdash; the "3 of 8 free" badge is the point</td></tr>
+                        <tr><td>Multi-resource</td><td>let people book several zones at once when an event needs more than one space</td></tr>
+                    </table>
+                    <div class="sc-config__note">Everything else is identical to the meeting-room config. Treating a capacity resource as a conflict resource means nobody can ever be the second booking, which is the most common misconfiguration on this pattern.</div>
+                </div>
+
+                <p>Both patterns ship as importable configurations in the <a href="/configlibrary.html">config library</a>, so you can start from a working one rather than a blank form.</p>
+
+
                 <div class="sc-related">
                     <h3>Related</h3>
                     <ul>
