@@ -114,10 +114,10 @@
             <div class="container" style="max-width:820px;">
                 <p class="sc-meta">Published 20 August 2026 &middot; MultiDatePick</p>
 
-                <p class="sc-lead">Every Salesforce admin gets this request eventually. A recruiter wants to capture the twelve days a candidate is available. A facility manager wants to close a building for six weeks. Someone in HR wants a two-week leave range that is one request, not ten. The ask sounds trivial. It is not, and the reason is worth understanding before you reach for a workaround.</p>
+                <p class="sc-lead">Every Salesforce admin gets this request eventually. Capture the twelve days a candidate is available. Close a building for six weeks. Log a two-week leave range as one request instead of ten. The ask sounds trivial, and it is not.</p>
 
-                <h2 style="margin-top:44px;">A date field holds one date</h2>
-                <p>That is not something anyone got wrong. It is the correct design for a field. The trouble starts when the business need is a <em>set</em> of dates and the only native container is a single value. From there an admin has four options, and each one trades away something different.</p>
+                <h2 style="margin-top:44px;">Four workarounds, four leaks</h2>
+                <p>A date field holding one value is the correct design for a field. The trouble starts when the business need is a <em>set</em> of dates and the only native container is a single value.</p>
 
                 <table class="sc-table">
                     <tr>
@@ -128,48 +128,41 @@
                     <tr>
                         <td>Multiple date fields</td>
                         <td class="sc-old">Works immediately, no code</td>
-                        <td class="sc-new">You have to guess the maximum up front. Reporting on which days means unioning N columns. Ten fields is unusable and still not enough.</td>
+                        <td class="sc-new">You guess the maximum up front, and reporting means unioning N columns. Ten fields is unusable and still not enough.</td>
                     </tr>
                     <tr>
                         <td>Start date and end date</td>
                         <td class="sc-old">Two fields cover a whole range</td>
-                        <td class="sc-new">Only contiguous ranges. A candidate free on Mondays and Thursdays is not a range, and neither is a schedule with a gap in the middle.</td>
+                        <td class="sc-new">Contiguous ranges only. Mondays and Thursdays is not a range, and neither is a schedule with a gap.</td>
                     </tr>
                     <tr>
                         <td>A child record per date</td>
-                        <td class="sc-old">The correct data model, and it reports properly</td>
-                        <td class="sc-new">The data model was never the hard part. Entering twelve child records one at a time is, and that is what the user actually experiences.</td>
+                        <td class="sc-old">The right data model, reports properly</td>
+                        <td class="sc-new">The data model was never the hard part. Entering twelve records one at a time is.</td>
                     </tr>
                     <tr>
                         <td>A screen flow with a loop</td>
-                        <td class="sc-old">Declarative, and it does produce child records</td>
-                        <td class="sc-new">One date per screen. Twelve dates is twelve round trips, with no way to see what has already been chosen or to change your mind about day three.</td>
+                        <td class="sc-old">Declarative, produces child records</td>
+                        <td class="sc-new">One date per screen, no view of what you already picked, no changing your mind about day three.</td>
                     </tr>
                 </table>
 
-                <p style="margin-top:28px;">The fourth one is where most orgs land, and it is the most revealing. The flow is not badly built. It is doing exactly what it was asked to do. The problem is that the interaction is one at a time while the task is all at once, and no amount of flow logic closes that gap.</p>
+                <p style="margin-top:28px;">Most orgs land on the fourth, and it is the most revealing. That flow is not badly built. It is doing exactly what it was asked. The interaction is one at a time while the task is all at once, and no amount of flow logic closes that gap.</p>
 
-                <h2 style="margin-top:44px;">What it actually costs</h2>
-                <p>The cost is rarely the admin's time. It is that the data stops being trustworthy.</p>
-                <p>When capturing twelve dates takes twelve interactions, people stop capturing twelve dates. They enter the first and the last and treat the middle as understood. They round a scattered availability pattern into a range because the range is what the form accepts. Six months later someone builds a report on that field and the numbers are quietly wrong, not because anything broke, but because the input never matched reality.</p>
-                <p>That is the failure worth naming. A hard-to-use form does not produce less data. It produces confident, incorrect data.</p>
+                <h2 style="margin-top:44px;">What it costs</h2>
+                <p>When capturing twelve dates takes twelve interactions, people stop capturing twelve dates. They enter the first and the last and treat the middle as understood. They round a scattered pattern into a range because the range is what the form accepts. Six months later a report on that field is quietly wrong, not because anything broke, but because the input never matched reality. A hard-to-use form does not produce less data. It produces confident, incorrect data.</p>
 
                 <h2 style="margin-top:44px;">What changes when selection is the unit</h2>
-                <p>Flip the interaction and the data model stops fighting the user. Show a calendar, let someone click the days that apply, and write one record per selection on save. Those are the same child records a flow loop would have created. The difference is that choosing them took one pass, the person could see the whole month while deciding, and unclicking day three cost nothing.</p>
-                <p>Once selection is the unit of work, several things that were awkward become ordinary:</p>
+                <p>Show a calendar, let someone click the days that apply, write one record per selection on save. Same child records a flow loop would have created, chosen in one pass, with the whole month visible while deciding. Three things stop being awkward:</p>
                 <ul class="sc-list">
-                    <li><strong>Scattered dates are as easy as ranges.</strong> Every second Tuesday takes the same effort as a solid week.</li>
-                    <li><strong>Adjacent dates can collapse into a range</strong> when a range is genuinely what you want, so a Monday to Friday closure becomes one record instead of five.</li>
-                    <li><strong>Existing records show up on the calendar</strong>, so whoever is choosing can see what is already booked rather than finding out on save.</li>
-                    <li><strong>Status is visible while choosing.</strong> Confirmed, tentative and cancelled are colors on the grid, not a column you check afterward.</li>
+                    <li><strong>Scattered dates cost the same as ranges.</strong> Every second Tuesday is no harder than a solid week.</li>
+                    <li><strong>Adjacent dates can collapse into a range</strong> when that is what you actually want, so a Monday to Friday closure is one record, not five.</li>
+                    <li><strong>Existing records show on the calendar</strong>, so whoever is choosing sees what is already booked instead of finding out on save.</li>
                 </ul>
 
-                <p style="margin-top:28px;">None of this needs a new object or a different data model. It is the same child records, entered the way the task actually works.</p>
+                <p style="margin-top:28px;">If you are booking one appointment at a time against a pool of service resources with skills and territories, that is a scheduling engine problem and this is not one. This is for the case where somebody needs to say "these days, on this record."</p>
 
-                <h2 style="margin-top:44px;">Where this does not apply</h2>
-                <p>If you are booking one appointment at a time against a pool of service resources with skills and territories, that is a scheduling engine problem and this is not one. The pattern here is for the case where somebody needs to say "these days, on this record," and the current answer is either ten fields or ten screens.</p>
-
-                <p class="sc-lead" style="margin-top:32px;">MultiDatePick is three Salesforce components built on that idea. They run on Lightning record pages, App and Home pages, Flow screens and Experience Cloud sites, and they read and write your own objects and fields rather than requiring theirs.</p>
+                <p class="sc-lead" style="margin-top:32px;">MultiDatePick is three Salesforce components built on that idea. They run on Lightning record pages, App and Home pages, Flow screens and Experience Cloud sites, and they read and write your own objects and fields.</p>
             </div>
         </section>
 
