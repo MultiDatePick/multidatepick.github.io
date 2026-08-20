@@ -15,22 +15,22 @@
   </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog | Salesforce Scheduling Notes | MultiDatePick</title>
-    <meta name="description" content="Practical notes on scheduling in Salesforce: calendars, time slot pickers, recurring date patterns, conflict detection, capacity, and accessibility.">
-    <link rel="canonical" href="https://multidatepick.com/blog/index.html">
+    <title>Why Salesforce Has No Multi-Date Calendar | MultiDatePick</title>
+    <meta name="description" content="A Salesforce date field holds one date. Every workaround for capturing many at once leaks somewhere. Here is what an admin actually runs into, and what changes when selection is the unit of work.">
+    <link rel="canonical" href="https://multidatepick.com/blog/why-salesforce-has-no-multi-date-calendar.html">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/solutions.css">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <meta property="og:title" content="The MultiDatePick Blog">
-    <meta property="og:description" content="Practical notes on scheduling in Salesforce.">
+    <meta property="og:title" content="Why Salesforce Has No Multi-Date Calendar">
+    <meta property="og:description" content="A date field holds one date. Every workaround for capturing many at once leaks somewhere.">
     <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
-    <meta property="og:url" content="https://multidatepick.com/blog/index.html">
+    <meta property="og:url" content="https://multidatepick.com/blog/why-salesforce-has-no-multi-date-calendar.html">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="The MultiDatePick Blog">
-    <meta name="twitter:description" content="Practical notes on scheduling in Salesforce.">
+    <meta name="twitter:title" content="Why Salesforce Has No Multi-Date Calendar">
+    <meta name="twitter:description" content="A date field holds one date. Every workaround for capturing many at once leaks somewhere.">
     <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
 </head>
 <body>
@@ -84,75 +84,100 @@
         </div>
     </header>
     <main class="page-content">
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-dates-status.png", "caption": "Salesforce calendar with many dates selected at once, each saved as its own record with a color-coded status", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}}
+            ]
+        }
+        </script>
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Why Salesforce Has No Multi-Date Calendar",
+            "datePublished": "2026-08-20",
+            "dateModified": "2026-08-20",
+            "author": { "@type": "Organization", "name": "MultiDatePick" },
+            "publisher": { "@type": "Organization", "name": "MultiDatePick" },
+            "mainEntityOfPage": "https://multidatepick.com/blog/why-salesforce-has-no-multi-date-calendar.html"
+        }
+        </script>
         <section class="guide-hero">
             <div class="container">
-                <h1>The MultiDatePick Blog</h1>
-                <p class="subtitle">Practical notes on scheduling in Salesforce: calendars, time slots, recurrence, conflicts, and the platform limits nobody warns you about.</p>
+                <h1>Why Salesforce Has No Multi-Date Calendar</h1>
+                <p class="subtitle">A date field holds one date. That is the whole problem, and every workaround for it leaks somewhere.</p>
             </div>
         </section>
         <section class="section">
             <div class="container" style="max-width:820px;">
-                <div class="sc-postlist">
-                    <div class="sc-post">
-                        <h2><a href="/blog/why-salesforce-has-no-multi-date-calendar.html">Why Salesforce Has No Multi-Date Calendar</a></h2>
-                        <p class="sc-meta">20 August 2026</p>
-                        <p>A date field holds one date, and every workaround for capturing many at once leaks somewhere: ten columns you have to guess at, ranges that cannot skip a day, or a flow loop that asks one screen at a time. What it costs when the form stops matching reality, and what changes when selection becomes the unit of work.</p>
-                        <p><a href="/blog/why-salesforce-has-no-multi-date-calendar.html">Read it &rsaquo;</a></p>
-                    </div>
+                <p class="sc-meta">Published 20 August 2026 &middot; MultiDatePick</p>
 
-                    <div class="sc-post">
-                        <h2><a href="/blog/salesforce-calendar-setup-wizard.html">Configuring a Salesforce Calendar Without Writing Code</a></h2>
-                        <p class="sc-meta">19 August 2026</p>
-                        <p>Sixty-plus properties sounds like a project. It is a wizard, three questions about the shape of your records, and a live preview that renders the real component before you save. Plus what it writes: a deployable, reusable Config__mdt record.</p>
-                        <p><a href="/blog/salesforce-calendar-setup-wizard.html">Read it &rsaquo;</a></p>
-                    </div>
+                <p class="sc-lead">Every Salesforce admin gets this request eventually. A recruiter wants to capture the twelve days a candidate is available. A facility manager wants to close a building for six weeks. Someone in HR wants a two-week leave range that is one request, not ten. The ask sounds trivial. It is not, and the reason is worth understanding before you reach for a workaround.</p>
 
+                <h2 style="margin-top:44px;">A date field holds one date</h2>
+                <p>That is not something anyone got wrong. It is the correct design for a field. The trouble starts when the business need is a <em>set</em> of dates and the only native container is a single value. From there an admin has four options, and each one trades away something different.</p>
 
-                    <div class="sc-post">
-                        <h2><a href="/blog/salesforce-vpat-accessibility.html">Salesforce VPAT: What Admins Need to Know</a></h2>
-                        <p class="sc-meta">12 August 2026</p>
-                        <p>What a VPAT is, why it appears during procurement rather than evaluation, how to read the conformance levels, and four questions worth asking a vendor. Plus why calendars are unusually hard to make accessible.</p>
-                        <p><a href="/blog/salesforce-vpat-accessibility.html">Read it &rsaquo;</a></p>
-                    </div>
+                <table class="sc-table">
+                    <tr>
+                        <th style="width:26%;">Workaround</th>
+                        <th style="width:37%;">What it gets you</th>
+                        <th style="width:37%;">Where it leaks</th>
+                    </tr>
+                    <tr>
+                        <td>Multiple date fields</td>
+                        <td class="sc-old">Works immediately, no code</td>
+                        <td class="sc-new">You have to guess the maximum up front. Reporting on which days means unioning N columns. Ten fields is unusable and still not enough.</td>
+                    </tr>
+                    <tr>
+                        <td>Start date and end date</td>
+                        <td class="sc-old">Two fields cover a whole range</td>
+                        <td class="sc-new">Only contiguous ranges. A candidate free on Mondays and Thursdays is not a range, and neither is a schedule with a gap in the middle.</td>
+                    </tr>
+                    <tr>
+                        <td>A child record per date</td>
+                        <td class="sc-old">The correct data model, and it reports properly</td>
+                        <td class="sc-new">The data model was never the hard part. Entering twelve child records one at a time is, and that is what the user actually experiences.</td>
+                    </tr>
+                    <tr>
+                        <td>A screen flow with a loop</td>
+                        <td class="sc-old">Declarative, and it does produce child records</td>
+                        <td class="sc-new">One date per screen. Twelve dates is twelve round trips, with no way to see what has already been chosen or to change your mind about day three.</td>
+                    </tr>
+                </table>
 
-                    <div class="sc-post">
-                        <h2><a href="/blog/prevent-double-booking-in-salesforce.html">Preventing Double-Booking in Salesforce</a></h2>
-                        <p class="sc-meta">21 July 2026</p>
-                        <p>Validation rules cannot see other records, and duplicate rules match on equality while overlap is not equality. Why conflict and capacity are different problems, and why the fix belongs at selection time rather than save time.</p>
-                        <p><a href="/blog/prevent-double-booking-in-salesforce.html">Read it &rsaquo;</a></p>
-                    </div>
+                <p style="margin-top:28px;">The fourth one is where most orgs land, and it is the most revealing. The flow is not badly built. It is doing exactly what it was asked to do. The problem is that the interaction is one at a time while the task is all at once, and no amount of flow logic closes that gap.</p>
 
-                    <div class="sc-post">
-                        <h2><a href="/blog/salesforce-calendar-time-slot-picker.html">Building a Calendar Time Slot Picker in Salesforce</a></h2>
-                        <p class="sc-meta">27 June 2026</p>
-                        <p>Salesforce gives you a date picker and a time field, not a grid of selectable slots. What a real slot picker has to do, and the parts of building one that nobody scopes: overlap math, timezones, race conditions, and keyboard accessibility.</p>
-                        <p><a href="/blog/salesforce-calendar-time-slot-picker.html">Read it &rsaquo;</a></p>
-                    </div>
+                <h2 style="margin-top:44px;">What it actually costs</h2>
+                <p>The cost is rarely the admin's time. It is that the data stops being trustworthy.</p>
+                <p>When capturing twelve dates takes twelve interactions, people stop capturing twelve dates. They enter the first and the last and treat the middle as understood. They round a scattered availability pattern into a range because the range is what the form accepts. Six months later someone builds a report on that field and the numbers are quietly wrong, not because anything broke, but because the input never matched reality.</p>
+                <p>That is the failure worth naming. A hard-to-use form does not produce less data. It produces confident, incorrect data.</p>
 
-                    <div class="sc-post">
-                        <h2><a href="/blog/recurring-date-patterns-in-salesforce.html">Recurring Date Patterns in Salesforce</a></h2>
-                        <p class="sc-meta">4 June 2026</p>
-                        <p>Every other Tuesday, the 2nd and 4th Friday, the last Saturday. Salesforce recurrence stops at Events and Tasks. The two kinds of recurrence, why "last" breaks hand-rolled logic, and whether to store the rule or the dates.</p>
-                        <p><a href="/blog/recurring-date-patterns-in-salesforce.html">Read it &rsaquo;</a></p>
-                    </div>
+                <h2 style="margin-top:44px;">What changes when selection is the unit</h2>
+                <p>Flip the interaction and the data model stops fighting the user. Show a calendar, let someone click the days that apply, and write one record per selection on save. Those are the same child records a flow loop would have created. The difference is that choosing them took one pass, the person could see the whole month while deciding, and unclicking day three cost nothing.</p>
+                <p>Once selection is the unit of work, several things that were awkward become ordinary:</p>
+                <ul class="sc-list">
+                    <li><strong>Scattered dates are as easy as ranges.</strong> Every second Tuesday takes the same effort as a solid week.</li>
+                    <li><strong>Adjacent dates can collapse into a range</strong> when a range is genuinely what you want, so a Monday to Friday closure becomes one record instead of five.</li>
+                    <li><strong>Existing records show up on the calendar</strong>, so whoever is choosing can see what is already booked rather than finding out on save.</li>
+                    <li><strong>Status is visible while choosing.</strong> Confirmed, tentative and cancelled are colors on the grid, not a column you check afterward.</li>
+                </ul>
 
-                    <div class="sc-post">
-                        <h2><a href="/blog/multiple-dates-in-a-salesforce-screen-flow.html">How to Let Users Pick Multiple Dates in a Salesforce Screen Flow</a></h2>
-                        <p class="sc-meta">1 May 2026</p>
-                        <p>Flow captures one date per element. Five common workarounds, why the start-and-end-date version is quietly wrong, and how to get a real collection back into your flow.</p>
-                        <p><a href="/blog/multiple-dates-in-a-salesforce-screen-flow.html">Read it &rsaquo;</a></p>
-                    </div>
+                <p style="margin-top:28px;">None of this needs a new object or a different data model. It is the same child records, entered the way the task actually works.</p>
 
-                </div>
-                <div class="sc-cta-band">
-                    <h2>The calendar behind the posts</h2>
-                    <p>Coming to the Salesforce AppExchange in 2026. Tell us where to send the launch note.</p>
-                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancialvforcesite?utm_source=multidatepick&utm_medium=cta&utm_campaign=live_demo&utm_content=blog-index" class="btn btn-demo" target="_blank" rel="noopener">Try the Live Demo</a>
-                        <a href="/notify-me-at-launch.html" class="btn btn-primary">Notify Me at Launch</a>
-                        <a href="/salesforce-calendar.html" class="btn btn-secondary">See the Salesforce Calendar</a>
-                    </div>
-                </div>
+                <h2 style="margin-top:44px;">Where this does not apply</h2>
+                <p>If you are booking one appointment at a time against a pool of service resources with skills and territories, that is a scheduling engine problem and this is not one. The pattern here is for the case where somebody needs to say "these days, on this record," and the current answer is either ten fields or ten screens.</p>
+
+                <p class="sc-lead" style="margin-top:32px;">MultiDatePick is three Salesforce components built on that idea. They run on Lightning record pages, App and Home pages, Flow screens and Experience Cloud sites, and they read and write your own objects and fields rather than requiring theirs.</p>
+            </div>
+        </section>
+
+        <section class="sc-cta-band">
+            <div class="container">
+                <h2>See it on a real Salesforce org</h2>
+                <p>A public site running the real components. No install, no login, and the demo data resets every hour, so click anything.</p>
+                <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancialvforcesite?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=blog-multi-date-calendar" target="_blank" rel="noopener" class="btn" style="background:#F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.35);">Launch the live demo &rarr;</a>
             </div>
         </section>
     </main>
