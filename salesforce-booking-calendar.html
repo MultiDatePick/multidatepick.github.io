@@ -165,9 +165,11 @@
                 <h2>Overview</h2>
                 <p>Booking is the most advanced component in the MultiDatePick suite. It combines the calendar with a resource selection panel and a visual time-slot grid. Users pick a resource (or multiple resources), select dates, and then click available time slots to create bookings. The component queries your resource object for available items, checks for existing bookings on save to detect conflicts, and creates booking records automatically.</p>
                 <p>Capacity mode supports multiple bookings per time slot - perfect for training rooms, class enrollments, and hot-desk pools. Live badges show "3/10" fill counts. Status colors distinguish bookings by any picklist values you define - Confirmed, Tentative, Cancelled, or anything else. Edit mode lets users modify, reassign, or delete existing bookings inline. Business hours are pulled from each resource record, so different resources can have different availability windows.</p>
+                <p>This is the component where all five layouts earn their keep, because it is the only one that knows about resources and capacity: <code>timeline</code> for which resource is free, <code>week</code> for who is free at 2pm, and <code>utilization</code> for who is over capacity. See <a href="#views">Views</a> below.</p>
                 <div class="toc">
                     <h4>On This Page</h4>
                     <ul>
+                        <li><a href="#views">Views</a></li>
                         <li><a href="#object-mapping">Object &amp; Field Mapping</a></li>
                         <li><a href="#usecases">Use Cases</a></li>
                         <li><a href="#lightning-page">Lightning Page Setup</a></li>
@@ -176,6 +178,62 @@
                     </ul>
                 </div>
                 <!-- ── Object Mapping Diagram ── -->
+                <h2 id="views">Views</h2>
+                <p>This is the component where all five views earn their keep, because it is the only one that knows about resources and capacity. Every view reads the same bookings through the same field mappings and saves through the same path: only the layout changes.</p>
+                <table class="property-table">
+                    <tr><th style="width:16%;">View</th><th style="width:44%;">What it gives you</th><th style="width:40%;">The question it answers</th></tr>
+                    <tr>
+                        <td><code>calendar</code></td>
+                        <td>A month at a time for the selected resource, with status colors per day.</td>
+                        <td>What is happening on the 14th?</td>
+                    </tr>
+                    <tr>
+                        <td><code>timeline</code></td>
+                        <td>Resources down the side, dates across the top, 14 days at a time by default. A multi-day booking draws as one bar. A resource with overlapping bookings collapses to a single row with a count, and expands on click.</td>
+                        <td>Which resource is free, and when?</td>
+                    </tr>
+                    <tr>
+                        <td><code>week</code></td>
+                        <td>Seven days across, business hours down. Honours per-resource business hours when you map <code>businessHoursStartField</code> and <code>businessHoursEndField</code>.</td>
+                        <td>Who is free Thursday at 2pm?</td>
+                    </tr>
+                    <tr>
+                        <td><code>utilization</code></td>
+                        <td>A heatmap of percentage-of-capacity used, per resource per day, green through red, with over-capacity called out. Read only.</td>
+                        <td>Who is over capacity?</td>
+                    </tr>
+                    <tr>
+                        <td><code>agenda</code></td>
+                        <td>A flat chronological list of the next 60 days with times, statuses and any fields you choose. Read only.</td>
+                        <td>What is next?</td>
+                    </tr>
+                </table>
+                <table class="property-table">
+                    <tr><th style="width:26%;">Property</th><th style="width:74%;">Notes</th></tr>
+                    <tr><td><code>view</code></td><td>Which layout the component opens on. Blank behaves as <code>calendar</code>. Utilization and Agenda are read only, so they are a poor default for a page whose job is taking bookings; put them in <code>availableViews</code> instead.</td></tr>
+                    <tr><td><code>availableViews</code></td><td>Comma-separated list the switcher offers. Blank offers all five. The default is always included whether or not you list it.</td></tr>
+                    <tr><td><code>timelineWindowDays</code></td><td>How many days Timeline shows at once. Defaults to 14, because a month of columns leaves each booking about twenty pixels wide and clips every label. Set 0 for the full month.</td></tr>
+                    <tr><td><code>maxViewResources</code></td><td>How many resource rows Timeline and Utilization draw, busiest first. Defaults to 12. This limits rows <em>drawn</em>, not what is loaded or counted: an org with 89 rooms still has all 89 counted.</td></tr>
+                    <tr><td><code>capacityField</code></td><td>Required for Utilization to show percentages. Without it the heatmap shows raw booking counts, which is indistinguishable from the no-capacity mode.</td></tr>
+                    <tr><td><code>agendaFields</code></td><td>Extra fields printed on each Agenda row. Blank reuses <code>hoverFields</code>.</td></tr>
+                </table>
+                <h3>Point the resource lookup at User and it becomes people scheduling</h3>
+                <p><code>resourceObjectApiName</code> accepts any object. Point it at rooms and you have room booking; point it at <code>User</code> and every view above becomes a staffing tool. Timeline is a roster, Week is a shift grid, Utilization is a team capacity dashboard. Two practical notes: User has no standard capacity field, so add a custom one if you want Utilization in percentages, and setting <code>businessHoursStartField</code> to a field on User gives each person their own working hours in the week grid.</p>
+                <p>The config library ships two ready-made examples of this: <strong>Team Capacity Planning</strong> and <strong>Staff Shift Roster</strong>.</p>
+                <!-- PLACEHOLDER IMAGE: booking-timeline-collapse.png (1600x900) - the Booking
+                     component in timeline view, 14-day window, several resources, one row
+                     collapsed showing an "N at once" chip and another expanded into lanes. -->
+                <div style="background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:10px;padding:44px 20px;text-align:center;color:#6B7280;font-size:.86rem;margin:22px 0;">
+                    <strong style="display:block;color:#374151;margin-bottom:4px;">Screenshot coming</strong>
+                    Timeline with one resource collapsed to a single row and another expanded into lanes.
+                </div>
+                <!-- PLACEHOLDER IMAGE: booking-utilization-heatmap.png (1400x700) - the
+                     utilization view showing percentage-of-capacity per resource per day with
+                     at least one over-capacity cell. -->
+                <div style="background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:10px;padding:44px 20px;text-align:center;color:#6B7280;font-size:.86rem;margin:22px 0;">
+                    <strong style="display:block;color:#374151;margin-bottom:4px;">Screenshot coming</strong>
+                    The utilization heatmap, including an over-capacity day.
+                </div>
                 <h2 id="object-mapping" style="margin-top:32px;margin-bottom:4px;color:var(--blue-900);">Object &amp; Field Mapping</h2>
                 <p style="color:var(--gray-500);font-size:.9rem;margin-bottom:0;">When configuring this component on a Lightning Page or via the Setup Wizard, these are the object and field API names you'll need to provide.</p>
                 <div class="diagram-wrap">

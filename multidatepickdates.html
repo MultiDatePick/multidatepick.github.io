@@ -161,9 +161,11 @@
                 <h2>Overview</h2>
                 <p>Date is the core date selection component in the MultiDatePick suite. It gives your users a full calendar interface where they can click individual dates, drag to select ranges, or use recurring patterns to select multiple dates at once. Recurring patterns support custom week intervals (every 1, 2, 3, or N weeks) and monthly occurrence filters (1st Monday, 2nd and 4th Friday, Last Saturday of each month).</p>
                 <p>The component works in Salesforce Screen Flows (outputting dates to Flow variables) and on Lightning Record Pages, App Pages, Home Pages, and Experience Sites (saving dates as related records automatically). Configure an <code>endDateField</code> to consolidate adjacent dates into single records with start and end dates - selecting Monday through Friday creates one record instead of five.</p>
+                <p>The month grid is the default layout, but it is not the only one. Set <code>view</code> to <code>timeline</code> and the same dates render as bars against a date axis, which is where an <code>endDateField</code> range finally looks like a range. Set it to <code>agenda</code> for a flat chronological list, and use <code>availableViews</code> to let users switch. See <a href="#views">Views</a> below.</p>
                 <div class="toc">
                     <h4>On This Page</h4>
                     <ul>
+                        <li><a href="#views">Views</a></li>
                         <li><a href="#object-mapping">Object &amp; Field Mapping</a></li>
                         <li><a href="#usecases">Use Cases</a></li>
                         <li><a href="#lightning-page">Lightning Page Setup</a>
@@ -184,6 +186,45 @@
                     </ul>
                 </div>
                 <!-- ── Object Mapping Diagram ── -->
+                <h2 id="views">Views</h2>
+                <p>The month grid is the default, but the same selected dates and the same saved records can render three other ways. Nothing about the data or the save behavior changes: only the layout.</p>
+                <table class="property-table">
+                    <tr><th style="width:16%;">View</th><th style="width:44%;">What it gives you</th><th style="width:40%;">When to use it on a Date component</th></tr>
+                    <tr>
+                        <td><code>calendar</code></td>
+                        <td>A month at a time, status colors per day, click or drag to select.</td>
+                        <td>The default. Right whenever the question is which days.</td>
+                    </tr>
+                    <tr>
+                        <td><code>timeline</code></td>
+                        <td>Dates across the top, resources or a single "All records" row down the side. A record with an <code>endDateField</code> draws as one continuous bar.</td>
+                        <td>Date <em>ranges</em>. A PTO request or a blackout period looks like a range here instead of five separate coloured squares.</td>
+                    </tr>
+                    <tr>
+                        <td><code>agenda</code></td>
+                        <td>A flat chronological list of the next 60 days. Read only.</td>
+                        <td>A summary panel, a mobile layout, or anywhere the user should read rather than pick.</td>
+                    </tr>
+                    <tr>
+                        <td><code>week</code> / <code>utilization</code></td>
+                        <td>Day-by-hour grid and capacity heatmap.</td>
+                        <td>Available, but both are built around times and resources, which a Date component does not capture. Use the DateTime or Booking component for those.</td>
+                    </tr>
+                </table>
+                <table class="property-table">
+                    <tr><th style="width:26%;">Property</th><th style="width:74%;">Notes</th></tr>
+                    <tr><td><code>view</code></td><td>Which layout the component opens on. Blank behaves as <code>calendar</code>.</td></tr>
+                    <tr><td><code>availableViews</code></td><td>Comma-separated list of views the switcher offers, e.g. <code>calendar,timeline,agenda</code>. Blank offers all five. The default view is always included whether you list it or not.</td></tr>
+                    <tr><td><code>timelineWindowDays</code></td><td>How many days Timeline shows at once. Defaults to 14, because a whole month of columns leaves each bar about twenty pixels wide and clips every label. Set 0 for the full month.</td></tr>
+                    <tr><td><code>agendaFields</code></td><td>Extra fields to print on each Agenda row. Blank reuses <code>hoverFields</code>.</td></tr>
+                </table>
+                <!-- PLACEHOLDER IMAGE: dates-timeline-ranges.png (1400x700) - the Date component
+                     in timeline view with three multi-day PTO records drawn as continuous bars,
+                     showing why endDateField ranges belong in this view. -->
+                <div style="background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:10px;padding:44px 20px;text-align:center;color:#6B7280;font-size:.86rem;margin:22px 0;">
+                    <strong style="display:block;color:#374151;margin-bottom:4px;">Screenshot coming</strong>
+                    Date ranges drawn as continuous bars in the timeline view.
+                </div>
                 <h2 id="object-mapping" style="margin-top:32px;margin-bottom:4px;color:var(--blue-900);">Object &amp; Field Mapping</h2>
                 <p style="color:var(--gray-500);font-size:.9rem;margin-bottom:0;">When configuring this component on a Lightning Page or via the Setup Wizard, these are the object and field API names you'll need to provide.</p>
                 <div class="diagram-wrap">
