@@ -195,6 +195,7 @@
                     <li><a href="#wizard">Setup Wizard walkthrough</a></li>
                     <li><a href="#save-modes">Click to Save vs Flow-Managed Save</a></li>
                     <li><a href="#status">Status colors & edit mode</a></li>
+                    <li><a href="#views">Views &mdash; five layouts, one component</a></li>
                     <li><a href="#booking">Resource booking</a></li>
                     <li><a href="#blocking">Blocking dates, times &amp; resources</a></li>
                     <li><a href="#faq">Common gotchas (FAQ)</a></li>
@@ -788,8 +789,128 @@
                 </div>
             </section>
             <!-- ───── SECTION 6: BOOKING ───── -->
+            <!-- ───── SECTION 6: VIEWS ───── -->
+            <section id="views" class="ug-section">
+                <h2>6. Views &mdash; five layouts, one component</h2>
+                <p>Every component renders five layouts. They read the same records through the same field mappings, honour the same conflict rules, blocked dates and business hours, and save through the same path. Switching layout never changes what a record means: only how it is drawn.</p>
+
+                <h3>The five, and the question each answers</h3>
+                <table class="property-table">
+                    <tr><th style="width:15%;">View</th><th style="width:30%;">The question</th><th style="width:35%;">Layout</th><th style="width:20%;">Writable?</th></tr>
+                    <tr>
+                        <td><code>calendar</code></td>
+                        <td>What is happening on the 14th?</td>
+                        <td>A month at a time, status colors per day.</td>
+                        <td>Yes. The default.</td>
+                    </tr>
+                    <tr>
+                        <td><code>timeline</code></td>
+                        <td>Which resource is free, and when?</td>
+                        <td>Resources down the side, dates across the top. Multi-day records draw as one bar.</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><code>week</code></td>
+                        <td>Who is free Thursday at 2pm?</td>
+                        <td>Seven days across, business hours down. Drag across days and down hours at once.</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><code>utilization</code></td>
+                        <td>Who is over capacity?</td>
+                        <td>Heatmap of percentage-of-capacity used, per resource per day.</td>
+                        <td>No, read only</td>
+                    </tr>
+                    <tr>
+                        <td><code>agenda</code></td>
+                        <td>What is next?</td>
+                        <td>Flat chronological list of the next 60 days.</td>
+                        <td>No, read only</td>
+                    </tr>
+                </table>
+
+                <div class="ug-callout">
+                    <strong>Do not default a booking page to Utilization or Agenda.</strong> Both are read only, so a page whose job is taking bookings would lose its primary action. Put them in <code>availableViews</code> and default to a writable view instead.
+                </div>
+
+                <h3>Properties</h3>
+                <table class="property-table">
+                    <tr><th style="width:24%;">Property</th><th style="width:12%;">Default</th><th style="width:64%;">What it does</th></tr>
+                    <tr>
+                        <td><code>view</code></td>
+                        <td><code>calendar</code></td>
+                        <td>Which layout the component opens on.</td>
+                    </tr>
+                    <tr>
+                        <td><code>availableViews</code></td>
+                        <td>blank</td>
+                        <td>Comma-separated list of views the switcher offers, e.g. <code>calendar,timeline,agenda</code>. Blank offers all five. <strong>Your default view is always included whether or not you list it</strong>, so this only needs the extras.</td>
+                    </tr>
+                    <tr>
+                        <td><code>timelineWindowDays</code></td>
+                        <td><code>14</code></td>
+                        <td>How many days Timeline shows at once. A full month of columns leaves each booking about twenty pixels wide and clips every label, which is why this is not the whole month by default. Set <code>0</code> for the full month. In windowed mode the inner chevrons step one window and the outer chevrons step one month.</td>
+                    </tr>
+                    <tr>
+                        <td><code>resourceViewFilter</code></td>
+                        <td><code>all</code></td>
+                        <td><code>all</code> draws every resource row. <code>booked</code> draws only resources with a booking in the current window. This is the right way to shorten a long resource list, because hiding an empty row loses nothing. Falls back to all resources when nothing is booked anywhere, so the grid is never mysteriously empty.</td>
+                    </tr>
+                    <tr>
+                        <td><code>maxViewResources</code></td>
+                        <td><code>0</code> (all)</td>
+                        <td>Caps how many resource rows Timeline and Utilization <strong>draw</strong>, busiest first. It does not limit what is loaded or counted: an org with 89 resources still counts all 89. Prefer <code>resourceViewFilter</code>, because a row cap can hide a real booking whereas the filter only hides empty rows.</td>
+                    </tr>
+                    <tr>
+                        <td><code>agendaFields</code></td>
+                        <td>blank</td>
+                        <td>Extra fields printed on each Agenda row, comma separated. Blank reuses <code>hoverFields</code>, so if you have already said which fields identify a record you do not need a second list. The date, time and record-name fields are skipped automatically because the row already prints them. Capped at four fields, past which the row stops being scannable.</td>
+                    </tr>
+                    <tr>
+                        <td><code>capacityField</code></td>
+                        <td>blank</td>
+                        <td>Not a view property, but Utilization needs it. Without a capacity per resource the heatmap shows raw booking counts, which is indistinguishable from the no-capacity mode.</td>
+                    </tr>
+                </table>
+
+                <h3>Setting a different view per page</h3>
+                <p>Because <code>view</code> is a property on the component rather than an org-wide setting, the same objects can be presented differently wherever they appear. One install, one set of field mappings, no chance of two components drifting apart.</p>
+                <table class="property-table">
+                    <tr><th style="width:32%;">Placement</th><th style="width:22%;">Default view</th><th style="width:46%;">availableViews</th></tr>
+                    <tr><td>Recruiter's interview page</td><td><code>week</code></td><td><code>calendar,agenda</code></td></tr>
+                    <tr><td>Facilities room booking page</td><td><code>calendar</code></td><td><code>timeline,utilization</code></td></tr>
+                    <tr><td>Shift manager's roster</td><td><code>timeline</code></td><td><code>week,agenda</code></td></tr>
+                    <tr><td>Operations wall display</td><td><code>agenda</code></td><td><code>utilization,timeline</code></td></tr>
+                    <tr><td>Public Experience Cloud page</td><td><code>calendar</code></td><td>leave blank or keep it short</td></tr>
+                </table>
+
+                <h3>Edit mode works in every view</h3>
+                <p>With <code>enableEditMode=true</code>, the Edit button appears regardless of which view is showing. Click a record in Timeline, Week or Agenda to add it to the edit set exactly as you would click a date on the month calendar: selected records get a blue outline, and the Apply and Delete buttons act on everything selected. All five views feed one edit flow, so a bulk status change made from Timeline behaves identically to one made from the calendar.</p>
+
+                <h3>Timeline: collapsed rows</h3>
+                <p>When a resource has overlapping bookings, its row collapses to a single strip with an <strong>N at once</strong> chip, and a twisty expands it into one lane per booking. A collapsed row stays fully interactive: you can still drag-select, hover and click on it. Resources with only one booking at a time never get a twisty, since there is nothing to collapse.</p>
+
+                <h3>Point the resource lookup at User</h3>
+                <p><code>resourceObjectApiName</code> accepts any object. Point it at <code>User</code> and every view becomes a staffing tool: Timeline is a roster, Week is a shift grid, Utilization is a team capacity dashboard. Two things to know:</p>
+                <ul>
+                    <li>User has no standard capacity field, so add a custom one (for example <code>Daily_Capacity__c</code>) if you want Utilization in percentages rather than counts.</li>
+                    <li>Set <code>businessHoursStartField</code> and <code>businessHoursEndField</code> to fields on User and the Week grid honours each person's own working hours instead of one org-wide range.</li>
+                </ul>
+                <p>The <a href="/configlibrary.html">Config Library</a> ships two ready-made examples: <strong>Team Capacity Planning</strong> and <strong>Staff Shift Roster</strong>.</p>
+
+                <!-- PLACEHOLDER IMAGE: user-guide-views-switcher.png (1400x800) - the view
+                     switcher pills above a populated grid, with a second panel showing the same
+                     data after switching, so the "same records, different layout" claim is
+                     visible rather than asserted. -->
+                <div class="ug-screenshot">
+                    <div style="background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:10px;padding:48px 20px;text-align:center;color:#6B7280;font-size:.88rem;">
+                        <strong style="display:block;color:#374151;margin-bottom:4px;">Screenshot coming</strong>
+                        The view switcher, and the same records before and after a switch.
+                    </div>
+                </div>
+            </section>
             <section id="booking" class="ug-section">
-                <h2>6. Resource booking (Booking component only)</h2>
+                <h2>7. Resource booking (Booking component only)</h2>
                 <h3>Single-resource mode</h3>
                 <p>The wrapper renders a resource picker dropdown. Admins pick one resource, the time-slot grid loads with that resource's bookings + capacity. Each booked slot shows an X/Y capacity badge.</p>
                 <h3>Multi-resource mode</h3>
@@ -811,7 +932,7 @@
             </section>
             <!-- ───── SECTION 7: BLOCKING ───── -->
             <section id="blocking" class="ug-section">
-                <h2>7. Blocking dates, times &amp; resources (closures)</h2>
+                <h2>8. Blocking dates, times &amp; resources (closures)</h2>
                 <p>Any calendar can read a list of <strong>closures</strong> from another object and grey out (block) the dates &mdash; or specific time slots, or specific resources &mdash; they cover, so users can only book when you're actually open. You point a few properties at the closure object and the component does the rest. Whole-day blocking works on all three components; the time and resource granularity is for DateTime &amp; Booking, which have a time grid.</p>
                 <h3 id="block-vs-hide">Blocking vs. hiding &mdash; what's the difference?</h3>
                 <p>Two features sound alike but do opposite things. <strong>Blocking</strong> takes availability <em>away</em> &mdash; a date or slot is shown but can't be booked. <strong>Hiding</strong> takes records <em>out of view</em> &mdash; certain saved bookings disappear, which actually <em>frees</em> the slot back up.</p>
@@ -899,7 +1020,7 @@
             </section>
             <!-- ───── SECTION 8: FAQ ───── -->
             <section id="faq" class="ug-section">
-                <h2>8. Common gotchas (FAQ)</h2>
+                <h2>9. Common gotchas (FAQ)</h2>
                 <p>Real questions admins have hit. Skim these BEFORE filing a support ticket.</p>
                 <dl class="ug-faq">
                     <dt id="gotcha-amber-banner-no-calendar">I see no calendar &mdash; just an amber banner</dt>
@@ -928,7 +1049,7 @@
             </section>
             <!-- ───── SECTION 9: SCHEMA ───── -->
             <section id="schema" class="ug-section">
-                <h2>9. Object &amp; field mapping</h2>
+                <h2>10. Object &amp; field mapping</h2>
                 <p>Each component page has the full Object/Field Mapping diagram. Quick links:</p>
                 <ul>
                     <li><a href="/multidatepickdates.html#object-mapping">multiDatePickDates &mdash; schema mapping</a></li>
@@ -939,7 +1060,7 @@
             </section>
             <!-- ───── SECTION 10: APEX SAMPLES ───── -->
             <section id="apex" class="ug-section">
-                <h2>10. Apex sample code</h2>
+                <h2>11. Apex sample code</h2>
                 <h3>Reading <code>selectedDates</code> in a Flow</h3>
                 <p>Use the bundled <strong>Parse Date Entries from JSON</strong> invocable action to convert the wrapper's JSON output into a Flow-loopable collection.</p>
                 <pre class="ug-code-block">// Flow:
@@ -982,7 +1103,7 @@
             </section>
             <!-- ───── SECTION 11: SECURITY ───── -->
             <section id="security" class="ug-section">
-                <h2>11. Security &amp; accessibility</h2>
+                <h2>12. Security &amp; accessibility</h2>
                 <ul>
                     <li><strong>AppExchange Security Reviewed.</strong> The package passes Salesforce's Security Review and the <code>sf code-analyzer</code> AppExchange + Recommended:Security rule sets with zero violations.</li>
                     <li><strong>FLS-aware:</strong> every Apex method validates object + field access before SOQL/DML via <code>validateObjectAndFieldAccess</code>. All DML runs under <code>Database.insert(records, AccessLevel.USER_MODE)</code> so user permission checks are enforced at the database layer, not just the controller.</li>
@@ -992,7 +1113,7 @@
             </section>
             <!-- ───── SECTION 12: HELP ───── -->
             <section id="help" class="ug-section">
-                <h2>12. Questions or bugs?</h2>
+                <h2>13. Questions or bugs?</h2>
                 <p>Found a gap in this guide, or something broken in the package? We want to hear about it.</p>
                 <p><strong>Email:</strong> <a href="mailto:support@multidatepick.com">support@multidatepick.com</a></p>
             </section>
