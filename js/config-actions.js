@@ -4,6 +4,79 @@
 
 (function () {
 
+    /* ─────────────────────────────────────────────────────────────
+       Boolean prop defaults per wrapper (source of truth = each
+       wrapper's .js-meta.xml). Copy Flow XML uses these to stamp
+       every load-bearing Boolean explicitly, so a Flow-embedded
+       component behaves identically to an App Builder placement
+       with the same config.
+
+       Why this exists:
+         A blank Boolean in Flow is null, not false. The LWC's
+         @api Boolean falls back to its JS default of false — even
+         when meta.xml defines default="true". So a config that
+         omits, say, showSelectedSummary would generate a Flow XML
+         that leaves it null → the summary strip silently OFF in
+         Flow, even though every App Builder placement shows it.
+
+       Only props that appear in buildInputParams need entries here
+       (dev-only props like viewDebug and outputAsJson are excluded
+       because we already stamp outputAsJson explicitly for
+       Dates/DateTime — see buildInputParams).
+
+       Keep this in sync with meta.xml defaults. When a wrapper
+       flips a Boolean default, update the matching entry here.
+       ───────────────────────────────────────────────────────────── */
+    var BOOL_DEFAULTS = {
+        Dates: {
+            twoMonthView: false,
+            showRecurringPattern: true,
+            showSelectedSummary: true,
+            allowPastDates: true,
+            weekStartsOnMonday: false,
+            autoJumpToFirstAvailable: false,
+            preloadExistingDates: true,
+            enableEditMode: true,
+            appendDateTimeToName: true
+        },
+        DateTime: {
+            twoMonthView: false,
+            showRecurringPattern: true,
+            showSelectedSummary: true,
+            allowPastDates: true,
+            weekStartsOnMonday: false,
+            autoJumpToFirstAvailable: false,
+            preloadExistingDates: true,
+            enableEditMode: true,
+            appendDateTimeToName: true,
+            allowDifferentTimes: false,
+            groupTimeSlotsByPeriod: false,
+            consolidateTimeSpan: false,
+            enableEndTime: true,
+            timeGridOnly: false,
+            showSubBlockButton: false
+        },
+        Booking: {
+            twoMonthView: false,
+            showRecurringPattern: true,
+            showSelectedSummary: true,
+            allowPastDates: false,
+            weekStartsOnMonday: false,
+            autoJumpToFirstAvailable: false,
+            preloadExistingDates: true,
+            enableEditMode: true,
+            appendDateTimeToName: true,
+            allowDifferentTimes: false,
+            groupTimeSlotsByPeriod: false,
+            consolidateTimeSpan: false,
+            timeGridOnly: false,
+            showSubBlockButton: false,
+            showAvailabilityCount: true,
+            disableTimeSlotGrid: false,
+            allowMultipleResources: false
+        }
+    };
+
     /* ── Toast ── */
     function showToast(title, message, duration) {
         let container = document.getElementById('mdp-toast-container');
@@ -106,14 +179,26 @@
             }
         }
         function addBool(name, value) {
-            if (value != null) {
-                lines.push(
-                    '            <inputParameters>\n' +
-                    '                <name>' + name + '</name>\n' +
-                    '                <value><booleanValue>' + (value ? 'true' : 'false') + '</booleanValue></value>\n' +
-                    '            </inputParameters>'
-                );
+            // Silent-inject the wrapper's meta.xml default when the config
+            // omits the value. This is what makes the generated Flow XML
+            // behave identically to an App Builder placement — otherwise
+            // "null in Flow" is read as false by the LWC and any prop that
+            // defaults true in App Builder is silently OFF in the flow.
+            // See BOOL_DEFAULTS at the top of this file for the mapping.
+            if (value == null) {
+                var typeDefaults = BOOL_DEFAULTS[componentType];
+                if (typeDefaults && Object.prototype.hasOwnProperty.call(typeDefaults, name)) {
+                    value = typeDefaults[name];
+                } else {
+                    return; // unknown prop for this component, don't stamp
+                }
             }
+            lines.push(
+                '            <inputParameters>\n' +
+                '                <name>' + name + '</name>\n' +
+                '                <value><booleanValue>' + (value ? 'true' : 'false') + '</booleanValue></value>\n' +
+                '            </inputParameters>'
+            );
         }
         function addNumber(name, value) {
             if (value != null) {
@@ -142,6 +227,14 @@
         addString('minDate', cfg.Min_Date__c);
         addString('maxDate', cfg.Max_Date__c);
         addBool('preloadExistingDates', cfg.Preload_Existing_Dates__c);
+        // appendDateTimeToName is exposed on all 3 wrappers (@api on Dates too)
+        // with default="true" in every wrapper's meta.xml. It used to live in
+        // the DateTime/Booking-only block below, which meant Dates configs
+        // silently dropped it — combined with Flow's null-Boolean trap, that
+        // meant a Dates flow could never opt out of auto-date-appending.
+        // Emitting it in the shared block gives all 3 wrappers the same
+        // behavior.
+        addBool('appendDateTimeToName', cfg.Append_DateTime_To_Name__c);
         addString('preloadMode', cfg.Preload_Mode__c);
         addString('saveButtonLabel', cfg.Save_Button_Label__c);
         addString('editButtonLabel', cfg.Edit_Button_Label__c);
@@ -157,7 +250,8 @@
             addBool('allowDifferentTimes', cfg.Allow_Different_Times__c);
             addBool('groupTimeSlotsByPeriod', cfg.Group_Time_Slots_By_Period__c);
             addBool('consolidateTimeSpan', cfg.Consolidate_Time_Span__c);
-            addBool('appendDateTimeToName', cfg.Append_DateTime_To_Name__c);
+            // (appendDateTimeToName moved to the shared block above — it applies
+            //  to all 3 wrappers, not just DateTime/Booking.)
             // Time Grid Only — hide the calendar, show just the slot grid for one
             // implied date (DateTime + Booking). Implied-date priority:
             // timeGridDate (explicit) → timeGridDateField (host-record Date field) → today.
@@ -648,14 +742,21 @@ inputParams + '\n' +
             });
     }
 
-    /* ── Attach handlers ── */
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.btn-copy-json').forEach(function (btn) {
-            btn.addEventListener('click', handleCopyJson);
+    /* ── Node export (for tests). Browser path skips this cleanly. ── */
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { buildFlowXml: buildFlowXml, BOOL_DEFAULTS: BOOL_DEFAULTS };
+    }
+
+    /* ── Attach handlers (browser only) ── */
+    if (typeof document !== 'undefined') {
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.btn-copy-json').forEach(function (btn) {
+                btn.addEventListener('click', handleCopyJson);
+            });
+            document.querySelectorAll('.btn-copy-flow').forEach(function (btn) {
+                btn.addEventListener('click', handleCopyFlowXml);
+            });
         });
-        document.querySelectorAll('.btn-copy-flow').forEach(function (btn) {
-            btn.addEventListener('click', handleCopyFlowXml);
-        });
-    });
+    }
 
 })();
