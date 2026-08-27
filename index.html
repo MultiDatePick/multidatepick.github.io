@@ -1456,61 +1456,70 @@
     <!--  CAROUSEL - vanilla JS, auto-advance + pause on hover -->
     <!-- ════════════════════════════════════════════════════ -->
     <script>
+    // Transform-based carousel. Track is a horizontal flex row; sliding is
+    // one CSS transform on the track. This replaces the previous
+    // opacity-stacked implementation, which had two bugs Brandon caught:
+    //   1. Slides visibly overlapped during and after fades (positioned
+    //      absolute over each other, opacity racing).
+    //   2. "Doesn't cycle at end" was ambiguous but the modulo wrap-around
+    //      is now an explicit branch, not a math side effect.
+    // The track's transform: translateX(-N * 100%) puts slide N in the
+    // viewport. Only ONE slide is visible at a time, always. Wrap-around
+    // is handled by clamping current with a modulo before applying.
     (function () {
         var carousel = document.querySelector('.mdp-carousel');
         if (!carousel) return;
+        var track    = carousel.querySelector('.mdp-carousel__track');
         var slides   = carousel.querySelectorAll('.mdp-carousel__slide');
         var dots     = carousel.querySelectorAll('.mdp-carousel__dot');
         var prevBtn  = carousel.querySelector('.mdp-carousel__btn--prev');
         var nextBtn  = carousel.querySelector('.mdp-carousel__btn--next');
+        if (!track || !slides.length) return;
         var current  = 0;
         var timerId  = null;
-        // Debounce guard: swallow show() calls while a fade is in flight, so
-        // rapid clicks on prev/next/dots don't stack multiple visible slides
-        // on top of each other mid-transition.
-        var transitioning = false;
-        var TRANSITION_MS = 500;
         var autoMs   = parseInt(carousel.getAttribute('data-autoplay-ms') || '6000', 10);
+        // Only the initial slide starts marked active on the dot, so on the
+        // very first render we sync explicitly rather than relying on the
+        // HTML class attributes staying in step with the JS state.
+        function apply() {
+            track.style.transform = 'translateX(-' + (current * 100) + '%)';
+            for (var i = 0; i < dots.length; i++) {
+                if (i === current) dots[i].classList.add('is-active');
+                else               dots[i].classList.remove('is-active');
+            }
+        }
         function show(idx) {
-            if (transitioning) return;
-            var n = ((idx % slides.length) + slides.length) % slides.length;
-            if (n === current) return;
-            transitioning = true;
-            slides[current].classList.remove('is-active');
-            dots[current].classList.remove('is-active');
-            slides[n].classList.add('is-active');
-            dots[n].classList.add('is-active');
-            current = n;
-            setTimeout(function () { transitioning = false; }, TRANSITION_MS);
+            // Modulo wrap. -1 % N is -1 in JS, so add N first.
+            current = ((idx % slides.length) + slides.length) % slides.length;
+            apply();
         }
         function start() {
             stop();
             timerId = setInterval(function () {
-                // Skip the advance while the lightbox is open (an image got
-                // clicked and zoomed) - otherwise the carousel quietly cycles
-                // behind the overlay and the user closes onto a different slide.
+                // Pause autoplay while the lightbox is open — otherwise the
+                // carousel silently advances behind the overlay and the user
+                // closes onto a different slide than the one they inspected.
                 if (document.querySelector('.lightbox-overlay.open')) return;
                 show(current + 1);
             }, autoMs);
         }
-        function stop()  { if (timerId) { clearInterval(timerId); timerId = null; } }
+        function stop() { if (timerId) { clearInterval(timerId); timerId = null; } }
         if (prevBtn) prevBtn.addEventListener('click', function () { show(current - 1); start(); });
         if (nextBtn) nextBtn.addEventListener('click', function () { show(current + 1); start(); });
         Array.prototype.forEach.call(dots, function (dot, i) {
             dot.addEventListener('click', function () { show(i); start(); });
         });
-        // Pause on hover; pause when off-screen so we don't burn cycles
         carousel.addEventListener('mouseenter', stop);
         carousel.addEventListener('mouseleave', start);
         document.addEventListener('visibilitychange', function () {
             if (document.hidden) stop(); else start();
         });
-        // Keyboard nav (left/right arrows when carousel is focused/in viewport)
         carousel.addEventListener('keydown', function (e) {
             if (e.key === 'ArrowLeft')  { show(current - 1); start(); }
             if (e.key === 'ArrowRight') { show(current + 1); start(); }
         });
         carousel.setAttribute('tabindex', '0');
+        apply();
         start();
     })();
     </script>

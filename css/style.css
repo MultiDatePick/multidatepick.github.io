@@ -933,43 +933,38 @@ a.card-link-wrapper .card { transition: transform var(--transition), box-shadow 
     margin: 24px auto 0;
 }
 .mdp-carousel:focus { outline: 2px solid var(--orange); outline-offset: 4px; }
+/* Viewport = the visible window; the track is a horizontal flex row of
+   slides that translates left/right. This replaces the previous opacity/
+   visibility stacking approach — no more images-on-top-of-each-other,
+   no timing races, and wrap-around is explicit in the JS. */
 .mdp-carousel__viewport {
     position: relative;
     overflow: hidden;
     border-radius: 12px;
     background: #F9FAFB;
+    min-height: 480px;
 }
 .mdp-carousel__track {
     list-style: none;
     margin: 0;
     padding: 0;
-    position: relative;
+    display: flex;
+    align-items: stretch;
     width: 100%;
-    min-height: 480px;
+    height: 100%;
+    transition: transform 0.45s cubic-bezier(0.4, 0.0, 0.2, 1);
+    will-change: transform;
 }
 .mdp-carousel__slide {
-    position: absolute;
-    inset: 0;
+    /* Every slide is exactly one viewport wide and lives side-by-side in the
+       track. Sliding is transform on the track, not per-slide opacity. */
+    flex: 0 0 100%;
+    min-width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    /* visibility flips to hidden AFTER the fade completes, so once a slide is
-       inactive it stops taking up space in the visual stack (previously two
-       slides could sit on top of each other during and after a transition). */
-    visibility: hidden;
-    transition: opacity 0.5s ease-out, visibility 0s linear 0.5s;
     padding: 16px 12px;
-}
-.mdp-carousel__slide.is-active {
-    opacity: 1;
-    pointer-events: auto;
-    /* Incoming slide flips visible IMMEDIATELY, opacity animates in. */
-    visibility: visible;
-    transition: opacity 0.5s ease-out, visibility 0s linear 0s;
-    z-index: 2;
 }
 .mdp-carousel__slide img {
     max-width: 100%;
