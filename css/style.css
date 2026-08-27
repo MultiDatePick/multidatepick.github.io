@@ -956,12 +956,20 @@ a.card-link-wrapper .card { transition: transform var(--transition), box-shadow 
     justify-content: center;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.5s ease-out;
+    /* visibility flips to hidden AFTER the fade completes, so once a slide is
+       inactive it stops taking up space in the visual stack (previously two
+       slides could sit on top of each other during and after a transition). */
+    visibility: hidden;
+    transition: opacity 0.5s ease-out, visibility 0s linear 0.5s;
     padding: 16px 12px;
 }
 .mdp-carousel__slide.is-active {
     opacity: 1;
     pointer-events: auto;
+    /* Incoming slide flips visible IMMEDIATELY, opacity animates in. */
+    visibility: visible;
+    transition: opacity 0.5s ease-out, visibility 0s linear 0s;
+    z-index: 2;
 }
 .mdp-carousel__slide img {
     max-width: 100%;
