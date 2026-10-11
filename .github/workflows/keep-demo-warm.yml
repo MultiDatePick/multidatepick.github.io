@@ -1,0 +1,29 @@
+# Keeps the ACME Financial live demo (mdp-demo org, Experience Cloud site) warm.
+#
+# When nobody has visited for a while the org is slow to answer even the first request,
+# so the first real visitor waits a long time. A light page request every 20 minutes
+# keeps it responsive. It only fetches the page HTML: no JavaScript runs, so it never
+# calls Apex, never creates records and never touches Demo_Usage_Log__c.
+#
+# The response time is printed in each run's log, which shows whether a run hit a cold org.
+# Note: GitHub pauses scheduled workflows after 60 days with no commits to the repo.
+name: Keep live demo warm
+
+on:
+  schedule:
+    - cron: '*/20 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Request the demo home page
+        run: |
+          curl -sS -o /dev/null --max-time 120 \
+            -A "MultiDatePick-keep-warm (+https://multidatepick.com)" \
+            -w "status=%{http_code} time=%{time_total}s\n" \
+            "https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/"
