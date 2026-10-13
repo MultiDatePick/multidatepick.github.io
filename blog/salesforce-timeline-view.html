@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Timeline View: Every Resource and Booking on One Screen</title>
+    <meta name="description" content="A resource timeline for Salesforce: rooms, people, equipment and projects down the side, dates across, multi-day bookings as single bars, capacity at a glance and drag to reschedule. No code.">
+    <link rel="canonical" href="https://multidatepick.com/blog/salesforce-timeline-view.html">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/solutions.css">
+    <style>
+        /* Timeline post: shares the views post's look. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 0.18em; bottom: 0.18em; width: 5px; border-radius: 3px; background: #F97316; }
+        .sc-cta-band h2 { padding-left: 0; }
+        .sc-cta-band h2::before { display: none; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); margin-left: calc(50% - min(540px, calc(50vw - 20px))); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-top: 4px solid #F97316; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-left: 5px solid var(--c); border-radius: 10px; padding: 14px 16px; }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce Timeline View: Every Resource and Booking on One Screen">
+    <meta property="og:description" content="A resource timeline for Salesforce: rooms, people, equipment and projects down the side, dates across, multi-day bookings as single bars, capacity at a glance and drag to reschedule. No code.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/blog/salesforce-timeline-view.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce Timeline View: Every Resource and Booking on One Screen">
+    <meta name="twitter:description" content="A resource timeline for Salesforce: rooms, people, equipment and projects down the side, dates across, multi-day bookings as single bars, capacity at a glance and drag to reschedule. No code.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">
+        Coming Soon to AppExchange - 2026
+        <button class="banner-close" id="bannerClose" aria-label="Dismiss banner" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="../images/logo.png" alt="MultiDatePick logo - Salesforce multi-date calendar and resource booking LWC" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Solutions <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
+                        <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Components <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/multidatepickdates.html">Date</a></li>
+                        <li><a href="/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/salesforce-booking-calendar.html">Booking</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pricing.html">Pricing</a></li>
+                <li><a href="/blog/" class="active">Blog</a></li>
+                <li><a href="/gettingstarted.html">Getting Started</a></li>
+                <li><a href="/user-guide.html">User Guide</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Resources <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/flowcheatsheet.html">Flow Cheat Sheet</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                        <li><a href="/home-app-experience.html">App / Home / Experience</a></li>
+                        <li><a href="/tips.html">Tips &amp; How-To</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/notify-me-at-launch.html" class="nav-cta">Notify Me at Launch</a></li>
+            </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {"@type": "Article", "headline": "Salesforce Timeline View: Every Resource and Booking on One Screen", "description": "A resource timeline for Salesforce: rooms, people, equipment and projects down the side, dates across, multi-day bookings as single bars, capacity at a glance and drag to reschedule. No code.", "datePublished": "2026-10-12", "dateModified": "2026-10-12", "author": {"@type": "Organization", "name": "MultiDatePick"}, "publisher": {"@type": "Organization", "name": "MultiDatePick"}, "mainEntityOfPage": "https://multidatepick.com/blog/salesforce-timeline-view.html", "image": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif"},
+                {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does Salesforce have a timeline view for resources?", "acceptedAnswer": {"@type": "Answer", "text": "Not as a standard Lightning component for your own objects. Calendars in Salesforce show one person's events, and Gantt-style charts usually mean an add-on built for projects. MultiDatePick adds a resource timeline that reads any custom or standard object: pick the object that holds bookings and the object that holds resources, and every resource becomes a row."}}, {"@type": "Question", "name": "Can I drag bookings on the timeline to reschedule them?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. With Edit Mode on, grab the middle of a bar to move it to other days or either edge to change its start or end. The bar shows its new dates while you drag and saves when you let go. In Day zoom the same gestures move and stretch the booking's start and end times."}}, {"@type": "Question", "name": "Can the rows be people instead of rooms?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The resource can be any object, including User. Point it at User and the timeline becomes a staff roster: each person a row, their shifts, visits or assignments as bars."}}, {"@type": "Question", "name": "How do I stop a long list of resources turning into a wall of rows?", "acceptedAnswer": {"@type": "Answer", "text": "Set Max View Resources to draw only the busiest rows, group rows under a picklist or lookup with Group Timeline By, and choose whether rows show all resources or only ones with bookings. Every resource still counts toward capacity; the settings only change what is drawn."}}, {"@type": "Question", "name": "Does the timeline work on Experience Cloud sites and record pages?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It is one of five views in the same component, so it runs anywhere the component does: record pages, app and home pages, Flow screens and Experience Cloud sites."}}]},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif", "caption": "Animated demo of a Salesforce resource timeline in MultiDatePick: advisors down the side, client engagements drawn as continuous bars across the days they run, a hover card on one, then zooming from Week to Month", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule.gif", "caption": "Animated demo of rescheduling on a Salesforce timeline: dragging the right edge of a booking stretches it two days, dragging another slides it two days later, and each saves on release", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-capacity-lanes.png", "caption": "Salesforce timeline close-up: overlapping multi-day bookings stacked into lanes under each resource, and a combined capacity strip showing how full each day is", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/views/salesforce-resource-timeline-view.png", "caption": "Salesforce resource timeline with people as the rows: each advisor down the side, two weeks across the top, and every client engagement drawn as one bar", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}}
+            ]
+        }
+        </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>The Salesforce Timeline View: Every Resource and Booking on One Screen</h1>
+                <p class="subtitle">Rooms, people, equipment or projects down the side, dates across the top, and every booking drawn as one bar. A resource timeline for any Salesforce object, set up without code.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Published 12 October 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"Which room is free next Tuesday?" "Who on the team has capacity this week?" "When does the van come back?" Each of those is a question about many resources across many days, and a month calendar answers it one resource at a time. A timeline answers it in one look.</p>
+
+                <p>MultiDatePick's Timeline view puts every resource on its own row and every booking on a bar that runs exactly as long as the booking does. It reads your own Salesforce objects, saves through the same path as the rest of the component, and is one config field away from any placement.</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-view-demo.gif" alt="Animated demo of a Salesforce resource timeline in MultiDatePick: advisors down the side, client engagements drawn as continuous bars across the days they run, a hover card on one, then zooming from Week to Month" loading="lazy" width="880" height="880" data-zoomable>
+                    <figcaption>Advisors down the side, engagements as bars, zoom from a week to a month. Hover any bar for its details.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">What the timeline does that a calendar cannot</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>One bar per booking</h3><p>A booking that runs Monday to Friday is one continuous bar, not five cells, so length is visible at a glance.</p></div>
+                    <div class="tl-feat"><h3>Lanes for overlaps</h3><p>Overlapping bookings on a resource stack into lanes. A busy day collapses to a count you expand in place.</p></div>
+                    <div class="tl-feat"><h3>Capacity strip</h3><p>A strip above each group shows how full every day is against the resources' combined capacity.</p></div>
+                    <div class="tl-feat"><h3>Day, Week and Month zoom</h3><p>Hours across for today, two weeks for planning, a month for the long view. One click between them.</p></div>
+                    <div class="tl-feat"><h3>Drag to reschedule</h3><p>Slide a bar to move it, pull an edge to stretch it. It saves on release and stays where you put it.</p></div>
+                    <div class="tl-feat"><h3>Book from the grid</h3><p>Drag across empty days on a resource's row to select them, then book. The row picks the resource for you.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Drag to reschedule, stretch to extend</h2>
+                <p>Plans change, and changing one should not mean opening a record, editing two date fields and saving. On the timeline you grab the bar. Pull its right edge and the booking runs longer; grab the middle and it slides to other days. The bar shows the dates it will land on while you drag, saves the moment you let go, and stays in its lane with a brief highlight so you can see exactly what changed.</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-drag-to-reschedule.gif" alt="Animated demo of rescheduling on a Salesforce timeline: dragging the right edge of a booking stretches it two days, dragging another slides it two days later, and each saves on release" loading="lazy" width="880" height="872" data-zoomable>
+                    <figcaption>Stretch from the edge, slide from the middle. Each change saves on release.</figcaption>
+                </figure>
+                <p>Switch to <strong>Day</strong> zoom and the columns become hours. The same gestures then move and stretch a booking's start and end <em>times</em>, so a meeting that runs over is one drag to fix.</p>
+
+                <h2 style="margin-top:44px;">Capacity you can see, not calculate</h2>
+                <p>Above the rows, a capacity strip shades every day by how much of the resources' combined capacity is booked, so the crunch weeks stand out before anyone asks. Group rows by a picklist or lookup (building, team, region) and each group gets its own strip. When one resource has several bookings on the same day, they stack into lanes; a day with more than a few collapses to a count that expands in place when you click it.</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-capacity-lanes.png" alt="Salesforce timeline close-up: overlapping multi-day bookings stacked into lanes under each resource, and a combined capacity strip showing how full each day is" loading="lazy" width="1400" height="616" data-zoomable>
+                    <figcaption>Overlapping bookings stack into lanes, and the strip shows how full each day is.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Who uses a Salesforce timeline</h2>
+                <p>The resource can be any object, so the same view fits very different teams:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>Conference rooms and desks</strong><span>Every room a row; see which is free on Thursday without opening a single day.</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Equipment and fleet</strong><span>Vans, cameras, lab instruments: multi-day checkouts draw as one bar, so a week out is obvious.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Staff rosters</strong><span>Point the resource at User and the rows are people: shifts, visits and assignments at a glance.</span></div></div>
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Client engagements and projects</strong><span>Advisors, consultants or crews down the side, each engagement stretched across the days it runs.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>PTO and leave</strong><span>Who is out, and when. Overlapping time off stacks into lanes instead of hiding behind one bar.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Field service crews</strong><span>Crews as rows, jobs as bars; drag a job to another day when the weather moves it.</span></div></div>
+                </div>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-resource-timeline-view.png" alt="Salesforce resource timeline with people as the rows: each advisor down the side, two weeks across the top, and every client engagement drawn as one bar" loading="lazy" width="1400" height="1024" data-zoomable>
+                    <figcaption>People as resources: every advisor a row, every engagement one bar.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">The settings that shape it</h2>
+                <p>Every one of these is a property on the component and a field in the Setup Wizard, so nothing here needs code:</p>
+                <table class="sc-table">
+                    <tr><th style="width:30%;">Property</th><th>What it does</th></tr>
+                    <tr><td class="sc-new">view</td><td class="sc-old">Set to <code>timeline</code> to open on it, or list it in <code>availableViews</code> to offer it in the switcher.</td></tr>
+                    <tr><td class="sc-new">timelineZoom</td><td class="sc-old">The zoom it opens on: <code>day</code> (hours across), <code>week</code> or <code>month</code>. Users switch with the pills.</td></tr>
+                    <tr><td class="sc-new">timelineWindowDays</td><td class="sc-old">How many days are on screen at once. Two weeks is the default; a whole month of columns gets cramped.</td></tr>
+                    <tr><td class="sc-new">timelineGroupByField</td><td class="sc-old">A picklist or lookup on the resource that groups rows under collapsible headings, each with its own capacity strip.</td></tr>
+                    <tr><td class="sc-new">maxViewResources</td><td class="sc-old">Draw only this many rows, busiest first. Everything still counts toward capacity.</td></tr>
+                    <tr><td class="sc-new">resourceViewFilter</td><td class="sc-old">Show every resource, or only the ones with bookings in the window.</td></tr>
+                    <tr><td class="sc-new">capacityField</td><td class="sc-old">A number on the resource. The capacity strip and lane count read against it.</td></tr>
+                    <tr><td class="sc-new">enableEditMode</td><td class="sc-old">Turns on drag to move and stretch bookings, and bulk edits from the Edit panel.</td></tr>
+                </table>
+
+                <div class="sc-note">
+                    <strong>One component, five views.</strong> Timeline sits beside Calendar, Week, Utilization and Agenda in the same component, reading the same records. Offer the ones each page needs and the switcher does the rest. <a href="/blog/salesforce-calendar-views.html">See all five views</a>.
+                </div>
+
+                <h2 style="margin-top:44px;">Questions people ask</h2>
+                <div class="tl-faq">
+                    <details><summary>Does Salesforce have a timeline view for resources?</summary><p>Not as a standard Lightning component for your own objects. Calendars in Salesforce show one person's events, and Gantt-style charts usually mean an add-on built for projects. MultiDatePick adds a resource timeline that reads any custom or standard object: pick the object that holds bookings and the object that holds resources, and every resource becomes a row.</p></details>
+                    <details><summary>Can I drag bookings on the timeline to reschedule them?</summary><p>Yes. With Edit Mode on, grab the middle of a bar to move it to other days or either edge to change its start or end. The bar shows its new dates while you drag and saves when you let go. In Day zoom the same gestures move and stretch the booking's start and end times.</p></details>
+                    <details><summary>Can the rows be people instead of rooms?</summary><p>Yes. The resource can be any object, including User. Point it at User and the timeline becomes a staff roster: each person a row, their shifts, visits or assignments as bars.</p></details>
+                    <details><summary>How do I stop a long list of resources turning into a wall of rows?</summary><p>Set Max View Resources to draw only the busiest rows, group rows under a picklist or lookup with Group Timeline By, and choose whether rows show all resources or only ones with bookings. Every resource still counts toward capacity; the settings only change what is drawn.</p></details>
+                    <details><summary>Does the timeline work on Experience Cloud sites and record pages?</summary><p>Yes. It is one of five views in the same component, so it runs anywhere the component does: record pages, app and home pages, Flow screens and Experience Cloud sites.</p></details>
+                </div>
+
+                <div class="sc-cta-band">
+                    <h2>A resource timeline for the objects you already have.</h2>
+                    <p>Browse ready-made configs for rooms, fleet, rosters and more, or try the live demo.</p>
+                    <a href="/configlibrary.html" class="btn btn-primary">Browse the Config Library</a>
+                    <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&utm_medium=blog&utm_campaign=live_demo&utm_content=salesforce-timeline-view" class="btn btn-secondary" target="_blank" rel="noopener">Try the Live Demo</a>
+                </div>
+                <p class="sc-trust-line">Coming to AppExchange in 2026. One plan, every feature included.</p>
+
+                <div class="sc-related">
+                    <h3>Related reading</h3>
+                    <ul>
+                        <li><a href="/blog/salesforce-calendar-views.html">Five calendar views, one Salesforce component</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference room booking in Salesforce</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing and recruiting scheduling</a></li>
+                        <li><a href="/blog/prevent-double-booking-in-salesforce.html">Preventing double bookings in Salesforce</a></li>
+                        <li><a href="/salesforce-booking-calendar.html">The Booking component</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/" class="logo">
+                        <img src="../images/logo.png" alt="MultiDatePick logo - Salesforce multi-date calendar and resource booking LWC" width="180" height="45">
+                    </a>
+                    <p>The most customizable calendar component suite on the Salesforce AppExchange.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Components</h4>
+                    <ul>
+                        <li><a href="/multidatepickdates.html">Date</a></li>
+                        <li><a href="/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/salesforce-booking-calendar.html">Booking</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Solutions</h4>
+                    <ul>
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
+                        <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="/gettingstarted.html">Getting Started</a></li>
+                        <li><a href="/user-guide.html">User Guide</a></li>
+                        <li><a href="/flowcheatsheet.html">Flow Cheat Sheet</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                        <li><a href="/deploy-flow-vscode.html">Deploy a Flow (VS Code)</a></li>
+                        <li><a href="/home-app-experience.html">App / Home / Experience Pages</a></li>
+                        <li><a href="/tips.html">Tips &amp; How-To</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/pricing.html">Pricing</a></li>
+                        <li><a href="/blog/">Blog</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                        <li><a href="/trust.html">Trust &amp; Security</a></li>
+                        <li><a href="/accessibility.html">Accessibility</a></li>
+                        <li><a href="mailto:support@multidatepick.com?subject=Notify%20me%20when%20MultiDatePick%20launches%20on%20AppExchange">AppExchange Listing (Coming 2026)</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. All rights reserved.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a>
+                    <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="../js/main.js"></script>
+</body>
+</html>
