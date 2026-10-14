@@ -185,3 +185,35 @@ test('Output is a Booking flow when componentType is Booking', () => {
     const xml = buildFlowXml(cfg, 'Booking', 'Test_Book');
     assert.match(xml, /mdpick:multiDatePickBooking/);
 });
+
+// Every library config's flow, checked as a whole (2026-10-13). Both bugs below passed the
+// `sf project deploy validate` in scripts/validate-flow-xmls.js, because a Draft flow deploys
+// even when Flow Builder later marks it invalid.
+const fs = require('fs');
+const path = require('path');
+const CONFIG_DIR = path.join(__dirname, '..', '..', 'downloads', 'configs');
+const libraryFlows = fs.readdirSync(CONFIG_DIR).filter((f) => f.endsWith('.json')).map((f) => {
+    const cfg = JSON.parse(fs.readFileSync(path.join(CONFIG_DIR, f), 'utf8'));
+    return { f, xml: buildFlowXml(cfg, cfg.Component_Type__c || 'Dates', f.replace('.json', '')) };
+});
+
+test('library flows: no component sets the same input twice', () => {
+    // A repeated bookingResourceField made every Booking flow an Invalid Draft
+    // ("An input parameter is duplicated") that could not be activated.
+    for (const { f, xml } of libraryFlows) {
+        for (const field of xml.split('<fields>').slice(1)) {
+            const names = [...field.matchAll(/<inputParameters>\s*<name>([^<]+)<\/name>/g)].map((m) => m[1]);
+            const dup = names.filter((n, i) => names.indexOf(n) !== i);
+            assert.deepStrictEqual(dup, [], `${f}: duplicated input ${dup.join(', ')}`);
+        }
+    }
+});
+
+test('library flows: plain ASCII only', () => {
+    // Em dashes and box-drawing characters became invalid UTF-8 when the XML was saved
+    // through Windows PowerShell, and the deploy failed.
+    for (const { f, xml } of libraryFlows) {
+        const odd = xml.match(/[^\x00-\x7F]/g);
+        assert.strictEqual(odd, null, `${f}: non-ASCII characters ${odd && [...new Set(odd)].join(' ')}`);
+    }
+});

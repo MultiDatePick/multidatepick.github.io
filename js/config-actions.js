@@ -567,6 +567,17 @@ recordCreateInputs + '\n' +
         var relField = cfg.Relationship_Field__c || 'YOUR_LOOKUP_FIELD__c';
         var resObj = cfg.Resource_Object__c || 'YOUR_RESOURCE_OBJECT__c';
         var resField = cfg.Booking_Resource_Field__c || 'YOUR_RESOURCE_LOOKUP__c';
+        // The booking-object settings below are always written, but buildInputParams already
+        // writes some of them (bookingResourceField) when the config has a value. Flow rejects a
+        // repeated input ("An input parameter is duplicated") and the flow deploys as an Invalid
+        // Draft that cannot be activated, which hit every Booking config until 2026-10-13.
+        function fixedParam(name, value) {
+            if (inputParams.indexOf('<name>' + name + '</name>') >= 0) return '';
+            return '            <inputParameters>\n' +
+                '                <name>' + name + '</name>\n' +
+                '                <value><stringValue>' + xmlEscape(value) + '</stringValue></value>\n' +
+                '            </inputParameters>\n';
+        }
 
         return '<?xml version="1.0" encoding="UTF-8"?>\n' +
 '<Flow xmlns="http://soap.sforce.com/2006/04/metadata">\n' +
@@ -646,26 +657,11 @@ recordCreateInputs + '\n' +
 '                 to match your Salesforce objects. -->\n' +
 inputParams + '\n' +
 '            <!-- >>> UPDATE: These tell the component which object to create booking records on -->\n' +
-'            <inputParameters>\n' +
-'                <name>resourceBookingObject</name>\n' +
-'                <value><stringValue>' + xmlEscape(relObj) + '</stringValue></value>\n' +
-'            </inputParameters>\n' +
-'            <inputParameters>\n' +
-'                <name>bookingDateField</name>\n' +
-'                <value><stringValue>' + xmlEscape(dateField) + '</stringValue></value>\n' +
-'            </inputParameters>\n' +
-'            <inputParameters>\n' +
-'                <name>bookingResourceField</name>\n' +
-'                <value><stringValue>' + xmlEscape(resField) + '</stringValue></value>\n' +
-'            </inputParameters>\n' +
-'            <inputParameters>\n' +
-'                <name>bookingStartTimeField</name>\n' +
-'                <value><stringValue>' + xmlEscape(cfg.Start_Time_Field__c || 'Start_Time__c') + '</stringValue></value>\n' +
-'            </inputParameters>\n' +
-'            <inputParameters>\n' +
-'                <name>bookingEndTimeField</name>\n' +
-'                <value><stringValue>' + xmlEscape(cfg.End_Time_Field__c || 'End_Time__c') + '</stringValue></value>\n' +
-'            </inputParameters>\n' +
+fixedParam('resourceBookingObject', relObj) +
+fixedParam('bookingDateField', dateField) +
+fixedParam('bookingResourceField', resField) +
+fixedParam('bookingStartTimeField', cfg.Start_Time_Field__c || 'Start_Time__c') +
+fixedParam('bookingEndTimeField', cfg.End_Time_Field__c || 'End_Time__c') +
 '            <isRequired>true</isRequired>\n' +
 '            <outputParameters>\n' +
 '                <assignToReference>varBookingSuccessCount</assignToReference>\n' +
