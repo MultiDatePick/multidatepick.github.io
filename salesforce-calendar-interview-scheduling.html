@@ -16,22 +16,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salesforce Interview Scheduling Calendar</title>
-    <meta name="description" content="Schedule interviews across multiple dates and time slots in Salesforce. A week grid shows the day by hour, with conflict detection and per-round statuses.">
+    <meta name="description" content="Schedule interviews in Salesforce on a week grid. Any slot length, conflict checks on save, panel capacity, interviewer hours and candidate self-booking.">
     <link rel="canonical" href="https://multidatepick.com/salesforce-calendar-interview-scheduling.html">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/solutions.css">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="preload" as="image" href="images/components/salesforce-date-time-scheduling-demo-poster.png" fetchpriority="high">
     <meta property="og:title" content="Salesforce Interview Scheduling Calendar">
-    <meta property="og:description" content="Schedule interviews across multiple dates and time slots in Salesforce. A week grid shows the day by hour, with conflict detection and per-round statuses.">
+    <meta property="og:description" content="Schedule interviews in Salesforce on a week grid. Any slot length, conflict checks on save, panel capacity, interviewer hours and candidate self-booking.">
     <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
     <meta property="og:url" content="https://multidatepick.com/salesforce-calendar-interview-scheduling.html">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Salesforce Interview Scheduling Calendar">
-    <meta name="twitter:description" content="Schedule interviews across multiple dates and time slots in Salesforce. A week grid shows the day by hour, with conflict detection and per-round statuses.">
+    <meta name="twitter:description" content="Schedule interviews in Salesforce on a week grid. Any slot length, conflict checks on save, panel capacity, interviewer hours and candidate self-booking.">
     <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "name": "Salesforce Interview Scheduling Calendar",
+                "url": "https://multidatepick.com/salesforce-calendar-interview-scheduling.html",
+                "description": "Interview scheduling in Salesforce with MultiDatePick: dates and time slots of any length on one screen, a week grid, interviewers as resources with their own hours, conflict detection on save, panel capacity and candidate self-booking on Experience Cloud. No code.",
+                "isPartOf": {"@id": "https://multidatepick.com/#website"},
+                "about": {"@id": "https://multidatepick.com/#software"},
+                "primaryImageOfPage": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo.gif"
+            },
+            {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can you schedule interviews in Salesforce?","acceptedAnswer":{"@type":"Answer","text":"Yes, with MultiDatePick. Recruiters pick one or many dates and the time slots on one screen, and each interview saves as a record on your own object, linked to the candidate. Existing interviews are drawn on the grid, so taken slots are visible before anyone books."}},{"@type":"Question","name":"Can interview slots be 45 minutes?","acceptedAnswer":{"@type":"Answer","text":"Yes. Time Interval (Minutes) takes any number. 15, 30 or 60 minutes are typical, and 45 or 90 work the same way."}},{"@type":"Question","name":"How do I stop an interviewer being double booked?","acceptedAnswer":{"@type":"Answer","text":"Make the interviewer the resource, often the User object, and set Conflict Behavior to Block. Every save is checked against existing bookings. For a panel, add a Capacity Field so a slot stays open until every seat is filled."}},{"@type":"Question","name":"Can candidates book their own interview?","acceptedAnswer":{"@type":"Answer","text":"Yes. Put the same component on an Experience Cloud site page and set Config Name and Static Parent Record Id. Candidates see only open slots inside interviewer hours, and the booking saves straight into your org."}},{"@type":"Question","name":"How is this different from Salesforce Scheduler?","acceptedAnswer":{"@type":"Answer","text":"Salesforce Scheduler is a paid add-on built on its own data model for appointments. MultiDatePick books on your own objects, with multi-date selection, capacity and five calendar views. See the full comparison of Salesforce Lightning Scheduler and MultiDatePick."}},{"@type":"Question","name":"How much does MultiDatePick cost?","acceptedAnswer":{"@type":"Answer","text":"$20 per user per month for every component and feature, with a 30-day free trial and no card required. It is 100% Salesforce native and coming soon to the Salesforce AppExchange."}}]},
+            {"@type":"ImageObject","contentUrl":"https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo.gif","thumbnailUrl":"https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo-poster.png","caption":"Animated demo of the MultiDatePick DateTime component in Salesforce: naming a New Hire Onboarding schedule, dragging across Monday to Thursday, dragging 09:00 to 12:00 in the shared time grid, and saving one shift per day","creditText":"MultiDatePick","creator":{"@type":"Organization","name":"MultiDatePick"}},
+            {"@type":"ImageObject","contentUrl":"https://multidatepick.com/images/marketing/salesforce-calendar-time-slots.png","caption":"Salesforce interview scheduling calendar in MultiDatePick: a month of interview days colored by status (Confirmed, Tentative, Pending), with days that mix statuses striped","creditText":"MultiDatePick","creator":{"@type":"Organization","name":"MultiDatePick"}},
+            {"@type":"ImageObject","contentUrl":"https://multidatepick.com/images/views/salesforce-week-view-demo.gif","thumbnailUrl":"https://multidatepick.com/images/views/salesforce-week-view-demo-poster.png","caption":"Animated demo of the MultiDatePick Salesforce week view: choosing an advisor shows their client meetings as status-colored blocks sized to each meeting's length, with hover cards giving client, meeting type and status","creditText":"MultiDatePick","creator":{"@type":"Organization","name":"MultiDatePick"}},
+            {"@type":"ImageObject","contentUrl":"https://multidatepick.com/images/views/salesforce-agenda-view-demo.gif","thumbnailUrl":"https://multidatepick.com/images/views/salesforce-agenda-view-demo-poster.png","caption":"Animated demo of the MultiDatePick Salesforce agenda view: upcoming appointments listed by date with time, client, status pill and advisor, with hover cards on two of them","creditText":"MultiDatePick","creator":{"@type":"Organization","name":"MultiDatePick"}}
+        ]
+    }
+    </script>
+    <style>
+        .hm-wrap{max-width:1040px;margin:0 auto;padding:0 16px;}
+        .hm-hero{background:linear-gradient(170deg,var(--blue-50,#F0F9FF) 0%,#E0F2FE 60%,#fff 100%);padding:44px 0 40px;}
+        .bk-hero{display:grid;grid-template-columns:1.15fr 1fr;gap:32px;align-items:center;}
+        .hm-hero h1{font-size:2.35rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1.12;margin:0;}
+        .hm-hero h1 .pre{display:block;font-size:1rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#C2410C;margin-bottom:8px;}
+        .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+        .hm-hero .subtitle{font-size:1.08rem;color:var(--gray-600,#4b5563);margin:14px 0 0;max-width:560px;}
+        .hm-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}
+        .hm-ctas .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .hm-ctas .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .hm-demo-link{display:inline-block;margin-top:12px;font-size:.92rem;font-weight:600;}
+        .hm-chips{list-style:none;padding:0;margin:18px 0 0;display:flex;flex-wrap:wrap;gap:6px;font-size:.8rem;}
+        .hm-chips li{background:#fff;border:1px solid #BFDBFE;color:#1E3A8A;border-radius:999px;padding:3px 11px;font-weight:600;}
+        .bk-hero .gs-fig{margin:0;max-width:400px;justify-self:center;width:100%;}
+        .hm-live{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;padding:26px 0;scroll-margin-top:80px;}
+        .hm-live .hm-wrap{display:flex;gap:18px 28px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+        .hm-live h2{color:#fff;font-size:1.3rem;margin:0 0 4px;}
+        .hm-live p{color:#cdd9e8;margin:0;font-size:.95rem;max-width:680px;}
+        .hm-live .tag{display:inline-block;background:#F97316;color:#fff;font-size:.68rem;font-weight:800;letter-spacing:.12em;padding:3px 10px;border-radius:999px;margin-bottom:8px;}
+        .hm-live .btn{background:#F97316;color:#fff;white-space:nowrap;}
+        .hm-live .btn:hover{background:#EA580C;color:#fff;}
+        .gs-sec{padding:56px 0;scroll-margin-top:80px;}
+        .gs-sec.alt{background:var(--blue-50,#F0F9FF);}
+        .gs-sec h2{font-size:1.6rem;color:var(--blue-900,#0C4A6E);margin:0 0 6px;padding-left:17px;position:relative;line-height:1.25;} .gs-sec h2::before{content:"";position:absolute;left:0;top:calc(.625em - 11px);width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-sec h3{font-size:1.15rem;color:var(--blue-900,#0C4A6E);margin:32px 0 6px;scroll-margin-top:80px;}
+        .gs-lead{color:var(--gray-600,#4b5563);margin:0 0 20px;font-size:1rem;max-width:760px;}
+        .gs-sec code{background:#f3f4f6;padding:1px 5px;border-radius:3px;color:#c2410c;font-size:.88em;word-break:break-word;}
+        .gs-fig{margin:18px 0 8px;}
+        .gs-fig img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #E5E7EB;box-shadow:0 4px 20px rgba(15,45,82,.08);background:#fff;}
+        .gs-fig figcaption{text-align:center;font-size:.88rem;color:var(--gray-500,#6b7280);margin-top:8px;}
+        .gs-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE3EC;border-radius:10px;overflow:hidden;font-size:.93rem;}
+        .gs-table th,.gs-table td{padding:11px 14px;border-bottom:1px solid #E8EDF3;border-right:1px solid #E8EDF3;text-align:left;vertical-align:top;}
+        .gs-table th:last-child,.gs-table td:last-child{border-right:none;}
+        .gs-table thead th{background:#0F2D52;color:#fff;font-weight:600;font-size:.85rem;}
+        .gs-table thead th.mdp{background:#C2410C;}
+        .gs-table tbody tr:last-child td{border-bottom:none;}
+        .gs-table td:first-child{font-weight:600;color:var(--blue-900,#0C4A6E);}
+        .gs-table .old{color:var(--gray-500,#6b7280);}
+        .gs-table .new{color:#065F46;font-weight:600;}
+        .gs-table small{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);font-weight:400;}
+        .hm-scroll{overflow-x:auto;}
+        .gs-chain{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-wrap:wrap;gap:8px 4px;align-items:center;font-size:.9rem;}
+        .gs-chain li{background:#fff;border:1px solid #BFDBFE;color:#1E3A8A;border-radius:999px;padding:5px 14px;font-weight:600;}
+        .gs-chain li b{color:#F97316;margin-right:4px;}
+        .gs-chain li.arr{background:none;border:none;color:#94A3B8;padding:0 2px;}
+        .gs-two{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+        .gs-two .gs-fig{margin-top:0;}
+        .bk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 0;}
+        .bk-tile{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:12px 14px 12px 18px;position:relative;} .bk-tile::before{content:"";position:absolute;left:0;top:13px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#10b981;}
+        .bk-tile b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;margin-bottom:3px;}
+        .bk-tile span{display:block;font-size:.85rem;color:var(--gray-600,#4b5563);}
+        .bk-tile .comp{display:inline-block;margin-top:8px;font-size:.72rem;font-weight:700;letter-spacing:.04em;color:#1E3A8A;background:#EFF6FF;border-radius:999px;padding:1px 9px;}
+        .gs-paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0;}
+        .gs-paths.three{grid-template-columns:repeat(3,1fr);}
+        .gs-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;font-size:.92rem;color:var(--gray-600,#4b5563);}
+        .gs-card b{display:block;color:var(--blue-900,#0C4A6E);font-size:1rem;margin-bottom:6px;}
+        .gs-card.bk,.gs-card.rs,.gs-card.sf{position:relative;padding-left:18px;} .gs-card.bk{--rail:#F97316;}
+        .gs-card.rs{--rail:#10b981;}
+        .gs-card.sf{--rail:#0176D3;} .gs-card.bk::before,.gs-card.rs::before,.gs-card.sf::before{content:"";position:absolute;left:0;top:15px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .hm-checks{list-style:none;padding:0;margin:0;}
+        .hm-checks li{padding:5px 0 5px 24px;position:relative;border-bottom:1px solid #F1F5F9;}
+        .hm-checks li:last-child{border-bottom:none;}
+        .hm-checks li::before{content:"\2713";position:absolute;left:2px;color:#10b981;font-weight:700;}
+        .gs-note{margin:16px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 18px 14px 22px;font-size:.92rem;color:#7C2D12;position:relative;} .gs-note::before{content:"";position:absolute;left:0;top:14px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-note b{color:#9A3412;}
+        .bk-views{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:8px;}
+        .bk-views .gs-fig{margin:0;}
+        .cf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 0;}
+        .cf-grid.two{grid-template-columns:1fr 1fr;}
+        .cf-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px 12px 18px;position:relative;display:flex;flex-direction:column;} .cf-card::before{content:"";position:absolute;left:0;top:16px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .cf-card .cf-type{font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#C2410C;}
+        .cf-card h3{margin:2px 0 4px;font-size:1.05rem;}
+        .cf-card p{margin:0 0 10px;font-size:.86rem;color:var(--gray-600,#4b5563);}
+        .cf-set{list-style:none;padding:0;margin:0 0 12px;font-size:.85rem;}
+        .cf-set li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #F1F5F9;}
+        .cf-set li:last-child{border-bottom:none;}
+        .cf-set li span{color:var(--blue-900,#0C4A6E);font-weight:600;}
+        .cf-set li em{font-style:normal;color:#334155;text-align:right;}
+        .cf-links{margin-top:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:.86rem;font-weight:600;}
+        .gs-faq details{background:#fff;border:1px solid #DCE3EC;border-radius:10px;margin:0 0 10px;padding:0 18px;}
+        .gs-faq summary{cursor:pointer;font-weight:600;color:var(--blue-900,#0C4A6E);padding:14px 0;list-style-position:outside;}
+        .gs-faq details p{margin:0 0 14px;color:var(--gray-600,#4b5563);font-size:.93rem;}
+        .gs-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .gs-links a{display:block;background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;text-decoration:none;transition:border-color .15s ease;}
+        .gs-links a:hover{border-color:#F97316;}
+        .gs-links b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;}
+        .gs-links span{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);}
+        .hm-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .hm-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .hm-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .hm-final .hm-ctas{justify-content:center;}
+        .hm-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .hm-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .hm-final .contact{margin:20px 0 0;font-size:.9rem;color:#cdd9e8;}
+        @media (max-width:900px){
+            .bk-hero,.gs-two{grid-template-columns:1fr;}
+            .bk-grid{grid-template-columns:1fr 1fr;}
+            .gs-links,.gs-paths.three,.cf-grid{grid-template-columns:1fr 1fr;}
+        }
+        @media (max-width:600px){
+            .hm-hero{padding:30px 0 28px;}
+            .hm-hero h1{font-size:1.75rem;}
+            .bk-views,.gs-paths,.gs-paths.three,.gs-links,.cf-grid,.cf-grid.two{grid-template-columns:1fr;}
+            .gs-sec{padding:40px 0;}
+            .gs-sec h2{font-size:1.35rem;}
+            .gs-table{font-size:.86rem;}
+            .gs-table th,.gs-table td{padding:9px 8px;}
+            .hm-final h2{font-size:1.45rem;}
+        }
+    </style>
 </head>
 <body>
     <!-- ANNOUNCEMENT BANNER -->
@@ -42,7 +174,7 @@
     <!-- HEADER -->
     <header class="site-header">
         <div class="header-inner">
-            <a href="/" class="logo"><img src="images/logo.png" alt="MultiDatePick logo - Salesforce multi-date calendar and resource booking LWC" width="180" height="45"></a>
+            <a href="/" class="logo"><img src="images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45"></a>
             <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
             <nav><ul class="nav-links">
                 <li class="nav-dropdown">
@@ -90,159 +222,213 @@
         </div>
     </header>
     <main class="page-content">
-        <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@graph": [
-                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-time-slots.png", "caption": "Salesforce calendar interview scheduling with a time slot grid showing available and booked slots", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}},
-                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-capacity.png", "caption": "Salesforce interview calendar showing capacity badges and conflict detection on each time slot", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}},
-                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/views/salesforce-week-view.png", "caption": "MultiDatePick week view on Salesforce for one advisor: named client meetings of 30 and 60 minutes drawn as status-colored blocks, closed hours hatched and today marked", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}}
-            ]
-        }
-        </script>
-        <section class="guide-hero">
-            <div class="container">
-                <h1>Interview Scheduling on a Salesforce Calendar</h1>
-                <p class="subtitle">Offer real interview slots, catch the double-booking before it happens, and save the result straight into Salesforce. No back-and-forth email, no third-party scheduler, no code.</p>
-                <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
-                        <a href="/notify-me-at-launch.html" class="btn btn-primary">Notify Me at Launch</a>
-                    <a href="/salesforce-calendar.html" class="btn btn-secondary">See the Salesforce Calendar</a>
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <section class="hm-hero">
+            <div class="hm-wrap bk-hero">
+                <div>
+                    <h1><span class="pre">Interview scheduling<span class="vh">:</span></span> Salesforce Interview Scheduling Calendar</h1>
+                    <p class="subtitle">Offer real interview slots, catch the clash before it happens, and save every round straight into Salesforce. No email ping-pong, no outside scheduler, no code.</p>
+                    <div class="hm-ctas">
+                        <a href="/notify-me-at-launch.html" class="btn btn-cta">Notify Me at Launch</a>
+                        <a href="/gettingstarted.html" class="btn btn-secondary">Getting Started</a>
+                    </div>
+                    <a class="hm-demo-link" href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-interview-scheduling" target="_blank" rel="noopener">Or book a slot in the live demo now, no login &rarr;</a>
+                    <ul class="hm-chips" aria-label="What interview scheduling includes">
+                        <li>Any slot length</li><li>Conflict checks</li><li>Panel capacity</li><li>Interviewer hours</li><li>Round status</li><li>Week view</li><li>Candidate self-booking</li><li>No code</li>
+                    </ul>
+                </div>
+                <figure class="gs-fig">
+                    <img src="images/components/salesforce-date-time-scheduling-demo-poster.png" data-gif="images/components/salesforce-date-time-scheduling-demo.gif" alt="Animated demo of the MultiDatePick DateTime component in Salesforce: naming a New Hire Onboarding schedule, dragging across Monday to Thursday, dragging 09:00 to 12:00 in the shared time grid, and saving one shift per day" title="Salesforce date and time scheduling demo" width="700" height="973" fetchpriority="high" decoding="async" data-zoomable>
+                    <figcaption>Pick the days, drag the hours, save. One record per block.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ═══════════════ LIVE DEMO ═══════════════ -->
+        <section class="hm-live" id="live-demo">
+            <div class="hm-wrap">
+                <div>
+                    <span class="tag">TRY IT LIVE: NO INSTALL, NO LOGIN</span>
+                    <h2>Book a slot like a candidate would</h2>
+                    <p>The live demo is a public Salesforce site where visitors book advisors by the half hour. Interviewers work the same way.</p>
+                </div>
+                <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-interview-scheduling" target="_blank" rel="noopener" class="btn">Launch the live demo &rarr;</a>
+            </div>
+        </section>
+
+        <!-- ═══════════════ OVERVIEW ═══════════════ -->
+        <section class="gs-sec" id="overview">
+            <div class="hm-wrap">
+                <h2>What makes interview scheduling different</h2>
+                <p class="gs-lead">Interviews break where the person booking cannot see who is busy. MultiDatePick shows it at the moment of choosing.</p>
+                <div class="bk-grid">
+                    <div class="bk-tile"><b>Date and time together</b><span>Any slot length. 15, 30 or 60 minutes are typical, and 45 works too.</span></div>
+                    <div class="bk-tile"><b>Interviewers as resources</b><span>Each one's hours come from their own record.</span></div>
+                    <div class="bk-tile"><b>Conflicts checked on save</b><span>Block the clash, skip it, or allow it.</span></div>
+                    <div class="bk-tile"><b>Panels use capacity</b><span>Three interviewers in a slot, then it closes.</span></div>
+                </div>
+                <div class="gs-two" style="margin-top:26px;">
+                    <div class="hm-scroll">
+                    <table class="gs-table">
+                        <thead><tr><th>Coordinator task</th><th>Standard Salesforce</th><th class="mdp">With MultiDatePick</th></tr></thead>
+                        <tbody>
+                            <tr><td>Offer three slots</td><td class="old">Typed into an email</td><td class="new">Picked from a live grid</td></tr>
+                            <tr><td>Is the interviewer free?</td><td class="old">Another tab, and hope</td><td class="new">Their bookings on the grid</td></tr>
+                            <tr><td>Two coordinators at once</td><td class="old">Last one wins</td><td class="new">Clash caught on save</td></tr>
+                            <tr><td>Panel of three</td><td class="old">Three separate records</td><td class="new">Live 2/3 badge on the slot</td></tr>
+                            <tr><td>Candidate moves it</td><td class="old">Delete and recreate</td><td class="new">Edit date, time or interviewer inline</td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                    <figure class="gs-fig">
+                        <img src="images/marketing/salesforce-calendar-time-slots.png" alt="Salesforce interview scheduling calendar in MultiDatePick: a month of interview days colored by status (Confirmed, Tentative, Pending), with days that mix statuses striped" title="Salesforce interview scheduling calendar" width="993" height="678" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Interview days colored by status. Mixed days are striped.</figcaption>
+                    </figure>
                 </div>
             </div>
         </section>
-        <section class="section">
-            <div class="container" style="max-width:880px;">
-                <p class="sc-lead">Interview scheduling breaks in the same place every time: the person booking cannot see who is already busy. So the slot gets offered, the candidate accepts, and somebody discovers the clash a day later. A Salesforce calendar that knows about existing bookings closes that gap at the point of selection.</p>
-                <div class="sc-quotes">
-                    <div class="sc-quote">"Can you do Tuesday at 2? Actually, hold on, let me check with the panel."</div>
+
+        <!-- ═══════════════ VIEWS ═══════════════ -->
+        <section class="gs-sec alt" id="views">
+            <div class="hm-wrap">
+                <h2>Interviews belong in the week grid</h2>
+                <p class="gs-lead">An interview is a time-of-day question, and a month grid hides times. Week shows seven days by your business hours, each interview as tall as it runs.</p>
+                <div class="bk-views">
+                    <figure class="gs-fig">
+                        <img src="images/views/salesforce-week-view-demo-poster.png" data-gif="images/views/salesforce-week-view-demo.gif" alt="Animated demo of the MultiDatePick Salesforce week view: choosing an advisor shows their client meetings as status-colored blocks sized to each meeting's length, with hover cards giving client, meeting type and status" title="Salesforce week view demo" width="880" height="1080" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Week: real interview lengths, inside business hours.</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="images/views/salesforce-agenda-view-demo-poster.png" data-gif="images/views/salesforce-agenda-view-demo.gif" alt="Animated demo of the MultiDatePick Salesforce agenda view: upcoming appointments listed by date with time, client, status pill and advisor, with hover cards on two of them" title="Salesforce agenda view demo" width="700" height="860" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Agenda: the morning-of list, easy to read on a phone.</figcaption>
+                    </figure>
                 </div>
-                <h2 style="margin-top:44px;">What makes interview scheduling different</h2>
-                <div class="sc-cards">
-                    <div class="sc-card">
-                        <h3>Dates and times together</h3>
-                        <p>An interview is not a date, it is a date plus a time window. Pick both on one screen, in 15, 30, or 60 minute slots.</p>
+                <p class="gs-note"><b>One save path for every view.</b> A coordinator switching from Week to Agenda or Calendar creates the same interview record every time.</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ SELF BOOKING + FLOWS ═══════════════ -->
+        <section class="gs-sec" id="self-booking">
+            <div class="hm-wrap">
+                <h2>Let the candidate book, or run it from a Screen Flow</h2>
+                <p class="gs-lead">Same component, same config. Nothing leaves your org, and there is no outside scheduling vendor in your security review.</p>
+                <div class="gs-paths">
+                    <div class="gs-card bk">
+                        <b>Candidate self-booking on Experience Cloud</b>
+                        <ul class="hm-checks">
+                            <li>Send a link, the candidate picks an open slot</li>
+                            <li>Only the slots you offer, inside interviewer hours</li>
+                            <li>Blocked dates from your own records</li>
+                            <li>The booking saves as a normal record at once</li>
+                        </ul>
                     </div>
-                    <div class="sc-card">
-                        <h3>The interviewer is a resource</h3>
-                        <p>Choose the interviewer or panel from a resource picker, and pull their available hours from their own record.</p>
-                    </div>
-                    <div class="sc-card">
-                        <h3>Conflicts are decided at save</h3>
-                        <p>Overlaps can block the save, skip just the clashing slot, or be allowed on purpose. You choose the behavior.</p>
-                    </div>
-                    <div class="sc-card">
-                        <h3>Panels need capacity</h3>
-                        <p>Three interviewers in one slot is a capacity problem, not a conflict. Capacity mode counts them and closes the slot when it is full.</p>
-                    </div>
-                </div>
-                <figure class="sc-shot">
-                    <img src="images/marketing/salesforce-calendar-time-slots.png" alt="Salesforce calendar interview scheduling with a time slot grid showing available and booked slots" loading="lazy" data-zoomable width="993" height="678">
-                    <figcaption>Dates and time slots on one screen, with taken slots visibly unavailable.</figcaption>
-                </figure>
-                <h2 style="margin-top:44px;">What changes</h2>
-                <table class="sc-table">
-                    <tr>
-                        <th style="width:30%;">Interview coordination task</th>
-                        <th style="width:35%;">Standard Salesforce today</th>
-                        <th style="width:35%;">With MultiDatePick</th>
-                    </tr>
-                    <tr>
-                        <td>Offer the candidate three slots</td>
-                        <td class="sc-old">Typed into an email from memory</td>
-                        <td class="sc-new">Picked from a live grid that already excludes taken slots</td>
-                    </tr>
-                    <tr>
-                        <td>Check the interviewer is free</td>
-                        <td class="sc-old">Open their calendar in another tab and hope</td>
-                        <td class="sc-new">Their existing bookings are drawn on the grid</td>
-                    </tr>
-                    <tr>
-                        <td>Two coordinators booking at once</td>
-                        <td class="sc-old">Last write wins, nobody notices</td>
-                        <td class="sc-new">Conflict detection runs on save and reports the clash</td>
-                    </tr>
-                    <tr>
-                        <td>Panel of three for one slot</td>
-                        <td class="sc-old">Three separate records, no shared view</td>
-                        <td class="sc-new">Capacity mode with a live X/Y badge on the slot</td>
-                    </tr>
-                    <tr>
-                        <td>Candidate needs to move the interview</td>
-                        <td class="sc-old">Delete and recreate, by hand</td>
-                        <td class="sc-new">Edit mode: change date, time, or interviewer inline</td>
-                    </tr>
-                </table>
-                <h2 style="margin-top:44px;">Let the candidate book it themselves</h2>
-                <p>The same component runs on an Experience Cloud site, so you can send a candidate a link and let them pick from the slots you are actually willing to offer. Business hours come from the interviewer record, blocked dates come from wherever you already store them, and the booking lands in your org as a normal record the moment they click save.</p>
-                <div class="sc-note">
-                    <strong>Nothing leaves your org.</strong> There is no external scheduling service holding your candidate data, no calendar sync to configure, and no separate vendor in your security review. It is a Lightning Web Component reading and writing your own objects.
-                </div>
-                <figure class="sc-shot">
-                    <img src="images/marketing/salesforce-calendar-capacity.png" alt="Salesforce interview calendar showing capacity badges and conflict detection on each time slot" loading="lazy" data-zoomable width="993" height="900">
-                    <figcaption>Capacity badges on each slot, so a panel interview fills up instead of double-booking.</figcaption>
-                </figure>
-                <h2 style="margin-top:44px;">Or drive it from a Screen Flow</h2>
-                <p>If interview scheduling already lives inside a recruiting flow, the calendar goes in the flow. The selection comes back as <code>selectedDatesWithTimesJson</code>, conflicts come back as <code>bookingConflictDates</code>, and the flow decides what to do next: send the invite, update the submittal, notify the panel.</p>
-                <h2 style="margin-top:44px;">The configuration, in full</h2>
-
-                <p>Point these at your own objects. The names below are an example schema, and none of it is code.</p>
-
-                <div class="sc-config">
-                    <div class="sc-config__head">Booking component: candidate record page</div>
-                    <table>
-                        <tr><td>relatedObjectApiName</td><td><code>Interview__c</code></td></tr>
-                        <tr><td>relationshipFieldApiName</td><td><code>Candidate__c</code></td></tr>
-                        <tr><td>dateFieldApiName</td><td><code>Interview_Date__c</code></td></tr>
-                        <tr><td>bookingStartTimeField<br>bookingEndTimeField</td><td><code>Start_Time__c</code> / <code>End_Time__c</code></td></tr>
-                        <tr><td>resourceObjectApiName</td><td><code>Interviewer__c</code>: or a panel record, if several people sit in</td></tr>
-                        <tr><td>bookingResourceField</td><td><code>Interviewer__c</code> on the interview</td></tr>
-                        <tr><td>businessHoursStartField<br>businessHoursEndField</td><td>on the interviewer, so each person's availability window is their own</td></tr>
-                        <tr><td>timeInterval</td><td><code>45</code>: interviews rarely fit a 30-minute grid</td></tr>
-                        <tr><td>groupTimeSlotsByPeriod</td><td><code>true</code>: morning / afternoon / evening, so a dense day stays scannable</td></tr>
-                        <tr><td>conflictBehavior</td><td><code>block</code> to refuse a clash outright, <code>skip</code> to save the free slots and report the rest</td></tr>
-                        <tr><td>capacityField</td><td>only if a slot takes several interviewers. A panel of three is a capacity question, not a conflict</td></tr>
-                        <tr><td>enableEditMode</td><td><code>true</code>: reschedule and reassign without deleting</td></tr>
-                    </table>
-                    <div class="sc-config__note"><strong>conflictBehavior is the property that matters most here.</strong> <code>block</code> is right when every slot is deliberate. <code>skip</code> is the humane default when someone selects several dates at once and two happen to clash: the other ones still save, and <code>bookingConflictDates</code> tells the flow exactly which did not.</div>
-                </div>
-
-                <div class="sc-config">
-                    <div class="sc-config__head">Screen Flow: recruiter scheduling a round</div>
-                    <table>
-                        <tr><td>recordId</td><td>the candidate record, from a flow variable</td></tr>
-                        <tr><td>Outputs</td><td><code>selectedDatesWithTimesJson</code> for the slots picked, <code>bookingSuccessCount</code> and <code>bookingConflictDates</code> for what actually saved</td></tr>
-                        <tr><td>Parser</td><td>the <code>MultiDatePickParser</code> invocable action turns that JSON into a loopable collection with <code>fromDate</code>, <code>startTime</code>, <code>endTime</code>, <code>resourceId</code></td></tr>
-                    </table>
-                    <div class="sc-config__note">That is what makes a flow able to send the invite, update the submittal and notify the panel in the same run. Set <strong>Config Name</strong> to your wizard config and every on/off setting comes from it, so there is no checkbox to set in Flow Builder.</div>
-                </div>
-
-
-                <div class="sc-related">
-                    <h3>Related</h3>
-                    <ul>
-                        <li><a href="/salesforce-calendar-staffing-recruiting.html">The full staffing and recruiting picture</a></li>
-                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Self-service booking on Experience Cloud</a></li>
-                        <li><a href="/multidatepickdatetime.html">The Date Time component in detail</a></li>
-                        <li><a href="/blog/prevent-double-booking-in-salesforce.html">How conflict detection and capacity actually work</a></li>
-                    </ul>
-                </div>
-                <h2 id="views" style="margin-top:44px;">Interviews belong in the week grid</h2>
-                <p>An interview is a time-of-day problem, and the month grid is the one layout that hides times. Set <code>view</code> to <strong>week</strong> and you get seven days across with your business hours down the side, each interview drawn as a block the height of its actual duration. A single drag across two days and down three hours blocks out a panel day.</p>
-                <p>Keep <strong>calendar</strong> in <code>availableViews</code> for the coordinator who thinks in weeks-out, and add <strong>agenda</strong> for the morning-of list: a flat chronological run of the day with candidate, round and status, which reads well on a phone on the way to the room.</p>
-                <div class="sc-note">
-                    Because all five layouts share one save path and one set of field mappings, a coordinator switching from week to agenda cannot accidentally create a different kind of record. The layout changes; the definition of an interview does not.
-                </div>
-                <img src="/images/views/salesforce-week-view.png" alt="MultiDatePick week view on Salesforce for one advisor: named client meetings of 30 and 60 minutes drawn as status-colored blocks, closed hours hatched and today marked" loading="lazy" style="width:100%;max-width:100%;height:auto;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid #E2E8F0;display:block;" width="1400" height="1355">
-                <div class="sc-cta-band">
-                    <h2>Stop scheduling interviews in your inbox</h2>
-                    <p>Coming to the Salesforce AppExchange in 2026. Tell us where to send the launch note.</p>
-                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&utm_medium=cta&utm_campaign=live_demo&utm_content=salesforce-calendar-interview-scheduling" class="btn btn-demo" target="_blank" rel="noopener">Try the Live Demo</a>
-                        <a href="/notify-me-at-launch.html" class="btn btn-primary">Notify Me at Launch</a>
-                        <a href="/gettingstarted.html" class="btn btn-secondary">See How It Works</a>
+                    <div class="gs-card sf">
+                        <b>Inside a recruiting Screen Flow</b>
+                        <ul class="hm-checks">
+                            <li>Set Config Name; every checkbox comes from the config</li>
+                            <li>Pass the candidate into Parent Record Id</li>
+                            <li>Booked slots and conflicts come back as outputs</li>
+                            <li>Next steps: send the invite, update the submittal</li>
+                        </ul>
                     </div>
                 </div>
-                <p class="sc-trust-line">100% Salesforce native. Your data and your configuration never leave your org.</p>
+                <p style="margin:14px 0 0;font-size:.93rem;">Full walkthroughs: <a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud booking</a> and the <a href="/flowcheatsheet.html">Screen Flow Guide</a>.</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ CONFIGS ═══════════════ -->
+        <section class="gs-sec alt" id="configuration">
+            <div class="hm-wrap">
+                <h2>Start from a config</h2>
+                <p class="gs-lead">Import one of 40+ ready configs into the Setup Wizard, pick your own objects and fields from dropdowns, and save.</p>
+                <div class="cf-grid two">
+                    <div class="cf-card">
+                        <span class="cf-type">Date Time</span>
+                        <h3>Interview Scheduling</h3>
+                        <p>Multi-round interviews across several days.</p>
+                        <ul class="cf-set">
+                            <li><span>Time Interval (Minutes)</span><em>30, or 45 for longer rounds</em></li>
+                            <li><span>Conflict Behavior</span><em>Block</em></li>
+                            <li><span>Second Picklist Field</span><em>Round</em></li>
+                            <li><span>View</span><em>Week, with Calendar and Agenda</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/configlibrary.html#interview-scheduling">Config Library &rarr;</a><a href="/downloads/configs/Interview_Scheduling.json" download>JSON</a></div>
+                    </div>
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>Advisor Appointment Booking</h3>
+                        <p>Pick the interviewer from a list of users.</p>
+                        <ul class="cf-set">
+                            <li><span>Resource</span><em>User, filtered to interviewers</em></li>
+                            <li><span>Business Hours Start / End Field</span><em>Working hours on User</em></li>
+                            <li><span>Conflict Behavior</span><em>Block</em></li>
+                            <li><span>Load Existing Bookings</span><em>On</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/configlibrary.html#advisor-appointment-booking">Config Library &rarr;</a><a href="/downloads/configs/Advisor_Appointment_Booking.json" download>JSON</a></div>
+                    </div>
+                </div>
+                <p class="gs-note"><b>Booking several rounds at once?</b> Set Conflict Behavior to Skip. The open slots save, and the clashes are listed for the coordinator.</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FAQ ═══════════════ -->
+        <section class="gs-sec" id="faq">
+            <div class="hm-wrap gs-faq">
+                <h2>Salesforce interview scheduling questions</h2>
+                <p class="gs-lead">Short answers to what people search.</p>
+                <details>
+                    <summary>Can you schedule interviews in Salesforce?</summary>
+                    <p>Yes, with MultiDatePick. Recruiters pick one or many dates and the time slots on one screen, and each interview saves as a record on your own object, linked to the candidate. Existing interviews are drawn on the grid, so taken slots are visible before anyone books.</p>
+                </details>
+                <details>
+                    <summary>Can interview slots be 45 minutes?</summary>
+                    <p>Yes. Time Interval (Minutes) takes any number. 15, 30 or 60 minutes are typical, and 45 or 90 work the same way.</p>
+                </details>
+                <details>
+                    <summary>How do I stop an interviewer being double booked?</summary>
+                    <p>Make the interviewer the resource, often the User object, and set Conflict Behavior to Block. Every save is checked against existing bookings. For a panel, add a Capacity Field so a slot stays open until every seat is filled.</p>
+                </details>
+                <details>
+                    <summary>Can candidates book their own interview?</summary>
+                    <p>Yes. Put the same component on an Experience Cloud site page and set Config Name and Static Parent Record Id. Candidates see only open slots inside interviewer hours, and the booking saves straight into your org.</p>
+                </details>
+                <details>
+                    <summary>How is this different from Salesforce Scheduler?</summary>
+                    <p>Salesforce Scheduler is a paid add-on built on its own data model for appointments. MultiDatePick books on your own objects, with multi-date selection, capacity and five calendar views. See the <a href="/salesforce-calendar-vs-lightning-scheduler.html">full comparison of Salesforce Lightning Scheduler and MultiDatePick</a>.</p>
+                </details>
+                <details>
+                    <summary>How much does MultiDatePick cost?</summary>
+                    <p>$20 per user per month for every component and feature, with a 30-day free trial and no card required. It is 100% Salesforce native and coming soon to the Salesforce AppExchange.</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- ═══════════════ RELATED ═══════════════ -->
+        <section class="gs-sec alt" id="related">
+            <div class="hm-wrap">
+                <h2>Keep exploring</h2>
+                <div class="gs-links" style="margin-top:16px;">
+                    <a href="/salesforce-calendar-staffing-recruiting.html"><b>Staffing and recruiting</b><span>Availability, shifts and rosters</span></a>
+                    <a href="/salesforce-calendar-vs-lightning-scheduler.html"><b>vs Salesforce Scheduler</b><span>Data model and licensing compared</span></a>
+                    <a href="/multidatepickdatetime.html"><b>The Date Time component</b><span>Dates and time slots together</span></a>
+                    <a href="/blog/prevent-double-booking-in-salesforce.html"><b>Prevent double booking</b><span>Conflicts and capacity, explained</span></a>
+                    <a href="/salesforce-calendar-experience-cloud-booking.html"><b>Experience Cloud booking</b><span>Self-service on a public site</span></a>
+                    <a href="/configlibrary.html"><b>Config Library</b><span>40+ ready configs to import</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FINAL CTA ═══════════════ -->
+        <section class="hm-final">
+            <div class="hm-wrap">
+                <h2>Stop scheduling interviews in your inbox</h2>
+                <p>Coming soon to the Salesforce AppExchange. Try the live demo now, or tell us where to send the launch note.</p>
+                <div class="hm-ctas">
+                    <a href="/notify-me-at-launch.html" class="btn btn-cta">Notify Me at Launch</a>
+                    <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-interview-scheduling" class="btn btn-ghost" target="_blank" rel="noopener">Try the Live Demo</a>
+                    <a href="/gettingstarted.html" class="btn btn-ghost">Getting Started</a>
+                </div>
+                <p class="contact">$20/user/month, 30-day free trial, no card required. Passed AppExchange Security Review. 100% Salesforce native.</p>
             </div>
         </section>
     </main>
@@ -251,7 +437,7 @@
             <div class="footer-inner">
                 <div class="footer-brand">
                     <a href="/" class="logo">
-                        <img src="images/logo.png" alt="MultiDatePick logo - Salesforce multi-date calendar and resource booking LWC" width="180" height="45">
+                        <img src="images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45">
                     </a>
                     <p>The most customizable calendar component suite for Salesforce.</p>
                 </div>
@@ -313,5 +499,22 @@
         </div>
     </footer>
     <script src="js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
 </body>
 </html>

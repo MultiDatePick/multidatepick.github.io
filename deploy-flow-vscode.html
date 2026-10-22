@@ -16,23 +16,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deploy a Flow with VS Code | MultiDatePick</title>
-    <meta name="description" content="Step-by-step guide to deploying a downloaded MultiDatePick Screen Flow into your Salesforce org using VS Code and the Salesforce CLI.">
+    <meta name="description" content="Step-by-step guide to deploying a ready-made MultiDatePick Screen Flow into your Salesforce org using VS Code and the Salesforce CLI, in about 15 minutes.">
     <link rel="canonical" href="https://multidatepick.com/deploy-flow-vscode.html">
     <link rel="stylesheet" href="css/style.css">
-    <style>/* long CLI command blocks scroll inside their own box instead of widening the page on phones */ .guide-content pre.code-block { max-width: 100%; overflow-x: auto; }</style>
+    <style>/* long CLI command blocks scroll inside their own box instead of widening the page on phones */ .guide-content pre.code-block { max-width: 100%; overflow-x: auto; }
+        .df-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .df-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .df-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .df-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+        .df-final .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .df-final .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .df-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .df-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .df-final .contact{margin:20px 0 0;font-size:.9rem;}
+        .df-final .contact a{color:#FDBA74;}
+        @media (max-width:640px){ .df-final{padding:40px 0;} .df-final h2{font-size:1.45rem;} }
+    </style>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <!-- Open Graph -->
     <meta property="og:title" content="Deploy a Flow with VS Code | MultiDatePick">
-    <meta property="og:description" content="Step-by-step guide to deploying a downloaded MultiDatePick Screen Flow into your Salesforce org using VS Code and the Salesforce CLI.">
+    <meta property="og:description" content="Step-by-step guide to deploying a ready-made MultiDatePick Screen Flow into your Salesforce org using VS Code and the Salesforce CLI, in about 15 minutes.">
     <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
     <meta property="og:url" content="https://multidatepick.com/deploy-flow-vscode.html">
     <meta property="og:type" content="website">
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Deploy a Flow with VS Code | MultiDatePick">
-    <meta name="twitter:description" content="Step-by-step guide to deploying a downloaded MultiDatePick Screen Flow into your Salesforce org using VS Code and the Salesforce CLI.">
+    <meta name="twitter:description" content="Step-by-step guide to deploying a ready-made MultiDatePick Screen Flow into your Salesforce org using VS Code and the Salesforce CLI, in about 15 minutes.">
     <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
     <script type="application/ld+json">
     {
@@ -61,7 +73,7 @@
 <body>
     <header class="site-header">
         <div class="header-inner">
-            <a href="/" class="logo"><img src="images/logo.png" alt="MultiDatePick logo - Salesforce multi-date calendar and resource booking LWC" width="180" height="45"></a>
+            <a href="/" class="logo"><img src="images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45"></a>
             <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
             <nav><ul class="nav-links">
                 <li class="nav-dropdown">
@@ -113,31 +125,31 @@
         <section class="guide-hero">
             <div class="container">
                 <h1>Deploy a Flow from VS Code</h1>
-                <p class="subtitle">You clicked <strong>Copy Flow XML</strong> in the Config Library - here's how to get that flow into your Salesforce org with VS Code and the Salesforce CLI. This is the developer path; if you'd rather not touch a code editor, build the flow by hand with the <a href="/flowcheatsheet.html">Flow Cheat Sheet</a> or use the in-app Setup Wizard.</p>
+                <p class="subtitle">You clicked <strong>Copy Flow XML</strong> in the Config Library. Here's how to get that flow into your Salesforce org with VS Code and the Salesforce CLI. This is the developer path. If you'd rather not touch a code editor, follow the <a href="/flowcheatsheet.html">Screen Flow Guide</a>: drop the component on a screen and set Config Name.</p>
             </div>
         </section>
         <!-- ═══════════════ CONTENT ═══════════════ -->
         <section class="guide-content">
             <div class="container">
                 <div class="guide-note">
-                    <div><strong>What this does:</strong> the copied XML is a ready-made Screen Flow that embeds the MultiDatePick component, already wired to a sensible set of objects and fields. You deploy it once, then rename a few API names to match your org. Total time is about 15 minutes the first time, a couple of minutes after that. Every Boolean property the wrapper exposes is stamped explicitly in the XML, so the flow behaves the same as the demo on the config's page (blank Booleans in Flow read as null, not false, and would silently disable features otherwise).</div>
+                    <div><strong>What this does:</strong> the copied XML is a ready-made Screen Flow that embeds the MultiDatePick component, already wired to a sensible set of objects and fields. You deploy it once, then rename a few API names to match your org. Total time is about 15 minutes the first time, a couple of minutes after that. Every Boolean property the wrapper exposes is stamped explicitly in the XML, so the flow behaves the same as the demo on the config's page (Flow reads a blank Boolean as null, which would quietly switch features off).</div>
                 </div>
                 <figure class="guide-shot" style="margin:20px 0 6px;">
                     <img src="/images/flow-guide/salesforce-config-library-flow-to-org.gif" alt="Animated demo of getting a MultiDatePick Config Library flow into Salesforce: Copy Flow XML on the Active Conference Rooms card, save it into a flow file and deploy it with the Salesforce CLI, activate it in Flow Builder, then run the flow and book a conference room" loading="lazy" data-zoomable width="900" height="576" style="width:100%;height:auto;border-radius:10px;border:1px solid #E2E8F0;display:block;">
                     <figcaption>The whole trip: Copy Flow XML in the Config Library, save and deploy it, activate it in Flow Builder, run it.</figcaption>
                 </figure>
                 <h2>1. What you need</h2>
-                <p>Three free tools - install once and you're set for every future deploy:</p>
+                <p>Three free tools. Install them once and you're set for every future deploy:</p>
                 <ul>
-                    <li><a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer">Visual Studio Code</a> - the code editor.</li>
-                    <li><a href="https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode" target="_blank" rel="noopener noreferrer">Salesforce Extension Pack</a> - adds the SFDX commands to VS Code. Install it from the Extensions panel (search "Salesforce Extension Pack").</li>
-                    <li><a href="https://developer.salesforce.com/tools/salesforcecli" target="_blank" rel="noopener noreferrer">Salesforce CLI (<code>sf</code>)</a> - the command-line tool the deploy runs through. Confirm it's installed by running <code>sf version</code> in VS Code's terminal.</li>
+                    <li><a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer">Visual Studio Code</a>: the code editor.</li>
+                    <li><a href="https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode" target="_blank" rel="noopener noreferrer">Salesforce Extension Pack</a>: adds the SFDX commands to VS Code. Install it from the Extensions panel (search "Salesforce Extension Pack").</li>
+                    <li><a href="https://developer.salesforce.com/tools/salesforcecli" target="_blank" rel="noopener noreferrer">Salesforce CLI (<code>sf</code>)</a>: the command-line tool the deploy runs through. Confirm it's installed by running <code>sf version</code> in VS Code's terminal.</li>
                 </ul>
                 <h2>2. One-time setup</h2>
                 <p>Skip this section if you already work in an SFDX project connected to your org.</p>
                 <div class="step">
                     <h4><span class="step-number">A</span> Authorize your org</h4>
-                    <p>Connect VS Code to your Salesforce org. Open the Command Palette (<code>Ctrl/Cmd + Shift + P</code>) and run <strong>SFDX: Authorize an Org</strong> - or from the terminal:</p>
+                    <p>Connect VS Code to your Salesforce org. Open the Command Palette (<code>Ctrl/Cmd + Shift + P</code>) and run <strong>SFDX: Authorize an Org</strong>, or run this in the terminal:</p>
                     <pre class="code-block"><code>sf org login web --alias myorg</code></pre>
                     <p>A browser opens; log in and approve. Use a sandbox or Developer org first, not production.</p>
                 </div>
@@ -151,7 +163,7 @@ cd multidatepick-flows</code></pre>
                 <h2>3. Import the copied XML</h2>
                 <div class="step">
                     <h4><span class="step-number">1</span> Create the flow file</h4>
-                    <p>In the Explorer, expand <code>force-app/main/default/</code> and open (or create) the <code>flows</code> folder. Add a new file named after your config, ending in <code>.flow-meta.xml</code> - for example <code>On_Call_Rotation.flow-meta.xml</code>. The name becomes the flow's API name, so use letters, numbers, and underscores only.</p>
+                    <p>In the Explorer, expand <code>force-app/main/default/</code> and open (or create) the <code>flows</code> folder. Add a new file named after your config, ending in <code>.flow-meta.xml</code>, for example <code>On_Call_Rotation.flow-meta.xml</code>. The name becomes the flow's API name, so use letters, numbers, and underscores only.</p>
                     <p>Or create it straight from VS Code's integrated terminal:</p>
                     <pre class="code-block"><code># Windows (PowerShell)
 New-Item force-app/main/default/flows/On_Call_Rotation.flow-meta.xml -ItemType File -Force
@@ -164,15 +176,15 @@ mkdir -p force-app/main/default/flows &amp;&amp; touch force-app/main/default/fl
                 </div>
                 <div class="step">
                     <h4><span class="step-number">3</span> Deploy to your org</h4>
-                    <p>Right-click the file in the Explorer and choose <strong>SFDX: Deploy Source to Org</strong> - or run this in the terminal:</p>
+                    <p>Right-click the file in the Explorer and choose <strong>SFDX: Deploy Source to Org</strong>, or run this in the terminal:</p>
                     <pre class="code-block"><code>sf project deploy start --source-dir force-app/main/default/flows/On_Call_Rotation.flow-meta.xml</code></pre>
-                    <p>Watch the Output panel for <strong>Deploy Succeeded</strong>. If it reports a field or object error, that's expected - the next step fixes it.</p>
+                    <p>Watch the Output panel for <strong>Deploy Succeeded</strong>. If it reports a field or object error, that's expected. The next step fixes it.</p>
                 </div>
                 <h2>4. Finish in Flow Builder</h2>
                 <div class="step">
                     <h4><span class="step-number">4</span> Swap in your object and field names</h4>
-                    <p>In your org, go to <strong>Setup → Flows</strong> and open the flow you just deployed. Look for the elements and notes marked <strong>&gt;&gt;&gt; UPDATE</strong> - those point at the object and field <em>API names</em> the sample assumed. Change each one to match your own object, date field, and lookup. Then <strong>Save</strong> and <strong>Activate</strong>.</p>
-                    <p>That's it - drop the flow on a page, a button, or run it directly, and members can start selecting dates.</p>
+                    <p>In your org, go to <strong>Setup → Flows</strong> and open the flow you just deployed. Look for the elements and notes marked <strong>&gt;&gt;&gt; UPDATE</strong>. Those point at the object and field <em>API names</em> the sample assumed. Change each one to match your own object, date field, and lookup. Then <strong>Save</strong> and <strong>Activate</strong>.</p>
+                    <p>Now drop the flow on a page or a button, or run it directly, and users can start selecting dates.</p>
                 </div>
                 <div class="guide-note">
                     <div><strong>Command recap:</strong>
@@ -183,13 +195,26 @@ sf project deploy start --source-dir force-app/main/default/flows/YOUR_FLOW.flow
                 </div>
             </div>
         </section>
+        <!-- ═══════════════ NEXT STEP ═══════════════ -->
+        <section class="df-final">
+            <div class="container">
+                <h2>Flow deployed. What next?</h2>
+                <p>See the components running in the live demo, learn the no-code Config Name path, or get notified the day MultiDatePick arrives on the Salesforce AppExchange.</p>
+                <div class="df-ctas">
+                    <a href="/notify-me-at-launch.html" class="btn btn-cta">Notify Me at Launch</a>
+                    <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=deploy-flow-vscode" class="btn btn-ghost" target="_blank" rel="noopener">Try the Live Demo</a>
+                    <a href="/flowcheatsheet.html" class="btn btn-ghost">Screen Flow Guide</a>
+                </div>
+                <p class="contact">Deploy error you can't place? <a href="mailto:Support@MultiDatePick.com">Support@MultiDatePick.com</a></p>
+            </div>
+        </section>
     </main>
     <footer class="site-footer">
         <div class="container">
             <div class="footer-inner">
                 <div class="footer-brand">
                     <a href="/" class="logo">
-                        <img src="images/logo.png" alt="MultiDatePick logo - Salesforce multi-date calendar and resource booking LWC" width="180" height="45">
+                        <img src="images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45">
                     </a>
                     <p>The most customizable calendar component suite for Salesforce.</p>
                 </div>
