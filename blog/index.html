@@ -61,19 +61,25 @@
         .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
         .bp-end p { margin: 0 0 16px; color: #374151; }
         .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
-        .bp-end-chips { list-style: none; padding: 0; margin: 16px 0 0; display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.8rem; }
-        .bp-end-chips li { background: #fff; border: 1px solid #BFDBFE; color: #1E3A8A; border-radius: 999px; padding: 3px 11px; font-weight: 600; }
         @media (max-width: 640px) {
             .bp-pair { grid-template-columns: 1fr; }
             .bp-end { padding: 20px 18px; }
             .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
         }
-        .bl-jump { list-style: none; padding: 0; margin: 18px 0 0; display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.85rem; }
-        .bl-jump a { display: inline-block; background: #fff; border: 1px solid #BFDBFE; color: #1E3A8A; border-radius: 999px; padding: 4px 12px; font-weight: 600; text-decoration: none; }
-        .bl-jump a:hover { background: #EFF6FF; }
-        .bl-topic { position: relative; padding-left: 16px; margin: 44px 0 4px; color: #0F2D52; scroll-margin-top: 90px; }
-        .bl-topic::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
-        .section .bl-topic:first-child { margin-top: 0; }
+        /* Blog index (2026-10-26): topic sidebar + one list, newest first. */
+        .bl-layout { display: flex; flex-wrap: wrap; gap: 40px; max-width: 1100px; align-items: flex-start; }
+        .bl-side { flex: 0 0 250px; display: flex; flex-direction: column; gap: 2px; }
+        .bl-side-title { margin: 0 0 8px 12px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #64748B; }
+        .bl-filter { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 10px 12px; border: 0; border-radius: 8px; background: transparent; font: inherit; font-size: 1rem; font-weight: 500; color: #334155; text-align: left; cursor: pointer; }
+        .bl-filter:hover { background: #F1F5F9; color: #0F2D52; }
+        .bl-filter.is-active { background: #E0F2FE; color: #0F2D52; font-weight: 600; }
+        .bl-filter:focus-visible { outline: 2px solid #0176D3; outline-offset: 2px; }
+        .bl-count { font-size: 0.875rem; font-weight: 400; color: #64748B; }
+        .bl-main { flex: 999 1 560px; min-width: 0; }
+        .bl-head h2 { margin: 0 0 4px; color: #0F2D52; font-size: 1.5rem; }
+        .bl-anchor { display: block; scroll-margin-top: 90px; }
+        .sc-post[hidden] { display: none; }
+        @media (min-width: 900px) { .bl-side { position: sticky; top: 96px; } }
         .bl-intro { color: #4B5563; margin: 0 0 4px; }
         .sc-post h3 { margin: 0 0 6px; font-size: 1.15rem; line-height: 1.35; }
         .sc-post h3 a { color: #0F2D52; text-decoration: none; }
@@ -143,151 +149,140 @@
             <div class="container">
                 <h1>The MultiDatePick Blog</h1>
                 <p class="subtitle">Practical guides to calendars and scheduling in Salesforce: views, time slots, conflicts, setup, and the platform limits nobody warns you about.</p>
-                <ul class="bl-jump">
-                    <li><a href="#calendar-views">Calendar views</a></li>
-                    <li><a href="#scheduling-booking">Scheduling and booking</a></li>
-                    <li><a href="#setup-flow">Setup and Flow</a></li>
-                    <li><a href="#use-cases">Use cases</a></li>
-                    <li><a href="#accessibility-government">Accessibility and government</a></li>
-                </ul>
             </div>
         </section>
         <section class="section">
-            <div class="container" style="max-width:860px;">
-                <h2 class="bl-topic" id="calendar-views">Calendar views</h2>
-                <p class="bl-intro">Five ways to see the same Salesforce records, and when each one fits.</p>
-                <div class="sc-postlist">
-                    <div class="sc-post has-thumb">
-                        <a class="sc-thumb" href="/blog/salesforce-utilization-heatmap.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/salesforce-utilization-heatmap.png" alt="The Salesforce Utilization Heatmap: See Who Is Overbooked at a Glance (article cover image)" loading="lazy" width="800" height="560"></a>
-                        <div>
-                            <h3><a href="/blog/salesforce-utilization-heatmap.html">The Salesforce Utilization Heatmap: See Who Is Overbooked at a Glance</a></h3>
-                            <p class="sc-meta"><time datetime="2026-10-13">October 13, 2026</time></p>
-                            <p>Every room, person or asset down the side, every day across, and each cell showing booked against capacity. Overbooking flags, the combined availability row, and who uses it, from room planning to team capacity.</p>
-                            <p><a href="/blog/salesforce-utilization-heatmap.html">Read it &rsaquo;</a></p>
-                        </div>
+            <div class="container bl-layout">
+                <nav class="bl-side" aria-label="Blog topics">
+                    <p class="bl-side-title">Topics</p>
+                    <button type="button" class="bl-filter is-active" data-topic="all" data-intro="Every guide, newest first." aria-pressed="true"><span>All articles</span><span class="bl-count">12</span></button>
+                    <button type="button" class="bl-filter" data-topic="calendar-views" data-intro="Five ways to see the same Salesforce records, and when each one fits." aria-pressed="false"><span>Calendar views</span><span class="bl-count">3</span></button>
+                    <button type="button" class="bl-filter" data-topic="scheduling-booking" data-intro="Time slots, conflicts, capacity and recurring dates on your own objects." aria-pressed="false"><span>Scheduling and booking</span><span class="bl-count">3</span></button>
+                    <button type="button" class="bl-filter" data-topic="setup-flow" data-intro="From the Setup Wizard to a Screen Flow, without writing code." aria-pressed="false"><span>Setup and Flow</span><span class="bl-count">2</span></button>
+                    <button type="button" class="bl-filter" data-topic="use-cases" data-intro="What teams put on a multi-date Salesforce calendar." aria-pressed="false"><span>Use cases</span><span class="bl-count">2</span></button>
+                    <button type="button" class="bl-filter" data-topic="accessibility-government" data-intro="WCAG 2.1 AA, Section 508 and the VPAT behind the calendar." aria-pressed="false"><span>Accessibility and government</span><span class="bl-count">2</span></button>
+                </nav>
+                <div class="bl-main">
+                    <span class="bl-anchor" id="calendar-views"></span>
+                    <span class="bl-anchor" id="scheduling-booking"></span>
+                    <span class="bl-anchor" id="setup-flow"></span>
+                    <span class="bl-anchor" id="use-cases"></span>
+                    <span class="bl-anchor" id="accessibility-government"></span>
+                    <div class="bl-head">
+                        <h2 id="bl-heading">All articles</h2>
+                        <p class="bl-intro" id="bl-intro">Every guide, newest first.</p>
                     </div>
-                    <div class="sc-post has-thumb">
-                        <a class="sc-thumb" href="/blog/salesforce-timeline-view.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/salesforce-timeline-view.png" alt="The Salesforce Timeline View: Every Resource and Booking on One Screen (article cover image)" loading="lazy" width="800" height="560"></a>
-                        <div>
-                            <h3><a href="/blog/salesforce-timeline-view.html">The Salesforce Timeline View: Every Resource and Booking on One Screen</a></h3>
-                            <p class="sc-meta"><time datetime="2026-10-12">October 12, 2026</time></p>
-                            <p>Rooms, people, equipment or projects down the side, dates across the top, and every booking drawn as one bar. Lanes for overlaps, a capacity strip, Day to Month zoom and drag to reschedule.</p>
-                            <p><a href="/blog/salesforce-timeline-view.html">Read it &rsaquo;</a></p>
-                        </div>
+                    <div class="sc-postlist" id="bl-posts">
+                        <div class="sc-post has-thumb" data-topics="use-cases">
+                          <a class="sc-thumb" href="/blog/salesforce-campaign-multiple-dates.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/salesforce-campaign-multiple-dates.png" alt="Salesforce Campaign Dates: Every Event Day on One Calendar (article cover image)" loading="lazy" width="800" height="560"></a>
+                          <div>
+                              <h3><a href="/blog/salesforce-campaign-multiple-dates.html">Salesforce Campaign Dates: Every Event Day on One Calendar</a></h3>
+                              <p class="sc-meta"><time datetime="2026-10-19">October 19, 2026</time> &middot; Use cases</p>
+                              <p>A Campaign has one start date and one end date. Put every tour stop, webinar session or volunteer day on the Campaign record instead, each one a real record with a status color. Three setup steps, no Apex.</p>
+                              <p><a href="/blog/salesforce-campaign-multiple-dates.html">Read it &rsaquo;</a></p>
+                          </div>
+                      </div>
+                        <div class="sc-post has-thumb" data-topics="calendar-views">
+                          <a class="sc-thumb" href="/blog/salesforce-utilization-heatmap.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/salesforce-utilization-heatmap.png" alt="The Salesforce Utilization Heatmap: See Who Is Overbooked at a Glance (article cover image)" loading="lazy" width="800" height="560"></a>
+                          <div>
+                              <h3><a href="/blog/salesforce-utilization-heatmap.html">The Salesforce Utilization Heatmap: See Who Is Overbooked at a Glance</a></h3>
+                              <p class="sc-meta"><time datetime="2026-10-13">October 13, 2026</time> &middot; Calendar views</p>
+                              <p>Every room, person or asset down the side, every day across, and each cell showing booked against capacity. Overbooking flags, the combined availability row, and who uses it, from room planning to team capacity.</p>
+                              <p><a href="/blog/salesforce-utilization-heatmap.html">Read it &rsaquo;</a></p>
+                          </div>
+                      </div>
+                        <div class="sc-post has-thumb" data-topics="calendar-views">
+                          <a class="sc-thumb" href="/blog/salesforce-timeline-view.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/salesforce-timeline-view.png" alt="The Salesforce Timeline View: Every Resource and Booking on One Screen (article cover image)" loading="lazy" width="800" height="560"></a>
+                          <div>
+                              <h3><a href="/blog/salesforce-timeline-view.html">The Salesforce Timeline View: Every Resource and Booking on One Screen</a></h3>
+                              <p class="sc-meta"><time datetime="2026-10-12">October 12, 2026</time> &middot; Calendar views</p>
+                              <p>Rooms, people, equipment or projects down the side, dates across the top, and every booking drawn as one bar. Lanes for overlaps, a capacity strip, Day to Month zoom and drag to reschedule.</p>
+                              <p><a href="/blog/salesforce-timeline-view.html">Read it &rsaquo;</a></p>
+                          </div>
+                      </div>
+                        <div class="sc-post has-thumb" data-topics="accessibility-government">
+                          <a class="sc-thumb" href="/blog/salesforce-section-508-government-calendar.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/section-508-government.png" alt="An Accessible Salesforce Calendar for Government Teams (article cover image)" loading="lazy" width="800" height="560"></a>
+                          <div>
+                              <h3><a href="/blog/salesforce-section-508-government-calendar.html">An Accessible Salesforce Calendar for Government Teams</a></h3>
+                              <p class="sc-meta"><time datetime="2026-10-11">October 11, 2026</time> &middot; Accessibility and government</p>
+                              <p>The ADA Title II web rule gives state and local agencies until April 2027 to meet WCAG 2.1 AA. Where scheduling shows up in a government org, and what MultiDatePick does criterion by criterion.</p>
+                              <p><a href="/blog/salesforce-section-508-government-calendar.html">Read it &rsaquo;</a></p>
+                          </div>
+                      </div>
+                        <div class="sc-post has-thumb" data-topics="calendar-views">
+                          <a class="sc-thumb" href="/blog/salesforce-calendar-views.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/five-calendar-views.png" alt="Five Calendar Views, One Salesforce Component (article cover image)" loading="lazy" width="800" height="560"></a>
+                          <div>
+                              <h3><a href="/blog/salesforce-calendar-views.html">Five Calendar Views, One Salesforce Component</a></h3>
+                              <p class="sc-meta"><time datetime="2026-08-21">August 21, 2026</time> &middot; Calendar views</p>
+                              <p>Calendar, Timeline, Week, Utilization and Agenda, all reading the same records through the same field mappings, and chosen per placement with one setting. No second install.</p>
+                              <p><a href="/blog/salesforce-calendar-views.html">Read it &rsaquo;</a></p>
+                          </div>
+                      </div>
+                        <div class="sc-post has-thumb" data-topics="use-cases">
+                          <a class="sc-thumb" href="/blog/why-salesforce-has-no-multi-date-calendar.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/why-no-multi-date-calendar.png" alt="Why Salesforce Has No Multi-Date Calendar (article cover image)" loading="lazy" width="800" height="560"></a>
+                          <div>
+                              <h3><a href="/blog/why-salesforce-has-no-multi-date-calendar.html">Why Salesforce Has No Multi-Date Calendar</a></h3>
+                              <p class="sc-meta"><time datetime="2026-08-20">August 20, 2026</time> &middot; Use cases</p>
+                              <p>A date field holds one date, and every workaround for capturing many at once leaks somewhere. What the three MultiDatePick components do instead, set up without code.</p>
+                              <p><a href="/blog/why-salesforce-has-no-multi-date-calendar.html">Read it &rsaquo;</a></p>
+                          </div>
+                      </div>
+                        <div class="sc-post has-thumb" data-topics="setup-flow">
+                          <a class="sc-thumb" href="/blog/salesforce-calendar-setup-wizard.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/setup-wizard.png" alt="Configuring a Salesforce Calendar Without Writing Code (article cover image)" loading="lazy" width="800" height="560"></a>
+                          <div>
+                              <h3><a href="/blog/salesforce-calendar-setup-wizard.html">Configuring a Salesforce Calendar Without Writing Code</a></h3>
+                              <p class="sc-meta"><time datetime="2026-08-19">August 19, 2026</time> &middot; Setup and Flow</p>
+                              <p>100+ properties sounds like a project. It is a wizard, three questions about the shape of your records, and a live preview of the real component. Plus what it writes: a deployable, reusable Custom Metadata record.</p>
+                              <p><a href="/blog/salesforce-calendar-setup-wizard.html">Read it &rsaquo;</a></p>
+                          </div>
+                      </div>
+                        <div class="sc-post has-thumb" data-topics="accessibility-government">
+                          <a class="sc-thumb" href="/blog/salesforce-vpat-accessibility.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/vpat-accessibility.png" alt="Salesforce VPAT: What Admins Need to Know (article cover image)" loading="lazy" width="800" height="560"></a>
+                          <div>
+                              <h3><a href="/blog/salesforce-vpat-accessibility.html">Salesforce VPAT: What Admins Need to Know</a></h3>
+                              <p class="sc-meta"><time datetime="2026-08-12">August 12, 2026</time> &middot; Accessibility and government</p>
+                              <p>What a VPAT is, why it appears during procurement rather than evaluation, how to read the conformance levels, and the questions to ask a vendor. Plus why calendars are hard to make accessible.</p>
+                              <p><a href="/blog/salesforce-vpat-accessibility.html">Read it &rsaquo;</a></p>
+                          </div>
+                      </div>
+                        <div class="sc-post has-thumb" data-topics="scheduling-booking">
+                          <a class="sc-thumb" href="/blog/prevent-double-booking-in-salesforce.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/prevent-double-booking.png" alt="Preventing Double-Booking in Salesforce (article cover image)" loading="lazy" width="800" height="560"></a>
+                          <div>
+                              <h3><a href="/blog/prevent-double-booking-in-salesforce.html">Preventing Double-Booking in Salesforce</a></h3>
+                              <p class="sc-meta"><time datetime="2026-07-21">July 21, 2026</time> &middot; Scheduling and booking</p>
+                              <p>Validation rules cannot see other records, and duplicate rules match on equality while overlaps do not. Why conflict and capacity are different problems, and why the fix belongs at selection time.</p>
+                              <p><a href="/blog/prevent-double-booking-in-salesforce.html">Read it &rsaquo;</a></p>
+                          </div>
+                      </div>
+                        <div class="sc-post has-thumb" data-topics="scheduling-booking">
+                          <a class="sc-thumb" href="/blog/salesforce-calendar-time-slot-picker.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/time-slot-picker.png" alt="Building a Calendar Time Slot Picker in Salesforce (article cover image)" loading="lazy" width="800" height="560"></a>
+                          <div>
+                              <h3><a href="/blog/salesforce-calendar-time-slot-picker.html">Building a Calendar Time Slot Picker in Salesforce</a></h3>
+                              <p class="sc-meta"><time datetime="2026-06-27">June 27, 2026</time> &middot; Scheduling and booking</p>
+                              <p>Salesforce gives you a date picker and a time field, but no grid of selectable slots. What a real time slot picker has to do, the parts nobody scopes, and the settings that give you one without code.</p>
+                              <p><a href="/blog/salesforce-calendar-time-slot-picker.html">Read it &rsaquo;</a></p>
+                          </div>
+                      </div>
+                        <div class="sc-post has-thumb" data-topics="scheduling-booking">
+                          <a class="sc-thumb" href="/blog/recurring-date-patterns-in-salesforce.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/recurring-patterns.png" alt="Recurring Date Patterns in Salesforce (article cover image)" loading="lazy" width="800" height="560"></a>
+                          <div>
+                              <h3><a href="/blog/recurring-date-patterns-in-salesforce.html">Recurring Date Patterns in Salesforce</a></h3>
+                              <p class="sc-meta"><time datetime="2026-06-04">June 4, 2026</time> &middot; Scheduling and booking</p>
+                              <p>Every other Tuesday, the 2nd and 4th Friday, the last Saturday. Salesforce recurrence stops at Events and Tasks. The two kinds of recurrence, why "last" breaks hand-rolled logic, and whether to store the rule or the dates.</p>
+                              <p><a href="/blog/recurring-date-patterns-in-salesforce.html">Read it &rsaquo;</a></p>
+                          </div>
+                      </div>
+                        <div class="sc-post has-thumb" data-topics="setup-flow">
+                          <a class="sc-thumb" href="/blog/multiple-dates-in-a-salesforce-screen-flow.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/multi-date-flow.png" alt="How to Let Users Pick Multiple Dates in a Salesforce Screen Flow (article cover image)" loading="lazy" width="800" height="560"></a>
+                          <div>
+                              <h3><a href="/blog/multiple-dates-in-a-salesforce-screen-flow.html">How to Let Users Pick Multiple Dates in a Salesforce Screen Flow</a></h3>
+                              <p class="sc-meta"><time datetime="2026-05-01">May 1, 2026</time> &middot; Setup and Flow</p>
+                              <p>Flow captures one date per element. Five common workarounds, why the start-and-end-date version is quietly wrong, and how to get a real collection back into your flow.</p>
+                              <p><a href="/blog/multiple-dates-in-a-salesforce-screen-flow.html">Read it &rsaquo;</a></p>
+                          </div>
+                      </div>
                     </div>
-                    <div class="sc-post has-thumb">
-                        <a class="sc-thumb" href="/blog/salesforce-calendar-views.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/five-calendar-views.png" alt="Five Calendar Views, One Salesforce Component (article cover image)" loading="lazy" width="800" height="560"></a>
-                        <div>
-                            <h3><a href="/blog/salesforce-calendar-views.html">Five Calendar Views, One Salesforce Component</a></h3>
-                            <p class="sc-meta"><time datetime="2026-08-21">August 21, 2026</time></p>
-                            <p>Calendar, Timeline, Week, Utilization and Agenda, all reading the same records through the same field mappings, and chosen per placement with one setting. No second install.</p>
-                            <p><a href="/blog/salesforce-calendar-views.html">Read it &rsaquo;</a></p>
-                        </div>
-                    </div>
-                </div>
-
-                <h2 class="bl-topic" id="scheduling-booking">Scheduling and booking</h2>
-                <p class="bl-intro">Time slots, conflicts, capacity and recurring dates on your own objects.</p>
-                <div class="sc-postlist">
-                    <div class="sc-post has-thumb">
-                        <a class="sc-thumb" href="/blog/prevent-double-booking-in-salesforce.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/prevent-double-booking.png" alt="Preventing Double-Booking in Salesforce (article cover image)" loading="lazy" width="800" height="560"></a>
-                        <div>
-                            <h3><a href="/blog/prevent-double-booking-in-salesforce.html">Preventing Double-Booking in Salesforce</a></h3>
-                            <p class="sc-meta"><time datetime="2026-07-21">July 21, 2026</time></p>
-                            <p>Validation rules cannot see other records, and duplicate rules match on equality while overlaps do not. Why conflict and capacity are different problems, and why the fix belongs at selection time.</p>
-                            <p><a href="/blog/prevent-double-booking-in-salesforce.html">Read it &rsaquo;</a></p>
-                        </div>
-                    </div>
-                    <div class="sc-post has-thumb">
-                        <a class="sc-thumb" href="/blog/salesforce-calendar-time-slot-picker.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/time-slot-picker.png" alt="Building a Calendar Time Slot Picker in Salesforce (article cover image)" loading="lazy" width="800" height="560"></a>
-                        <div>
-                            <h3><a href="/blog/salesforce-calendar-time-slot-picker.html">Building a Calendar Time Slot Picker in Salesforce</a></h3>
-                            <p class="sc-meta"><time datetime="2026-06-27">June 27, 2026</time></p>
-                            <p>Salesforce gives you a date picker and a time field, but no grid of selectable slots. What a real time slot picker has to do, the parts nobody scopes, and the settings that give you one without code.</p>
-                            <p><a href="/blog/salesforce-calendar-time-slot-picker.html">Read it &rsaquo;</a></p>
-                        </div>
-                    </div>
-                    <div class="sc-post has-thumb">
-                        <a class="sc-thumb" href="/blog/recurring-date-patterns-in-salesforce.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/recurring-patterns.png" alt="Recurring Date Patterns in Salesforce (article cover image)" loading="lazy" width="800" height="560"></a>
-                        <div>
-                            <h3><a href="/blog/recurring-date-patterns-in-salesforce.html">Recurring Date Patterns in Salesforce</a></h3>
-                            <p class="sc-meta"><time datetime="2026-06-04">June 4, 2026</time></p>
-                            <p>Every other Tuesday, the 2nd and 4th Friday, the last Saturday. Salesforce recurrence stops at Events and Tasks. The two kinds of recurrence, why "last" breaks hand-rolled logic, and whether to store the rule or the dates.</p>
-                            <p><a href="/blog/recurring-date-patterns-in-salesforce.html">Read it &rsaquo;</a></p>
-                        </div>
-                    </div>
-                </div>
-
-                <h2 class="bl-topic" id="setup-flow">Setup and Flow</h2>
-                <p class="bl-intro">From the Setup Wizard to a Screen Flow, without writing code.</p>
-                <div class="sc-postlist">
-                    <div class="sc-post has-thumb">
-                        <a class="sc-thumb" href="/blog/salesforce-calendar-setup-wizard.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/setup-wizard.png" alt="Configuring a Salesforce Calendar Without Writing Code (article cover image)" loading="lazy" width="800" height="560"></a>
-                        <div>
-                            <h3><a href="/blog/salesforce-calendar-setup-wizard.html">Configuring a Salesforce Calendar Without Writing Code</a></h3>
-                            <p class="sc-meta"><time datetime="2026-08-19">August 19, 2026</time></p>
-                            <p>100+ properties sounds like a project. It is a wizard, three questions about the shape of your records, and a live preview of the real component. Plus what it writes: a deployable, reusable Custom Metadata record.</p>
-                            <p><a href="/blog/salesforce-calendar-setup-wizard.html">Read it &rsaquo;</a></p>
-                        </div>
-                    </div>
-                    <div class="sc-post has-thumb">
-                        <a class="sc-thumb" href="/blog/multiple-dates-in-a-salesforce-screen-flow.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/multi-date-flow.png" alt="How to Let Users Pick Multiple Dates in a Salesforce Screen Flow (article cover image)" loading="lazy" width="800" height="560"></a>
-                        <div>
-                            <h3><a href="/blog/multiple-dates-in-a-salesforce-screen-flow.html">How to Let Users Pick Multiple Dates in a Salesforce Screen Flow</a></h3>
-                            <p class="sc-meta"><time datetime="2026-05-01">May 1, 2026</time></p>
-                            <p>Flow captures one date per element. Five common workarounds, why the start-and-end-date version is quietly wrong, and how to get a real collection back into your flow.</p>
-                            <p><a href="/blog/multiple-dates-in-a-salesforce-screen-flow.html">Read it &rsaquo;</a></p>
-                        </div>
-                    </div>
-                </div>
-
-                <h2 class="bl-topic" id="use-cases">Use cases</h2>
-                <p class="bl-intro">What teams put on a multi-date Salesforce calendar.</p>
-                <div class="sc-postlist">
-                    <div class="sc-post has-thumb">
-                        <a class="sc-thumb" href="/blog/salesforce-campaign-multiple-dates.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/salesforce-campaign-multiple-dates.png" alt="Salesforce Campaign Dates: Every Event Day on One Calendar (article cover image)" loading="lazy" width="800" height="560"></a>
-                        <div>
-                            <h3><a href="/blog/salesforce-campaign-multiple-dates.html">Salesforce Campaign Dates: Every Event Day on One Calendar</a></h3>
-                            <p class="sc-meta"><time datetime="2026-10-19">October 19, 2026</time></p>
-                            <p>A Campaign has one start date and one end date. Put every tour stop, webinar session or volunteer day on the Campaign record instead, each one a real record with a status color. Three setup steps, no Apex.</p>
-                            <p><a href="/blog/salesforce-campaign-multiple-dates.html">Read it &rsaquo;</a></p>
-                        </div>
-                    </div>
-                    <div class="sc-post has-thumb">
-                        <a class="sc-thumb" href="/blog/why-salesforce-has-no-multi-date-calendar.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/why-no-multi-date-calendar.png" alt="Why Salesforce Has No Multi-Date Calendar (article cover image)" loading="lazy" width="800" height="560"></a>
-                        <div>
-                            <h3><a href="/blog/why-salesforce-has-no-multi-date-calendar.html">Why Salesforce Has No Multi-Date Calendar</a></h3>
-                            <p class="sc-meta"><time datetime="2026-08-20">August 20, 2026</time></p>
-                            <p>A date field holds one date, and every workaround for capturing many at once leaks somewhere. What the three MultiDatePick components do instead, set up without code.</p>
-                            <p><a href="/blog/why-salesforce-has-no-multi-date-calendar.html">Read it &rsaquo;</a></p>
-                        </div>
-                    </div>
-                </div>
-
-                <h2 class="bl-topic" id="accessibility-government">Accessibility and government</h2>
-                <p class="bl-intro">WCAG 2.1 AA, Section 508 and the VPAT behind the calendar.</p>
-                <div class="sc-postlist">
-                    <div class="sc-post has-thumb">
-                        <a class="sc-thumb" href="/blog/salesforce-section-508-government-calendar.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/section-508-government.png" alt="An Accessible Salesforce Calendar for Government Teams (article cover image)" loading="lazy" width="800" height="560"></a>
-                        <div>
-                            <h3><a href="/blog/salesforce-section-508-government-calendar.html">An Accessible Salesforce Calendar for Government Teams</a></h3>
-                            <p class="sc-meta"><time datetime="2026-10-11">October 11, 2026</time></p>
-                            <p>The ADA Title II web rule gives state and local agencies until April 2027 to meet WCAG 2.1 AA. Where scheduling shows up in a government org, and what MultiDatePick does criterion by criterion.</p>
-                            <p><a href="/blog/salesforce-section-508-government-calendar.html">Read it &rsaquo;</a></p>
-                        </div>
-                    </div>
-                    <div class="sc-post has-thumb">
-                        <a class="sc-thumb" href="/blog/salesforce-vpat-accessibility.html" aria-hidden="true" tabindex="-1"><img src="/images/blog/vpat-accessibility.png" alt="Salesforce VPAT: What Admins Need to Know (article cover image)" loading="lazy" width="800" height="560"></a>
-                        <div>
-                            <h3><a href="/blog/salesforce-vpat-accessibility.html">Salesforce VPAT: What Admins Need to Know</a></h3>
-                            <p class="sc-meta"><time datetime="2026-08-12">August 12, 2026</time></p>
-                            <p>What a VPAT is, why it appears during procurement rather than evaluation, how to read the conformance levels, and the questions to ask a vendor. Plus why calendars are hard to make accessible.</p>
-                            <p><a href="/blog/salesforce-vpat-accessibility.html">Read it &rsaquo;</a></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bp-end">
+                    <div class="bp-end">
                     <h2>The calendar behind the posts</h2>
                     <p>Try every view in the live demo, or get a note the day MultiDatePick launches.</p>
                     <div class="bp-end-ctas">
@@ -295,10 +290,41 @@
                         <a href="/notify-me-at-launch.html" class="btn btn-primary">Notify Me at Launch</a>
                         <a href="/gettingstarted.html" class="btn btn-secondary">Getting Started</a>
                     </div>
-                    <ul class="bp-end-chips"><li>$20/user/month, every feature</li><li>30-day free trial, no card</li><li>100% native Salesforce</li><li>No Apex</li><li>Coming soon to the Salesforce AppExchange</li></ul>
+                    <ul class="check-list"><li>$20/user/month, every feature</li><li>30-day free trial, no card</li><li>100% native Salesforce</li><li>No Apex</li><li>Coming soon to the Salesforce AppExchange</li></ul>
+                </div>
                 </div>
             </div>
         </section>
+    <script>
+    (function () {
+        var buttons = document.querySelectorAll('.bl-filter');
+        var posts = document.querySelectorAll('#bl-posts .sc-post');
+        var heading = document.getElementById('bl-heading');
+        var intro = document.getElementById('bl-intro');
+        function pick(id, updateUrl) {
+            var chosen = null;
+            buttons.forEach(function (b) {
+                var on = b.getAttribute('data-topic') === id;
+                b.classList.toggle('is-active', on);
+                b.setAttribute('aria-pressed', on ? 'true' : 'false');
+                if (on) chosen = b;
+            });
+            if (!chosen) return;
+            posts.forEach(function (p) {
+                p.hidden = id !== 'all' && (' ' + p.getAttribute('data-topics') + ' ').indexOf(' ' + id + ' ') < 0;
+            });
+            heading.textContent = chosen.querySelector('span').textContent;
+            intro.textContent = chosen.getAttribute('data-intro');
+            if (updateUrl) history.replaceState(null, '', id === 'all' ? location.pathname : '#' + id);
+        }
+        buttons.forEach(function (b) {
+            b.addEventListener('click', function () { pick(b.getAttribute('data-topic'), true); });
+        });
+        function fromHash() { var h = location.hash.slice(1); if (h) pick(h, false); }
+        window.addEventListener('hashchange', fromHash);
+        fromHash();
+    })();
+    </script>
     </main>
     <footer class="site-footer">
         <div class="container">
