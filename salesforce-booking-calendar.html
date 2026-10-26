@@ -306,12 +306,6 @@
                         <a href="/gettingstarted.html" class="btn btn-secondary">See how setup works</a>
                     </div>
                     <a class="hm-demo-link" href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-booking-calendar" target="_blank" rel="noopener">Or book a slot in the live demo now, no login &rarr;</a>
-                    <ul class="trust-row" aria-label="What the Booking component does">
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"></path><path d="M8.8 12.2l2.2 2.2 4.2-4.4"></path></svg><div><strong>Security reviewed</strong><span>Passed the Salesforce Security Review</span></div></li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="7" ry="2.5"></ellipse><path d="M5 5.5v13c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-13"></path><path d="M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"></path></svg><div><strong>100% native</strong><span>Your data stays in Salesforce</span></div></li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"></path></svg><div><strong>9 languages</strong><span>Components and setup wizard</span></div></li>
-                        <li><svg viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="7.5" r="1.3"></circle><path d="M7.5 10.5l4.5 1 4.5-1"></path><path d="M12 11.5v3.5l-2.5 4"></path><path d="M12 15l2.5 4"></path></svg><div><strong>WCAG 2.1 AA</strong><span>VPAT published</span></div></li>
-                    </ul>
                     <p class="works-in">Any object, including User. Live capacity, no double booking, several resources at once and five views. Works in Screen Flows and Experience Cloud, no Apex.</p>
                 </div>
                 <figure class="gs-fig">
@@ -426,6 +420,9 @@
                         <tr><td>Capacity Aggregation</td><td><b>Combined</b> sums several resources (4 rooms of 5 = 20 seats). <b>Distinct</b> counts one event across rooms once; pair it with Block so the event saves only when every room is free</td></tr>
                         <tr><td>Hide Bookings With Status</td><td>Cancelled bookings vanish from the grid and free their capacity</td></tr>
                         <tr><td>Conflict Look-Ahead Days</td><td>How far ahead badges and conflicts are checked. Default 360</td></tr>
+                        <tr><td>Buffer Between Bookings</td><td>Cleanup or turnaround minutes kept free after every booking, per resource. The slot grid, capacity badges, Week drag and the save check all honor it</td></tr>
+                        <tr><td>Book Up To (Days Ahead)</td><td>A rolling window: bookings open today plus N days out, moving forward every day</td></tr>
+                        <tr><td>Minimum Notice (Hours)</td><td>No booking that starts sooner than N hours from now, checked again at Save</td></tr>
                     </tbody>
                 </table>
                 </div>
@@ -470,6 +467,7 @@
                         <ul class="hm-checks">
                             <li>Open slots and live capacity</li>
                             <li>An in-component confirmation toast</li>
+                            <li>Add to Calendar: an .ics file for Outlook, Google or Apple</li>
                             <li>One status set for them, picker hidden</li>
                         </ul>
                     </div>
@@ -479,7 +477,8 @@
                             <li>Config Name, plus Static Parent Record Id</li>
                             <li>Show In-Component Toast on</li>
                             <li>Selectable Statuses, e.g. Requested</li>
-                            <li>Guest access to your booking and resource objects</li>
+                            <li>The MultiDatePick - Guest permission set on the site's guest user</li>
+                            <li>Guest sharing rules for your booking and resource objects</li>
                         </ul>
                     </div>
                 </div>
@@ -766,6 +765,7 @@
                         <thead><tr><th>Setting</th><th>API name</th><th>Default</th><th>What it does</th></tr></thead>
                         <tbody>
                             <tr id="prop-conflictBehavior"><td>Conflict Behavior</td><td><code>conflictBehavior</code></td><td>block</td><td>block: taken slots cannot be picked. skip: multi-date bookings save the open dates and list the skipped ones. allow: no check</td></tr>
+<tr id="prop-bufferMinutes"><td>Buffer Between Bookings (Minutes)</td><td><code>bufferMinutes</code></td><td>0</td><td>Turnaround kept free after every booking on the same resource</td></tr>
                             <tr id="prop-conflictLookAheadDays"><td>Conflict Look-Ahead Days</td><td><code>conflictLookAheadDays</code></td><td>360</td><td>Window for both availability badges and the conflict check on save</td></tr>
                             <tr id="prop-hideBookingsWithStatus"><td>Hide Bookings With Status</td><td><code>hideBookingsWithStatus</code></td><td></td><td>e.g. Cancelled: hidden from the grid and left out of capacity</td></tr>
                         </tbody>
@@ -785,6 +785,7 @@
                             <tr id="prop-selectableSecondStatuses"><td>Selectable Second-Picklist Values</td><td><code>selectableSecondStatuses</code></td><td></td><td>Allowed values for the second picklist</td></tr>
                             <tr id="prop-hoverFields"><td>Hover Popover Fields</td><td><code>hoverFields</code></td><td></td><td>Fields shown when hovering a booking</td></tr>
                             <tr id="prop-showSuccessToast"><td>Show In-Component Toast</td><td><code>showSuccessToast</code></td><td>false</td><td>Confirmation drawn inside the component. Needed on Experience Cloud</td></tr>
+<tr id="prop-showAddToCalendar"><td>Show Add to Calendar After Saving</td><td><code>showAddToCalendar</code></td><td>false</td><td>After Save, one .ics file with every booking just made, for Outlook, Google or Apple</td></tr>
                             <tr id="prop-successToastMessage"><td>Success Toast Message (optional)</td><td><code>successToastMessage</code></td><td></td><td>Custom success text</td></tr>
                         </tbody>
                     </table></div>
@@ -807,6 +808,8 @@
                             <tr id="prop-allowPastDates"><td>Allow Past Dates</td><td><code>allowPastDates</code></td><td>false</td><td>Allow booking in the past</td></tr>
                             <tr id="prop-minDate"><td>Earliest Bookable Date</td><td><code>minDate</code></td><td></td><td>Nothing before this date</td></tr>
                             <tr id="prop-maxDate"><td>Latest Bookable Date</td><td><code>maxDate</code></td><td></td><td>Nothing after this date</td></tr>
+<tr id="prop-maxDaysAhead"><td>Book Up To (Days Ahead)</td><td><code>maxDaysAhead</code></td><td>0</td><td>Rolling window: today plus N days. 0 is no limit</td></tr>
+<tr id="prop-minNoticeHours"><td>Minimum Notice (Hours)</td><td><code>minNoticeHours</code></td><td>0</td><td>Nothing that starts within N hours of now. Checked again at Save</td></tr>
                             <tr id="prop-defaultDates"><td>Pre-Selected Dates</td><td><code>defaultDates</code></td><td></td><td>Dates picked when the calendar opens</td></tr>
                             <tr id="prop-disabledDates"><td>Blocked Dates</td><td><code>disabledDates</code></td><td></td><td>A fixed list of dates that cannot be picked</td></tr>
                             <tr id="prop-availableDates"><td>Only These Dates Are Selectable</td><td><code>availableDates</code></td><td></td><td>Everything else is closed</td></tr>
