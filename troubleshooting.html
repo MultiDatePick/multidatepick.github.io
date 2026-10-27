@@ -286,6 +286,46 @@
                     </figure>
                 </article>
 
+                <article class="ts-card" id="days-grayed-out">
+                    <h2>Some days or times are grayed out</h2>
+                    <p class="ts-why"><b>Why:</b> a booking rule closes them. <b>Minimum Notice (Hours)</b> closes anything starting too soon, <b>Book Up To (Days Ahead)</b> closes days past the rolling window, and Earliest or Latest Selectable Date, blocked dates and each resource's business hours close the rest.</p>
+                    <p class="ts-fix-h">Fix</p>
+                    <ol>
+                        <li>Check those settings on the component or its config. 0 turns notice and the window off.</li>
+                        <li>Click a closed time slot: a closure says why it is closed.</li>
+                    </ol>
+                </article>
+
+                <article class="ts-card" id="slot-after-booking-taken">
+                    <h2>The slot right after a booking shows as taken</h2>
+                    <p class="ts-why"><b>Why:</b> <b>Buffer Between Bookings (Minutes)</b> keeps time free after every booking on the same resource, for cleanup or turnaround.</p>
+                    <p class="ts-fix-h">Fix</p>
+                    <ol>
+                        <li>Lower the buffer, or set it to 0 for back-to-back bookings.</li>
+                        <li>Conflict Behavior still applies: with Skip, a buffer hit is skipped and reported like any other clash.</li>
+                    </ol>
+                </article>
+
+                <article class="ts-card" id="outside-booking-window">
+                    <h2>"These picks are no longer inside the booking window"</h2>
+                    <p class="ts-why"><b>Why:</b> the page sat open long enough for the picked day or time to fall inside the Minimum Notice period. Save checks the rule again so a stale page cannot book too late.</p>
+                    <p class="ts-fix-h">Fix</p>
+                    <ol>
+                        <li>Remove the dates the message names, or pick a later time.</li>
+                        <li>Save again.</li>
+                    </ol>
+                </article>
+
+                <article class="ts-card" id="add-to-calendar">
+                    <h2>No Add to Calendar button after saving</h2>
+                    <p class="ts-why"><b>Why:</b> <b>Show Add to Calendar After Saving</b> is off. It is off by default.</p>
+                    <p class="ts-fix-h">Fix</p>
+                    <ol>
+                        <li>Turn it on in the component properties or the config, then save a record. The button appears in a bar under the toast.</li>
+                        <li>See "Add to Google Calendar" instead? The browser blocked creating a file, so a single event gets a Google Calendar link.</li>
+                    </ol>
+                </article>
+
                 <article class="ts-card" id="flow-ignores-config">
                     <h2>A Flow screen ignores my wizard settings</h2>
                     <p class="ts-why"><b>Why:</b> <b>Config Name</b> is empty or misspelled. A wrong name shows no error: the component quietly falls back to its defaults.</p>
@@ -315,9 +355,21 @@
                             <tr><td><b>MultiDatePick - User</b></td><td>Everyone who uses the calendars</td></tr>
                             <tr><td><b>MultiDatePick - Setup</b></td><td>Admins who build configs. Includes the Setup Wizard.</td></tr>
                             <tr><td><b>MultiDatePick - All Access</b></td><td>Admins who build and use them</td></tr>
+                            <tr><td><b>MultiDatePick - Guest</b></td><td>The guest user of a public Experience Cloud site</td></tr>
                         </tbody>
                     </table>
+                    <p class="ts-note">Error messages name what is wrong: the field, object or validation rule. When a message ends in <b>Details:</b>, that text is Salesforce's own description. Send it to your admin, or to us, and it says exactly where to look.</p>
                 </section>
+
+                <article class="ts-card" id="license-required">
+                    <h2>"You need a MultiDatePick license to use this calendar"</h2>
+                    <p class="ts-why"><b>Why:</b> MultiDatePick is licensed per seat, and this user has not been assigned one. The calendar is replaced by this notice, and saves are refused. Site guests never need a seat.</p>
+                    <p class="ts-fix-h">Fix</p>
+                    <ol>
+                        <li>In Setup, open <b>Installed Packages</b>, then <b>Manage Licenses</b> next to MultiDatePick.</li>
+                        <li>Click <b>Add Users</b> and add the user. They see the calendar on their next page load.</li>
+                    </ol>
+                </article>
 
                 <article class="ts-card" id="access-insufficient-privileges">
                     <h2>The record won't open, or "insufficient privileges"</h2>
@@ -341,7 +393,7 @@
                 </article>
 
                 <article class="ts-card" id="access-save-failed">
-                    <h2>"Time group failed to save" or "Failed to create bookings: Insert failed"</h2>
+                    <h2>"Time group failed to save" or "Failed to create bookings" naming a field</h2>
                     <p class="ts-why"><b>Why:</b> the user can read the fields but cannot edit one the save writes. Often a status, second picklist or time field added later.</p>
                     <p class="ts-fix-h">Fix</p>
                     <ol>
@@ -351,7 +403,7 @@
                 </article>
 
                 <article class="ts-card" id="access-cross-reference">
-                    <h2>"INSUFFICIENT_ACCESS_ON_CROSS_REFERENCE_ENTITY"</h2>
+                    <h2>"You don't have permission to do this" with "insufficient access rights on cross-reference id"</h2>
                     <p class="ts-why"><b>Why:</b> the new record points at a record the user cannot see: the parent or the resource.</p>
                     <p class="ts-fix-h">Fix</p>
                     <ol>
@@ -476,7 +528,11 @@
           {"@type": "Question", "name": "Why can't Experience Cloud site members see records they created?", "acceptedAnswer": {"@type": "Answer", "text": "Experience Cloud sharing: site users only see records that sharing gives them. Add a sharing rule, or a sharing set for members, on the object the dates save to, or open its external org-wide default."}},
           {"@type": "Question", "name": "Why will the record not open, or why do users get insufficient privileges?", "acceptedAnswer": {"@type": "Answer", "text": "The user cannot read the parent object, or sharing hides that record. Assign MultiDatePick - User, give Read on the parent object in a permission set, and check that sharing gives the user that record."}},
           {"@type": "Question", "name": "What does No read access to field X on object Y mean?", "acceptedAnswer": {"@type": "Answer", "text": "The user has no Read field-level security on a field the calendar shows, such as a status, hover, date or time field. Grant Read on the field named in the message. Do it for admins too: a new custom field is hidden from everyone, System Administrators included, until a permission set grants it."}},
-          {"@type": "Question", "name": "Why do I get Time group failed to save or Failed to create bookings: Insert failed?", "acceptedAnswer": {"@type": "Answer", "text": "The user can read the fields but cannot edit one the save writes, often a status, second picklist or time field added later. Grant Edit on every field the calendar writes (date, start and end time, status, second picklist, name field and the parent lookup) and Create on the object the records save to."}},
+          {"@type": "Question", "name": "Why does MultiDatePick say You need a MultiDatePick license to use this calendar?", "acceptedAnswer": {"@type": "Answer", "text": "MultiDatePick is licensed per seat and this user has not been assigned one. In Setup, open Installed Packages, click Manage Licenses next to MultiDatePick, then Add Users. Site guests never need a seat."}},
+          {"@type": "Question", "name": "Why are some days or times grayed out in MultiDatePick?", "acceptedAnswer": {"@type": "Answer", "text": "A booking rule closes them: Minimum Notice (Hours) closes anything starting too soon, Book Up To (Days Ahead) closes days past the rolling window, and Earliest or Latest Selectable Date, blocked dates and each resource's business hours close the rest. Set notice and the window to 0 to turn them off."}},
+          {"@type": "Question", "name": "Why is the slot right after a booking taken?", "acceptedAnswer": {"@type": "Answer", "text": "Buffer Between Bookings (Minutes) keeps time free after every booking on the same resource for cleanup or turnaround. Lower it, or set it to 0 for back-to-back bookings."}},
+          {"@type": "Question", "name": "Why is there no Add to Calendar button after saving?", "acceptedAnswer": {"@type": "Answer", "text": "Show Add to Calendar After Saving is off by default. Turn it on in the component properties or the config; after a save, a bar under the toast offers one calendar file for Outlook, Google Calendar or Apple Calendar."}},
+          {"@type": "Question", "name": "Why do I get Time group failed to save or Failed to create bookings?", "acceptedAnswer": {"@type": "Answer", "text": "The user can read the fields but cannot edit one the save writes, often a status, second picklist or time field added later. Grant Edit on every field the calendar writes (date, start and end time, status, second picklist, name field and the parent lookup) and Create on the object the records save to."}},
           {"@type": "Question", "name": "What does INSUFFICIENT_ACCESS_ON_CROSS_REFERENCE_ENTITY mean in MultiDatePick?", "acceptedAnswer": {"@type": "Answer", "text": "The new record points at a record the user cannot see: the parent or the resource. Give at least Read on the parent and resource objects and sharing on those records. On a public site, book guests against a custom object, because Salesforce restricts guest access to Contacts and Accounts."}},
           {"@type": "Question", "name": "Why do guests see an empty calendar?", "acceptedAnswer": {"@type": "Answer", "text": "The guest sharing rule is not in effect yet, or the guest profile is missing a step. Set the object's external org-wide default to Private and click Recalculate in Setup, Sharing Settings. Assign the MultiDatePick - Guest permission set to the guest user, give it Read on each of your own objects and fields, and activate the site."}}
         ]},
