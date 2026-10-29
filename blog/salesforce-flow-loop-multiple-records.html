@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Flow Loops: Create a Record for Every Date or Shift</title>
+    <meta name="description" content="How to create multiple records from one Salesforce Screen Flow: parse the picked dates, loop through them, and save once after the loop. Three starter flows for shifts, days off and date ranges.">
+    <link rel="canonical" href="https://multidatepick.com/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line tables, rail cards, FAQ, end CTA. */
+        .section .container > p { margin: 0 0 14px; }
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code, .section p code, .bp-list code { font-size: 0.85rem; color: #0F2D52; background: #F1F5F9; padding: 1px 5px; border-radius: 4px; }
+        .bp-steps { list-style: none; counter-reset: s; padding: 0; margin: 22px 0; display: grid; gap: 10px; }
+        .bp-steps li { counter-increment: s; position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px 16px 12px 54px; color: #374151; }
+        .bp-steps li::before { content: counter(s); position: absolute; left: 14px; top: 11px; width: 26px; height: 26px; border-radius: 50%; background: #0F2D52; color: #fff; font-weight: 700; font-size: 0.85rem; display: grid; place-items: center; }
+        .bp-steps li strong { color: #0F2D52; }
+        .bp-pair { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 22px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-starter { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px 16px 22px; margin: 22px 0; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-starter::before { content: ""; position: absolute; left: 0; top: 20px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-starter h3 { margin: 0 0 4px; font-size: 1.05rem; color: #0F2D52; }
+        .bp-starter p { margin: 0 0 12px; color: #4B5563; font-size: 0.93rem; line-height: 1.55; }
+        .bp-starter .bp-file { font-family: Consolas, Menlo, monospace; font-size: 0.82rem; color: #64748B; }
+        .bp-starter-ctas { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .bp-copied { color: #16A34A; font-weight: 600; font-size: 0.88rem; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 8px 0 8px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 720px) { .bp-pair { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) { .bp-end { padding: 20px 18px; } .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; } }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce Flow Loops: Create a Record for Every Date or Shift">
+    <meta property="og:description" content="How to create multiple records from one Salesforce Screen Flow: parse the picked dates, loop through them, and save once after the loop. Three starter flows for shifts, days off and date ranges.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/blog/salesforce-flow-loop-multiple-records.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce Flow Loops: Create a Record for Every Date or Shift">
+    <meta name="twitter:description" content="How to create multiple records from one Salesforce Screen Flow: parse the picked dates, loop through them, and save once after the loop. Three starter flows for shifts, days off and date ranges.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">
+        Coming soon to the Salesforce AppExchange
+        <button class="banner-close" id="bannerClose" aria-label="Dismiss banner" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="../images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Product <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/multidatepickdates.html">Date</a></li>
+                        <li><a href="/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Five Calendar Views</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                        <li><a href="/trust.html">Trust &amp; Security</a></li>
+                        <li><a href="/accessibility.html">Accessibility (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Solutions <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
+                        <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Dates</a></li>
+                        <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pricing.html">Pricing</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Docs <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/gettingstarted.html">Getting Started</a></li>
+                        <li><a href="/user-guide.html">User Guide</a></li>
+                        <li><a href="/flowcheatsheet.html">Screen Flow Guide</a></li>
+                        <li><a href="/home-app-experience.html">App, Home &amp; Experience Pages</a></li>
+                        <li><a href="/deploy-flow-vscode.html">Deploy a Flow (VS Code)</a></li>
+                        <li><a href="/troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Try the Live Demo</a></li>
+                <li><a href="/notify-me-at-launch.html" class="nav-cta">Notify Me at Launch</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {"@type": "Article", "headline": "Salesforce Flow Loops: Create a Record for Every Date or Shift", "description": "How to create multiple records from one Salesforce Screen Flow: parse the picked dates, loop through them, and save once after the loop. Three starter flows for shifts, days off and date ranges.", "datePublished": "2026-10-29", "dateModified": "2026-10-29", "author": {"@type": "Organization", "name": "MultiDatePick"}, "publisher": {"@type": "Organization", "name": "MultiDatePick"}, "mainEntityOfPage": "https://multidatepick.com/blog/salesforce-flow-loop-multiple-records.html", "image": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png"},
+                {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I create multiple records from one Salesforce Screen Flow?", "acceptedAnswer": {"@type": "Answer", "text": "Collect the choices on one screen, loop through them, and in the loop use an Assignment to fill a record variable and add it to a record collection. After the loop, one Create Records element saves the whole collection."}}, {"@type": "Question", "name": "Should Create Records go inside a Flow loop?", "acceptedAnswer": {"@type": "Answer", "text": "No. A Create Records inside a loop saves once per item, and a transaction allows 150 such saves, so a long list fails and every list runs slower. Build a record collection in the loop and save it once after the loop ends."}}, {"@type": "Question", "name": "How do I loop through JSON in Salesforce Flow?", "acceptedAnswer": {"@type": "Answer", "text": "Flow cannot read JSON on its own. Turn it into a collection first: MultiDatePick includes an action, Parse Date Entries from JSON, that turns the calendar's JSON output into a list of entries with fromDate, toDate, startTime and endTime, which a Loop element can walk."}}, {"@type": "Question", "name": "How do I add multiple shifts to a job in Salesforce?", "acceptedAnswer": {"@type": "Answer", "text": "Put a date and time picker on a Screen Flow launched from the job record, let the recruiter pick the shift days and hours, parse the picks into a list, and loop over it to build one shift record per day, linked to the job. Save them all in one Create Records after the loop."}}, {"@type": "Question", "name": "Do I need Apex to loop through picked dates?", "acceptedAnswer": {"@type": "Answer", "text": "No. The parsing action ships with MultiDatePick, and the loop, assignment and save are standard Flow elements. For whole days you do not even need the action: the calendar also outputs a plain list of picked days."}}]},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png", "caption": "A Salesforce Screen Flow in Flow Builder that adds shifts: a MultiDatePick screen, a Parse Date Entries action, a loop that builds each shift, and one Create Records after the loop", "width": 940, "height": 1780, "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-shift-picker.png", "caption": "MultiDatePick date and time picker in a Salesforce Screen Flow: three shift days picked in November with 13:00 to 14:00 selected for all of them", "width": 1900, "height": 1917, "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}}
+            ]
+        }
+        </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce Flow Loops: Create a Record for Every Date or Shift</h1>
+                <p class="subtitle">One screen, many records. The loop pattern every Screen Flow builder needs, with three starter flows to copy: shifts, days off and date ranges.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Published October 29, 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">A recruiter needs to add twelve shifts to a job. A manager approves a week off. An event planner books a three-day workshop and a follow-up day. Each one is a single decision on a single screen, and each one should become several records.</p>
+
+                <p>Screen Flow has no element that says "create one record per date". You build it from three standard pieces: a loop, an assignment and one save. This post walks through that pattern and gives you three working flows built on it.</p>
+
+                <p>The pattern comes from a recruiting build on TalentRover, where recruiters had to add a run of shifts to a job. Entering them one record at a time took longer than the scheduling itself. Picking the days and hours once and letting a loop write the shifts fixed that, and it works the same for any object.</p>
+
+                <h2 style="margin-top:44px;">The pattern in five elements</h2>
+                <div class="bp-pair">
+                    <figure class="sc-shot">
+                        <img src="/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png" alt="A Salesforce Screen Flow in Flow Builder that adds shifts: a MultiDatePick screen, a Parse Date Entries action, a loop that builds each shift, and one Create Records after the loop" loading="lazy" decoding="async" width="940" height="1780" data-zoomable>
+                        <figcaption>The Add Shifts starter flow. The save sits after the loop, not inside it.</figcaption>
+                    </figure>
+                    <ol class="bp-steps">
+                        <li><strong>Screen.</strong> A MultiDatePick calendar where the user picks every date, and times if you need them, at once.</li>
+                        <li><strong>Parse.</strong> The <code>Parse Date Entries from JSON</code> action turns the picks into a list Flow can loop through.</li>
+                        <li><strong>Loop.</strong> A Loop element walks the list, one entry at a time.</li>
+                        <li><strong>Assignment.</strong> Inside the loop: copy the entry's date and times onto a record variable, then add that record to a record collection.</li>
+                        <li><strong>Create Records.</strong> After the loop, one Create Records saves the whole collection.</li>
+                    </ol>
+                </div>
+
+                <h2 style="margin-top:44px;">Why the save goes after the loop</h2>
+                <p>It is tempting to drop a Create Records inside the loop: one pass, one record. It works for three dates and breaks for thirty. Every Create Records is a separate database save, and Salesforce allows 150 of them in a transaction, shared with every trigger and flow those saves set off. A save inside the loop spends one per date.</p>
+                <p>Building a collection and saving it once spends one save in total, whatever the user picked. It is also faster, and it either saves everything or nothing, so a failure never leaves half the shifts behind.</p>
+                <table class="bp-grid">
+                    <thead><tr><th></th><th>Create Records inside the loop</th><th>Collection, saved after the loop</th></tr></thead>
+                    <tbody>
+                        <tr><td>Saves for 30 dates</td><td>30</td><td>1</td></tr>
+                        <tr><td>Limit risk</td><td>Grows with every date picked</td><td>None from the loop</td></tr>
+                        <tr><td>On an error</td><td>Some records saved, some not</td><td>All or nothing</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 style="margin-top:44px;">Use case: add shifts to a job</h2>
+                <p>The recruiter opens the flow from the job, picks the shift days on the calendar and the hours on the time grid, and clicks Next. The flow writes one shift per day, linked to the job.</p>
+                <figure class="sc-shot">
+                    <img src="/images/flow-guide/salesforce-flow-loop-shift-picker.png" alt="MultiDatePick date and time picker in a Salesforce Screen Flow: three shift days picked in November with 13:00 to 14:00 selected for all of them" loading="lazy" decoding="async" width="1900" height="1917" data-zoomable>
+                    <figcaption>Three shift days and one time range, picked on one screen. The flow turns them into three shift records.</figcaption>
+                </figure>
+                <p>The calendar hands the picks to the flow as JSON in its <code>selectedDatesWithTimesJson</code> output. Flow cannot read JSON, which is where the parser comes in. Each entry it returns has these fields:</p>
+                <table class="bp-grid">
+                    <thead><tr><th>Field</th><th>Type</th><th>Holds</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>fromDate</code></td><td>Date</td><td>The shift's day</td></tr>
+                        <tr><td><code>toDate</code></td><td>Date</td><td>The same day for a shift; the last day for a range</td></tr>
+                        <tr><td><code>startTime</code></td><td>Time</td><td>The first picked slot</td></tr>
+                        <tr><td><code>endTime</code></td><td>Time</td><td>The end of the last picked slot</td></tr>
+                    </tbody>
+                </table>
+                <p>Adjacent slots make one shift, so 13:00 and 13:30 become 13:00 to 14:00. Picking two separate blocks on a day, say a morning and an afternoon, gives two entries and two shifts for that day.</p>
+
+                <div class="bp-starter">
+                    <h3>Starter flow: Add Shifts</h3>
+                    <p>Pick days and hours, then save one shift per block, linked to the record the flow is launched from. <span class="bp-file">MDP_Starter_Add_Shifts.flow-meta.xml</span></p>
+                    <div class="bp-starter-ctas">
+                        <button type="button" class="btn btn-primary btn-sm bp-copy" data-flow="MDP_Starter_Add_Shifts.flow-meta.xml">Copy flow XML</button>
+                        <a class="btn btn-secondary btn-sm" href="/downloads/flows/MDP_Starter_Add_Shifts.flow-meta.xml" download>Download</a>
+                        <span class="bp-copied" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
+                <h2 style="margin-top:44px;">Use case: one record for every day off</h2>
+                <p>Time off is usually tracked per day: payroll counts days, and a half-approved request has to be split by day anyway. Here you do not even need the parser. The Date component also outputs <code>selectedDates</code>, a plain text list with every picked day, ranges spelled out day by day.</p>
+                <p>Loop through that list directly. The only catch is that each item is text such as <code>2026-11-09</code>, so a one-line formula, <code>DATEVALUE({!Loop_Days})</code>, turns it into a date before the assignment copies it onto the record.</p>
+
+                <div class="bp-starter">
+                    <h3>Starter flow: Record per Day</h3>
+                    <p>Pick days and ranges, then save one record for every single day, no parser needed. <span class="bp-file">MDP_Starter_Record_Per_Day.flow-meta.xml</span></p>
+                    <div class="bp-starter-ctas">
+                        <button type="button" class="btn btn-primary btn-sm bp-copy" data-flow="MDP_Starter_Record_Per_Day.flow-meta.xml">Copy flow XML</button>
+                        <a class="btn btn-secondary btn-sm" href="/downloads/flows/MDP_Starter_Record_Per_Day.flow-meta.xml" download>Download</a>
+                        <span class="bp-copied" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
+                <h2 style="margin-top:44px;">Use case: one record per date range</h2>
+                <p>Some things span days but are one thing: a three-day workshop, an equipment rental, a site visit that runs Monday to Wednesday. Those want one record with a start date and an end date, not three.</p>
+                <p>That is the <code>selectedDateRangesJson</code> output. The calendar joins adjacent days into a single range, so picking the 9th, 10th and 11th gives one entry from the 9th to the 11th. Parse it, loop, and copy <code>fromDate</code> and <code>toDate</code> onto the start and end fields.</p>
+
+                <div class="bp-starter">
+                    <h3>Starter flow: Record per Range</h3>
+                    <p>Pick dates and ranges, then save one record per range with its start and end date. <span class="bp-file">MDP_Starter_Record_Per_Range.flow-meta.xml</span></p>
+                    <div class="bp-starter-ctas">
+                        <button type="button" class="btn btn-primary btn-sm bp-copy" data-flow="MDP_Starter_Record_Per_Range.flow-meta.xml">Copy flow XML</button>
+                        <a class="btn btn-secondary btn-sm" href="/downloads/flows/MDP_Starter_Record_Per_Range.flow-meta.xml" download>Download</a>
+                        <span class="bp-copied" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Booking a resource? You do not need a loop.</strong> The <a href="/salesforce-booking-calendar.html">Booking component</a> saves its own bookings, checking capacity and conflicts as it goes, and tells the flow how many it saved in <code>bookingSuccessCount</code> and which dates clashed in <code>bookingConflictDates</code>.
+                </div>
+
+                <h2 style="margin-top:44px;">Use a starter flow in your org</h2>
+                <p>The starter flows save to the Schedule and Event objects that come with MultiDatePick, so they deploy as they are and run straight after install. Swap in your own objects once you have seen them work.</p>
+                <ol class="bp-steps">
+                    <li><strong>Copy or download</strong> the flow's XML above.</li>
+                    <li><strong>Deploy it</strong> from VS Code. <a href="/deploy-flow-vscode.html">Deploy a Flow with VS Code</a> walks through it step by step.</li>
+                    <li><strong>Open it in Flow Builder</strong> and click the calendar on the first screen. Type the <strong>Config Name</strong> of a config you saved in the Setup Wizard, or one you imported from the <a href="/configlibrary.html">Config Library</a>, to give it your settings.</li>
+                    <li><strong>Point it at your objects</strong>, if you are not using Schedule and Event: change the record variable's object and the fields in the assignment.</li>
+                    <li><strong>Activate it</strong> and add it to the record page with the Flow component or as an action. It reads the record's Id from its <code>recordId</code> variable.</li>
+                </ol>
+
+                <h2 style="margin-top:44px;">Mistakes that cost an afternoon</h2>
+                <ul class="bp-list">
+                    <li><strong>Saving inside the loop.</strong> Fine in a test with three dates, a limit error in production with forty.</li>
+                    <li><strong>Forgetting to add the record to the collection.</strong> The assignment needs two parts: set the fields, then <em>Add</em> the record variable to the collection. Without the second, the save at the end has nothing to save.</li>
+                    <li><strong>Assigning text to a date field.</strong> The <code>selectedDates</code> list is text. Wrap each item in <code>DATEVALUE()</code> first.</li>
+                    <li><strong>Leaving Output As JSON off.</strong> The JSON outputs are only filled when the calendar's Output As JSON setting is on. The starter flows turn it on.</li>
+                    <li><strong>Launching from the wrong place.</strong> The flow links each record to <code>recordId</code>. Run it from the job, event or person the records belong to, or the link stays empty.</li>
+                </ul>
+
+                <h2 style="margin-top:44px;">Questions people ask</h2>
+                <div class="bp-faq">
+                    <details><summary>How do I create multiple records from one Salesforce Screen Flow?</summary><p>Collect the choices on one screen, loop through them, and in the loop use an Assignment to fill a record variable and add it to a record collection. After the loop, one Create Records element saves the whole collection.</p></details>
+                    <details><summary>Should Create Records go inside a Flow loop?</summary><p>No. A Create Records inside a loop saves once per item, and a transaction allows 150 such saves, so a long list fails and every list runs slower. Build a record collection in the loop and save it once after the loop ends.</p></details>
+                    <details><summary>How do I loop through JSON in Salesforce Flow?</summary><p>Flow cannot read JSON on its own. Turn it into a collection first: MultiDatePick includes an action, Parse Date Entries from JSON, that turns the calendar's JSON output into a list of entries with fromDate, toDate, startTime and endTime, which a Loop element can walk.</p></details>
+                    <details><summary>How do I add multiple shifts to a job in Salesforce?</summary><p>Put a date and time picker on a Screen Flow launched from the job record, let the recruiter pick the shift days and hours, parse the picks into a list, and loop over it to build one shift record per day, linked to the job. Save them all in one Create Records after the loop.</p></details>
+                    <details><summary>Do I need Apex to loop through picked dates?</summary><p>No. The parsing action ships with MultiDatePick, and the loop, assignment and save are standard Flow elements. For whole days you do not even need the action: the calendar also outputs a plain list of picked days.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>One screen, every record it should make.</h2>
+                    <p>Copy a starter flow above, or try the calendar first in the live demo.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-flow-loop-multiple-records" class="btn btn-demo" target="_blank" rel="noopener">Try the Live Demo</a>
+                        <a href="/notify-me-at-launch.html" class="btn btn-primary">Notify Me at Launch</a>
+                        <a href="/flowcheatsheet.html" class="btn btn-secondary">Screen Flow Guide</a>
+                    </div>
+                    <ul class="check-list"><li>$20/user/month, every feature</li><li>30-day free trial, no card</li><li>100% native Salesforce</li><li>No Apex</li><li>Coming soon to the Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Related reading</h3>
+                    <ul>
+                        <li><a href="/blog/multiple-dates-in-a-salesforce-screen-flow.html">Multiple dates in a Salesforce Screen Flow</a></li>
+                        <li><a href="/flowcheatsheet.html">The Screen Flow guide</a></li>
+                        <li><a href="/deploy-flow-vscode.html">Deploy a Flow with VS Code</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">A Salesforce calendar for staffing and recruiting</a></li>
+                        <li><a href="/blog/recurring-date-patterns-in-salesforce.html">Recurring date patterns in Salesforce</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/" class="logo">
+                        <img src="../images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45">
+                    </a>
+                    <p>The most customizable calendar component suite for Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="/multidatepickdates.html">Date</a></li>
+                        <li><a href="/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Five Calendar Views</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Solutions</h4>
+                    <ul>
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
+                        <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Dates</a></li>
+                        <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Docs</h4>
+                    <ul>
+                        <li><a href="/gettingstarted.html">Getting Started</a></li>
+                        <li><a href="/user-guide.html">User Guide</a></li>
+                        <li><a href="/flowcheatsheet.html">Screen Flow Guide</a></li>
+                        <li><a href="/home-app-experience.html">App, Home &amp; Experience Pages</a></li>
+                        <li><a href="/deploy-flow-vscode.html">Deploy a Flow (VS Code)</a></li>
+                        <li><a href="/troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="/pricing.html">Pricing</a></li>
+                        <li><a href="/blog/">Blog</a></li>
+                        <li><a href="/trust.html">Trust &amp; Security</a></li>
+                        <li><a href="/accessibility.html">Accessibility</a></li>
+                        <li><a href="/notify-me-at-launch.html">Notify Me at Launch</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. All rights reserved.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a>
+                    <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="../js/main.js"></script>
+    <script>
+    // Copy a starter flow's XML. Falls back to opening the file when the clipboard is refused.
+    (function () {
+        document.querySelectorAll('.bp-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var url = '/downloads/flows/' + btn.getAttribute('data-flow');
+                var note = btn.parentNode.querySelector('.bp-copied');
+                fetch(url).then(function (r) { return r.text(); })
+                    .then(function (xml) { return navigator.clipboard.writeText(xml); })
+                    .then(function () { note.textContent = 'Copied. Save it in your project\'s flows folder.'; })
+                    .catch(function () { window.open(url, '_blank'); });
+            });
+        });
+    })();
+    </script>
+</body>
+</html>
