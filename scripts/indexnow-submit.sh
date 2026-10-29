@@ -55,10 +55,22 @@ END {
     printf "  ]\n}\n"
 }')"
 
+# "|| true": a connection that never answers makes curl exit non-zero, and under set -e that
+# ended the script silently after "Submitting" with nothing sent (2026-10-28).
 CODE="$(curl -s -o /tmp/indexnow.out -w '%{http_code}' \
     -X POST "$ENDPOINT" \
     -H 'Content-Type: application/json; charset=utf-8' \
-    --data-binary "$BODY" --max-time 45)"
+    --data-binary "$BODY" --max-time 45 || true)"
+
+# Some networks (the work laptop, 2026-10-28) reset connections to api.indexnow.org. Bing runs
+# the same protocol at its own endpoint and shares submissions with the other IndexNow engines.
+if [ "$CODE" = "000" ]; then
+    echo "  api.indexnow.org unreachable; retrying at www.bing.com/indexnow ..."
+    CODE="$(curl -s -o /tmp/indexnow.out -w '%{http_code}' \
+        -X POST "https://www.bing.com/indexnow" \
+        -H 'Content-Type: application/json; charset=utf-8' \
+        --data-binary "$BODY" --max-time 45 || true)"
+fi
 
 case "$CODE" in
     200|202) echo "  HTTP $CODE — accepted." ;;
