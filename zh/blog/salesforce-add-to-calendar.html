@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 添加到日历：把预订加入 Outlook 和 Google</title>
+    <meta name="description" content="为每个 Salesforce 预订加上“添加到日历”按钮：保存后生成一个适用于 Outlook、Google 和 Apple 日历的 .ics 文件，Experience Cloud 访客也能用。无需代码。">
+    <link rel="canonical" href="https://multidatepick.com/zh/blog/salesforce-add-to-calendar.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Campaign post: same look as the Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce 添加到日历：把预订加入 Outlook 和 Google">
+    <meta property="og:description" content="为每个 Salesforce 预订加上“添加到日历”按钮：保存后生成一个适用于 Outlook、Google 和 Apple 日历的 .ics 文件，Experience Cloud 访客也能用。无需代码。">
+    <meta property="og:image" content="https://multidatepick.com/images/blog/salesforce-add-to-calendar.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/blog/salesforce-add-to-calendar.html">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 添加到日历：把预订加入 Outlook 和 Google">
+    <meta name="twitter:description" content="为每个 Salesforce 预订加上“添加到日历”按钮：保存后生成一个适用于 Outlook、Google 和 Apple 日历的 .ics 文件，Experience Cloud 访客也能用。无需代码。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/blog/salesforce-add-to-calendar.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-add-to-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-zum-kalender-hinzufuegen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/anadir-al-calendario-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/ajouter-au-calendrier-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/aggiungi-al-calendario-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/adicionar-ao-calendario-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-add-to-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-add-to-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-add-to-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-add-to-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html" class="active">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce 添加到日历：把预订加入 Outlook 和 Google",
+                "description": "为每个 Salesforce 预订加上“添加到日历”按钮：保存后生成一个适用于 Outlook、Google 和 Apple 日历的 .ics 文件，Experience Cloud 访客也能用。无需代码。",
+                "datePublished": "2026-10-26",
+                "dateModified": "2026-10-27",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/zh/blog/salesforce-add-to-calendar.html",
+                "image": "https://multidatepick.com/images/blog/salesforce-add-to-calendar.png",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce 有给预订用的“添加到日历”按钮吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "对于您自己对象上的记录，没有。Salesforce 活动可以通过 Einstein 活动捕获同步到 Outlook 或 Google，但保存为自定义记录的预订没有办法进入个人日历。MultiDatePick 增加了一个“添加到日历”按钮，每次保存后都会出现，并为对方提供一个日历文件，内容正是其预订的内容。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "支持 Outlook、Google 日历和 Apple 日历吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "支持。该按钮会下载一个标准 .ics 日历文件，所有主流日历都能打开这种格式：Windows 和 Mac 上的 Outlook、Google 日历、Mac、iPhone 和 iPad 上的 Apple 日历，以及大多数其他日历。如果浏览器无法生成文件，单个预订会改为提供“添加到 Google 日历”链接。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "公开预订页面上的 Experience Cloud 访客也能用吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "能。文件在访客的浏览器中生成，所以从公开 Experience Cloud 页面预订的访客，也会看到和已登录用户一样的“添加到日历”按钮。访客的访问权限不会有任何变化。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "如果预订之后有变动，日历中的日程会更新吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "不会。“添加到日历”提供的是一次性文件，而不是实时同步，所以预订之后改了时间，需要重新下载文件。每个日程都以 Salesforce 记录 Id 作为唯一 ID，因此支持按 ID 更新的日历会把新文件识别为同一个预订，而不是再添一个。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "会有数据离开 Salesforce 吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "只有对方自己选择下载的那个文件。没有连接的应用程序，没有外部调用，也没有第三方日历服务；MultiDatePick 始终 100% 原生。文件里只包含预订的名称、日期、时间、资源、资源的地点（如果您选择了地点字段）和状态，别无其他。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "开启它需要 Apex 或开发人员吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "不需要。只是一个复选框：Show Add to Calendar After Saving，位于 Lightning App Builder、Experience Builder 或 Flow 屏幕中的组件上，或设置向导中的配置里。"
+                        }
+                    }
+                ],
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/blog/salesforce-add-to-calendar.gif",
+                "caption": "Salesforce 中“添加到日历”的动画演示：在休假申请日历上，用“自定义日期”循环模式选中 2 月 1 日至 3 月 6 日每隔一周的周一、周三和周六，单击一次“保存”创建 9 条休假记录，“添加到日历”下载一个包含全部 9 个日程的日历文件",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/blog/salesforce-add-to-calendar-month-view.png",
+                "caption": "MultiDatePick 中的 Salesforce 预订日历月视图，刚提交咨询申请后：一条提示栏显示“已保存。将其添加到您的日历。”，11 月日历上方有一个“添加到日历”按钮",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/blog/salesforce-add-to-calendar.png",
+                "caption": "Salesforce 添加到日历：把预订加入 Outlook 和 Google 日历（文章封面图）",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce 添加到日历：把预订直接发送到 Outlook、Google 和 Apple 日历</h1>
+                <p class="subtitle">保存在 Salesforce 中的预订，只有进入对方自己的日历才算真正完成。“添加到日历”帮您做完最后一步：保存后单击一下，预约就进入 Outlook、Google 或 Apple 日历。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">发布于 2026 年 10 月 26 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">“Salesforce 能把预订发到我的 Outlook 吗？”“客户怎样把预约加进 Google 日历？”“为什么大家会忘记自己约的会议？”预订安安稳稳地存在 Salesforce 里，但人们的日程往往记在自己的日历上，而两者之间没有任何东西把它带过去。</p>
+
+                <p>MultiDatePick 填补了这个空缺。开启 <strong>Show Add to Calendar After Saving</strong>，每次保存成功后都会提供一个<strong>添加到日历</strong>按钮。单击一下即可下载一个日历文件，刚保存的每条记录都对应一个日程：日期和时间准确，包含会议室或人员，以及状态。它适用于记录页面、应用程序页面、屏幕 Flow（Screen Flow）和公开的 Experience Cloud 预订页面。</p>
+
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/blog/salesforce-add-to-calendar-poster.png" data-gif="/images/blog/salesforce-add-to-calendar.gif" alt="Salesforce 中“添加到日历”的动画演示：在休假申请日历上，用“自定义日期”循环模式选中 2 月 1 日至 3 月 6 日每隔一周的周一、周三和周六，单击一次“保存”创建 9 条休假记录，“添加到日历”下载一个包含全部 9 个日程的日历文件" title="一键把九个日期加入日历" loading="lazy" decoding="async" width="700" height="1000" data-zoomable>
+                    <figcaption>每隔一周的周一、周三和周六，用一个模式选出，保存一次，用一个文件发送到日历。</figcaption>
+                </figure>
+
+                <div class="atc-math" role="img" aria-label="选择 9 个日期，保存 1 次，1 个日历文件，9 个日历日程">
+                    <div><b>9</b><span>个已选日期</span></div><i aria-hidden="true">&rarr;</i>
+                    <div><b>1</b><span>次保存</span></div><i aria-hidden="true">&rarr;</i>
+                    <div><b>1</b><span>个日历文件</span></div><i aria-hidden="true">&rarr;</i>
+                    <div><b>9</b><span>个日程</span></div>
+                </div>
+                <p>这就是上面的录屏。<a href="/zh/blog/recurring-date-patterns-in-salesforce.html">“自定义日期”模式</a>选中 2 月 1 日至 3 月 6 日每隔一周的周一、周三和周六，单击一次“保存”创建 9 条休假记录，下载的文件包含 9 个全天日程，每个日期一个。一个月的假期、一学期的课程或一季的班次，<span class="sc-hl-orange">单击一次即可全部加入日历，而不是每个日期点一次</span>。</p>
+
+                <h2 style="margin-top:44px;">“添加到日历”为预订人带来什么</h2>
+                <div class="bp-cards">
+                    <div class="bp-card"><h3>一个文件包含所有已保存内容</h3><p>一次保存预订五个日期或二十个时间段，文件中每项都有一个日程，单击一次即可全部添加。</p></div>
+                    <div class="bp-card"><h3>时间准确</h3><p>带时间的预订保留开始和结束时间。仅日期的记录（例如休假）会作为全天日程添加。</p></div>
+                    <div class="bp-card"><h3>谁和在哪里</h3><p>被预订的顾问、会议室或车辆会写入日程标题。预订会议室时，它的地址还可以填入日程的地点，让邀请写明是谁、在哪里。</p></div>
+                    <div class="bp-card"><h3>同样适用于访客</h3><p>文件在浏览器中生成，所以公开的 Experience Cloud 预订页面无需额外权限即可使用。</p></div>
+                    <div class="bp-card"><h3>无需安装任何东西</h3><p>没有连接的应用程序，没有 OAuth，没有外部调用。在对方下载自己的文件之前，您的数据始终留在 Salesforce 中。</p></div>
+                    <div class="bp-card"><h3>适用于各种日历</h3><p>标准 .ics 文件可在 Outlook、Google 日历和 Apple 日历中打开。单个预订还可以直接添加到 Google。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">为什么用日历文件，而不是日历同步</h2>
+                <p>把 Salesforce 与 Outlook 或 Google 同步，意味着需要一个连接的应用程序、每位用户都要进行 OAuth 授权，还要让数据从您的组织流向第三方，而这正是安全审查要追问的。日历文件完全不需要这些。日程是在浏览器中根据刚保存的预订生成的，在对方下载之前，没有任何数据离开 Salesforce。MultiDatePick 始终 100% 原生。</p>
+                <p>取舍很公平，也很简单：它是一次性文件，而不是实时链接。如果预订之后改了时间，对方重新下载一个文件即可。每个日程都以 Salesforce 记录 Id 作为唯一 ID，因此按 ID 匹配的日历会把新文件当作同一个预订，而不是重复项。</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/blog/salesforce-add-to-calendar-month-view.png" alt="MultiDatePick 中的 Salesforce 预订日历月视图，刚提交咨询申请后：一条提示栏显示“已保存。将其添加到您的日历。”，11 月日历上方有一个“添加到日历”按钮" title="Salesforce 月历上的“添加到日历”" loading="lazy" decoding="async" width="700" height="776" data-zoomable>
+                    <figcaption>月历视图上的同一个按钮，在咨询申请提交的那一刻出现。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">每个日历日程包含哪些内容</h2>
+                <table class="bp-grid">
+                    <tr><th style="width:28%;">日历字段</th><th>从 Salesforce 填入的内容</th></tr>
+                    <tr><td>日程标题</td><td>记录名称（记录没有名称时用日历标题），后接资源：<em>Request a consultation: Priya Nair</em></td></tr>
+                    <tr><td>开始和结束</td><td>已保存的日期和时间。仅日期的记录成为全天日程；日期范围成为横跨整个范围的一个日程</td></tr>
+                    <tr><td>地点</td><td>可选：资源上由您选定的一个字段，例如会议室地址，通过 <strong>Calendar File Location Field</strong>（日历文件地点字段）设置。预订人员时留空，因为人员已经在标题中</td></tr>
+                    <tr><td>说明</td><td>状态，例如 Requested 或 Confirmed</td></tr>
+                    <tr><td>唯一 ID</td><td>Salesforce 记录 Id，让日历知道重新下载的是同一个预订</td></tr>
+                </table>
+                <p>时间按预订时的当地时钟时间写入，所以 10:00 的咨询会显示在 10:00。</p>
+
+                <h2 style="margin-top:44px;">两分钟即可开启</h2>
+                <ol class="cp-steps">
+                    <li><strong>打开组件或配置。</strong>在 Lightning App Builder、Experience Builder 或 Flow 屏幕中选中 MultiDatePick 组件。或者在<a href="/zh/blog/salesforce-calendar-setup-wizard.html">设置向导</a>中编辑配置。</li>
+                    <li><strong>勾选 Show Add to Calendar After Saving。</strong>它默认关闭，所以在您选择开启之前不会有任何变化。</li>
+                    <li><strong>预订会议室？把 Calendar File Location Field 设置</strong>为会议室的地址字段，每个日程都会显示要去哪里。预订顾问等人员时留空即可。</li>
+                    <li><strong>在公开站点上，还要勾选 Show In-Component Toast</strong>，让访客同时看到保存确认和按钮。访客页面的其余设置请参阅 <a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订指南</a>。</li>
+                    <li><strong>保存并预订点什么。</strong>“添加到日历”提示栏会出现在确认信息下方，直到被关闭或下一次保存为止。</li>
+                </ol>
+
+                <h2 style="margin-top:44px;">团队在哪些场景中使用</h2>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>客户和患者预约</strong><span>客户在您的站点上预约，离开时会议已在他们的日历里，爽约也就更少了。</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>面试安排</strong><span>候选人选好时间段的那一刻就能添加面试，面试官会作为地点写入。</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>会议室和工位预订</strong><span>会议室随预订一起进入参会者的日历，时间和地点都在他们的手机上。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>休假和请假</strong><span>批准的日期作为全天日程添加，缺勤情况就出现在大家每天都看的日历里。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>培训和活动</strong><span>报名四场课程，单击一次全部添加。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>公开预订页面</strong><span>Experience Cloud 上的访客无需登录，就能获得和您的员工一样的按钮。</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">常见问题</h2>
+                <div class="bp-faq">
+                    <details><summary>Salesforce 有给预订用的“添加到日历”按钮吗？</summary><p>对于您自己对象上的记录，没有。Salesforce 活动可以通过 Einstein 活动捕获同步到 Outlook 或 Google，但保存为自定义记录的预订没有办法进入个人日历。MultiDatePick 增加了一个“添加到日历”按钮，每次保存后都会出现，并为对方提供一个日历文件，内容正是其预订的内容。</p></details>
+                    <details><summary>支持 Outlook、Google 日历和 Apple 日历吗？</summary><p>支持。该按钮会下载一个标准 .ics 日历文件，所有主流日历都能打开这种格式：Windows 和 Mac 上的 Outlook、Google 日历、Mac、iPhone 和 iPad 上的 Apple 日历，以及大多数其他日历。如果浏览器无法生成文件，单个预订会改为提供“添加到 Google 日历”链接。</p></details>
+                    <details><summary>公开预订页面上的 Experience Cloud 访客也能用吗？</summary><p>能。文件在访客的浏览器中生成，所以从公开 Experience Cloud 页面预订的访客，也会看到和已登录用户一样的“添加到日历”按钮。访客的访问权限不会有任何变化。</p></details>
+                    <details><summary>如果预订之后有变动，日历中的日程会更新吗？</summary><p>不会。“添加到日历”提供的是一次性文件，而不是实时同步，所以预订之后改了时间，需要重新下载文件。每个日程都以 Salesforce 记录 Id 作为唯一 ID，因此支持按 ID 更新的日历会把新文件识别为同一个预订，而不是再添一个。</p></details>
+                    <details><summary>会有数据离开 Salesforce 吗？</summary><p>只有对方自己选择下载的那个文件。没有连接的应用程序，没有外部调用，也没有第三方日历服务；MultiDatePick 始终 100% 原生。文件里只包含预订的名称、日期、时间、资源、资源的地点（如果您选择了地点字段）和状态，别无其他。</p></details>
+                    <details><summary>开启它需要 Apex 或开发人员吗？</summary><p>不需要。只是一个复选框：Show Add to Calendar After Saving，位于 Lightning App Builder、Experience Builder 或 Flow 屏幕中的组件上，或设置向导中的配置里。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>在 Salesforce 中预订，留在他们的日历里。</h2>
+                    <p>在在线演示中提交一个咨询申请并添加到您自己的日历，或从 <a href="/zh/configlibrary.html">Config Library</a> 中的现成预订配置开始。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-add-to-calendar" class="btn btn-demo" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-primary">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">入门指南</a>
+                    </div>
+                    <ul class="check-list"><li>$20/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>100% Salesforce 原生</li><li>无需 Apex</li><li>即将登陆 Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>相关阅读</h3>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">在 Experience Cloud 上自助预订</a></li>
+                        <li><a href="/zh/blog/prevent-double-booking-in-salesforce.html">在 Salesforce 中防止重复预订</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-time-slot-picker.html">在 Salesforce 中构建日历时间段选择器</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">在 Salesforce 中安排面试</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking 组件</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>解决方案</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>文档</h4>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>公司</h4>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/blog/salesforce-add-to-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-zum-kalender-hinzufuegen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/anadir-al-calendario-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/ajouter-au-calendrier-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/aggiungi-al-calendario-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/adicionar-ao-calendario-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-add-to-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-add-to-calendar.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/blog/salesforce-add-to-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

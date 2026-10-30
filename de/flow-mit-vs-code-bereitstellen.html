@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow mit VS Code in Salesforce bereitstellen | MultiDatePick</title>
+    <meta name="description" content="Schritt für Schritt: einen fertigen MultiDatePick-Bildschirm-Flow mit VS Code und der Salesforce CLI in Ihrer Salesforce-Org bereitstellen, in etwa 15 Minuten.">
+    <link rel="canonical" href="https://multidatepick.com/de/flow-mit-vs-code-bereitstellen.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>/* long CLI command blocks scroll inside their own box instead of widening the page on phones */ .guide-content pre.code-block { max-width: 100%; overflow-x: auto; }
+        .df-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .df-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .df-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .df-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+        .df-final .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .df-final .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .df-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .df-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .df-final .contact{margin:20px 0 0;font-size:.9rem;}
+        .df-final .contact a{color:#FDBA74;}
+        @media (max-width:640px){ .df-final{padding:40px 0;} .df-final h2{font-size:1.45rem;} }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Flow mit VS Code in Salesforce bereitstellen | MultiDatePick">
+    <meta property="og:description" content="Schritt für Schritt: einen fertigen MultiDatePick-Bildschirm-Flow mit VS Code und der Salesforce CLI in Ihrer Salesforce-Org bereitstellen, in etwa 15 Minuten.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/de/flow-mit-vs-code-bereitstellen.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="de_DE">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Flow mit VS Code in Salesforce bereitstellen | MultiDatePick">
+    <meta name="twitter:description" content="Schritt für Schritt: einen fertigen MultiDatePick-Bildschirm-Flow mit VS Code und der Salesforce CLI in Ihrer Salesforce-Org bereitstellen, in etwa 15 Minuten.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "Einen MultiDatePick-Flow aus VS Code in Salesforce bereitstellen",
+        "description": "So stellen Sie einen MultiDatePick-Starter-Flow aus dem Blogartikel zu Flow-Schleifen mit VS Code, dem Salesforce Extension Pack und der Salesforce CLI in einer Salesforce-Org bereit.",
+        "totalTime": "PT15M",
+        "tool": [
+            {
+                "@type": "HowToTool",
+                "name": "Visual Studio Code"
+            },
+            {
+                "@type": "HowToTool",
+                "name": "Salesforce Extension Pack"
+            },
+            {
+                "@type": "HowToTool",
+                "name": "Salesforce CLI (sf)"
+            }
+        ],
+        "step": [
+            {
+                "@type": "HowToStep",
+                "position": 1,
+                "name": "Org autorisieren",
+                "text": "Führen Sie sf org login web aus oder verwenden Sie in VS Code den Befehl SFDX: Authorize an Org, um VS Code mit Ihrer Salesforce-Org zu verbinden."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 2,
+                "name": "Projekt öffnen oder erstellen",
+                "text": "Öffnen Sie ein bestehendes SFDX-Projekt in VS Code oder erstellen Sie eines mit sf project generate und öffnen Sie dann den Ordner."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 3,
+                "name": "Flow-Datei erstellen",
+                "text": "Erstellen Sie unter force-app/main/default/flows/ eine neue Datei mit dem Namen Ihres Flows und der Endung .flow-meta.xml."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 4,
+                "name": "XML einfügen und speichern",
+                "text": "Fügen Sie das Starter-Flow-XML ein, das Sie aus dem Blogartikel zu Flow-Schleifen kopiert haben, und speichern Sie die Datei."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 5,
+                "name": "In Ihrer Org bereitstellen",
+                "text": "Klicken Sie mit der rechten Maustaste auf die Datei und wählen Sie SFDX: Deploy Source to Org, oder führen Sie sf project deploy start mit Verweis auf die Datei aus."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 6,
+                "name": "Im Flow Builder abschließen",
+                "text": "Öffnen Sie den Flow im Setup, suchen Sie die mit >>> UPDATE markierten Stellen, passen Sie die API-Namen von Objekt und Feldern an Ihre Org an, dann speichern und aktivieren."
+            }
+        ],
+        "inLanguage": "de"
+    }
+    </script>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/deploy-flow-vscode.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/flow-mit-vs-code-bereitstellen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/implementar-flujo-vs-code.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/deployer-flux-vscode.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/distribuire-flusso-vs-code.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/implantar-fluxo-vs-code.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/deploy-flow-vscode.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/deploy-flow-vscode.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/deploy-flow-vscode.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/deploy-flow-vscode.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/de/" class="logo"><img src="/images/logo.png" alt="MultiDatePick-Logo: Salesforce-Kalender für mehrere Termine und Ressourcenbuchung" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Navigation ein-/ausblenden"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produkt <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/salesforce-mehrfach-datumsauswahl.html">Date</a></li>
+                        <li><a href="/de/salesforce-datum-zeitfenster-auswahl.html">Date Time</a></li>
+                        <li><a href="/de/salesforce-buchungskalender.html">Booking</a></li>
+                        <li><a href="/de/blog/salesforce-kalenderansichten.html">Fünf Kalenderansichten</a></li>
+                        <li><a href="/de/salesforce-kalender-konfigurationen.html">Config Library</a></li>
+                        <li><a href="/de/vertrauen-sicherheit.html">Vertrauen &amp; Sicherheit</a></li>
+                        <li><a href="/de/barrierefreiheit-vpat.html">Barrierefreiheit (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Lösungen <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/salesforce-kalender.html">Salesforce-Kalender</a></li>
+                        <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Personaldienstleistung &amp; Recruiting</a></li>
+                        <li><a href="/de/salesforce-interviewplanung.html">Interviewplanung</a></li>
+                        <li><a href="/de/salesforce-besprechungsraum-buchung.html">Besprechungsraum-Buchung</a></li>
+                        <li><a href="/de/salesforce-experience-cloud-buchungskalender.html">Buchung in Experience Cloud</a></li>
+                        <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Kampagnentermine</a></li>
+                        <li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html">Behörden / Section 508</a></li>
+                        <li><a href="/de/salesforce-lightning-scheduler-alternative.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/de/preise.html">Preise</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">Doku <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/erste-schritte.html">Erste Schritte</a></li>
+                        <li><a href="/de/benutzerhandbuch.html">Benutzerhandbuch</a></li>
+                        <li><a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a></li>
+                        <li><a href="/de/app-start-experience-seiten.html">App-, Start- &amp; Experience-Seiten</a></li>
+                        <li><a href="/de/flow-mit-vs-code-bereitstellen.html" class="active">Flow bereitstellen (VS Code)</a></li>
+                        <li><a href="/de/fehlerbehebung.html">Fehlerbehebung</a></li>
+                        <li><a href="/de/haeufige-fragen.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/de/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Live-Demo testen</a></li>
+                <li><a href="/de/zum-start-benachrichtigen.html" class="nav-cta">Zum Start benachrichtigen</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Einen Flow aus VS Code bereitstellen</h1>
+                <p class="subtitle">Sie haben einen Starter-Flow aus dem <a href="/de/blog/salesforce-flow-schleife-mehrere-datensaetze.html">Artikel zu Flow-Schleifen</a> kopiert. So bringen Sie diesen Flow mit VS Code und der Salesforce CLI in Ihre Salesforce-Org. Das ist der Weg für Entwickler. Wenn Sie keinen Code-Editor anfassen möchten, folgen Sie dem <a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a>: Komponente auf einen Bildschirm ziehen und Config Name setzen.</p>
+            </div>
+        </section>
+        <!-- ═══════════════ CONTENT ═══════════════ -->
+        <section class="guide-content">
+            <div class="container">
+                <div class="guide-note">
+                    <div><strong>Was das bewirkt:</strong> Das kopierte XML ist ein fertiger Bildschirm-Flow (Screen Flow) mit eingebetteter MultiDatePick-Komponente, bereits mit einer sinnvollen Auswahl an Objekten und Feldern verbunden. Sie stellen ihn einmal bereit und benennen dann ein paar API-Namen passend zu Ihrer Org um. Beim ersten Mal dauert das etwa 15 Minuten, danach ein paar Minuten.</div>
+                </div>
+                <h2>1. Was Sie brauchen</h2>
+                <p>Drei kostenlose Tools. Einmal installiert, sind Sie für jede künftige Bereitstellung gerüstet:</p>
+                <ul>
+                    <li><a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer">Visual Studio Code</a>: der Code-Editor.</li>
+                    <li><a href="https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode" target="_blank" rel="noopener noreferrer">Salesforce Extension Pack</a>: fügt VS Code die SFDX-Befehle hinzu. Installieren Sie es über das Erweiterungen-Panel (Suche nach "Salesforce Extension Pack").</li>
+                    <li><a href="https://developer.salesforce.com/tools/salesforcecli" target="_blank" rel="noopener noreferrer">Salesforce CLI (<code>sf</code>)</a>: das Befehlszeilentool, über das die Bereitstellung läuft. Prüfen Sie die Installation, indem Sie <code>sf version</code> im Terminal von VS Code ausführen.</li>
+                </ul>
+                <h2>2. Einmalige Einrichtung</h2>
+                <p>Überspringen Sie diesen Abschnitt, wenn Sie bereits in einem SFDX-Projekt arbeiten, das mit Ihrer Org verbunden ist.</p>
+                <div class="step">
+                    <h4><span class="step-number">A</span> Org autorisieren</h4>
+                    <p>Verbinden Sie VS Code mit Ihrer Salesforce-Org. Öffnen Sie die Befehlspalette (<code>Ctrl/Cmd + Shift + P</code>) und führen Sie <strong>SFDX: Authorize an Org</strong> aus, oder führen Sie dies im Terminal aus:</p>
+                    <pre class="code-block"><code>sf org login web --alias myorg</code></pre>
+                    <p>Ein Browser öffnet sich; melden Sie sich an und bestätigen Sie. Verwenden Sie zuerst eine Sandbox oder eine Developer-Org, nicht die Produktion.</p>
+                </div>
+                <div class="step">
+                    <h4><span class="step-number">B</span> Projekt öffnen oder erstellen</h4>
+                    <p>Wenn Sie ein SFDX-Projekt haben, öffnen Sie dessen Ordner in VS Code (<strong>File → Open Folder</strong>). Wenn nicht, erstellen Sie eines:</p>
+                    <pre class="code-block"><code>sf project generate --name multidatepick-flows
+cd multidatepick-flows</code></pre>
+                    <p>Öffnen Sie diesen Ordner dann in VS Code. Im Explorer-Panel sollten Sie eine Struktur <code>force-app/main/default/</code> sehen.</p>
+                </div>
+                <h2>3. Das kopierte XML importieren</h2>
+                <div class="step">
+                    <h4><span class="step-number">1</span> Flow-Datei erstellen</h4>
+                    <p>Klappen Sie im Explorer <code>force-app/main/default/</code> auf und öffnen (oder erstellen) Sie den Ordner <code>flows</code>. Fügen Sie eine neue Datei mit dem Namen Ihres Flows und der Endung <code>.flow-meta.xml</code> hinzu, zum Beispiel <code>On_Call_Rotation.flow-meta.xml</code>. Der Name wird zum API-Namen des Flows, verwenden Sie also nur Buchstaben, Ziffern und Unterstriche.</p>
+                    <p>Oder erstellen Sie sie direkt im integrierten Terminal von VS Code:</p>
+                    <pre class="code-block"><code># Windows (PowerShell)
+New-Item force-app/main/default/flows/On_Call_Rotation.flow-meta.xml -ItemType File -Force
+# macOS / Linux
+mkdir -p force-app/main/default/flows &amp;&amp; touch force-app/main/default/flows/On_Call_Rotation.flow-meta.xml</code></pre>
+                </div>
+                <div class="step">
+                    <h4><span class="step-number">2</span> Einfügen und speichern</h4>
+                    <p>Fügen Sie das Starter-Flow-XML aus dem Artikel zu Flow-Schleifen in die neue Datei ein und speichern Sie (<code>Ctrl/Cmd + S</code>).</p>
+                </div>
+                <div class="step">
+                    <h4><span class="step-number">3</span> In Ihrer Org bereitstellen</h4>
+                    <p>Klicken Sie im Explorer mit der rechten Maustaste auf die Datei und wählen Sie <strong>SFDX: Deploy Source to Org</strong>, oder führen Sie dies im Terminal aus:</p>
+                    <pre class="code-block"><code>sf project deploy start --source-dir force-app/main/default/flows/On_Call_Rotation.flow-meta.xml</code></pre>
+                    <p>Achten Sie im Output-Panel auf <strong>Deploy Succeeded</strong>. Meldet es einen Feld- oder Objektfehler, ist das zu erwarten. Der nächste Schritt behebt ihn.</p>
+                </div>
+                <h2>4. Im Flow Builder abschließen</h2>
+                <div class="step">
+                    <h4><span class="step-number">4</span> Eigene Objekt- und Feldnamen einsetzen</h4>
+                    <p>Gehen Sie in Ihrer Org zu <strong>Setup → Flows</strong> und öffnen Sie den Flow, den Sie gerade bereitgestellt haben. Suchen Sie die Elemente und Notizen mit der Markierung <strong>&gt;&gt;&gt; UPDATE</strong>. Sie zeigen auf die <em>API-Namen</em> von Objekt und Feldern, von denen das Beispiel ausgeht. Ändern Sie jeden passend zu Ihrem eigenen Objekt, Datumsfeld und Lookup-Feld. Dann <strong>Speichern</strong> und <strong>Aktivieren</strong>.</p>
+                    <p>Legen Sie den Flow jetzt auf eine Seite oder eine Schaltfläche oder führen Sie ihn direkt aus, und Benutzer können Termine auswählen.</p>
+                </div>
+                <div class="guide-note">
+                    <div><strong>Befehle im Überblick:</strong>
+                    <pre class="code-block"><code>sf org login web --alias myorg                 # authorize once
+sf project generate --name multidatepick-flows  # only if you need a new project
+sf project deploy start --source-dir force-app/main/default/flows/YOUR_FLOW.flow-meta.xml</code></pre>Hängen Sie bei der CLI fest? Der <a href="https://developer.salesforce.com/tools/salesforcecli" target="_blank" rel="noopener noreferrer">CLI-Einrichtungsleitfaden</a> von Salesforce erklärt Installation und Anmeldung im Detail.</div>
+                </div>
+            </div>
+        </section>
+        <!-- ═══════════════ NEXT STEP ═══════════════ -->
+        <section class="df-final">
+            <div class="container">
+                <h2>Flow bereitgestellt. Wie geht es weiter?</h2>
+                <p>Sehen Sie die Komponenten in der Live-Demo in Aktion, lernen Sie den No-Code-Weg über Config Name kennen oder lassen Sie sich benachrichtigen, sobald MultiDatePick auf der Salesforce AppExchange erscheint.</p>
+                <div class="df-ctas">
+                    <a href="/de/zum-start-benachrichtigen.html" class="btn btn-cta">Zum Start benachrichtigen</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=deploy-flow-vscode" class="btn btn-ghost" target="_blank" rel="noopener">Live-Demo testen</a> <a href="/de/salesforce-bildschirm-flow-leitfaden.html" class="btn btn-ghost">Leitfaden Bildschirm-Flow</a>
+                </div>
+                <p class="contact">Ein Bereitstellungsfehler, den Sie nicht zuordnen können? <a href="mailto:Support@MultiDatePick.com">Support@MultiDatePick.com</a></p>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/de/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick-Logo: Salesforce-Kalender für mehrere Termine und Ressourcenbuchung" width="180" height="45">
+                    </a>
+                    <p>Die am umfassendsten anpassbare Kalenderkomponenten-Suite für Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produkt</h4>
+                    <ul>
+                        <li><a href="/de/salesforce-mehrfach-datumsauswahl.html">Date</a></li>
+                        <li><a href="/de/salesforce-datum-zeitfenster-auswahl.html">Date Time</a></li>
+                        <li><a href="/de/salesforce-buchungskalender.html">Booking</a></li>
+                        <li><a href="/de/blog/salesforce-kalenderansichten.html">Fünf Kalenderansichten</a></li>
+                        <li><a href="/de/salesforce-kalender-konfigurationen.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Lösungen</h4>
+                    <ul>
+                        <li><a href="/de/salesforce-kalender.html">Salesforce-Kalender</a></li>
+                        <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Personaldienstleistung &amp; Recruiting</a></li>
+                        <li><a href="/de/salesforce-interviewplanung.html">Interviewplanung</a></li>
+                        <li><a href="/de/salesforce-besprechungsraum-buchung.html">Besprechungsraum-Buchung</a></li>
+                        <li><a href="/de/salesforce-experience-cloud-buchungskalender.html">Buchung in Experience Cloud</a></li>
+                        <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Kampagnentermine</a></li>
+                        <li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html">Behörden / Section 508</a></li>
+                        <li><a href="/de/salesforce-lightning-scheduler-alternative.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Doku</h4>
+                    <ul>
+                        <li><a href="/de/erste-schritte.html">Erste Schritte</a></li>
+                        <li><a href="/de/benutzerhandbuch.html">Benutzerhandbuch</a></li>
+                        <li><a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a></li>
+                        <li><a href="/de/app-start-experience-seiten.html">App-, Start- &amp; Experience-Seiten</a></li>
+                        <li><a href="/de/flow-mit-vs-code-bereitstellen.html">Flow bereitstellen (VS Code)</a></li>
+                        <li><a href="/de/fehlerbehebung.html">Fehlerbehebung</a></li>
+                        <li><a href="/de/haeufige-fragen.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Unternehmen</h4>
+                    <ul>
+                        <li><a href="/de/preise.html">Preise</a></li>
+                        <li><a href="/de/blog/">Blog</a></li>
+                        <li><a href="/de/vertrauen-sicherheit.html">Vertrauen &amp; Sicherheit</a></li>
+                        <li><a href="/de/barrierefreiheit-vpat.html">Barrierefreiheit</a></li>
+                        <li><a href="/de/zum-start-benachrichtigen.html">Zum Start benachrichtigen</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Alle Rechte vorbehalten.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Sprache" translate="no"><ul><li><a href="/deploy-flow-vscode.html" hreflang="en" lang="en">English</a></li><li><a href="/de/flow-mit-vs-code-bereitstellen.html" hreflang="de" lang="de" aria-current="page">Deutsch</a></li><li><a href="/es/implementar-flujo-vs-code.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/deployer-flux-vscode.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/distribuire-flusso-vs-code.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/implantar-fluxo-vs-code.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/deploy-flow-vscode.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/deploy-flow-vscode.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/deploy-flow-vscode.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Bild vergrößern</p><p data-k="expand-diagram">Diagramm vergrößern</p><p data-k="close">Schließen</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

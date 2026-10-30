@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Lightning Scheduler の代替: MultiDatePick</title>
+    <meta name="description" content="Salesforce Lightning Scheduler (現 Salesforce Scheduler) と MultiDatePick を比較。ライセンス、データモデル、Experience Cloud での予約、選び方を解説。">
+    <link rel="canonical" href="https://multidatepick.com/ja/salesforce-calendar-vs-lightning-scheduler.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Salesforce Lightning Scheduler の代替: MultiDatePick">
+    <meta property="og:description" content="Salesforce Lightning Scheduler (現 Salesforce Scheduler) と MultiDatePick を比較。ライセンス、データモデル、Experience Cloud での予約、選び方を解説。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/salesforce-calendar-vs-lightning-scheduler.html">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="ja_JP">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce Lightning Scheduler の代替: MultiDatePick">
+    <meta name="twitter:description" content="Salesforce Lightning Scheduler (現 Salesforce Scheduler) と MultiDatePick を比較。ライセンス、データモデル、Experience Cloud での予約、選び方を解説。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "自社のオブジェクトで予約できる Salesforce Lightning Scheduler の代替",
+                "description": "Salesforce Lightning Scheduler (現 Salesforce Scheduler) と MultiDatePick を比較。ライセンス、データモデル、Experience Cloud での予約、選び方を解説。",
+                "datePublished": "2026-08-18",
+                "dateModified": "2026-10-20",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/salesforce-calendar-vs-lightning-scheduler.html",
+                "about": [
+                    {
+                        "@type": "SoftwareApplication",
+                        "name": "Salesforce Scheduler",
+                        "alternateName": "Lightning Scheduler"
+                    },
+                    {
+                        "@type": "SoftwareApplication",
+                        "name": "MultiDatePick"
+                    }
+                ],
+                "image": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce Lightning Scheduler とは?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Salesforce 純正の予約スケジュール製品です。サービステリトリー、作業種別グループ、作業種別、サービスリソース、サービス予定を使って、顧客を適切な場所と時間に有資格の担当者と結び付けます。予約はガイド付きのインバウンドフローとアウトバウンドフローで行います。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Lightning Scheduler と Salesforce Scheduler は同じものですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。Lightning Scheduler は以前の名称です。現在、Salesforce のドキュメントと Trailhead では Salesforce Scheduler と呼ばれていますが、ライセンス名には今も Lightning Scheduler と書かれているものがあります。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce Scheduler には追加費用がかかりますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。Enterprise、Performance、Unlimited Edition の Lightning Experience で追加費用により利用でき、サービスリソースごとに Salesforce Scheduler 権限セットライセンスが必要です。会議室や機材用の Asset Scheduling はさらに別料金です。MultiDatePick は 1 ユーザーあたり月額 $20 の 1 プランのみで、30 日間の無料トライアルがあります。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce Scheduler は Experience Cloud で使えますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。ゲストユーザーにサービスリソース、サービステリトリー、作業種別、作業種別グループへのアクセス権を付与したうえで、Inbound New Guest Appointment フローを公開の Experience Cloud ページに配置します。MultiDatePick も Experience Cloud ページで動作し、自社のオブジェクトを読み込んで保存します。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce で会議室や機材を予約できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Salesforce Scheduler では、会議室や機材は資産リソースとして扱われ、追加費用のオプションである Asset Scheduling が必要です。MultiDatePick では、Booking コンポーネントが会議室、車両、機材、ユーザーなど任意のレコードをリソースとして予約し、定員と競合もチェックします。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "カスタムオブジェクトで使える Lightning Scheduler の代替は?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Scheduler のデータモデルを導入するのではなく、自社のオブジェクトを読み書きするカレンダーが欲しいなら MultiDatePick です。1 つのカレンダーで多くの日付、時刻、予約を選び、5 つの表示で見せ、Apex なしでセットアップウィザードから設定できます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "標準の Salesforce カレンダーは予約ツールですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。標準のカレンダーは、行動やオブジェクトのレコードを月または週のビューで表示するものです。表示のためのもので入力用のコントロールではなく、9 つの日付を選んで 9 件のレコードを作ることはできません。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/multidatepick-booking-demo-poster.png",
+                "caption": "MultiDatePick による Salesforce の予約受付のアニメーションデモ: アドバイザーを選び、顧客を入力し、日付と空いている 30 分の時間枠を選んで、申請を保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/salesforce-booking-capacity-calendar.png",
+                "caption": "MultiDatePick の Salesforce 予約カレンダー (アドバイザー 1 名分): 各日を予定の状況で色分けし、混在する日は斜めに分割。30 分単位の時間枠グリッドに予約数/定員のバッジを表示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo-poster.png",
+                "caption": "Salesforce の MultiDatePick Dates コンポーネントのアニメーションデモ: 感謝祭の週の 3 日間をドラッグし、金曜日をワンクリックで追加して、4 日分をまとめて保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-resource-timeline-view.png",
+                "caption": "Salesforce 上の MultiDatePick リソースタイムライン: 縦に人、上部に日付、日ごとの定員バー、複数日の予約は 1 本のバーで表示し、重なる場合は段を分けて積み重ねる",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+    <style>
+        .hm-wrap{max-width:1040px;margin:0 auto;padding:0 16px;}
+        .hm-hero{background:linear-gradient(170deg,var(--blue-50,#F0F9FF) 0%,#E0F2FE 60%,#fff 100%);padding:48px 0 40px;text-align:center;}
+        .hm-hero h1{font-size:2.5rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1.12;margin:0 auto;max-width:860px;}
+        .hm-hero .subtitle{font-size:1.08rem;color:var(--gray-600,#4b5563);margin:14px auto 0;max-width:700px;}
+        .hm-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px;}
+        .hm-ctas .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .hm-ctas .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .hm-demo-link{display:block;margin-top:12px;font-size:.92rem;font-weight:600;}
+        .vs-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:28px auto 0;max-width:900px;text-align:left;}
+        .vs-card{position:relative;--rail:#0176D3;background:#fff;border:1px solid #DCE3EC;border-radius:12px;padding:16px 18px;box-shadow:0 4px 20px rgba(15,45,82,.06);}
+        .vs-card.mdp{--rail:#F97316;} .vs-card::before{content:"";position:absolute;left:0;top:18px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .vs-card h2{font-size:1.1rem;color:var(--blue-900,#0C4A6E);margin:0 0 2px;border:0;padding:0;}
+        .vs-card .tag{font-size:.85rem;color:var(--gray-500,#6b7280);margin:0 0 10px;}
+        .gs-sec{padding:56px 0;scroll-margin-top:80px;}
+        .gs-sec.alt{background:var(--blue-50,#F0F9FF);}
+        .gs-sec h2{font-size:1.6rem;color:var(--blue-900,#0C4A6E);margin:0 0 6px;padding-left:17px;position:relative;line-height:1.25;} .gs-sec h2::before{content:"";position:absolute;left:0;top:calc(.625em - 11px);width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-sec h3{font-size:1.15rem;color:var(--blue-900,#0C4A6E);margin:32px 0 6px;scroll-margin-top:80px;}
+        .gs-lead{color:var(--gray-600,#4b5563);margin:0 0 20px;font-size:1rem;max-width:760px;}
+        .gs-fig{margin:18px 0 8px;}
+        .gs-fig img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #E5E7EB;box-shadow:0 4px 20px rgba(15,45,82,.08);background:#fff;}
+        .gs-fig figcaption{text-align:center;font-size:.88rem;color:var(--gray-500,#6b7280);margin-top:8px;}
+        .gs-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE3EC;border-radius:10px;overflow:hidden;font-size:.93rem;}
+        .gs-table th,.gs-table td{padding:11px 14px;border-bottom:1px solid #E8EDF3;border-right:1px solid #E8EDF3;text-align:left;vertical-align:top;}
+        .gs-table th:last-child,.gs-table td:last-child{border-right:none;}
+        .gs-table thead th{background:#0F2D52;color:#fff;font-weight:600;font-size:.85rem;}
+        .gs-table thead th.mdp{background:#C2410C;}
+        .gs-table tbody tr:last-child td{border-bottom:none;}
+        .gs-table td:first-child{font-weight:600;color:var(--blue-900,#0C4A6E);}
+        .gs-table.kv td:first-child{width:24%;}
+        .gs-table .c{text-align:center;width:22%;}
+        .gs-table .y{color:#10b981;font-size:1.15rem;}
+        .gs-table .n{color:#CBD5E1;}
+        .gs-table .x{color:#B91C1C;font-weight:700;margin-right:6px;}
+        .gs-table .ok{color:#047857;font-weight:700;margin-right:6px;}
+        .gs-table td.new{background:#FFF7ED;color:#7C2D12;}
+        .gs-table td.old{color:var(--gray-600,#4b5563);}
+        .gs-table small{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);font-weight:400;}
+        .hm-scroll{overflow-x:auto;}
+        .gs-chain{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-wrap:wrap;gap:6px 4px;align-items:center;font-size:.85rem;}
+        .gs-chain li{background:#fff;border:1px solid #BFDBFE;color:#1E3A8A;border-radius:999px;padding:4px 12px;font-weight:600;}
+        .gs-chain li.arr{background:none;border:none;color:#94A3B8;padding:0 2px;}
+        .gs-paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0;}
+        .gs-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;font-size:.92rem;color:var(--gray-600,#4b5563);}
+        .gs-card b{display:block;color:var(--blue-900,#0C4A6E);font-size:1rem;margin-bottom:6px;}
+        .gs-card.sf{position:relative;padding-left:18px;--rail:#0176D3;}
+        .gs-card.mdp{position:relative;padding-left:18px;--rail:#F97316;} .gs-card.sf::before,.gs-card.mdp::before{content:"";position:absolute;left:0;top:15px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .hm-checks{list-style:none;padding:0;margin:0;}
+        .hm-checks li{padding:5px 0 5px 24px;position:relative;border-bottom:1px solid #F1F5F9;}
+        .hm-checks li:last-child{border-bottom:none;}
+        .hm-checks li::before{content:"\2713";position:absolute;left:2px;color:#10b981;font-weight:700;}
+        .gs-note{margin:16px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 18px 14px 22px;font-size:.92rem;color:#7C2D12;position:relative;} .gs-note::before{content:"";position:absolute;left:0;top:14px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-note b{color:#9A3412;}
+        .gs-two{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+        .gs-two .gs-fig{margin-top:0;}
+        .hm-price{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+        .hm-price .gs-card{display:flex;flex-direction:column;gap:6px;}
+        .hm-price .amt{font-size:2.2rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1;}
+        .hm-price .amt small{font-size:1rem;font-weight:600;color:var(--gray-500,#6b7280);}
+        .hm-price .amt.word{font-size:1.4rem;}
+        .gs-faq details{background:#fff;border:1px solid #DCE3EC;border-radius:10px;margin:0 0 10px;padding:0 18px;}
+        .gs-faq summary{cursor:pointer;font-weight:600;color:var(--blue-900,#0C4A6E);padding:14px 0;list-style-position:outside;}
+        .gs-faq details p{margin:0 0 14px;color:var(--gray-600,#4b5563);font-size:.93rem;}
+        .gs-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .gs-links a{display:block;background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;text-decoration:none;transition:border-color .15s ease;}
+        .gs-links a:hover{border-color:#F97316;}
+        .gs-links b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;}
+        .gs-links span{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);}
+        .vs-src{font-size:.82rem;color:var(--gray-500,#6b7280);margin:12px 0 0;}
+        .hm-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .hm-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .hm-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .hm-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .hm-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .hm-final .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;}
+        .hm-final .btn-cta:hover{background:#EA580C;color:#fff;}
+        .hm-final .contact{margin:20px 0 0;font-size:.9rem;color:#cdd9e8;}
+        @media (max-width:900px){
+            .gs-two{grid-template-columns:1fr;}
+            .gs-links{grid-template-columns:1fr 1fr;}
+        }
+        @media (max-width:600px){
+            .hm-hero{padding:32px 0 28px;}
+            .hm-hero h1{font-size:1.8rem;}
+            .vs-pair,.gs-paths,.gs-links,.hm-price{grid-template-columns:1fr;}
+            .gs-sec{padding:40px 0;}
+            .gs-sec h2{font-size:1.35rem;}
+            .gs-table{font-size:.86rem;}
+            .gs-table th,.gs-table td{padding:9px 8px;}
+            .hm-final h2{font-size:1.45rem;}
+        }
+    </style>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/salesforce-calendar-vs-lightning-scheduler.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/salesforce-lightning-scheduler-alternative.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/alternativa-salesforce-lightning-scheduler.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/calendrier-salesforce-vs-lightning-scheduler.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/alternativa-salesforce-lightning-scheduler.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/alternativa-salesforce-lightning-scheduler.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/salesforce-calendar-vs-lightning-scheduler.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/salesforce-calendar-vs-lightning-scheduler.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/salesforce-calendar-vs-lightning-scheduler.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/salesforce-calendar-vs-lightning-scheduler.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html" class="active">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <section class="hm-hero">
+            <div class="hm-wrap">
+                <h1>自社のオブジェクトで予約できる Salesforce Lightning Scheduler の代替</h1>
+                <p class="subtitle">MultiDatePick は、予定、会議室、人、そして複数の日付を一度に予約し、すでにある Salesforce オブジェクトにそのまま保存します。ウィザードで設定でき、Apex は不要です。</p>
+                <div class="hm-ctas">
+                    <a href="/ja/notify-me-at-launch.html" class="btn btn-cta">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">セットアップの流れを見る</a>
+                </div>
+                <a class="hm-demo-link" href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-vs-lightning-scheduler" target="_blank" rel="noopener">または今すぐライブデモを試す (ログイン不要) &rarr;</a>
+                <div class="vs-pair">
+                    <div class="vs-card mdp">
+                        <h2>MultiDatePick</h2>
+                        <p class="tag">多くの日付、時刻、予約を 1 つのカレンダーで。どのオブジェクトでも。</p>
+                        <ul class="check-list"><li>任意のオブジェクト</li><li>5 つの表示</li><li>定員</li><li>セットアップウィザード</li><li>画面フロー</li><li>Experience Cloud</li><li>Apex 不要</li></ul>
+                    </div>
+                    <div class="vs-card">
+                        <h2>Salesforce Scheduler</h2>
+                        <p class="tag">旧称 Lightning Scheduler。独自のデータモデルで顧客の予約を管理。</p>
+                        <ul class="check-list check-list--plain"><li>サービステリトリー</li><li>作業種別</li><li>サービスリソース</li><li>アドオンライセンス</li></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ WHEN TO CHOOSE ═══════════════ -->
+        <section class="gs-sec alt" id="choose">
+            <div class="hm-wrap">
+                <h2>Lightning Scheduler か MultiDatePick か: 選び方</h2>
+                <p class="gs-lead">Salesforce で時間を予約するほとんどのチームにとって、MultiDatePick のほうが早く、シンプルに導入できます。</p>
+                <div class="gs-paths">
+                    <div class="gs-card mdp">
+                        <b>MultiDatePick を選ぶべきなのは、次のことをしたい場合</b>
+                        <ul class="hm-checks">
+                            <li>自社のオブジェクトで予定、会議室、機材、人を予約する</li>
+                            <li>多くの日付、期間、繰り返しパターンを一度に選ぶ</li>
+                            <li>定員まで時間枠を共有し、保存時に競合をチェックする</li>
+                            <li>予約を 5 通りに見る: カレンダー、タイムライン、週、稼働率、予定一覧</li>
+                            <li>レコードページ、画面フロー (Screen Flow)、Experience Cloud サイトに配置する</li>
+                            <li>Apex も新しいデータモデルもなしに、ウィザードで設定する</li>
+                            <li>ユーザーあたり 1 つの料金で、すべての機能を使う</li>
+                        </ul>
+                    </div>
+                    <div class="gs-card sf">
+                        <b>Salesforce Scheduler を選ぶべきなのは</b>
+                        <ul class="hm-checks">
+                            <li>スキルと支店のテリトリーで顧客とスタッフを照合する必要がある場合</li>
+                            <li>いずれにせよサービステリトリーと作業種別のモデルを導入する場合</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="gs-note"><b>要するに。</b> スキルとテリトリーによる自動照合が必要でない限り、カレンダーのために Scheduler を導入するのは大掛かりすぎます。予定の予約なら MultiDatePick でもできます。</p>
+                <div class="hm-ctas" style="justify-content:flex-start;">
+                    <a href="/ja/notify-me-at-launch.html" class="btn btn-cta">公開時に通知を受け取る</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-vs-lightning-scheduler" class="btn btn-secondary" target="_blank" rel="noopener">ライブデモを試す</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ BOOKING ═══════════════ -->
+        <section class="gs-sec" id="booking">
+            <div class="hm-wrap">
+                <h2>自社のオブジェクトで使える Salesforce 予約カレンダー</h2>
+                <p class="gs-lead">MultiDatePick の場合: リソース、日付、空いている時間枠を選んで保存するだけ。定員と競合は自動でチェックされます。</p>
+                <div class="gs-two">
+                    <figure class="gs-fig">
+                        <img src="/images/multidatepick-booking-demo-poster.png" data-gif="/images/multidatepick-booking-demo.gif" alt="MultiDatePick による Salesforce の予約受付のアニメーションデモ: アドバイザーを選び、顧客を入力し、日付と空いている 30 分の時間枠を選んで、申請を保存" title="Salesforce 予約受付のデモ" width="700" height="1010" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>アドバイザーとの予定を、1 つの画面で予約して保存。</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/salesforce-booking-capacity-calendar.png" alt="MultiDatePick の Salesforce 予約カレンダー (アドバイザー 1 名分): 各日を予定の状況で色分けし、混在する日は斜めに分割。30 分単位の時間枠グリッドに予約数/定員のバッジを表示" title="定員バッジ付きの Salesforce 予約カレンダー" width="1362" height="1938" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>日付を状況で色分けし、すべての時間枠に予約数/定員を表示。</figcaption>
+                    </figure>
+                </div>
+                <p style="margin:14px 0 0;font-size:.93rem;">詳しくは <a href="/ja/salesforce-booking-calendar.html">Salesforce 予約カレンダー</a>と <a href="/ja/salesforce-conference-room-booking-calendar.html">Salesforce での会議室予約</a>をご覧ください。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FEATURE TABLE ═══════════════ -->
+        <section class="gs-sec alt" id="compare">
+            <div class="hm-wrap">
+                <h2>Salesforce Scheduler と MultiDatePick の機能比較</h2>
+                <p class="gs-lead">チェックマークは、追加ライセンスなしの標準搭載を示します。</p>
+                <div class="hm-scroll">
+                <table class="gs-table">
+                    <thead><tr><th>機能</th><th>Salesforce Scheduler</th><th class="mdp">MultiDatePick</th></tr></thead>
+                    <tbody>
+                        <tr><td>データモデル</td><td class="old">独自: テリトリー、作業種別、リソース、予定</td><td class="new"><span class="ok">&#10003;</span>自社のもの。任意の標準・カスタムオブジェクト</td></tr>
+                        <tr><td>予約される人</td><td class="old">スキルとサービステリトリーで照合</td><td class="new"><span class="ok">&#10003;</span>ユーザーがリソースを選択。空き状況と競合をリアルタイムでチェック</td></tr>
+                        <tr><td>複数のリソースを同時に</td><td class="old">複数リソースの予定</td><td class="new"><span class="ok">&#10003;</span>複数リソースの空き状況を合算</td></tr>
+                        <tr><td>多くの日付を一度に選択</td><td class="old">一度に 1 件の予定が前提</td><td class="new"><span class="ok">&#10003;</span>多くの日付、期間、繰り返しパターン</td></tr>
+                        <tr><td>1 つの時間枠に複数の予約</td><td class="old"><span class="ok">&#10003;</span>同時スケジュール</td><td class="new"><span class="ok">&#10003;</span>3/10 のバッジをリアルタイム表示する定員モード</td></tr>
+                        <tr><td>会議室と機材</td><td class="old">Asset Scheduling (追加費用)</td><td class="new"><span class="ok">&#10003;</span>任意のレコードをリソースに。追加費用なし</td></tr>
+                        <tr><td>カレンダーのレイアウト</td><td class="old">予約画面と Salesforce カレンダー</td><td class="new"><span class="ok">&#10003;</span>カレンダー、タイムライン、週、稼働率、予定一覧</td></tr>
+                        <tr><td>画面フローの中で</td><td class="old">独自のモデルに依存したフローテンプレート</td><td class="new"><span class="ok">&#10003;</span>再利用できる出力を持つネイティブの画面コンポーネント</td></tr>
+                        <tr><td>Experience Cloud</td><td class="old"><span class="ok">&#10003;</span>公開ページでのゲストフロー</td><td class="new"><span class="ok">&#10003;</span>同じコンポーネントをどのサイトページにも</td></tr>
+                        <tr><td>設定の手間</td><td class="old">導入プロジェクトが必要</td><td class="new"><span class="ok">&#10003;</span>ウィザード、または設定をインポート</td></tr>
+                        <tr><td>ライセンス</td><td class="old">Enterprise、Performance、Unlimited へのアドオン</td><td class="new"><span class="ok">&#10003;</span>1 つのパッケージ、$20/ユーザー/月ですべての機能</td></tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ WHAT IS SCHEDULER ═══════════════ -->
+        <section class="gs-sec" id="what-is-lightning-scheduler">
+            <div class="hm-wrap">
+                <h2>Salesforce Lightning Scheduler とは?</h2>
+                <p class="gs-lead">Salesforce 純正の予約スケジュール製品で、現在は Salesforce Scheduler と呼ばれています。1 つの仕事に強みがあります。顧客を、適切な資格を持つ担当者と、適切な支店で、適切な時間に結び付けることです。</p>
+                <table class="gs-table kv">
+                    <tbody>
+                        <tr><td>対象</td><td>銀行やクリニックが支店で有資格のスタッフとの予約を受け付けるような、顧客との予定。</td></tr>
+                        <tr><td>Booking</td><td>ガイド付きの<b>インバウンド</b> (顧客が予約) と<b>アウトバウンド</b> (スタッフが予約) のフローテンプレート、さらに見込み客向けのゲストフロー。</td></tr>
+                        <tr><td>追加機能</td><td>同時スケジュール、複数リソースの予定 (必須リソースは 5 つまで)、出席者数の上限、地図と場所の検索。</td></tr>
+                        <tr><td>ライセンス</td><td>Enterprise、Performance、Unlimited Edition の Lightning Experience で使える有料アドオン。サービスリソースごとに Salesforce Scheduler 権限セットライセンスが必要です。</td></tr>
+                    </tbody>
+                </table>
+                <h3>導入とともに採用するデータモデル</h3>
+                <ul class="gs-chain" aria-label="Salesforce Scheduler のデータモデル">
+                    <li>サービステリトリー</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>作業種別グループ</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>作業種別</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>サービスリソース</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>サービス予定</li>
+                </ul>
+                <p class="vs-src">出典: Salesforce「<a href="https://resources.docs.salesforce.com/latest/latest/en-us/sfdc/pdf/salesforce_scheduler_implementation_guide_for_financial_services.pdf" target="_blank" rel="noopener">Salesforce Scheduler 実装ガイド</a>」および Trailhead「<a href="https://trailhead.salesforce.com/content/learn/modules/multi-resource-concurrent-and-inbound-scheduling-with-lightning-scheduler/set-up-inbound-scheduling-for-prospective-customers" target="_blank" rel="noopener">Multi-resource, Inbound, and Concurrent Scheduling with Salesforce Scheduler</a>」。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ MANY DATES + VIEWS ═══════════════ -->
+        <section class="gs-sec alt" id="views">
+            <div class="hm-wrap">
+                <h2>任意の Salesforce オブジェクトでリソースの日程管理</h2>
+                <p class="gs-lead">多くの日付を一度に、そして同じレコードを 5 種類のレイアウトで。レイアウトはロードマップの約束ではなく、今ある設定です。</p>
+                <div class="gs-two">
+                    <figure class="gs-fig">
+                        <img src="/images/components/salesforce-multi-date-picker-demo-poster.png" data-gif="/images/components/salesforce-multi-date-picker-demo.gif" alt="Salesforce の MultiDatePick Dates コンポーネントのアニメーションデモ: 感謝祭の週の 3 日間をドラッグし、金曜日をワンクリックで追加して、4 日分をまとめて保存" title="Salesforce 複数日付ピッカーのデモ" width="700" height="640" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>4 日分の休暇を 1 回で保存。Scheduler の予約は一度に 1 件です。</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-resource-timeline-view.png" alt="Salesforce 上の MultiDatePick リソースタイムライン: 縦に人、上部に日付、日ごとの定員バー、複数日の予約は 1 本のバーで表示し、重なる場合は段を分けて積み重ねる" title="定員バー付きの Salesforce リソースタイムライン" width="1722" height="1782" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>縦にリソース、横に日付。リソースをユーザーにすればスタッフの勤務表になります。</figcaption>
+                    </figure>
+                </div>
+                <div class="hm-scroll" style="margin-top:18px;">
+                <table class="gs-table">
+                    <thead><tr><th>必要なこと</th><th class="mdp">MultiDatePick の設定</th></tr></thead>
+                    <tbody>
+                        <tr><td>縦にリソース、横に日付</td><td><code>view="timeline"</code></td></tr>
+                        <tr><td>リソースごとの定員ヒートマップ</td><td><code>view="utilization"</code> と <code>capacityField</code></td></tr>
+                        <tr><td>ユーザーがレイアウトを切り替えられるようにする</td><td><code>availableViews</code> で切り替えボタンを制御</td></tr>
+                        <tr><td>資産ではなく人の日程を管理する</td><td>リソースの参照先を <code>User</code> にする</td></tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ EXPERIENCE CLOUD ═══════════════ -->
+        <section class="gs-sec" id="experience-cloud">
+            <div class="hm-wrap">
+                <h2>Salesforce Scheduler と Experience Cloud での予約</h2>
+                <p class="gs-lead">どちらも公開サイトから予約できます。違うのは設定の内容です。</p>
+                <div class="hm-scroll">
+                <table class="gs-table">
+                    <thead><tr><th>ステップ</th><th>Salesforce Scheduler</th><th class="mdp">MultiDatePick</th></tr></thead>
+                    <tbody>
+                        <tr><td>サイトへの配置</td><td class="old">Inbound New Guest Appointment フローを実行するフローコンポーネント</td><td class="new">コンポーネントをページにドラッグし、Config Name（設定名） を設定</td></tr>
+                        <tr><td>ゲストアクセス</td><td class="old">サービスリソース、テリトリー、作業種別、作業種別グループの共有設定</td><td class="new">自社の予約オブジェクトとリソースオブジェクトへのアクセス</td></tr>
+                        <tr><td>サイト訪問者</td><td class="old">ゲストとして予約</td><td class="new">ゲストとして、カレンダー上で直接予約</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p style="margin:14px 0 0;font-size:.93rem;">詳しい手順: <a href="/ja/salesforce-calendar-experience-cloud-booking.html">Salesforce Experience Cloud サイトでのセルフサービス予約</a>。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ COST ═══════════════ -->
+        <section class="gs-sec alt" id="cost">
+            <div class="hm-wrap">
+                <h2>それぞれの費用</h2>
+                <p class="gs-lead">すべての機能込みの定額料金か、エディションに上乗せするアドオンライセンスか。</p>
+                <div class="hm-price">
+                    <div class="gs-card mdp">
+                        <b>MultiDatePick</b>
+                        <div class="amt">$20<small>/ユーザー/月</small></div>
+                        <ul class="hm-checks">
+                            <li>1 つのプランで、3 つのコンポーネントとすべての機能</li>
+                            <li>30 日間の無料トライアル、クレジットカード不要</li>
+                            <li>レコード数による従量課金なし: 50 件でも 50,000 件でも同じ料金</li>
+                        </ul>
+                        <a href="/ja/pricing.html" style="font-weight:600;font-size:.9rem;margin-top:4px;">MultiDatePick の料金を見る &rarr;</a>
+                    </div>
+                    <div class="gs-card sf">
+                        <b>Salesforce Scheduler</b>
+                        <div class="amt word">アドオンライセンス</div>
+                        <ul class="hm-checks">
+                            <li>Salesforce のエディションに上乗せされる追加費用</li>
+                            <li>サービスリソースごとの権限セットライセンス</li>
+                            <li>会議室用の Asset Scheduling はさらに別料金</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FAQ ═══════════════ -->
+        <section class="gs-sec" id="faq">
+            <div class="hm-wrap gs-faq">
+                <h2>Salesforce Lightning Scheduler に関する質問</h2>
+                <p class="gs-lead">よく検索される疑問に簡潔にお答えします。</p>
+                <details>
+                    <summary>Salesforce Lightning Scheduler とは?</summary>
+                    <p>Salesforce 純正の予約スケジュール製品です。サービステリトリー、作業種別グループ、作業種別、サービスリソース、サービス予定を使って、顧客を適切な場所と時間に有資格の担当者と結び付けます。予約はガイド付きのインバウンドフローとアウトバウンドフローで行います。</p>
+                </details>
+                <details>
+                    <summary>Lightning Scheduler と Salesforce Scheduler は同じものですか?</summary>
+                    <p>はい。Lightning Scheduler は以前の名称です。現在、Salesforce のドキュメントと Trailhead では Salesforce Scheduler と呼ばれていますが、ライセンス名には今も Lightning Scheduler と書かれているものがあります。</p>
+                </details>
+                <details>
+                    <summary>Salesforce Scheduler には追加費用がかかりますか?</summary>
+                    <p>はい。Enterprise、Performance、Unlimited Edition の Lightning Experience で追加費用により利用でき、サービスリソースごとに Salesforce Scheduler 権限セットライセンスが必要です。会議室や機材用の Asset Scheduling はさらに別料金です。MultiDatePick は 1 ユーザーあたり月額 $20 の 1 プランのみで、30 日間の無料トライアルがあります。</p>
+                </details>
+                <details>
+                    <summary>Salesforce Scheduler は Experience Cloud で使えますか?</summary>
+                    <p>はい。ゲストユーザーにサービスリソース、サービステリトリー、作業種別、作業種別グループへのアクセス権を付与したうえで、Inbound New Guest Appointment フローを公開の Experience Cloud ページに配置します。MultiDatePick も Experience Cloud ページで動作し、自社のオブジェクトを読み込んで保存します。</p>
+                </details>
+                <details>
+                    <summary>Salesforce で会議室や機材を予約できますか?</summary>
+                    <p>Salesforce Scheduler では、会議室や機材は資産リソースとして扱われ、追加費用のオプションである Asset Scheduling が必要です。MultiDatePick では、Booking コンポーネントが会議室、車両、機材、ユーザーなど任意のレコードをリソースとして予約し、定員と競合もチェックします。</p>
+                </details>
+                <details>
+                    <summary>カスタムオブジェクトで使える Lightning Scheduler の代替は?</summary>
+                    <p>Scheduler のデータモデルを導入するのではなく、自社のオブジェクトを読み書きするカレンダーが欲しいなら MultiDatePick です。1 つのカレンダーで多くの日付、時刻、予約を選び、5 つの表示で見せ、Apex なしでセットアップウィザードから設定できます。</p>
+                </details>
+                <details>
+                    <summary>標準の Salesforce カレンダーは予約ツールですか?</summary>
+                    <p>いいえ。標準のカレンダーは、行動やオブジェクトのレコードを月または週のビューで表示するものです。表示のためのもので入力用のコントロールではなく、9 つの日付を選んで 9 件のレコードを作ることはできません。</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- ═══════════════ RELATED ═══════════════ -->
+        <section class="gs-sec alt" id="related">
+            <div class="hm-wrap">
+                <h2>さらに詳しく</h2>
+                <p class="gs-lead">比較している内容に対応する MultiDatePick のページ。</p>
+                <div class="gs-links">
+                    <a href="/ja/salesforce-booking-calendar.html"><b>Salesforce 予約カレンダー</b><span>リソース、時間枠、定員</span></a> <a href="/ja/salesforce-conference-room-booking-calendar.html"><b>会議室予約</b><span>会議室を 1 つのカレンダーに</span></a> <a href="/ja/salesforce-calendar-experience-cloud-booking.html"><b>Experience Cloud での予約</b><span>公開サイトでセルフサービス</span></a> <a href="/ja/gettingstarted.html"><b>はじめに</b><span>インストールから最初のカレンダーまで</span></a> <a href="/ja/pricing.html"><b>料金</b><span>$20/ユーザー/月、30 日間トライアル</span></a> <a href="/ja/troubleshooting.html"><b>トラブルシューティング</b><span>表示内容から原因を見つけて解決</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FINAL CTA ═══════════════ -->
+        <section class="hm-final">
+            <div class="hm-wrap">
+                <h2>予定、予約、複数日付の日程管理を、自社のオブジェクトで</h2>
+                <p>Salesforce AppExchange で近日公開。今すぐライブデモを試すか、公開のお知らせの送り先を教えてください。</p>
+                <div class="hm-ctas">
+                    <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-vs-lightning-scheduler" class="btn btn-cta" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-ghost">公開時に通知を受け取る</a>
+                </div>
+                <p class="contact">100% Salesforce ネイティブ。データも設定も組織の外に出ることはありません。</p>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/salesforce-calendar-vs-lightning-scheduler.html" hreflang="en" lang="en">English</a></li><li><a href="/de/salesforce-lightning-scheduler-alternative.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/alternativa-salesforce-lightning-scheduler.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/calendrier-salesforce-vs-lightning-scheduler.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/alternativa-salesforce-lightning-scheduler.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/salesforce-calendar-vs-lightning-scheduler.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

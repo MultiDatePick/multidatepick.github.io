@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronologia risorse in Salesforce: la vista timeline</title>
+    <meta name="description" content="Una cronologia risorse (timeline) per Salesforce: sale, persone e attrezzature sul lato, date in orizzontale, prenotazioni di più giorni come un'unica barra. Senza codice.">
+    <link rel="canonical" href="https://multidatepick.com/it/blog/cronologia-timeline-risorse-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Timeline post: shares the views post's look. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Cronologia risorse in Salesforce: la vista timeline">
+    <meta property="og:description" content="Una cronologia risorse (timeline) per Salesforce: sale, persone e attrezzature sul lato, date in orizzontale, prenotazioni di più giorni come un'unica barra. Senza codice.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/it/blog/cronologia-timeline-risorse-salesforce.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="it_IT">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Cronologia risorse in Salesforce: la vista timeline">
+    <meta name="twitter:description" content="Una cronologia risorse (timeline) per Salesforce: sale, persone e attrezzature sul lato, date in orizzontale, prenotazioni di più giorni come un'unica barra. Senza codice.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-timeline-view.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-zeitachse-ressourcen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/linea-de-tiempo-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/vue-chronologie-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/cronologia-timeline-risorse-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/linha-do-tempo-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-timeline-view.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-timeline-view.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-timeline-view.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-timeline-view.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Presto disponibile su Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Chiudi banner" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/it/" class="logo"><img src="/images/logo.png" alt="Logo MultiDatePick: componente calendario a più date e prenotazione risorse per Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Apri/chiudi menu di navigazione"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Prodotto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Date</a></li>
+                        <li><a href="/it/selettore-data-ora-fasce-orarie-salesforce.html">Date Time</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Booking</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Cinque viste calendario</a></li>
+                        <li><a href="/it/configurazioni-calendario-salesforce.html">Config Library</a></li>
+                        <li><a href="/it/affidabilita-e-sicurezza.html">Affidabilità e sicurezza</a></li>
+                        <li><a href="/it/accessibilita-vpat.html">Accessibilità (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Soluzioni <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/calendario-salesforce.html">Calendario Salesforce</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Staffing e recruiting</a></li>
+                        <li><a href="/it/pianificazione-colloqui-salesforce.html">Pianificazione colloqui</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce-experience-cloud.html">Prenotazioni su Experience Cloud</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Date delle campagne</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">Pubblica amministrazione / Section 508</a></li>
+                        <li><a href="/it/alternativa-salesforce-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/it/prezzi.html">Prezzi</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentazione <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/per-iniziare.html">Per iniziare</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente</a></li>
+                        <li><a href="/it/guida-flussi-su-schermo-salesforce.html">Guida ai flussi su schermo</a></li>
+                        <li><a href="/it/pagine-app-home-experience.html">Pagine app, iniziali ed Experience</a></li>
+                        <li><a href="/it/distribuire-flusso-vs-code.html">Distribuire un flusso (VS Code)</a></li>
+                        <li><a href="/it/risoluzione-problemi.html">Risoluzione dei problemi</a></li>
+                        <li><a href="/it/domande-frequenti.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/it/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Prova la demo live</a></li>
+                <li><a href="/it/avvisami-al-lancio.html" class="nav-cta">Avvisami al lancio</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Cronologia risorse in Salesforce: la vista timeline",
+                "description": "Una cronologia risorse (timeline) per Salesforce: sale, persone e attrezzature sul lato, date in orizzontale, prenotazioni di più giorni come un'unica barra. Senza codice.",
+                "datePublished": "2026-10-12",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/it/blog/cronologia-timeline-risorse-salesforce.html",
+                "image": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif",
+                "inLanguage": "it"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce ha una vista timeline per le risorse?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Non come componente Lightning standard per i tuoi oggetti. I calendari di Salesforce mostrano gli eventi di una persona, e i diagrammi di Gantt di solito richiedono un add-on pensato per i progetti. MultiDatePick aggiunge una cronologia risorse che legge qualsiasi oggetto personalizzato o standard: scegli l'oggetto che contiene le prenotazioni e quello che contiene le risorse, e ogni risorsa diventa una riga."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Posso trascinare le prenotazioni sulla cronologia per riprogrammarle?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sì. Con la modalità modifica attiva, afferra il centro di una barra per spostarla su altri giorni, o uno dei bordi per cambiarne l'inizio o la fine. Mentre trascini la barra mostra le nuove date, e si salva quando la rilasci. Con lo zoom Giorno gli stessi gesti spostano e allungano l'ora di inizio e di fine della prenotazione."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Le righe possono essere persone invece che sale?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sì. La risorsa può essere qualsiasi oggetto, compreso User. Puntala su User e la cronologia diventa un prospetto del personale: ogni persona è una riga, con turni, visite o incarichi come barre."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Come evito che un lungo elenco di risorse diventi un muro di righe?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Imposta Max View Resources per mostrare solo le righe più piene, raggruppa le righe sotto un elenco di selezione o un lookup con Timeline Group By Field, e scegli se mostrare tutte le risorse o solo quelle con prenotazioni. Ogni risorsa conta comunque per la capacità; queste impostazioni cambiano solo ciò che viene mostrato."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "La cronologia funziona nei siti Experience Cloud e nelle pagine record?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sì. È una delle cinque viste dello stesso componente, quindi funziona ovunque funzioni il componente: pagine record, pagine app e iniziali, schermate dei flussi e siti Experience Cloud."
+                        }
+                    }
+                ],
+                "inLanguage": "it"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo-poster.png",
+                "caption": "Demo animata di una cronologia risorse in Salesforce con MultiDatePick: consulenti sul lato, incarichi con i clienti come barre continue sui giorni in cui si svolgono, una scheda al passaggio del mouse su uno di essi, poi zoom da Settimana a Mese",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule-poster.png",
+                "caption": "Demo animata della riprogrammazione su una cronologia Salesforce: trascinando il bordo destro di una prenotazione la si allunga di due giorni, trascinandone un'altra la si sposta di due giorni più avanti, e ciascuna si salva al rilascio",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-capacity-lanes.png",
+                "caption": "Dettaglio della cronologia in Salesforce: prenotazioni di più giorni sovrapposte impilate in corsie sotto ogni risorsa e una striscia di capacità combinata che mostra quanto è pieno ogni giorno",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-resource-timeline-view.png",
+                "caption": "Cronologia risorse in Salesforce con le persone come righe: ogni consulente sul lato, i giorni a venire in alto e ogni incarico con un cliente come un'unica barra",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>La vista Cronologia di Salesforce: tutte le risorse in una sola schermata</h1>
+                <p class="subtitle">Sale, persone, attrezzature o progetti sul lato, date in alto e ogni prenotazione come un'unica barra. Una cronologia risorse per qualsiasi oggetto Salesforce, configurata senza codice.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Pubblicato il 12 ottobre 2026 &middot; Aggiornato il 21 ottobre 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"Quale sala è libera martedì prossimo?" "Chi nel team ha disponibilità questa settimana?" "Quando rientra il furgone?" Sono tutte domande su molte risorse e molti giorni, e un calendario mensile risponde una risorsa alla volta. Una cronologia risponde con un solo sguardo.</p>
+
+                <p>La vista Cronologia di MultiDatePick mette ogni risorsa sulla sua riga e ogni prenotazione su una barra lunga esattamente quanto la prenotazione. Legge i tuoi oggetti Salesforce, salva con lo stesso meccanismo del resto del componente e basta un campo della configurazione per usarla ovunque.</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-view-demo-poster.png" data-gif="/images/views/salesforce-timeline-view-demo.gif" alt="Demo animata di una cronologia risorse in Salesforce con MultiDatePick: consulenti sul lato, incarichi con i clienti come barre continue sui giorni in cui si svolgono, una scheda al passaggio del mouse su uno di essi, poi zoom da Settimana a Mese" loading="lazy" decoding="async" width="880" height="880" data-zoomable>
+                    <figcaption>Consulenti sul lato, incarichi come barre, zoom da una settimana a un mese. Passa il mouse su una barra per vederne i dettagli.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Cosa fa la cronologia che un calendario non può fare</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>Una barra per prenotazione</h3><p>Una prenotazione dal lunedì al venerdì è un'unica barra continua, quindi la sua durata si vede a colpo d'occhio.</p></div>
+                    <div class="tl-feat"><h3>Corsie per le sovrapposizioni</h3><p>Le prenotazioni sovrapposte sulla stessa risorsa si impilano in corsie. Una giornata piena si riduce a un numero che espandi sul posto.</p></div>
+                    <div class="tl-feat"><h3>Barra della capacità</h3><p>Una barra sopra ogni gruppo mostra quanto è pieno ogni giorno rispetto alla capacità complessiva delle risorse.</p></div>
+                    <div class="tl-feat"><h3>Zoom Giorno, Settimana e Mese</h3><p>Le ore in orizzontale per oggi, due settimane per pianificare, un mese per la visione d'insieme. Un clic per passare dall'una all'altra.</p></div>
+                    <div class="tl-feat"><h3>Trascina per riprogrammare</h3><p>Fai scorrere una barra per spostarla, tira un bordo per allungarla. Si salva al rilascio e resta dove l'hai messa.</p></div>
+                    <div class="tl-feat"><h3>Prenota dalla griglia</h3><p>Trascina sui giorni liberi della riga di una risorsa per selezionarli, poi prenota. La riga sceglie la risorsa per te.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Trascina per riprogrammare, allunga per prolungare</h2>
+                <p>I piani cambiano, e cambiarne uno non dovrebbe voler dire aprire un record, modificare due campi data e salvare. Sulla cronologia afferri la barra. Tira il bordo destro e la prenotazione dura di più; afferra il centro e la sposti su altri giorni. Mentre trascini la barra mostra le date su cui finirà, si salva appena la rilasci e resta nella sua corsia con un breve evidenziamento, così vedi esattamente cosa è cambiato.</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-drag-to-reschedule-poster.png" data-gif="/images/views/salesforce-timeline-drag-to-reschedule.gif" alt="Demo animata della riprogrammazione su una cronologia Salesforce: trascinando il bordo destro di una prenotazione la si allunga di due giorni, trascinandone un'altra la si sposta di due giorni più avanti, e ciascuna si salva al rilascio" loading="lazy" decoding="async" width="880" height="880" data-zoomable>
+                    <figcaption>Allunga dal bordo, sposta dal centro. Ogni modifica si salva al rilascio.</figcaption>
+                </figure>
+                <p>Passa allo zoom <strong>Giorno</strong> e le colonne diventano ore. Gli stessi gesti spostano e allungano allora l'ora di inizio e di fine di una prenotazione, i suoi <em>orari</em>: una riunione che sfora si sistema con un trascinamento.</p>
+
+                <h2 style="margin-top:44px;">La capacità a colpo d'occhio</h2>
+                <p>Sopra le righe, una barra della capacità colora ogni giorno in base a quanta parte della capacità complessiva delle risorse è prenotata, così le settimane critiche saltano all'occhio prima che qualcuno chieda. Raggruppa le righe per un elenco di selezione o un lookup (sede, team, area) e ogni gruppo ha la sua barra. Quando una risorsa ha più prenotazioni nello stesso giorno, si impilano in corsie; un giorno con più di qualche prenotazione si riduce a un numero che si espande sul posto quando ci fai clic.</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-capacity-lanes.png" alt="Dettaglio della cronologia in Salesforce: prenotazioni di più giorni sovrapposte impilate in corsie sotto ogni risorsa e una striscia di capacità combinata che mostra quanto è pieno ogni giorno" loading="lazy" width="1622" height="894" data-zoomable>
+                    <figcaption>Le prenotazioni sovrapposte si impilano in corsie, e la barra mostra quanto è pieno ogni giorno.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Chi usa una cronologia in Salesforce</h2>
+                <p>La risorsa può essere qualsiasi oggetto, quindi la stessa vista si adatta a team molto diversi:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>Sale riunioni e postazioni</strong><span>Ogni sala è una riga; vedi quale è libera giovedì senza aprire un solo giorno.</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Attrezzature e flotta</strong><span>Furgoni, telecamere, strumenti di laboratorio: i prestiti di più giorni sono un'unica barra, quindi una settimana fuori salta all'occhio.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Prospetti del personale</strong><span>Punta la risorsa su User e le righe sono persone: turni, visite e incarichi a colpo d'occhio.</span></div></div>
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Incarichi e progetti con i clienti</strong><span>Consulenti o squadre sul lato, ogni incarico steso sui giorni in cui si svolge.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>Ferie e permessi</strong><span>Chi è assente, e quando. Le assenze sovrapposte si impilano in corsie invece di nascondersi dietro una sola barra.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Squadre di assistenza sul campo</strong><span>Squadre come righe, interventi come barre; trascina un intervento su un altro giorno quando il meteo lo sposta.</span></div></div>
+                </div>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-resource-timeline-view.png" alt="Cronologia risorse in Salesforce con le persone come righe: ogni consulente sul lato, i giorni a venire in alto e ogni incarico con un cliente come un'unica barra" loading="lazy" width="1722" height="1782" data-zoomable>
+                    <figcaption>Persone come risorse: ogni consulente è una riga, ogni incarico un'unica barra.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Le impostazioni che lo definiscono</h2>
+                <p>Ognuna di queste è una proprietà del componente e un campo della configurazione guidata, quindi niente richiede codice:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Impostazione</th><th>Cosa fa</th><th style="width:22%;">Nome API</th></tr></thead>
+                    <tbody>
+                    <tr><td>Vista (View)</td><td>Imposta <code>timeline</code> per aprire su questa vista, o inseriscila in Available Views (Viste disponibili) per offrirla nel selettore.</td><td><code>view</code></td></tr>
+                    <tr><td>Zoom Cronologia (Timeline Zoom)</td><td>Lo zoom di apertura: <code>day</code> (ore in orizzontale), <code>week</code> o <code>month</code>. Gli utenti cambiano zoom con i pulsanti.</td><td><code>timelineZoom</code></td></tr>
+                    <tr><td>Finestra Cronologia (giorni) / Timeline Window (Days)</td><td>Quanti giorni sono visibili insieme. Il valore predefinito è due settimane; un mese intero di colonne diventa stretto.</td><td><code>timelineWindowDays</code></td></tr>
+                    <tr><td>Raggruppa Cronologia per (Timeline Group By Field)</td><td>Un elenco di selezione o un lookup sulla risorsa che raggruppa le righe sotto intestazioni comprimibili, ognuna con la sua barra della capacità.</td><td><code>timelineGroupByField</code></td></tr>
+                    <tr><td>Max righe risorse (Max View Resources)</td><td>Mostra solo questo numero di righe, a partire dalle più piene. Tutto conta comunque per la capacità.</td><td><code>maxViewResources</code></td></tr>
+                    <tr><td>Righe risorse (Resource Rows)</td><td>Mostra tutte le risorse, o solo quelle con prenotazioni nel periodo visibile.</td><td><code>resourceViewFilter</code></td></tr>
+                    <tr><td>Campo capacità (Capacity Field)</td><td>Un numero sulla risorsa. La barra della capacità e il conteggio delle corsie si basano su di esso.</td><td><code>capacityField</code></td></tr>
+                    <tr><td>Abilita modalità modifica (Enable Edit Mode)</td><td>Attiva il trascinamento per spostare e allungare le prenotazioni, e le modifiche in blocco dal pannello Modifica.</td><td><code>enableEditMode</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Un componente, cinque viste.</strong> Cronologia sta accanto a Calendario, Settimana, Utilizzo e Agenda nello stesso componente e legge gli stessi record. Offri quelle che servono a ogni pagina e il selettore fa il resto. <a href="/it/blog/viste-calendario-salesforce.html">Scopri tutte e cinque le viste</a>.</div>
+
+                <h2 style="margin-top:44px;">Domande frequenti</h2>
+                <div class="tl-faq">
+                    <details><summary>Salesforce ha una vista timeline per le risorse?</summary><p>Non come componente Lightning standard per i tuoi oggetti. I calendari di Salesforce mostrano gli eventi di una persona, e i diagrammi di Gantt di solito richiedono un add-on pensato per i progetti. MultiDatePick aggiunge una cronologia risorse che legge qualsiasi oggetto personalizzato o standard: scegli l'oggetto che contiene le prenotazioni e quello che contiene le risorse, e ogni risorsa diventa una riga.</p></details>
+                    <details><summary>Posso trascinare le prenotazioni sulla cronologia per riprogrammarle?</summary><p>Sì. Con la modalità modifica attiva, afferra il centro di una barra per spostarla su altri giorni, o uno dei bordi per cambiarne l'inizio o la fine. Mentre trascini la barra mostra le nuove date, e si salva quando la rilasci. Con lo zoom Giorno gli stessi gesti spostano e allungano l'ora di inizio e di fine della prenotazione.</p></details>
+                    <details><summary>Le righe possono essere persone invece che sale?</summary><p>Sì. La risorsa può essere qualsiasi oggetto, compreso User. Puntala su User e la cronologia diventa un prospetto del personale: ogni persona è una riga, con turni, visite o incarichi come barre.</p></details>
+                    <details><summary>Come evito che un lungo elenco di risorse diventi un muro di righe?</summary><p>Imposta Max View Resources per mostrare solo le righe più piene, raggruppa le righe sotto un elenco di selezione o un lookup con Timeline Group By Field, e scegli se mostrare tutte le risorse o solo quelle con prenotazioni. Ogni risorsa conta comunque per la capacità; queste impostazioni cambiano solo ciò che viene mostrato.</p></details>
+                    <details><summary>La cronologia funziona nei siti Experience Cloud e nelle pagine record?</summary><p>Sì. È una delle cinque viste dello stesso componente, quindi funziona ovunque funzioni il componente: pagine record, pagine app e iniziali, schermate dei flussi e siti Experience Cloud.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Una cronologia risorse per gli oggetti che hai già.</h2>
+                    <p>Trascina una prenotazione sulla cronologia nella demo live, oppure sfoglia le configurazioni pronte per sale, flotte e prospetti del personale nella <a href="/it/configurazioni-calendario-salesforce.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-timeline-view" class="btn btn-demo" target="_blank" rel="noopener">Prova la demo live</a> <a href="/it/avvisami-al-lancio.html" class="btn btn-primary">Avvisami al lancio</a> <a href="/it/per-iniziare.html" class="btn btn-secondary">Per iniziare</a>
+                    </div>
+                    <ul class="check-list"><li>$20/utente/mese, tutte le funzionalità</li><li>Prova gratuita di 30 giorni, senza carta</li><li>100% nativo Salesforce</li><li>Senza Apex</li><li>Presto disponibile su Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Letture correlate</h3>
+                    <ul>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Cinque viste calendario, un solo componente Salesforce</a></li>
+                        <li><a href="/it/blog/heatmap-utilizzo-salesforce.html">La heatmap di utilizzo di Salesforce</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni in Salesforce</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Pianificazione per staffing e recruiting</a></li>
+                        <li><a href="/it/blog/evitare-doppie-prenotazioni-salesforce.html">Evitare le doppie prenotazioni in Salesforce</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Il componente Booking</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/it/" class="logo">
+                        <img src="/images/logo.png" alt="Logo MultiDatePick: componente calendario a più date e prenotazione risorse per Salesforce" width="180" height="45">
+                    </a>
+                    <p>La suite di componenti calendario più personalizzabile per Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Prodotto</h4>
+                    <ul>
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Date</a></li>
+                        <li><a href="/it/selettore-data-ora-fasce-orarie-salesforce.html">Date Time</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Booking</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Cinque viste calendario</a></li>
+                        <li><a href="/it/configurazioni-calendario-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluzioni</h4>
+                    <ul>
+                        <li><a href="/it/calendario-salesforce.html">Calendario Salesforce</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Staffing e recruiting</a></li>
+                        <li><a href="/it/pianificazione-colloqui-salesforce.html">Pianificazione colloqui</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce-experience-cloud.html">Prenotazioni su Experience Cloud</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Date delle campagne</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">Pubblica amministrazione / Section 508</a></li>
+                        <li><a href="/it/alternativa-salesforce-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentazione</h4>
+                    <ul>
+                        <li><a href="/it/per-iniziare.html">Per iniziare</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente</a></li>
+                        <li><a href="/it/guida-flussi-su-schermo-salesforce.html">Guida ai flussi su schermo</a></li>
+                        <li><a href="/it/pagine-app-home-experience.html">Pagine app, iniziali ed Experience</a></li>
+                        <li><a href="/it/distribuire-flusso-vs-code.html">Distribuire un flusso (VS Code)</a></li>
+                        <li><a href="/it/risoluzione-problemi.html">Risoluzione dei problemi</a></li>
+                        <li><a href="/it/domande-frequenti.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Azienda</h4>
+                    <ul>
+                        <li><a href="/it/prezzi.html">Prezzi</a></li>
+                        <li><a href="/it/blog/">Blog</a></li>
+                        <li><a href="/it/affidabilita-e-sicurezza.html">Affidabilità e sicurezza</a></li>
+                        <li><a href="/it/accessibilita-vpat.html">Accessibilità</a></li>
+                        <li><a href="/it/avvisami-al-lancio.html">Avvisami al lancio</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Supporto</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Tutti i diritti riservati.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Lingua" translate="no"><ul><li><a href="/blog/salesforce-timeline-view.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-zeitachse-ressourcen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/linea-de-tiempo-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/vue-chronologie-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/cronologia-timeline-risorse-salesforce.html" hreflang="it" lang="it" aria-current="page">Italiano</a></li><li><a href="/pt-br/blog/linha-do-tempo-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-timeline-view.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-timeline-view.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-timeline-view.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ingrandisci immagine</p><p data-k="expand-diagram">Ingrandisci diagramma</p><p data-k="close">Chiudi</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

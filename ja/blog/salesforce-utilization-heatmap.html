@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 稼働率ヒートマップ: 予約過多を一目で</title>
+    <meta name="description" content="Salesforce の稼働率ヒートマップ: リソースごとに毎日の予約数/定員を表示し、定員超過を強調。クリックでスケジュールへ。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/salesforce-utilization-heatmap.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Utilization post: same look as the Timeline and views posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce 稼働率ヒートマップ: 予約過多を一目で">
+    <meta property="og:description" content="Salesforce の稼働率ヒートマップ: リソースごとに毎日の予約数/定員を表示し、定員超過を強調。クリックでスケジュールへ。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/salesforce-utilization-heatmap.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 稼働率ヒートマップ: 予約過多を一目で">
+    <meta name="twitter:description" content="Salesforce の稼働率ヒートマップ: リソースごとに毎日の予約数/定員を表示し、定員超過を強調。クリックでスケジュールへ。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-utilization-heatmap.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-auslastungs-heatmap.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/mapa-de-calor-ocupacion-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/heatmap-occupation-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/heatmap-utilizzo-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/mapa-de-calor-ocupacao-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-utilization-heatmap.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-utilization-heatmap.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-utilization-heatmap.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-utilization-heatmap.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce 稼働率ヒートマップ: 予約過多を一目で",
+                "description": "Salesforce の稼働率ヒートマップ: リソースごとに毎日の予約数/定員を表示し、定員超過を強調。クリックでスケジュールへ。",
+                "datePublished": "2026-10-13",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/salesforce-utilization-heatmap.html",
+                "image": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce でリソースの稼働率を確認するには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "標準の Salesforce には、自社の予約オブジェクト向けの稼働率表示はなく、疑問ごとにレポートを作ることになります。MultiDatePick はカレンダーコンポーネントに稼働率表示を追加します。各リソースが 1 行、各日が 1 セルで、そのリソースの定員に対する予約数を表示します。グループ全体の合計行と、右側に平均と空き枠の列も付きます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "2/2 や 3/4 といったセルの表示は何を意味しますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "その日の予約数と、リソースの定員です。3/4 なら 4 枠中 3 枠が埋まっています。青が濃いほどその日は埋まっており、定員を超えて予約された日はオレンジの枠で囲まれて目立ちます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "リソースオブジェクトに定員の項目がない場合は?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "ヒートマップはそのまま使えます。セルには同じ青の濃淡で予約件数だけが表示され、グリッドの下にその旨の注記が出ます。割合や空き枠を表示したくなったら、いつでも定員用の数値項目を追加してください。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "稼働率表示から予約や編集はできますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "稼働率表示は意図的に参照専用で、どれだけ埋まっているかを答えるためのものです。予約のあるセルをクリックすると、そのリソースのその日の週表示が開き、そこで予約、移動、編集ができます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "行を会議室ではなく人にできますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。リソースには User を含め、どのオブジェクトでも使えます。User に定員の数値項目を追加すれば、ヒートマップはチームの稼働状況ダッシュボードになります。誰が手一杯か、誰に余裕があるか、どの週が過負荷かがわかります。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png",
+                "caption": "MultiDatePick の Salesforce 稼働率ヒートマップのアニメーションデモ: 縦にアドバイザー、日ごとに予約数/定員を表示。満員の日にカーソルを合わせ、クリックするとそのアドバイザーの週を表示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-heatmap.png",
+                "caption": "アドバイザーの予定を表示した Salesforce 稼働率ヒートマップ: 各アドバイザーの日ごとの予約数/定員、上部に全体の空き状況の行、右側に平均と空き枠の列",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-project-capacity.png",
+                "caption": "複数日にわたる顧客案件を表示した Salesforce 稼働率ヒートマップ: 定員がそれぞれ 2 案件のアドバイザー 3 名の 1 か月分で、各アドバイザーが手一杯の日がわかる",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce 稼働率ヒートマップ: 予約過多を一目で把握</h1>
+                <p class="subtitle">会議室、人、設備を縦に、日付を横に並べ、各セルで定員のどれだけが埋まっているかを表示します。自社の Salesforce オブジェクト向けの稼働状況ダッシュボードを、コードなしで作れます。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 10 月 13 日 &middot; 更新日 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">「来週、チームは予定を詰め込みすぎていないか?」「月の大半が空いている会議室はどれか?」「もう 1 件案件を受けられるか?」これらはキャパシティの問題です。カレンダーは何が予約されているかを示しますが、どれだけ埋まっているかは示しません。それを示すのが稼働率ヒートマップです。</p>
+
+                <p>MultiDatePick の稼働率表示は、カレンダーやタイムラインと同じ予約を読み取り、埋まり具合のグリッドに変換します。リソースごとに 1 行、日ごとに 1 セルで、各セルにそのリソースの枠がいくつ埋まっているかを表示します。どの配置場所でも設定項目 1 つで表示でき、必要なのはリソースに定員を表す数値が 1 つあることだけです。</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-utilization-view-demo-poster.png" data-gif="/images/views/salesforce-utilization-view-demo.gif" alt="MultiDatePick の Salesforce 稼働率ヒートマップのアニメーションデモ: 縦にアドバイザー、日ごとに予約数/定員を表示。満員の日にカーソルを合わせ、クリックするとそのアドバイザーの週を表示" loading="lazy" decoding="async" width="880" height="780" data-zoomable>
+                    <figcaption>縦にアドバイザー、各セルに予約数/定員。日にカーソルを合わせると予約を表示し、クリックするとその週を開きます。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">ヒートマップでわかること</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>予約数/定員</h3><p>各セルは 3/4 のように表示されます。4 枠中 3 枠が埋まっているという意味です。埋まっている日ほど青が濃くなります。</p></div>
+                    <div class="tl-feat"><h3>定員超過を強調</h3><p>定員を超えて予約された日はオレンジの枠で囲まれます。黙って「満員」で止めることはありません。</p></div>
+                    <div class="tl-feat"><h3>全体の空き状況</h3><p>上部の行にグループ全体の日ごとの埋まり具合をパーセントで表示するので、混み合う日がすぐわかります。</p></div>
+                    <div class="tl-feat"><h3>平均と空き枠</h3><p>右側の列には、各リソースの月間平均と、今日以降に残っている空き枠の数を表示します。</p></div>
+                    <div class="tl-feat"><h3>クリックで詳細へ</h3><p>予約のあるセルをクリックすると、そのリソースのその日の週表示が開き、すぐに予約や編集ができます。</p></div>
+                    <div class="tl-feat"><h3>定員がなくても動作</h3><p>定員の項目がまだない場合でも、セルには同じ濃淡で予約件数が表示され、グリッドにその旨が示されます。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">1 か月分のキャパシティをひと目で</h2>
+                <p>レポートでも稼働率はわかりますが、1 回に 1 つの疑問にしか答えられません。ヒートマップなら 1 か月全体を一度に見られるので、レポートでは見えてこないパターンが浮かび上がります。毎週火曜日に手一杯になるアドバイザー、金曜日には誰も予約しない会議室、全員が同時に定員いっぱいになる週などです。グリッドは今日の位置で開き、スクロールしてもリソース名は固定表示されます。空き枠は今日以降の分だけを数えます。先週の使われなかった枠は、もう予約できないからです。</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-utilization-heatmap.png" alt="アドバイザーの予定を表示した Salesforce 稼働率ヒートマップ: 各アドバイザーの日ごとの予約数/定員、上部に全体の空き状況の行、右側に平均と空き枠の列" loading="lazy" width="2000" height="1247" data-zoomable>
+                    <figcaption>アドバイザーの予定 1 か月分。最も濃いセルは満員の日で、右側の列で残りの空きがわかります。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">複数日にわたる業務は、期間中の毎日にカウント</h2>
+                <p>キャパシティは会議だけのものではありません。コンサルタントは同時に 2 件の顧客案件を担当でき、作業班は一度に 1 か所の現場を担当し、研修室は 1 週間まるごと 1 つの講座に使われます。ヒートマップは複数日にわたる予約を期間中の毎日にカウントするので、月曜から金曜までの案件は 5 つのセルすべてを埋めます。定員をリソースが同時に担当できる数に設定すれば、各メンバーが手一杯になる日が正確にわかります。</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-utilization-project-capacity.png" alt="複数日にわたる顧客案件を表示した Salesforce 稼働率ヒートマップ: 定員がそれぞれ 2 案件のアドバイザー 3 名の 1 か月分で、各アドバイザーが手一杯の日がわかる" loading="lazy" width="2000" height="761" data-zoomable>
+                    <figcaption>アドバイザーごとの定員 2 件に対する顧客案件。2/2 はその日が手一杯であることを示します。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Salesforce 稼働率ヒートマップの活用例</h2>
+                <p>リソースにはどのオブジェクトでも使えるので、同じ表示でまったく異なるチームのキャパシティの疑問に答えられます。</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>チームのキャパシティ計画</strong><span>リソースを定員の数値付きの User に設定すれば、誰が手一杯で、誰がまだ仕事を引き受けられるかがわかります。</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>会議室と研修室</strong><span>新たな賃貸契約を結ぶ前に、空いたままの部屋と、すべての部屋が埋まる日を把握できます。</span></div></div>
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>コンサルタントとアドバイザー</strong><span>各メンバーが同時に担当できる数に対する案件や予定。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>クリニックと医療従事者</strong><span>担当者ごとの日々の予約枠。予約過多の日はオレンジの枠で表示されます。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>機材と車両</strong><span>各車両、機器、キットがどれだけ使われているか、どれを減らせるかがわかります。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>イベントと講座</strong><span>その月のすべての回について、予約済みの席数と定員を表示します。</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">動作を決める設定</h2>
+                <p>いずれもコンポーネントのプロパティとセットアップウィザードの項目なので、コードは一切不要です。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">設定</th><th>機能</th><th style="width:22%;">API 参照名</th></tr></thead>
+                    <tbody>
+                    <tr><td>表示</td><td><code>utilization</code> に設定すると稼働率表示で開きます。利用可能な表示に含めれば、切り替えメニューに表示されます。</td><td><code>view</code></td></tr>
+                    <tr><td>定員項目（Capacity Field）</td><td>リソースの数値項目で、同時に受け付けられる予約の数です。セルには予約数/この値が表示されます。空欄なら件数だけが表示されます。</td><td><code>capacityField</code></td></tr>
+                    <tr><td>リソース行の最大数（Max View Resources）</td><td>予約の多い順に、この数の行だけを表示します。合計行にはすべてのリソースが含まれます。</td><td><code>maxViewResources</code></td></tr>
+                    <tr><td>リソース行（Resource Rows）</td><td>すべてのリソースを表示するか、その月に予約のあるリソースだけを表示するか。</td><td><code>resourceViewFilter</code></td></tr>
+                    <tr><td>状況項目（Status Field）</td><td>状況の色がオンのとき、グリッドの上にある状況のボタンで集計対象を絞り込めます。Cancelled をオフにすると、その予約はすべてのセルから除外されます。</td><td><code>statusField</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>1 つのコンポーネントに 5 つの表示。</strong>稼働率は、カレンダー、タイムライン、週、予定一覧と同じコンポーネントに並び、同じレコードを読み取ります。予約に使う表示の隣に置けば、あとは切り替えメニューが対応します。<a href="/ja/blog/salesforce-calendar-views.html">5 つの表示をすべて見る</a>。</div>
+
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="tl-faq">
+                    <details><summary>Salesforce でリソースの稼働率を確認するには?</summary><p>標準の Salesforce には、自社の予約オブジェクト向けの稼働率表示はなく、疑問ごとにレポートを作ることになります。MultiDatePick はカレンダーコンポーネントに稼働率表示を追加します。各リソースが 1 行、各日が 1 セルで、そのリソースの定員に対する予約数を表示します。グループ全体の合計行と、右側に平均と空き枠の列も付きます。</p></details>
+                    <details><summary>2/2 や 3/4 といったセルの表示は何を意味しますか?</summary><p>その日の予約数と、リソースの定員です。3/4 なら 4 枠中 3 枠が埋まっています。青が濃いほどその日は埋まっており、定員を超えて予約された日はオレンジの枠で囲まれて目立ちます。</p></details>
+                    <details><summary>リソースオブジェクトに定員の項目がない場合は?</summary><p>ヒートマップはそのまま使えます。セルには同じ青の濃淡で予約件数だけが表示され、グリッドの下にその旨の注記が出ます。割合や空き枠を表示したくなったら、いつでも定員用の数値項目を追加してください。</p></details>
+                    <details><summary>稼働率表示から予約や編集はできますか?</summary><p>稼働率表示は意図的に参照専用で、どれだけ埋まっているかを答えるためのものです。予約のあるセルをクリックすると、そのリソースのその日の週表示が開き、そこで予約、移動、編集ができます。</p></details>
+                    <details><summary>行を会議室ではなく人にできますか?</summary><p>はい。リソースには User を含め、どのオブジェクトでも使えます。User に定員の数値項目を追加すれば、ヒートマップはチームの稼働状況ダッシュボードになります。誰が手一杯か、誰に余裕があるか、どの週が過負荷かがわかります。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>今あるオブジェクトで、キャパシティを見える化。</h2>
+                    <p>ライブデモで稼働率表示を開くか、<a href="/ja/configlibrary.html">Config Library</a> の「チームのキャパシティ計画」設定から始めましょう。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-utilization-heatmap" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/salesforce-timeline-view.html">Salesforce のタイムライン表示</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">Salesforce カレンダー表示 5 種類を 1 つのコンポーネントで</a></li>
+                        <li><a href="/ja/blog/prevent-double-booking-in-salesforce.html">Salesforce でダブルブッキングを防ぐ</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">Salesforce で会議室を予約する</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking コンポーネント</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/salesforce-utilization-heatmap.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-auslastungs-heatmap.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/mapa-de-calor-ocupacion-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/heatmap-occupation-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/heatmap-utilizzo-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/mapa-de-calor-ocupacao-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-utilization-heatmap.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/salesforce-utilization-heatmap.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-utilization-heatmap.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

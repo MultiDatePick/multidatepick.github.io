@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 防止重复预订：冲突检测与容量</title>
+    <meta name="description" content="验证规则要等用户选完才触发。如何在选择之前就检查可用性，以及一个时间段可容纳多个预订时如何处理容量。">
+    <link rel="canonical" href="https://multidatepick.com/zh/blog/prevent-double-booking-in-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce 防止重复预订：冲突检测与容量">
+    <meta property="og:description" content="验证规则要等用户选完才触发。如何在选择之前就检查可用性，以及一个时间段可容纳多个预订时如何处理容量。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/blog/prevent-double-booking-in-salesforce.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 防止重复预订：冲突检测与容量">
+    <meta name="twitter:description" content="验证规则要等用户选完才触发。如何在选择之前就检查可用性，以及一个时间段可容纳多个预订时如何处理容量。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/prevent-double-booking-in-salesforce.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-doppelbuchungen-verhindern.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/evitar-reservas-duplicadas-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/eviter-doubles-reservations-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/evitare-doppie-prenotazioni-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/evitar-reservas-duplicadas-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/prevent-double-booking-in-salesforce.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/prevent-double-booking-in-salesforce.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/prevent-double-booking-in-salesforce.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/prevent-double-booking-in-salesforce.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "在 Salesforce 中防止重复预订：冲突检测与容量",
+                "description": "验证规则要等用户选完才触发。如何在选择之前就检查可用性，以及一个时间段可容纳多个预订时如何处理容量。",
+                "datePublished": "2026-07-21",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/zh/blog/prevent-double-booking-in-salesforce.html",
+                "image": "https://multidatepick.com/images/marketing/salesforce-calendar-capacity.png",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-capacity.png",
+                "caption": "Salesforce 预订日历：每个时间段显示容量标记，冲突检测防止重复预订",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png",
+                "caption": "MultiDatePick Salesforce 使用率热力图的动画演示：左侧列出顾问，显示每天已预订占容量，悬停在已满的一天上，单击后打开该顾问当周",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>在 Salesforce 中防止重复预订</h1>
+                <p class="subtitle">验证规则看不到其他记录。正是这一个限制，让大多数 Salesforce 预订系统总是晚一天才发现冲突。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">发布于 2026 年 7 月 21 日 &middot; 更新于 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+                <p class="sc-lead">重复预订是一个时机问题。等到标准 Salesforce 中的任何功能能告诉您会议室已被占用时，用户早已选好了它，填完了表单的其余部分，并转去做别的事了。</p>
+
+                <h2 style="margin-top:44px;">为什么常见的工具都不管用</h2>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:26%;">工具</th><th style="width:34%;">能做什么</th><th>不足之处</th></tr></thead>
+                    <tbody>
+                    <tr><td>验证规则</td><td class="bp-yes">检查正在保存的记录上的字段</td><td class="bp-no">完全无法查询其他记录</td></tr>
+                    <tr><td>重复规则</td><td class="bp-yes">按字段值相等匹配</td><td class="bp-no">9:00 到 10:00 和 9:30 到 10:30 有冲突，但并不匹配</td></tr>
+                    <tr><td>记录触发的 Flow</td><td class="bp-yes">保存时查询并阻止</td><td class="bp-no">在用户提交之后才触发；写法随意时无法安全处理批量数据</td></tr>
+                    <tr><td>自定义代码</td><td class="bp-yes">完全可控，重叠判断逻辑正确</td><td class="bp-no">仍然是在保存时拒绝，而且代码要由您来维护</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>它们的模式都一样：在用户做出选择<em>之后</em>才拒绝。即使是正确的自定义方案，结果也是“该时间段已被占用，请重试”，这种体验远不如一开始就不提供这个时间段。</p>
+
+                <h2 style="margin-top:44px;">重叠不等于相等</h2>
+                <p>很多人会想到用重复规则，所以先把规则讲清楚。两个预订冲突的条件是：一个在另一个结束之前开始，并且在另一个开始之后结束。9:00 到 10:00 的预订和 9:30 到 10:30 的预订重叠了半小时，但没有任何一个字段值完全相同。任何基于值匹配的方法每次都会漏掉这种情况。</p>
+
+                <h2 style="margin-top:44px;">冲突和容量是两个不同的问题</h2>
+                <p>它们常常被混为一谈。</p>
+                <div class="bp-cards">
+                    <div class="bp-card" style="--c:#E11D48;"><h3>冲突</h3><p>两项预订争用一个只能容纳一项的资源。比如一间会议室、一位面试官、一辆车。</p></div>
+                    <div class="bp-card" style="--c:#0176D3;"><h3>容量</h3><p>一个可容纳多项的资源，问题在于还剩多少。比如有二十个座位的课程、需要四名护士的班次、有六十个工位的办公区。</p></div>
+                </div>
+                <p>把容量型资源当成冲突型资源，就永远无法预订第二个人。把冲突型资源当成容量为一的资源，技术上可行，但会丢失您很可能需要用来做报表的数量统计。</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-utilization-view-demo-poster.png" data-gif="/images/views/salesforce-utilization-view-demo.gif" alt="MultiDatePick Salesforce 使用率热力图的动画演示：左侧列出顾问，显示每天已预订占容量，悬停在已满的一天上，单击后打开该顾问当周" width="880" height="780" loading="lazy" decoding="async" data-zoomable>
+                    <figcaption>整个团队的容量：每天显示已预订占容量，超订的日期用橙色圆环标出。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">三种合理的处理方式</h2>
+                <p>“一律阻止”并不总是对的。当有人选了十二个日期而其中两个有冲突时，拒绝整个提交很不友好。好用的系统会提供选择：</p>
+                <div class="bp-cards">
+                    <div class="bp-card" style="--c:#E11D48;"><h3>阻止</h3><p>拒绝保存并报告冲突。适合每个日期都不可或缺的场景。</p></div>
+                    <div class="bp-card" style="--c:#16A34A;"><h3>跳过</h3><p>保存空闲的十个，报告不空闲的两个。对于批量选择，这通常是最体贴的默认方式。</p></div>
+                    <div class="bp-card" style="--c:#7C3AED;"><h3>允许</h3><p>有意允许重叠。有些企业就是故意超订的。</p></div>
+                </div>
+                <figure class="sc-shot">
+                    <img src="/images/marketing/salesforce-calendar-capacity.png" alt="Salesforce 预订日历：每个时间段显示容量标记，冲突检测防止重复预订" loading="lazy" data-zoomable width="1004" height="900">
+                    <figcaption>每个时间段实时显示容量计数，在任何人单击之前冲突就一目了然。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">真正的解决办法在更早的环节</h2>
+                <p>上面所有机制都在保存时起作用。解决办法是把检查提前到<em>选择</em>的时候：日历加载时查询已有记录，把它们画到网格上，绝不提供已被占用的时间段。保存时的检查仍然保留，作为两个人同时看中同一空闲时间段这种真实竞争情况的兜底，但不再是第一道防线。</p>
+                <div class="sc-note">
+                    <strong>MultiDatePick 的做法。</strong>日历呈现时读取现有记录，把已占用的时间段显示为已占用，用实时的“已预订占容量”标记统计容量，并在保存时再次检查冲突。<strong>冲突行为</strong>可设为 block、skip 或 allow。在屏幕 Flow（Screen Flow）中，<strong>Conflict Dates</strong> 和 <strong>Successful Bookings Count</strong> 输出会准确告诉下一个屏幕发生了什么。</div>
+
+                <div class="bp-end">
+                    <h2>在做出选择的那一刻杜绝重复预订</h2>
+                    <p>在在线演示中预订一个时间段，看看已占用的时间如何从网格中消失。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=prevent-double-booking-in-salesforce" class="btn btn-demo" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-primary">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">入门指南</a>
+                    </div>
+                    <ul class="check-list"><li>$20/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>100% Salesforce 原生</li><li>无需 Apex</li><li>即将登陆 Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>相关阅读</h3>
+                    <ul>
+                        <li><a href="/zh/blog/salesforce-add-to-calendar.html">添加到日历：把预订加入 Outlook 和 Google</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-time-slot-picker.html">在 Salesforce 中构建日历时间段选择器</a></li>
+                        <li><a href="/zh/blog/salesforce-utilization-heatmap.html">Salesforce 使用率热力图</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking 组件详解</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>解决方案</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>文档</h4>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>公司</h4>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/blog/prevent-double-booking-in-salesforce.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-doppelbuchungen-verhindern.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/evitar-reservas-duplicadas-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/eviter-doubles-reservations-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/evitare-doppie-prenotazioni-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/evitar-reservas-duplicadas-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/prevent-double-booking-in-salesforce.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/prevent-double-booking-in-salesforce.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/blog/prevent-double-booking-in-salesforce.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

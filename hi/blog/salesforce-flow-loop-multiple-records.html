@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Flow Loop: हर तारीख या शिफ़्ट के लिए एक रिकॉर्ड बनाएँ</title>
+    <meta name="description" content="एक Salesforce स्क्रीन फ़्लो (Screen Flow) से कई रिकॉर्ड कैसे बनाएँ: चुनी गई तारीखें पार्स करें, उन पर loop चलाएँ और loop के बाद एक बार सहेजें। शिफ़्ट, छुट्टी और डेट रेंज के लिए तीन स्टार्टर फ़्लो।">
+    <link rel="canonical" href="https://multidatepick.com/hi/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line tables, rail cards, FAQ, end CTA. */
+        .section .container > p { margin: 0 0 14px; }
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code, .section p code, .bp-list code { font-size: 0.85rem; color: #0F2D52; background: #F1F5F9; padding: 1px 5px; border-radius: 4px; }
+        .bp-steps { list-style: none; counter-reset: s; padding: 0; margin: 22px 0; display: grid; gap: 10px; }
+        .bp-steps li { counter-increment: s; position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px 16px 12px 54px; color: #374151; }
+        .bp-steps li::before { content: counter(s); position: absolute; left: 14px; top: 11px; width: 26px; height: 26px; border-radius: 50%; background: #0F2D52; color: #fff; font-weight: 700; font-size: 0.85rem; display: grid; place-items: center; }
+        .bp-steps li strong { color: #0F2D52; }
+        .bp-pair { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 22px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-starter { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px 16px 22px; margin: 22px 0; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-starter::before { content: ""; position: absolute; left: 0; top: 20px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-starter h3 { margin: 0 0 4px; font-size: 1.05rem; color: #0F2D52; }
+        .bp-starter p { margin: 0 0 12px; color: #4B5563; font-size: 0.93rem; line-height: 1.55; }
+        .bp-starter .bp-file { font-family: Consolas, Menlo, monospace; font-size: 0.82rem; color: #64748B; }
+        .bp-starter-ctas { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .bp-copied { color: #16A34A; font-weight: 600; font-size: 0.88rem; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 8px 0 8px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 720px) { .bp-pair { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) { .bp-end { padding: 20px 18px; } .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; } }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce Flow Loop: हर तारीख या शिफ़्ट के लिए एक रिकॉर्ड बनाएँ">
+    <meta property="og:description" content="एक Salesforce स्क्रीन फ़्लो (Screen Flow) से कई रिकॉर्ड कैसे बनाएँ: चुनी गई तारीखें पार्स करें, उन पर loop चलाएँ और loop के बाद एक बार सहेजें। शिफ़्ट, छुट्टी और डेट रेंज के लिए तीन स्टार्टर फ़्लो।">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/hi/blog/salesforce-flow-loop-multiple-records.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="hi_IN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce Flow Loop: हर तारीख या शिफ़्ट के लिए एक रिकॉर्ड बनाएँ">
+    <meta name="twitter:description" content="एक Salesforce स्क्रीन फ़्लो (Screen Flow) से कई रिकॉर्ड कैसे बनाएँ: चुनी गई तारीखें पार्स करें, उन पर loop चलाएँ और loop के बाद एक बार सहेजें। शिफ़्ट, छुट्टी और डेट रेंज के लिए तीन स्टार्टर फ़्लो।">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-flow-schleife-mehrere-datensaetze.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/bucle-flow-salesforce-varios-registros.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/boucle-flux-salesforce-plusieurs-enregistrements.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/ciclo-flusso-salesforce-piu-record.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/loop-salesforce-flow-varios-registros.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-flow-loop-multiple-records.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">जल्द ही Salesforce AppExchange पर <button class="banner-close" id="bannerClose" aria-label="बैनर हटाएँ" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/hi/" class="logo"><img src="/images/logo.png" alt="MultiDatePick लोगो: Salesforce मल्टी-डेट कैलेंडर और संसाधन बुकिंग कंपोनेंट" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="नेविगेशन खोलें/बंद करें"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">प्रोडक्ट <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/multidatepickdates.html">Date</a></li>
+                        <li><a href="/hi/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/hi/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/hi/blog/salesforce-calendar-views.html">पाँच कैलेंडर व्यू</a></li>
+                        <li><a href="/hi/configlibrary.html">Config Library</a></li>
+                        <li><a href="/hi/trust.html">भरोसा और सुरक्षा</a></li>
+                        <li><a href="/hi/accessibility.html">सुगम्यता (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">समाधान <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/salesforce-calendar.html">Salesforce कैलेंडर</a></li>
+                        <li><a href="/hi/salesforce-calendar-staffing-recruiting.html">स्टाफ़िंग और रिक्रूटिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-interview-scheduling.html">इंटरव्यू शेड्यूलिंग</a></li>
+                        <li><a href="/hi/salesforce-conference-room-booking-calendar.html">कॉन्फ़्रेंस रूम बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-experience-cloud-booking.html">Experience Cloud बुकिंग</a></li>
+                        <li><a href="/hi/blog/salesforce-campaign-multiple-dates.html">Campaign की तारीखें</a></li>
+                        <li><a href="/hi/blog/salesforce-section-508-government-calendar.html">सरकारी विभाग / Section 508</a></li>
+                        <li><a href="/hi/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/hi/pricing.html">कीमत</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">डॉक्स <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/gettingstarted.html">शुरुआत करें</a></li>
+                        <li><a href="/hi/user-guide.html">यूज़र गाइड</a></li>
+                        <li><a href="/hi/flowcheatsheet.html">Screen Flow गाइड</a></li>
+                        <li><a href="/hi/home-app-experience.html">ऐप, होम और Experience पेज</a></li>
+                        <li><a href="/hi/deploy-flow-vscode.html">Flow डिप्लॉय करें (VS Code)</a></li>
+                        <li><a href="/hi/troubleshooting.html">समस्या निवारण</a></li>
+                        <li><a href="/hi/faq.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/hi/blog/">ब्लॉग</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">लाइव डेमो आज़माएँ</a></li>
+                <li><a href="/hi/notify-me-at-launch.html" class="nav-cta">लॉन्च पर सूचना पाएँ</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce Flow Loop: हर तारीख या शिफ़्ट के लिए एक रिकॉर्ड बनाएँ",
+                "description": "एक Salesforce स्क्रीन फ़्लो (Screen Flow) से कई रिकॉर्ड कैसे बनाएँ: चुनी गई तारीखें पार्स करें, उन पर loop चलाएँ और loop के बाद एक बार सहेजें। शिफ़्ट, छुट्टी और डेट रेंज के लिए तीन स्टार्टर फ़्लो।",
+                "datePublished": "2026-10-29",
+                "dateModified": "2026-10-29",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/hi/blog/salesforce-flow-loop-multiple-records.html",
+                "image": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png",
+                "inLanguage": "hi"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "एक Salesforce Screen Flow से कई रिकॉर्ड कैसे बनाएँ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "एक स्क्रीन पर सारे विकल्प लें, उन पर loop चलाएँ, और loop के भीतर एक Assignment से record variable भरें और उसे record collection में जोड़ें। loop के बाद एक Create Records एलिमेंट पूरा collection सहेज देता है।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "क्या Create Records को Flow loop के भीतर रखना चाहिए?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "नहीं। loop के भीतर रखा Create Records हर आइटम पर एक बार सहेजता है, और एक transaction में ऐसे सिर्फ़ 150 सेव की अनुमति है, इसलिए लंबी सूची फ़ेल हो जाती है और हर सूची धीमी चलती है। loop में record collection बनाएँ और loop खत्म होने के बाद उसे एक बार सहेजें।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce Flow में JSON पर loop कैसे चलाएँ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Flow खुद JSON नहीं पढ़ सकता। पहले उसे collection में बदलें: MultiDatePick में एक action है, Parse Date Entries from JSON, जो कैलेंडर के JSON आउटपुट को fromDate, toDate, startTime और endTime वाली एंट्री की सूची में बदल देता है, जिस पर Loop एलिमेंट चल सकता है।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce में किसी जॉब में कई शिफ़्ट कैसे जोड़ें?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "जॉब रिकॉर्ड से लॉन्च होने वाले Screen Flow पर तारीख और समय पिकर रखें, रिक्रूटर को शिफ़्ट के दिन और घंटे चुनने दें, चुनी गई चीज़ों को सूची में पार्स करें, और उस पर loop चलाकर हर दिन का एक शिफ़्ट रिकॉर्ड बनाएँ, जो जॉब से जुड़ा हो। loop के बाद एक ही Create Records में सब सहेज दें।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "क्या चुनी गई तारीखों पर loop चलाने के लिए Apex चाहिए?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "नहीं। पार्स करने वाला action MultiDatePick के साथ आता है, और loop, assignment और सेव स्टैंडर्ड Flow एलिमेंट हैं। पूरे दिनों के लिए तो action की भी ज़रूरत नहीं: कैलेंडर चुने गए दिनों की एक सादी सूची भी आउटपुट करता है।"
+                        }
+                    }
+                ],
+                "inLanguage": "hi"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png",
+                "caption": "Flow Builder में शिफ़्ट जोड़ने वाला Salesforce Screen Flow: एक MultiDatePick स्क्रीन, एक Parse Date Entries action, हर शिफ़्ट बनाने वाला loop, और loop के बाद एक Create Records",
+                "width": 940,
+                "height": 1780,
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-shift-picker.png",
+                "caption": "Salesforce Screen Flow में MultiDatePick तारीख और समय पिकर: नवंबर में तीन शिफ़्ट के दिन चुने गए और सबके लिए 13:00 से 14:00 चुना गया",
+                "width": 1900,
+                "height": 1917,
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce Flow Loop: हर तारीख या शिफ़्ट के लिए एक रिकॉर्ड बनाएँ</h1>
+                <p class="subtitle">एक स्क्रीन, कई रिकॉर्ड। वह loop पैटर्न जो हर Screen Flow बनाने वाले को चाहिए, कॉपी करने के लिए तीन स्टार्टर फ़्लो के साथ: शिफ़्ट, छुट्टी और डेट रेंज।</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">प्रकाशित 29 अक्टूबर 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">एक रिक्रूटर को किसी जॉब में बारह शिफ़्ट जोड़नी हैं। एक मैनेजर एक हफ़्ते की छुट्टी मंज़ूर करता है। एक इवेंट प्लानर तीन दिन की वर्कशॉप और एक फ़ॉलो-अप दिन बुक करता है। हर काम एक स्क्रीन पर लिया गया एक फ़ैसला है, और हर एक से कई रिकॉर्ड बनने चाहिए।</p>
+
+                <p>Screen Flow में ऐसा कोई एलिमेंट नहीं जो कहे “हर तारीख के लिए एक रिकॉर्ड बनाओ”। इसे आप तीन स्टैंडर्ड हिस्सों से बनाते हैं: एक loop, एक assignment और एक सेव। यह लेख उस पैटर्न को कदम-दर-कदम समझाता है और उस पर बने तीन चालू फ़्लो देता है।</p>
+
+                <p>यह पैटर्न TalentRover पर एक रिक्रूटिंग प्रोजेक्ट से निकला, जहाँ रिक्रूटर को किसी जॉब में लगातार कई शिफ़्ट जोड़नी होती थीं। एक-एक रिकॉर्ड डालने में शेड्यूलिंग से ज़्यादा समय लगता था। दिन और घंटे एक बार चुनकर loop से शिफ़्ट लिखवाने से यह समस्या हल हुई, और यह किसी भी ऑब्जेक्ट के लिए वैसे ही काम करता है।</p>
+
+                <h2 style="margin-top:44px;">पाँच एलिमेंट में पूरा पैटर्न</h2>
+                <div class="bp-pair">
+                    <figure class="sc-shot">
+                        <img src="/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png" alt="Flow Builder में शिफ़्ट जोड़ने वाला Salesforce Screen Flow: एक MultiDatePick स्क्रीन, एक Parse Date Entries action, हर शिफ़्ट बनाने वाला loop, और loop के बाद एक Create Records" loading="lazy" decoding="async" width="940" height="1780" data-zoomable>
+                        <figcaption>Add Shifts स्टार्टर फ़्लो। सेव loop के बाद है, भीतर नहीं।</figcaption>
+                    </figure>
+                    <ol class="bp-steps">
+                        <li><strong>Screen।</strong> एक MultiDatePick कैलेंडर, जहाँ यूज़र हर तारीख, और ज़रूरत हो तो समय भी, एक साथ चुनता है।</li>
+                        <li><strong>Parse।</strong> <code>Parse Date Entries from JSON</code> action चुनी गई चीज़ों को ऐसी सूची में बदलता है जिस पर Flow loop चला सके।</li>
+                        <li><strong>Loop।</strong> एक Loop एलिमेंट सूची की हर एंट्री पर बारी-बारी से चलता है।</li>
+                        <li><strong>Assignment।</strong> loop के भीतर: एंट्री की तारीख और समय को record variable पर कॉपी करें, फिर उस रिकॉर्ड को record collection में जोड़ें।</li>
+                        <li><strong>Create Records।</strong> loop के बाद एक Create Records पूरा collection सहेज देता है।</li>
+                    </ol>
+                </div>
+
+                <h2 style="margin-top:44px;">सेव loop के बाद क्यों होता है</h2>
+                <p>Create Records को loop के भीतर डालने का मन करता है: एक चक्कर, एक रिकॉर्ड। तीन तारीखों पर यह चल जाता है, तीस पर टूट जाता है। हर Create Records डेटाबेस में एक अलग सेव है, और Salesforce एक transaction में ऐसे 150 सेव की अनुमति देता है, जो उन सेव से चलने वाले हर trigger और flow के साथ साझा होते हैं। loop के भीतर का सेव हर तारीख पर एक खर्च करता है।</p>
+                <p>collection बनाकर एक बार सहेजने में कुल एक ही सेव लगता है, यूज़र ने चाहे जितना चुना हो। यह तेज़ भी है, और या तो सब कुछ सहेजता है या कुछ नहीं, इसलिए गड़बड़ होने पर आधी शिफ़्ट अधूरी नहीं छूटतीं।</p>
+                <table class="bp-grid">
+                    <thead><tr><th></th><th>loop के भीतर Create Records</th><th>collection, loop के बाद सहेजा गया</th></tr></thead>
+                    <tbody>
+                        <tr><td>30 तारीखों पर सेव</td><td>30</td><td>1</td></tr>
+                        <tr><td>लिमिट का जोखिम</td><td>हर चुनी गई तारीख के साथ बढ़ता है</td><td>loop से कोई नहीं</td></tr>
+                        <tr><td>एरर आने पर</td><td>कुछ रिकॉर्ड सहेजे गए, कुछ नहीं</td><td>सब या कुछ नहीं</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 style="margin-top:44px;">उपयोग का उदाहरण: जॉब में शिफ़्ट जोड़ें</h2>
+                <p>रिक्रूटर जॉब से फ़्लो खोलता है, कैलेंडर पर शिफ़्ट के दिन और टाइम ग्रिड पर घंटे चुनता है, और Next पर क्लिक करता है। फ़्लो हर दिन की एक शिफ़्ट लिखता है, जो जॉब से जुड़ी होती है।</p>
+                <figure class="sc-shot">
+                    <img src="/images/flow-guide/salesforce-flow-loop-shift-picker.png" alt="Salesforce Screen Flow में MultiDatePick तारीख और समय पिकर: नवंबर में तीन शिफ़्ट के दिन चुने गए और सबके लिए 13:00 से 14:00 चुना गया" loading="lazy" decoding="async" width="1900" height="1917" data-zoomable>
+                    <figcaption>तीन शिफ़्ट के दिन और एक समय सीमा, एक ही स्क्रीन पर चुने गए। फ़्लो इन्हें तीन शिफ़्ट रिकॉर्ड में बदल देता है।</figcaption>
+                </figure>
+                <p>कैलेंडर चुनी गई चीज़ें अपने <code>selectedDatesWithTimesJson</code> आउटपुट में JSON के रूप में फ़्लो को देता है। Flow JSON नहीं पढ़ सकता, और यहीं पार्सर काम आता है। उसकी लौटाई हर एंट्री में ये फ़ील्ड होते हैं:</p>
+                <table class="bp-grid">
+                    <thead><tr><th>फ़ील्ड</th><th>प्रकार</th><th>इसमें क्या होता है</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>fromDate</code></td><td>Date</td><td>शिफ़्ट का दिन</td></tr>
+                        <tr><td><code>toDate</code></td><td>Date</td><td>शिफ़्ट के लिए वही दिन; रेंज के लिए आख़िरी दिन</td></tr>
+                        <tr><td><code>startTime</code></td><td>समय</td><td>पहला चुना गया स्लॉट</td></tr>
+                        <tr><td><code>endTime</code></td><td>समय</td><td>आख़िरी चुने गए स्लॉट का अंत</td></tr>
+                    </tbody>
+                </table>
+                <p>लगातार स्लॉट मिलकर एक शिफ़्ट बनते हैं, इसलिए 13:00 और 13:30 मिलकर 13:00 से 14:00 हो जाते हैं। किसी दिन दो अलग ब्लॉक चुनने पर, जैसे सुबह और दोपहर, उस दिन की दो एंट्री और दो शिफ़्ट बनती हैं।</p>
+
+                <div class="bp-starter">
+                    <h3>स्टार्टर फ़्लो: Add Shifts</h3>
+                    <p>दिन और घंटे चुनें, फिर हर ब्लॉक की एक शिफ़्ट सहेजें, उस रिकॉर्ड से जुड़ी जिससे फ़्लो लॉन्च हुआ है। <span class="bp-file">MDP_Starter_Add_Shifts.flow-meta.xml</span></p>
+                    <div class="bp-starter-ctas">
+                        <button type="button" class="btn btn-primary btn-sm bp-copy" data-flow="MDP_Starter_Add_Shifts.flow-meta.xml">Flow XML कॉपी करें</button> <a class="btn btn-secondary btn-sm" href="/downloads/flows/MDP_Starter_Add_Shifts.flow-meta.xml" download>डाउनलोड करें</a> <span class="bp-copied" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
+                <h2 style="margin-top:44px;">उपयोग का उदाहरण: छुट्टी के हर दिन का एक रिकॉर्ड</h2>
+                <p>छुट्टी आमतौर पर दिन के हिसाब से ट्रैक होती है: पेरोल दिन गिनता है, और आधा मंज़ूर हुआ अनुरोध वैसे भी दिनों में बाँटना पड़ता है। यहाँ पार्सर की भी ज़रूरत नहीं। Date कंपोनेंट <code>selectedDates</code> भी आउटपुट करता है, एक सादी टेक्स्ट सूची जिसमें हर चुना गया दिन होता है, और रेंज दिन-ब-दिन लिखी होती हैं।</p>
+                <p>उस सूची पर सीधे loop चलाएँ। बस एक बात ध्यान रखें: हर आइटम <code>2026-11-09</code> जैसा टेक्स्ट है, इसलिए एक लाइन का formula, <code>DATEVALUE({!Loop_Days})</code>, assignment से रिकॉर्ड पर कॉपी होने से पहले उसे तारीख में बदल देता है।</p>
+
+                <div class="bp-starter">
+                    <h3>स्टार्टर फ़्लो: Record per Day</h3>
+                    <p>दिन और रेंज चुनें, फिर हर एक दिन का एक रिकॉर्ड सहेजें, पार्सर की ज़रूरत नहीं। <span class="bp-file">MDP_Starter_Record_Per_Day.flow-meta.xml</span></p>
+                    <div class="bp-starter-ctas">
+                        <button type="button" class="btn btn-primary btn-sm bp-copy" data-flow="MDP_Starter_Record_Per_Day.flow-meta.xml">Flow XML कॉपी करें</button> <a class="btn btn-secondary btn-sm" href="/downloads/flows/MDP_Starter_Record_Per_Day.flow-meta.xml" download>डाउनलोड करें</a> <span class="bp-copied" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
+                <h2 style="margin-top:44px;">उपयोग का उदाहरण: हर डेट रेंज का एक रिकॉर्ड</h2>
+                <p>कुछ चीज़ें कई दिनों तक चलती हैं पर होती एक ही हैं: तीन दिन की वर्कशॉप, उपकरण का किराया, सोमवार से बुधवार तक चलने वाली साइट विज़िट। इनके लिए शुरुआत और अंत की तारीख वाला एक रिकॉर्ड चाहिए, तीन नहीं।</p>
+                <p>इसके लिए <code>selectedDateRangesJson</code> आउटपुट है। कैलेंडर लगातार दिनों को एक रेंज में जोड़ देता है, इसलिए 9, 10 और 11 तारीख चुनने पर 9 से 11 तक की एक एंट्री मिलती है। इसे पार्स करें, loop चलाएँ, और <code>fromDate</code> और <code>toDate</code> को शुरुआत और अंत वाले फ़ील्ड पर कॉपी करें।</p>
+
+                <div class="bp-starter">
+                    <h3>स्टार्टर फ़्लो: Record per Range</h3>
+                    <p>तारीखें और रेंज चुनें, फिर हर रेंज का एक रिकॉर्ड उसकी शुरुआत और अंत की तारीख के साथ सहेजें। <span class="bp-file">MDP_Starter_Record_Per_Range.flow-meta.xml</span></p>
+                    <div class="bp-starter-ctas">
+                        <button type="button" class="btn btn-primary btn-sm bp-copy" data-flow="MDP_Starter_Record_Per_Range.flow-meta.xml">Flow XML कॉपी करें</button> <a class="btn btn-secondary btn-sm" href="/downloads/flows/MDP_Starter_Record_Per_Range.flow-meta.xml" download>डाउनलोड करें</a> <span class="bp-copied" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
+                <div class="sc-note">
+                    <strong>संसाधन बुक कर रहे हैं? तब loop की ज़रूरत नहीं।</strong> <a href="/hi/salesforce-booking-calendar.html">Booking कंपोनेंट</a> अपनी बुकिंग खुद सहेजता है, साथ-साथ क्षमता और टकराव जाँचता है, और फ़्लो को <code>bookingSuccessCount</code> में बताता है कि कितनी सहेजी गईं और <code>bookingConflictDates</code> में कि किन तारीखों पर टकराव हुआ।</div>
+
+                <h2 style="margin-top:44px;">अपने org में स्टार्टर फ़्लो इस्तेमाल करें</h2>
+                <p>स्टार्टर फ़्लो MultiDatePick के साथ आने वाले Schedule और Event ऑब्जेक्ट में सहेजते हैं, इसलिए ये जैसे हैं वैसे ही डिप्लॉय होते हैं और इंस्टॉल के तुरंत बाद चलते हैं। इन्हें चलता देख लेने के बाद अपने ऑब्जेक्ट लगा दें।</p>
+                <ol class="bp-steps">
+                    <li>ऊपर से फ़्लो का XML <strong>कॉपी या डाउनलोड करें</strong>।</li>
+                    <li>VS Code से <strong>डिप्लॉय करें</strong>। <a href="/hi/deploy-flow-vscode.html">VS Code से Flow डिप्लॉय करें</a> में हर कदम समझाया गया है।</li>
+                    <li><strong>इसे Flow Builder में खोलें</strong> और पहली स्क्रीन पर कैलेंडर पर क्लिक करें। अपनी सेटिंग्स देने के लिए Setup Wizard में सहेजे गए, या <a href="/hi/configlibrary.html">Config Library</a> से इम्पोर्ट किए गए कॉन्फ़िगरेशन का <strong>Config Name</strong> टाइप करें।</li>
+                    <li>अगर आप Schedule और Event इस्तेमाल नहीं कर रहे, तो <strong>इसे अपने ऑब्जेक्ट से जोड़ें</strong>: record variable का ऑब्जेक्ट और assignment के फ़ील्ड बदलें।</li>
+                    <li><strong>इसे Activate करें</strong> और Flow कंपोनेंट से या action के रूप में रिकॉर्ड पेज पर जोड़ें। यह रिकॉर्ड का Id अपने <code>recordId</code> variable से पढ़ता है।</li>
+                </ol>
+
+                <h2 style="margin-top:44px;">गलतियाँ जो पूरी दोपहर खा जाती हैं</h2>
+                <ul class="bp-list">
+                    <li><strong>loop के भीतर सहेजना।</strong> तीन तारीखों वाले टेस्ट में ठीक, प्रोडक्शन में चालीस पर लिमिट एरर।</li>
+                    <li><strong>रिकॉर्ड को collection में जोड़ना भूल जाना।</strong> assignment के दो हिस्से होते हैं: फ़ील्ड सेट करें, फिर record variable को collection में <em>Add</em> करें। दूसरे हिस्से के बिना आख़िर में सहेजने के लिए कुछ नहीं होता।</li>
+                    <li><strong>Date फ़ील्ड में टेक्स्ट असाइन करना।</strong> <code>selectedDates</code> सूची टेक्स्ट है। हर आइटम को पहले <code>DATEVALUE()</code> में लपेटें।</li>
+                    <li><strong>Output As JSON बंद छोड़ देना।</strong> JSON आउटपुट तभी भरते हैं जब कैलेंडर की Output As JSON सेटिंग चालू हो। स्टार्टर फ़्लो इसे चालू कर देते हैं।</li>
+                    <li><strong>गलत जगह से लॉन्च करना।</strong> फ़्लो हर रिकॉर्ड को <code>recordId</code> से जोड़ता है। इसे उसी जॉब, इवेंट या व्यक्ति से चलाएँ जिसके रिकॉर्ड हैं, वरना लिंक खाली रह जाता है।</li>
+                </ul>
+
+                <h2 style="margin-top:44px;">लोग अक्सर पूछते हैं</h2>
+                <div class="bp-faq">
+                    <details><summary>एक Salesforce Screen Flow से कई रिकॉर्ड कैसे बनाएँ?</summary><p>एक स्क्रीन पर सारे विकल्प लें, उन पर loop चलाएँ, और loop के भीतर एक Assignment से record variable भरें और उसे record collection में जोड़ें। loop के बाद एक Create Records एलिमेंट पूरा collection सहेज देता है।</p></details>
+                    <details><summary>क्या Create Records को Flow loop के भीतर रखना चाहिए?</summary><p>नहीं। loop के भीतर रखा Create Records हर आइटम पर एक बार सहेजता है, और एक transaction में ऐसे सिर्फ़ 150 सेव की अनुमति है, इसलिए लंबी सूची फ़ेल हो जाती है और हर सूची धीमी चलती है। loop में record collection बनाएँ और loop खत्म होने के बाद उसे एक बार सहेजें।</p></details>
+                    <details><summary>Salesforce Flow में JSON पर loop कैसे चलाएँ?</summary><p>Flow खुद JSON नहीं पढ़ सकता। पहले उसे collection में बदलें: MultiDatePick में एक action है, Parse Date Entries from JSON, जो कैलेंडर के JSON आउटपुट को fromDate, toDate, startTime और endTime वाली एंट्री की सूची में बदल देता है, जिस पर Loop एलिमेंट चल सकता है।</p></details>
+                    <details><summary>Salesforce में किसी जॉब में कई शिफ़्ट कैसे जोड़ें?</summary><p>जॉब रिकॉर्ड से लॉन्च होने वाले Screen Flow पर तारीख और समय पिकर रखें, रिक्रूटर को शिफ़्ट के दिन और घंटे चुनने दें, चुनी गई चीज़ों को सूची में पार्स करें, और उस पर loop चलाकर हर दिन का एक शिफ़्ट रिकॉर्ड बनाएँ, जो जॉब से जुड़ा हो। loop के बाद एक ही Create Records में सब सहेज दें।</p></details>
+                    <details><summary>क्या चुनी गई तारीखों पर loop चलाने के लिए Apex चाहिए?</summary><p>नहीं। पार्स करने वाला action MultiDatePick के साथ आता है, और loop, assignment और सेव स्टैंडर्ड Flow एलिमेंट हैं। पूरे दिनों के लिए तो action की भी ज़रूरत नहीं: कैलेंडर चुने गए दिनों की एक सादी सूची भी आउटपुट करता है।</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>एक स्क्रीन, और उससे बनने वाला हर रिकॉर्ड।</h2>
+                    <p>ऊपर से कोई स्टार्टर फ़्लो कॉपी करें, या पहले लाइव डेमो में कैलेंडर आज़माएँ।</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-flow-loop-multiple-records" class="btn btn-demo" target="_blank" rel="noopener">लाइव डेमो आज़माएँ</a> <a href="/hi/notify-me-at-launch.html" class="btn btn-primary">लॉन्च पर सूचना पाएँ</a> <a href="/hi/flowcheatsheet.html" class="btn btn-secondary">Screen Flow गाइड</a>
+                    </div>
+                    <ul class="check-list"><li>$20/यूज़र/माह, हर फ़ीचर</li><li>30 दिन का फ़्री ट्रायल, कार्ड नहीं</li><li>100% नेटिव Salesforce</li><li>कोई Apex नहीं</li><li>जल्द ही Salesforce AppExchange पर</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>संबंधित लेख</h3>
+                    <ul>
+                        <li><a href="/hi/blog/multiple-dates-in-a-salesforce-screen-flow.html">Salesforce Screen Flow में कई तारीखें</a></li>
+                        <li><a href="/hi/flowcheatsheet.html">Screen Flow गाइड</a></li>
+                        <li><a href="/hi/deploy-flow-vscode.html">VS Code से Flow डिप्लॉय करें</a></li>
+                        <li><a href="/hi/salesforce-calendar-staffing-recruiting.html">स्टाफ़िंग और रिक्रूटिंग के लिए Salesforce कैलेंडर</a></li>
+                        <li><a href="/hi/blog/recurring-date-patterns-in-salesforce.html">Salesforce में आवर्ती तारीख पैटर्न (Recurring Dates)</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/hi/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick लोगो: Salesforce मल्टी-डेट कैलेंडर और संसाधन बुकिंग कंपोनेंट" width="180" height="45">
+                    </a>
+                    <p>Salesforce के लिए सबसे ज़्यादा कस्टमाइज़ करने योग्य कैलेंडर कंपोनेंट सुइट।</p>
+                </div>
+                <div class="footer-links">
+                    <h4>प्रोडक्ट</h4>
+                    <ul>
+                        <li><a href="/hi/multidatepickdates.html">Date</a></li>
+                        <li><a href="/hi/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/hi/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/hi/blog/salesforce-calendar-views.html">पाँच कैलेंडर व्यू</a></li>
+                        <li><a href="/hi/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>समाधान</h4>
+                    <ul>
+                        <li><a href="/hi/salesforce-calendar.html">Salesforce कैलेंडर</a></li>
+                        <li><a href="/hi/salesforce-calendar-staffing-recruiting.html">स्टाफ़िंग और रिक्रूटिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-interview-scheduling.html">इंटरव्यू शेड्यूलिंग</a></li>
+                        <li><a href="/hi/salesforce-conference-room-booking-calendar.html">कॉन्फ़्रेंस रूम बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-experience-cloud-booking.html">Experience Cloud बुकिंग</a></li>
+                        <li><a href="/hi/blog/salesforce-campaign-multiple-dates.html">Campaign की तारीखें</a></li>
+                        <li><a href="/hi/blog/salesforce-section-508-government-calendar.html">सरकारी विभाग / Section 508</a></li>
+                        <li><a href="/hi/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>डॉक्स</h4>
+                    <ul>
+                        <li><a href="/hi/gettingstarted.html">शुरुआत करें</a></li>
+                        <li><a href="/hi/user-guide.html">यूज़र गाइड</a></li>
+                        <li><a href="/hi/flowcheatsheet.html">Screen Flow गाइड</a></li>
+                        <li><a href="/hi/home-app-experience.html">ऐप, होम और Experience पेज</a></li>
+                        <li><a href="/hi/deploy-flow-vscode.html">Flow डिप्लॉय करें (VS Code)</a></li>
+                        <li><a href="/hi/troubleshooting.html">समस्या निवारण</a></li>
+                        <li><a href="/hi/faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>कंपनी</h4>
+                    <ul>
+                        <li><a href="/hi/pricing.html">कीमत</a></li>
+                        <li><a href="/hi/blog/">ब्लॉग</a></li>
+                        <li><a href="/hi/trust.html">भरोसा और सुरक्षा</a></li>
+                        <li><a href="/hi/accessibility.html">सुगम्यता</a></li>
+                        <li><a href="/hi/notify-me-at-launch.html">लॉन्च पर सूचना पाएँ</a></li>
+                        <li><a href="mailto:support@multidatepick.com">सपोर्ट</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. सर्वाधिकार सुरक्षित।</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="भाषा" translate="no"><ul><li><a href="/blog/salesforce-flow-loop-multiple-records.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-flow-schleife-mehrere-datensaetze.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/bucle-flow-salesforce-varios-registros.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/boucle-flux-salesforce-plusieurs-enregistrements.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/ciclo-flusso-salesforce-piu-record.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/loop-salesforce-flow-varios-registros.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-flow-loop-multiple-records.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-flow-loop-multiple-records.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-flow-loop-multiple-records.html" hreflang="hi" lang="hi" aria-current="page">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <div class="mdp-strings" hidden><p data-k="flow-copied">कॉपी हो गया। इसे अपने प्रोजेक्ट के flows फ़ोल्डर में सेव करें।</p></div>
+    <script src="/js/main.js"></script>
+    <script>
+    // Copy a starter flow's XML. Falls back to opening the file when the clipboard is refused.
+    (function () {
+        document.querySelectorAll('.bp-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var url = '/downloads/flows/' + btn.getAttribute('data-flow');
+                var note = btn.parentNode.querySelector('.bp-copied');
+                fetch(url).then(function (r) { return r.text(); })
+                    .then(function (xml) { return navigator.clipboard.writeText(xml); })
+                    .then(function () { note.innerHTML = window.mdpText('flow-copied', 'Copied. Save it in your project\'s flows folder.'); })
+                    .catch(function () { window.open(url, '_blank'); });
+            });
+        });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">इमेज बड़ी करें</p><p data-k="expand-diagram">आरेख बड़ा करें</p><p data-k="close">बंद करें</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

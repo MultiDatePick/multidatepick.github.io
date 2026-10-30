@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 画面フローで複数の日付を選択する</title>
+    <meta name="description" content="Salesforce の 1 つのフロー画面で複数の日付を受け取る方法と、その後のコレクションの扱い方。ループ、JSON の解析、標準コンポーネントの限界を解説します。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce 画面フローで複数の日付を選択する">
+    <meta property="og:description" content="Salesforce の 1 つのフロー画面で複数の日付を受け取る方法と、その後のコレクションの扱い方。ループ、JSON の解析、標準コンポーネントの限界を解説します。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 画面フローで複数の日付を選択する">
+    <meta name="twitter:description" content="Salesforce の 1 つのフロー画面で複数の日付を受け取る方法と、その後のコレクションの扱い方。ループ、JSON の解析、標準コンポーネントの限界を解説します。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/mehrere-termine-salesforce-bildschirm-flow.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/varias-fechas-flujo-de-pantalla-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/plusieurs-dates-flux-ecran-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/date-multiple-flusso-su-schermo-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/varias-datas-fluxo-de-tela-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce 画面フロー (Screen Flow) でユーザーに複数の日付を選ばせる方法",
+                "description": "Salesforce の 1 つのフロー画面で複数の日付を受け取る方法と、その後のコレクションの扱い方。ループ、JSON の解析、標準コンポーネントの限界を解説します。",
+                "datePublished": "2026-05-01",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html",
+                "image": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates.gif",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates-poster.png",
+                "caption": "Salesforce 画面フロー (Screen Flow) による休暇申請のアニメーションデモ: ユーザーが MultiDatePick カレンダーで 3 日をクリックして送信すると、次のフロー画面に受け取った 3 つの日付が一覧表示される",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-builder-add-booking-component.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-builder-add-booking-component-poster.png",
+                "caption": "Salesforce Flow Builder のアニメーションデモ: 画面を開いて MultiDatePick を検索し、Resource Booking コンポーネントを画面にドラッグ。Config Name に保存済みのセットアップウィザード設定を指定し、[完了] と [保存] をクリック",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-dates-status.png",
+                "caption": "複数日付のカレンダーコンポーネントで、ユーザーが一度にいくつもの日付を選択している Salesforce 画面フロー",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce 画面フロー (Screen Flow) でユーザーに複数の日付を選ばせる方法</h1>
+                <p class="subtitle">フローの日付項目は、1 つの画面要素につき 1 つだけです。9 日分を選んでもらう必要があるなら、それが壁になります。選択肢とそれぞれのトレードオフを整理しました。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 5 月 1 日 &middot; 更新日 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+                <p class="sc-lead">管理者なら誰もが一度はぶつかる問題です。休暇申請、勤務可能日の回答フォーム、研修の申し込み。ユーザーは連続しているとは限らない複数の日付を選ぶ必要があるのに、フロー標準の日付コンポーネントで受け取れるのはちょうど 1 つだけです。</p>
+
+                <h2 style="margin-top:44px;">よくある回避策と、その問題点</h2>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">方法</th><th style="width:34%;">やり方</th><th>代償</th></tr></thead>
+                    <tbody>
+                    <tr><td>1 つの画面に日付項目を複数並べる</td><td>日付 1、日付 2、日付 3、日付 4...</td><td class="bp-no">上限が固定で見た目も悪く、ほとんどが空欄</td></tr>
+                    <tr><td>1 つずつ尋ねるループ</td><td>「別の日付を追加しますか?」と聞いて画面に戻る</td><td class="bp-no">3 日を超えるとかなりの苦痛</td></tr>
+                    <tr><td>自由入力のテキスト項目</td><td>ユーザーが日付を文字で入力する</td><td class="bp-no">解析できず、レポートにも使えず、ミスも多い</td></tr>
+                    <tr><td>開始日と終了日だけ</td><td>1 つの連続した期間として扱う</td><td class="bp-no">日付が連続していなければ必ず間違う</td></tr>
+                    <tr><td>日付の複数選択リスト</td><td>日付の値をあらかじめ作っておく</td><td class="bp-no">すぐに古くなり、常にメンテナンスが必要</td></tr>
+                    <tr><td>複数日付のカレンダーコンポーネント</td><td>必要な日付を 1 つの画面ですべてクリック</td><td class="bp-yes">コレクションを返すので、そのままループできる</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>開始日と終了日の回避策は最もよく使われ、そして最も気付かれにくい間違いを生みます。「3 日、4 日、11 日、18 日に休みたい」が「3 日から 18 日まで」になり、16 日間不在という扱いになってしまいます。データは一見きれいでも、単に間違っています。</p>
+
+                <h2 style="margin-top:44px;">本当の解決策: コレクションを返す画面コンポーネント</h2>
+                <p>フローに本当に必要なのは、ユーザーが好きなだけ日付をクリックでき、それをコレクションとして返してくれる画面コンポーネントです。これさえあれば、残りはごく普通のフローです。コレクションをループして、日付ごとにレコードを作成すれば完了です。</p>
+                <figure class="sc-shot">
+                    <img src="/images/flow-guide/salesforce-screen-flow-select-multiple-dates-poster.png" data-gif="/images/flow-guide/salesforce-screen-flow-select-multiple-dates.gif" alt="Salesforce 画面フロー (Screen Flow) による休暇申請のアニメーションデモ: ユーザーが MultiDatePick カレンダーで 3 日をクリックして送信すると、次のフロー画面に受け取った 3 つの日付が一覧表示される" width="900" height="770" loading="lazy" decoding="async" data-zoomable>
+                    <figcaption>休暇申請フロー: 3 日をクリックして送信すると、次の画面にはもう 3 日分がコレクションとして届いています。</figcaption>
+                </figure>
+                <p>MultiDatePick は、受け取りたい内容に応じて複数の出力を返します:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">出力</th><th>内容</th><th style="width:26%;">API 参照名</th></tr></thead>
+                    <tbody>
+                    <tr><td>Selected Dates</td><td>ISO 形式の日付のテキストコレクション。そのままループ可能</td><td><code>selectedDates</code></td></tr>
+                    <tr><td>Date Ranges JSON</td><td>連続する日を 1 件のレコードにまとめたい場合の、統合された期間</td><td><code>selectedDateRangesJson</code></td></tr>
+                    <tr><td>Dates With Times JSON</td><td>日付ごとの開始時刻と終了時刻</td><td><code>selectedDatesWithTimesJson</code></td></tr>
+                    <tr><td>Successful Bookings Count、Conflict Dates</td><td>保存できたものと、競合したもの</td><td><code>bookingSuccessCount</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">JSON をレコードに戻す</h2>
+                <p>出力のうち 2 つが JSON なのは、フローに「複数の項目を持つオブジェクトのリスト」を表すネイティブな型がないためです。数式でテキストを解析する必要はありません。パッケージには <strong>Parse Date Entries from JSON</strong> というフローアクションが付属しており、JSON を受け取って From Date、To Date、Start Time、End Time を持つ正式なコレクションを返します。あとは他のコレクションと同じようにループするだけです。</p>
+                <figure class="sc-shot">
+                    <img src="/images/marketing/salesforce-calendar-dates-status.png" alt="複数日付のカレンダーコンポーネントで、ユーザーが一度にいくつもの日付を選択している Salesforce 画面フロー" loading="lazy" data-zoomable width="1004" height="682">
+                    <figcaption>画面フローの中の複数日付カレンダー。フローの後続処理でループできるコレクションを返します。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">1 時間を無駄にしがちな落とし穴</h2>
+                <div class="sc-note">
+                    <strong>チェックボックスではなく Config Name を設定してください。</strong> このコンポーネントにはオン/オフのプロパティが数多くあり、Flow Builder では空欄のままのチェックボックス入力は false ではなく「空」になります。これらはすべて省略できます。セットアップウィザードでカレンダーを作成し、その設定の名前を <strong>Config Name</strong> プロパティに入れるだけです。すると、オン/オフの設定はすべて設定から読み込まれ、フロー専用のいくつかの項目 (Required、Show Inline、Output Date Ranges as JSON) は自分でオンにしない限りオフのままです。Config Name を使わずにすべて手作業で設定する場合に限り、必要なチェックボックスに <code>$GlobalConstant.True</code> または <code>$GlobalConstant.False</code> を指定する必要があります。</div>
+                <figure class="sc-shot">
+                    <img src="/images/flow-guide/salesforce-flow-builder-add-booking-component-poster.png" data-gif="/images/flow-guide/salesforce-flow-builder-add-booking-component.gif" alt="Salesforce Flow Builder のアニメーションデモ: 画面を開いて MultiDatePick を検索し、Resource Booking コンポーネントを画面にドラッグ。Config Name に保存済みのセットアップウィザード設定を指定し、[完了] と [保存] をクリック" width="1200" height="760" loading="lazy" decoding="async" data-zoomable>
+                    <figcaption>コンポーネントを画面にドラッグし、Config Name（設定名） を設定して保存。チェックボックスの設定は不要です。</figcaption>
+                </figure>
+                <p>レコードの保存もコンポーネントに任せたい場合は、親レコードの Id を <strong>Parent Record Id</strong> に渡してください。日付ごとに子レコードを 1 件ずつ作成します。空欄のままにすれば、出力をループして自分の方法でレコードを作成できます。</p>
+
+                <h2 style="margin-top:44px;">作る前にレコードの形を決める</h2>
+                <p>同じ 9 つの選択日でも、9 件のレコードにも、連続する日を期間にまとめて 4 件のレコードにも、サブブロックを持つ 1 件の親レコードにもできます。どれが正しいかは、必要なレポートによって変わります。フローを作る前に決めておきましょう。後から変えると、フローの修正だけでなくデータの移行も必要になるからです。</p>
+
+                <div class="bp-end">
+                    <h2>次のフローには本物の複数日付ピッカーを</h2>
+                    <p>ライブデモで日付をクリックしてみてから、「はじめに」の手順に沿ってフロー画面にコンポーネントを追加してください。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=multiple-dates-in-a-salesforce-screen-flow" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/salesforce-flow-loop-multiple-records.html">フローのループ: 日付やシフトごとにレコードを作成する</a></li>
+                        <li><a href="/ja/blog/recurring-date-patterns-in-salesforce.html">ロジックを書かずに繰り返しの日付パターンを作る</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">すべてのキャンペーンの日程を 1 つのカレンダーに</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">候補者の対応可能日を受け取る</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/multiple-dates-in-a-salesforce-screen-flow.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/mehrere-termine-salesforce-bildschirm-flow.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/varias-fechas-flujo-de-pantalla-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/plusieurs-dates-flux-ecran-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/date-multiple-flusso-su-schermo-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/varias-datas-fluxo-de-tela-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/multiple-dates-in-a-salesforce-screen-flow.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/multiple-dates-in-a-salesforce-screen-flow.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

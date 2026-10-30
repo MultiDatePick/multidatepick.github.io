@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interviewplanung in Salesforce: Kalender für Interviews</title>
+    <meta name="description" content="Interviews in Salesforce im Wochenraster planen. Beliebige Zeitfensterlänge, Konfliktprüfung beim Speichern, Gremien, Interviewer-Zeiten und Selbstbuchung.">
+    <link rel="canonical" href="https://multidatepick.com/de/salesforce-interviewplanung.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="preload" as="image" href="/images/components/salesforce-date-time-scheduling-demo-poster.png" fetchpriority="high">
+    <meta property="og:title" content="Interviewplanung in Salesforce: Kalender für Interviews">
+    <meta property="og:description" content="Interviews in Salesforce im Wochenraster planen. Beliebige Zeitfensterlänge, Konfliktprüfung beim Speichern, Gremien, Interviewer-Zeiten und Selbstbuchung.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/de/salesforce-interviewplanung.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="de_DE">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Interviewplanung in Salesforce: Kalender für Interviews">
+    <meta name="twitter:description" content="Interviews in Salesforce im Wochenraster planen. Beliebige Zeitfensterlänge, Konfliktprüfung beim Speichern, Gremien, Interviewer-Zeiten und Selbstbuchung.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "name": "Interviewplanung in Salesforce: Kalender für Interviews",
+                "url": "https://multidatepick.com/de/salesforce-interviewplanung.html",
+                "description": "Interviewplanung in Salesforce mit MultiDatePick: Termine und Zeitfenster beliebiger Länge auf einem Bildschirm, ein Wochenraster, Interviewer als Ressourcen mit eigenen Arbeitszeiten, Konflikterkennung beim Speichern, Kapazität für Gremien und Selbstbuchung durch Bewerber in Experience Cloud. Ohne Code.",
+                "isPartOf": {
+                    "@id": "https://multidatepick.com/de/#website"
+                },
+                "about": {
+                    "@id": "https://multidatepick.com/de/#software"
+                },
+                "primaryImageOfPage": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo.gif",
+                "inLanguage": "de"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Kann man Interviews in Salesforce planen?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Ja, mit MultiDatePick. Recruiter wählen einen oder viele Termine und die Zeitfenster auf einem Bildschirm, und jedes Interview wird als Datensatz in Ihrem eigenen Objekt gespeichert, verknüpft mit dem Bewerber. Vorhandene Interviews erscheinen im Raster, belegte Zeitfenster sind also sichtbar, bevor jemand bucht."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Können Interview-Zeitfenster 45 Minuten lang sein?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Ja. Time Interval (Minutes) nimmt jede Zahl. Typisch sind 15, 30 oder 60 Minuten, und 45 oder 90 funktionieren genauso."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Wie verhindere ich, dass ein Interviewer doppelt gebucht wird?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Machen Sie den Interviewer zur Ressource, oft das Objekt User, und setzen Sie Conflict Behavior auf Block. Jedes Speichern wird gegen vorhandene Buchungen geprüft. Für ein Gremium ergänzen Sie ein Capacity Field, damit ein Zeitfenster offen bleibt, bis jeder Platz besetzt ist."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Können Bewerber ihr Interview selbst buchen?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Ja. Platzieren Sie dieselbe Komponente auf einer Seite einer Experience Cloud-Site und setzen Sie Config Name und Static Parent Record Id. Bewerber sehen nur freie Zeitfenster innerhalb der Arbeitszeiten der Interviewer, und die Buchung wird direkt in Ihrer Org gespeichert."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Was ist der Unterschied zu Salesforce Scheduler?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Salesforce Scheduler ist ein kostenpflichtiges Add-on mit eigenem Datenmodell für Termine. MultiDatePick bucht auf Ihren eigenen Objekten, mit Auswahl mehrerer Termine, Kapazität und fünf Kalenderansichten. Lesen Sie den vollständigen Vergleich von Salesforce Lightning Scheduler und MultiDatePick."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Was kostet MultiDatePick?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "$20 pro Benutzer und Monat für alle Komponenten und Funktionen, mit 30 Tagen kostenloser Testphase und ohne Kreditkarte. Zu 100 % Salesforce-nativ und demnächst auf der Salesforce AppExchange."
+                        }
+                    }
+                ],
+                "inLanguage": "de"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo-poster.png",
+                "caption": "Animierte Demo der MultiDatePick-Komponente DateTime in Salesforce: einen Einarbeitungsplan für neue Mitarbeitende benennen, Montag bis Donnerstag markieren, 09:00 bis 12:00 im gemeinsamen Zeitraster ziehen und eine Schicht pro Tag speichern",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-time-slots.png",
+                "caption": "Kalender für die Interviewplanung in Salesforce mit MultiDatePick: ein Monat mit Interviewtagen, nach Status eingefärbt (Confirmed, Tentative, Pending), mit einem Punkt unter jedem Tag für jeden enthaltenen Status",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo-poster.png",
+                "caption": "Animierte Demo der MultiDatePick-Wochenansicht in Salesforce: Die Auswahl eines Beraters zeigt seine Kundentermine als farbige Statusblöcke in ihrer echten Länge, mit Hover-Karten zu Kunde, Terminart und Status",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-agenda-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-agenda-view-demo-poster.png",
+                "caption": "Animierte Demo der MultiDatePick-Agenda-Ansicht in Salesforce: anstehende Termine nach Datum mit Uhrzeit, Kunde, Status-Kennzeichnung und Berater, mit Hover-Karten zu zwei Terminen",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+    <style>
+        .hm-wrap{max-width:1040px;margin:0 auto;padding:0 16px;}
+        .hm-hero{background:linear-gradient(170deg,var(--blue-50,#F0F9FF) 0%,#E0F2FE 60%,#fff 100%);padding:44px 0 40px;}
+        .bk-hero{display:grid;grid-template-columns:1.15fr 1fr;gap:32px;align-items:center;}
+        .hm-hero h1{font-size:2.35rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1.12;margin:0;}
+        .hm-hero h1 .pre{display:block;font-size:1rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#C2410C;margin-bottom:8px;}
+        .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+        .hm-hero .subtitle{font-size:1.08rem;color:var(--gray-600,#4b5563);margin:14px 0 0;max-width:560px;}
+        .hm-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}
+        .hm-ctas .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .hm-ctas .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .hm-demo-link{display:inline-block;margin-top:12px;font-size:.92rem;font-weight:600;}
+        .bk-hero .gs-fig{margin:0;max-width:400px;justify-self:center;width:100%;}
+        .hm-live{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;padding:26px 0;scroll-margin-top:80px;}
+        .hm-live .hm-wrap{display:flex;gap:18px 28px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+        .hm-live h2{color:#fff;font-size:1.3rem;margin:0 0 4px;}
+        .hm-live p{color:#cdd9e8;margin:0;font-size:.95rem;max-width:680px;}
+        .hm-live .tag{display:block;color:#FDBA74;font-size:.75rem;font-weight:800;letter-spacing:.12em;margin-bottom:8px;}
+        .hm-live .btn{background:#F97316;color:#fff;white-space:nowrap;}
+        .hm-live .btn:hover{background:#EA580C;color:#fff;}
+        .gs-sec{padding:56px 0;scroll-margin-top:80px;}
+        .gs-sec.alt{background:var(--blue-50,#F0F9FF);}
+        .gs-sec h2{font-size:1.6rem;color:var(--blue-900,#0C4A6E);margin:0 0 6px;padding-left:17px;position:relative;line-height:1.25;} .gs-sec h2::before{content:"";position:absolute;left:0;top:calc(.625em - 11px);width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-sec h3{font-size:1.15rem;color:var(--blue-900,#0C4A6E);margin:32px 0 6px;scroll-margin-top:80px;}
+        .gs-lead{color:var(--gray-600,#4b5563);margin:0 0 20px;font-size:1rem;max-width:760px;}
+        .gs-sec code{background:#f3f4f6;padding:1px 5px;border-radius:3px;color:#c2410c;font-size:.88em;word-break:break-word;}
+        .gs-fig{margin:18px 0 8px;}
+        .gs-fig img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #E5E7EB;box-shadow:0 4px 20px rgba(15,45,82,.08);background:#fff;}
+        .gs-fig figcaption{text-align:center;font-size:.88rem;color:var(--gray-500,#6b7280);margin-top:8px;}
+        .gs-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE3EC;border-radius:10px;overflow:hidden;font-size:.93rem;}
+        .gs-table th,.gs-table td{padding:11px 14px;border-bottom:1px solid #E8EDF3;border-right:1px solid #E8EDF3;text-align:left;vertical-align:top;}
+        .gs-table th:last-child,.gs-table td:last-child{border-right:none;}
+        .gs-table thead th{background:#0F2D52;color:#fff;font-weight:600;font-size:.85rem;}
+        .gs-table thead th.mdp{background:#C2410C;}
+        .gs-table tbody tr:last-child td{border-bottom:none;}
+        .gs-table td:first-child{font-weight:600;color:var(--blue-900,#0C4A6E);}
+        .gs-table .old{color:var(--gray-500,#6b7280);}
+        .gs-table .new{color:#065F46;font-weight:600;}
+        .gs-table small{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);font-weight:400;}
+        .hm-scroll{overflow-x:auto;}
+        .gs-chain{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-wrap:wrap;gap:8px 4px;align-items:center;font-size:.9rem;}
+        .gs-chain li{background:#fff;border:1px solid #BFDBFE;color:#1E3A8A;border-radius:999px;padding:5px 14px;font-weight:600;}
+        .gs-chain li b{color:#F97316;margin-right:4px;}
+        .gs-chain li.arr{background:none;border:none;color:#94A3B8;padding:0 2px;}
+        .gs-two{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+        .gs-two .gs-fig{margin-top:0;}
+        .bk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 0;}
+        .bk-tile{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:12px 14px 12px 18px;position:relative;} .bk-tile::before{content:"";position:absolute;left:0;top:13px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#10b981;}
+        .bk-tile b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;margin-bottom:3px;}
+        .bk-tile span{display:block;font-size:.85rem;color:var(--gray-600,#4b5563);}
+        .bk-tile .comp{display:inline-block;margin-top:8px;font-size:.72rem;font-weight:700;letter-spacing:.04em;color:#1E3A8A;background:#EFF6FF;border-radius:999px;padding:1px 9px;}
+        .gs-paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0;}
+        .gs-paths.three{grid-template-columns:repeat(3,1fr);}
+        .gs-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;font-size:.92rem;color:var(--gray-600,#4b5563);}
+        .gs-card b{display:block;color:var(--blue-900,#0C4A6E);font-size:1rem;margin-bottom:6px;}
+        .gs-card.bk,.gs-card.rs,.gs-card.sf{position:relative;padding-left:18px;} .gs-card.bk{--rail:#F97316;}
+        .gs-card.rs{--rail:#10b981;}
+        .gs-card.sf{--rail:#0176D3;} .gs-card.bk::before,.gs-card.rs::before,.gs-card.sf::before{content:"";position:absolute;left:0;top:15px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .hm-checks{list-style:none;padding:0;margin:0;}
+        .hm-checks li{padding:5px 0 5px 24px;position:relative;border-bottom:1px solid #F1F5F9;}
+        .hm-checks li:last-child{border-bottom:none;}
+        .hm-checks li::before{content:"\2713";position:absolute;left:2px;color:#10b981;font-weight:700;}
+        .gs-note{margin:16px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 18px 14px 22px;font-size:.92rem;color:#7C2D12;position:relative;} .gs-note::before{content:"";position:absolute;left:0;top:14px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-note b{color:#9A3412;}
+        .bk-views{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:8px;}
+        .bk-views .gs-fig{margin:0;}
+        .cf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 0;}
+        .cf-grid.two{grid-template-columns:1fr 1fr;}
+        .cf-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px 12px 18px;position:relative;display:flex;flex-direction:column;} .cf-card::before{content:"";position:absolute;left:0;top:16px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .cf-card .cf-type{font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#C2410C;}
+        .cf-card h3{margin:2px 0 4px;font-size:1.05rem;}
+        .cf-card p{margin:0 0 10px;font-size:.86rem;color:var(--gray-600,#4b5563);}
+        .cf-set{list-style:none;padding:0;margin:0 0 12px;font-size:.85rem;}
+        .cf-set li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #F1F5F9;}
+        .cf-set li:last-child{border-bottom:none;}
+        .cf-set li span{color:var(--blue-900,#0C4A6E);font-weight:600;}
+        .cf-set li em{font-style:normal;color:#334155;text-align:right;}
+        .cf-links{margin-top:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:.86rem;font-weight:600;}
+        .gs-faq details{background:#fff;border:1px solid #DCE3EC;border-radius:10px;margin:0 0 10px;padding:0 18px;}
+        .gs-faq summary{cursor:pointer;font-weight:600;color:var(--blue-900,#0C4A6E);padding:14px 0;list-style-position:outside;}
+        .gs-faq details p{margin:0 0 14px;color:var(--gray-600,#4b5563);font-size:.93rem;}
+        .gs-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .gs-links a{display:block;background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;text-decoration:none;transition:border-color .15s ease;}
+        .gs-links a:hover{border-color:#F97316;}
+        .gs-links b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;}
+        .gs-links span{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);}
+        .hm-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .hm-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .hm-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .hm-final .hm-ctas{justify-content:center;}
+        .hm-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .hm-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .hm-final .contact{margin:20px 0 0;font-size:.9rem;color:#cdd9e8;}
+        @media (max-width:900px){
+            .bk-hero,.gs-two{grid-template-columns:1fr;}
+            .bk-grid{grid-template-columns:1fr 1fr;}
+            .gs-links,.gs-paths.three,.cf-grid{grid-template-columns:1fr 1fr;}
+        }
+        @media (max-width:600px){
+            .hm-hero{padding:30px 0 28px;}
+            .hm-hero h1{font-size:1.75rem;}
+            .bk-views,.gs-paths,.gs-paths.three,.gs-links,.cf-grid,.cf-grid.two{grid-template-columns:1fr;}
+            .gs-sec{padding:40px 0;}
+            .gs-sec h2{font-size:1.35rem;}
+            .gs-table{font-size:.86rem;}
+            .gs-table th,.gs-table td{padding:9px 8px;}
+            .hm-final h2{font-size:1.45rem;}
+        }
+    </style>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/salesforce-calendar-interview-scheduling.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/salesforce-interviewplanung.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/calendario-salesforce-programar-entrevistas.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/planification-entretiens-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/pianificazione-colloqui-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/agendamento-de-entrevistas-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/salesforce-calendar-interview-scheduling.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/salesforce-calendar-interview-scheduling.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/salesforce-calendar-interview-scheduling.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/salesforce-calendar-interview-scheduling.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Demnächst auf der Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Banner schließen" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/de/" class="logo"><img src="/images/logo.png" alt="MultiDatePick-Logo: Salesforce-Kalender für mehrere Termine und Ressourcenbuchung" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Navigation ein-/ausblenden"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produkt <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/salesforce-mehrfach-datumsauswahl.html">Date</a></li>
+                        <li><a href="/de/salesforce-datum-zeitfenster-auswahl.html">Date Time</a></li>
+                        <li><a href="/de/salesforce-buchungskalender.html">Booking</a></li>
+                        <li><a href="/de/blog/salesforce-kalenderansichten.html">Fünf Kalenderansichten</a></li>
+                        <li><a href="/de/salesforce-kalender-konfigurationen.html">Config Library</a></li>
+                        <li><a href="/de/vertrauen-sicherheit.html">Vertrauen &amp; Sicherheit</a></li>
+                        <li><a href="/de/barrierefreiheit-vpat.html">Barrierefreiheit (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">Lösungen <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/salesforce-kalender.html">Salesforce-Kalender</a></li>
+                        <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Personaldienstleistung &amp; Recruiting</a></li>
+                        <li><a href="/de/salesforce-interviewplanung.html" class="active">Interviewplanung</a></li>
+                        <li><a href="/de/salesforce-besprechungsraum-buchung.html">Besprechungsraum-Buchung</a></li>
+                        <li><a href="/de/salesforce-experience-cloud-buchungskalender.html">Buchung in Experience Cloud</a></li>
+                        <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Kampagnentermine</a></li>
+                        <li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html">Behörden / Section 508</a></li>
+                        <li><a href="/de/salesforce-lightning-scheduler-alternative.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/de/preise.html">Preise</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Doku <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/erste-schritte.html">Erste Schritte</a></li>
+                        <li><a href="/de/benutzerhandbuch.html">Benutzerhandbuch</a></li>
+                        <li><a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a></li>
+                        <li><a href="/de/app-start-experience-seiten.html">App-, Start- &amp; Experience-Seiten</a></li>
+                        <li><a href="/de/flow-mit-vs-code-bereitstellen.html">Flow bereitstellen (VS Code)</a></li>
+                        <li><a href="/de/fehlerbehebung.html">Fehlerbehebung</a></li>
+                        <li><a href="/de/haeufige-fragen.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/de/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Live-Demo testen</a></li>
+                <li><a href="/de/zum-start-benachrichtigen.html" class="nav-cta">Zum Start benachrichtigen</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <section class="hm-hero">
+            <div class="hm-wrap bk-hero">
+                <div>
+                    <h1><span class="pre">Interviewplanung<span class="vh">:</span></span> Kalender für Interviews in Salesforce</h1>
+                    <p class="subtitle">Echte Interviewtermine anbieten, Überschneidungen abfangen, bevor sie passieren, und jede Runde direkt in Salesforce speichern. Kein E-Mail-Pingpong, kein externes Planungstool, kein Code.</p>
+                    <div class="hm-ctas">
+                        <a href="/de/zum-start-benachrichtigen.html" class="btn btn-cta">Zum Start benachrichtigen</a> <a href="/de/erste-schritte.html" class="btn btn-secondary">Erste Schritte</a>
+                    </div>
+                    <a class="hm-demo-link" href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-interview-scheduling" target="_blank" rel="noopener">Oder jetzt in der Live-Demo ein Zeitfenster buchen, ohne Anmeldung &rarr;</a>
+                </div>
+                <figure class="gs-fig">
+                    <img src="/images/components/salesforce-date-time-scheduling-demo-poster.png" data-gif="/images/components/salesforce-date-time-scheduling-demo.gif" alt="Animierte Demo der MultiDatePick-Komponente DateTime in Salesforce: einen Einarbeitungsplan für neue Mitarbeitende benennen, Montag bis Donnerstag markieren, 09:00 bis 12:00 im gemeinsamen Zeitraster ziehen und eine Schicht pro Tag speichern" title="Demo: Termin- und Uhrzeitplanung in Salesforce" width="700" height="961" fetchpriority="high" decoding="async" data-zoomable>
+                    <figcaption>Tage wählen, Stunden ziehen, speichern. Ein Datensatz pro Block.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ═══════════════ LIVE DEMO ═══════════════ -->
+        <section class="hm-live" id="live-demo">
+            <div class="hm-wrap">
+                <div>
+                    <span class="tag">LIVE TESTEN: OHNE INSTALLATION, OHNE ANMELDUNG</span>
+                    <h2>Ein Zeitfenster buchen wie ein Bewerber</h2>
+                    <p>Die Live-Demo ist eine öffentliche Salesforce-Site, auf der Besucher Berater halbstundenweise buchen. Für Interviewer funktioniert es genauso.</p>
+                </div>
+                <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-interview-scheduling" target="_blank" rel="noopener" class="btn">Live-Demo starten &rarr;</a>
+            </div>
+        </section>
+
+        <!-- ═══════════════ OVERVIEW ═══════════════ -->
+        <section class="gs-sec" id="overview">
+            <div class="hm-wrap">
+                <h2>Was Interviewplanung besonders macht</h2>
+                <p class="gs-lead">Interviewplanung scheitert dort, wo die buchende Person nicht sieht, wer beschäftigt ist. MultiDatePick zeigt es im Moment der Auswahl.</p>
+                <div class="bk-grid">
+                    <div class="bk-tile"><b>Datum und Uhrzeit zusammen</b><span>Beliebige Zeitfensterlänge. Typisch sind 15, 30 oder 60 Minuten, auch 45 funktioniert.</span></div>
+                    <div class="bk-tile"><b>Interviewer als Ressourcen</b><span>Die Arbeitszeiten jedes Einzelnen kommen aus seinem eigenen Datensatz.</span></div>
+                    <div class="bk-tile"><b>Konfliktprüfung beim Speichern</b><span>Überschneidung blockieren, überspringen oder zulassen.</span></div>
+                    <div class="bk-tile"><b>Gremien nutzen Kapazität</b><span>Drei Interviewer in einem Zeitfenster, dann ist es geschlossen.</span></div>
+                </div>
+                <div class="gs-two" style="margin-top:26px;">
+                    <div class="hm-scroll">
+                    <table class="gs-table">
+                        <thead><tr><th>Aufgabe der Koordination</th><th>Salesforce-Standard</th><th class="mdp">Mit MultiDatePick</th></tr></thead>
+                        <tbody>
+                            <tr><td>Drei Zeitfenster anbieten</td><td class="old">In eine E-Mail getippt</td><td class="new">Aus einem Live-Raster gewählt</td></tr>
+                            <tr><td>Ist der Interviewer frei?</td><td class="old">Ein weiterer Tab, und hoffen</td><td class="new">Seine Buchungen im Raster</td></tr>
+                            <tr><td>Zwei Koordinatoren gleichzeitig</td><td class="old">Der Letzte gewinnt</td><td class="new">Überschneidung beim Speichern erkannt</td></tr>
+                            <tr><td>Gremium aus drei Personen</td><td class="old">Drei getrennte Datensätze</td><td class="new">Live-Anzeige 2/3 am Zeitfenster</td></tr>
+<tr><td>Interviews direkt hintereinander</td><td class="old">Keine Zeit zum Durchatmen</td><td class="new">Puffer nach jedem Interview frei gehalten</td></tr>
+<tr><td>Für in einer Stunde gebucht</td><td class="old">Interviewer überrascht</td><td class="new">Mindestvorlauf verhindert es</td></tr>
+<tr><td>In den eigenen Kalender</td><td class="old">Von Hand übertragen</td><td class="new">Kalenderdatei nach dem Speichern</td></tr>
+                            <tr><td>Bewerber verschiebt den Termin</td><td class="old">Löschen und neu anlegen</td><td class="new">Datum, Uhrzeit oder Interviewer direkt bearbeiten</td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                    <figure class="gs-fig">
+                        <img src="/images/marketing/salesforce-calendar-time-slots.png" alt="Kalender für die Interviewplanung in Salesforce mit MultiDatePick: ein Monat mit Interviewtagen, nach Status eingefärbt (Confirmed, Tentative, Pending), mit einem Punkt unter jedem Tag für jeden enthaltenen Status" title="Interviewplanung in Salesforce: Kalender für Interviews" width="1004" height="682" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Interviewtage nach Status markiert, ein Punkt pro Status.</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ VIEWS ═══════════════ -->
+        <section class="gs-sec alt" id="views">
+            <div class="hm-wrap">
+                <h2>Interviews gehören ins Wochenraster</h2>
+                <p class="gs-lead">Ein Interview ist eine Frage der Uhrzeit, und ein Monatsraster verbirgt Uhrzeiten. Die Wochenansicht zeigt sieben Tage entlang Ihrer Geschäftszeiten, jedes Interview so hoch, wie es dauert.</p>
+                <div class="bk-views">
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-week-view-demo-poster.png" data-gif="/images/views/salesforce-week-view-demo.gif" alt="Animierte Demo der MultiDatePick-Wochenansicht in Salesforce: Die Auswahl eines Beraters zeigt seine Kundentermine als farbige Statusblöcke in ihrer echten Länge, mit Hover-Karten zu Kunde, Terminart und Status" title="Demo: Wochenansicht in Salesforce" width="880" height="1080" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Woche: echte Interviewlängen, innerhalb der Geschäftszeiten.</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-agenda-view-demo-poster.png" data-gif="/images/views/salesforce-agenda-view-demo.gif" alt="Animierte Demo der MultiDatePick-Agenda-Ansicht in Salesforce: anstehende Termine nach Datum mit Uhrzeit, Kunde, Status-Kennzeichnung und Berater, mit Hover-Karten zu zwei Terminen" title="Demo: Agenda-Ansicht in Salesforce" width="700" height="860" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Agenda: die Liste für den Morgen, gut lesbar auf dem Smartphone.</figcaption>
+                    </figure>
+                </div>
+                <p class="gs-note"><b>Ein Speicherweg für jede Ansicht.</b> Ob die Koordination von Woche zu Agenda oder Kalender wechselt: Es entsteht jedes Mal derselbe Interviewdatensatz.</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ SELF BOOKING + FLOWS ═══════════════ -->
+        <section class="gs-sec" id="self-booking">
+            <div class="hm-wrap">
+                <h2>Den Bewerber buchen lassen oder alles aus einem Bildschirm-Flow steuern</h2>
+                <p class="gs-lead">Dieselbe Komponente, dieselbe Konfiguration. Nichts verlässt Ihre Org, und in Ihrer Sicherheitsprüfung taucht kein externer Planungsanbieter auf.</p>
+                <div class="gs-paths">
+                    <div class="gs-card bk">
+                        <b>Selbstbuchung durch Bewerber in Experience Cloud</b>
+                        <ul class="hm-checks">
+                            <li>Link senden, der Bewerber wählt ein freies Zeitfenster</li>
+                            <li>Nur die Zeitfenster, die Sie anbieten, innerhalb der Interviewer-Zeiten</li>
+                            <li>Gesperrte Tage aus Ihren eigenen Datensätzen</li>
+                            <li>Die Buchung wird sofort als normaler Datensatz gespeichert</li>
+                        </ul>
+                    </div>
+                    <div class="gs-card sf">
+                        <b>In einem Recruiting-Bildschirm-Flow (Screen Flow)</b>
+                        <ul class="hm-checks">
+                            <li>Config Name setzen; jedes Kontrollkästchen kommt aus der Konfiguration</li>
+                            <li>Den Bewerber an Parent Record Id übergeben</li>
+                            <li>Gebuchte Zeitfenster und Konflikte kommen als Ausgaben zurück</li>
+                            <li>Nächste Schritte: Einladung senden, Kandidatenvorstellung aktualisieren</li>
+                        </ul>
+                    </div>
+                </div>
+                <p style="margin:14px 0 0;font-size:.93rem;">Vollständige Anleitungen: <a href="/de/salesforce-experience-cloud-buchungskalender.html">Buchung in Experience Cloud</a> und der <a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a>.</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ CONFIGS ═══════════════ -->
+        <section class="gs-sec alt" id="configuration">
+            <div class="hm-wrap">
+                <h2>Mit einer Konfiguration starten</h2>
+                <p class="gs-lead">Importieren Sie eine von über 40 fertigen Konfigurationen in den Einrichtungsassistenten, wählen Sie Ihre eigenen Objekte und Felder aus Dropdowns und speichern Sie.</p>
+                <div class="cf-grid two">
+                    <div class="cf-card">
+                        <span class="cf-type">Date Time</span>
+                        <h3>Interviewplanung</h3>
+                        <p>Mehrrundige Interviews über mehrere Tage.</p>
+                        <ul class="cf-set">
+                            <li><span>Time Interval (Minutes) / Zeitintervall</span><em>30, oder 45 für längere Runden</em></li>
+                            <li><span>Konfliktverhalten (Conflict Behavior)</span><em>Blockieren</em></li>
+                            <li><span>Second Picklist Field (Zweites Auswahllistenfeld)</span><em>Runde</em></li>
+                            <li><span>View</span><em>Week, mit Calendar und Agenda</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/de/salesforce-kalender-konfigurationen.html#interview-scheduling">Config Library &rarr;</a><a href="/downloads/configs/Interview_Scheduling.json" download>JSON</a></div>
+                    </div>
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>Beratertermine buchen</h3>
+                        <p>Den Interviewer aus einer Benutzerliste wählen.</p>
+                        <ul class="cf-set">
+                            <li><span>Ressource</span><em>User, auf Interviewer gefiltert</em></li>
+                            <li><span>Business Hours Start / End Field</span><em>Arbeitszeiten am User</em></li>
+                            <li><span>Konfliktverhalten (Conflict Behavior)</span><em>Blockieren</em></li>
+                            <li><span>Load Existing Bookings</span><em>An</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/de/salesforce-kalender-konfigurationen.html#advisor-appointment-booking">Config Library &rarr;</a><a href="/downloads/configs/Advisor_Appointment_Booking.json" download>JSON</a></div>
+                    </div>
+                </div>
+                <p class="gs-note"><b>Mehrere Runden auf einmal buchen?</b> Setzen Sie Conflict Behavior auf Skip. Die freien Zeitfenster werden gespeichert, und die Überschneidungen werden für die Koordination aufgelistet.</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FAQ ═══════════════ -->
+        <section class="gs-sec" id="faq">
+            <div class="hm-wrap gs-faq">
+                <h2>Fragen zur Interviewplanung in Salesforce</h2>
+                <p class="gs-lead">Kurze Antworten auf das, wonach gesucht wird.</p>
+                <details>
+                    <summary>Kann man Interviews in Salesforce planen?</summary>
+                    <p>Ja, mit MultiDatePick. Recruiter wählen einen oder viele Termine und die Zeitfenster auf einem Bildschirm, und jedes Interview wird als Datensatz in Ihrem eigenen Objekt gespeichert, verknüpft mit dem Bewerber. Vorhandene Interviews erscheinen im Raster, belegte Zeitfenster sind also sichtbar, bevor jemand bucht.</p>
+                </details>
+                <details>
+                    <summary>Können Interview-Zeitfenster 45 Minuten lang sein?</summary>
+                    <p>Ja. Time Interval (Minutes) nimmt jede Zahl. Typisch sind 15, 30 oder 60 Minuten, und 45 oder 90 funktionieren genauso.</p>
+                </details>
+                <details>
+                    <summary>Wie verhindere ich, dass ein Interviewer doppelt gebucht wird?</summary>
+                    <p>Machen Sie den Interviewer zur Ressource, oft das Objekt User, und setzen Sie Conflict Behavior auf Block. Jedes Speichern wird gegen vorhandene Buchungen geprüft. Für ein Gremium ergänzen Sie ein Capacity Field, damit ein Zeitfenster offen bleibt, bis jeder Platz besetzt ist.</p>
+                </details>
+                <details>
+                    <summary>Können Bewerber ihr Interview selbst buchen?</summary>
+                    <p>Ja. Platzieren Sie dieselbe Komponente auf einer Seite einer Experience Cloud-Site und setzen Sie Config Name und Static Parent Record Id. Bewerber sehen nur freie Zeitfenster innerhalb der Arbeitszeiten der Interviewer, und die Buchung wird direkt in Ihrer Org gespeichert.</p>
+                </details>
+                <details>
+                    <summary>Was ist der Unterschied zu Salesforce Scheduler?</summary>
+                    <p>Salesforce Scheduler ist ein kostenpflichtiges Add-on mit eigenem Datenmodell für Termine. MultiDatePick bucht auf Ihren eigenen Objekten, mit Auswahl mehrerer Termine, Kapazität und fünf Kalenderansichten. Lesen Sie den <a href="/de/salesforce-lightning-scheduler-alternative.html">vollständigen Vergleich von Salesforce Lightning Scheduler und MultiDatePick</a>.</p>
+                </details>
+                <details>
+                    <summary>Was kostet MultiDatePick?</summary>
+                    <p>$20 pro Benutzer und Monat für alle Komponenten und Funktionen, mit 30 Tagen kostenloser Testphase und ohne Kreditkarte. Zu 100 % Salesforce-nativ und demnächst auf der Salesforce AppExchange.</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- ═══════════════ RELATED ═══════════════ -->
+        <section class="gs-sec alt" id="related">
+            <div class="hm-wrap">
+                <h2>Weiterlesen</h2>
+                <div class="gs-links" style="margin-top:16px;">
+                    <a href="/de/salesforce-kalender-personaldienstleister-recruiting.html"><b>Personaldienstleistung und Recruiting</b><span>Verfügbarkeit, Schichten und Einsatzpläne</span></a> <a href="/de/salesforce-lightning-scheduler-alternative.html"><b>vs. Salesforce Scheduler</b><span>Datenmodell und Lizenzen im Vergleich</span></a> <a href="/de/salesforce-datum-zeitfenster-auswahl.html"><b>Die Komponente Date Time</b><span>Termine und Zeitfenster zusammen</span></a> <a href="/de/blog/salesforce-doppelbuchungen-verhindern.html"><b>Doppelbuchungen verhindern</b><span>Konflikte und Kapazität erklärt</span></a> <a href="/de/salesforce-experience-cloud-buchungskalender.html"><b>Buchung in Experience Cloud</b><span>Selbstbuchung auf einer öffentlichen Site</span></a> <a href="/de/salesforce-kalender-konfigurationen.html"><b>Config Library</b><span>Über 40 fertige Konfigurationen zum Importieren</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FINAL CTA ═══════════════ -->
+        <section class="hm-final">
+            <div class="hm-wrap">
+                <h2>Schluss mit Interviewplanung im Posteingang</h2>
+                <p>Demnächst auf der Salesforce AppExchange. Testen Sie jetzt die Live-Demo oder sagen Sie uns, wohin wir die Startmitteilung schicken sollen.</p>
+                <div class="hm-ctas">
+                    <a href="/de/zum-start-benachrichtigen.html" class="btn btn-cta">Zum Start benachrichtigen</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-interview-scheduling" class="btn btn-ghost" target="_blank" rel="noopener">Live-Demo testen</a> <a href="/de/erste-schritte.html" class="btn btn-ghost">Erste Schritte</a>
+                </div>
+                <p class="contact">$20/Benutzer/Monat, 30 Tage kostenlos testen, keine Kreditkarte nötig. AppExchange Security Review bestanden. 100 % Salesforce-nativ.</p>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/de/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick-Logo: Salesforce-Kalender für mehrere Termine und Ressourcenbuchung" width="180" height="45">
+                    </a>
+                    <p>Die am umfassendsten anpassbare Kalenderkomponenten-Suite für Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produkt</h4>
+                    <ul>
+                        <li><a href="/de/salesforce-mehrfach-datumsauswahl.html">Date</a></li>
+                        <li><a href="/de/salesforce-datum-zeitfenster-auswahl.html">Date Time</a></li>
+                        <li><a href="/de/salesforce-buchungskalender.html">Booking</a></li>
+                        <li><a href="/de/blog/salesforce-kalenderansichten.html">Fünf Kalenderansichten</a></li>
+                        <li><a href="/de/salesforce-kalender-konfigurationen.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Lösungen</h4>
+                    <ul>
+                        <li><a href="/de/salesforce-kalender.html">Salesforce-Kalender</a></li>
+                        <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Personaldienstleistung &amp; Recruiting</a></li>
+                        <li><a href="/de/salesforce-interviewplanung.html">Interviewplanung</a></li>
+                        <li><a href="/de/salesforce-besprechungsraum-buchung.html">Besprechungsraum-Buchung</a></li>
+                        <li><a href="/de/salesforce-experience-cloud-buchungskalender.html">Buchung in Experience Cloud</a></li>
+                        <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Kampagnentermine</a></li>
+                        <li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html">Behörden / Section 508</a></li>
+                        <li><a href="/de/salesforce-lightning-scheduler-alternative.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Doku</h4>
+                    <ul>
+                        <li><a href="/de/erste-schritte.html">Erste Schritte</a></li>
+                        <li><a href="/de/benutzerhandbuch.html">Benutzerhandbuch</a></li>
+                        <li><a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a></li>
+                        <li><a href="/de/app-start-experience-seiten.html">App-, Start- &amp; Experience-Seiten</a></li>
+                        <li><a href="/de/flow-mit-vs-code-bereitstellen.html">Flow bereitstellen (VS Code)</a></li>
+                        <li><a href="/de/fehlerbehebung.html">Fehlerbehebung</a></li>
+                        <li><a href="/de/haeufige-fragen.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Unternehmen</h4>
+                    <ul>
+                        <li><a href="/de/preise.html">Preise</a></li>
+                        <li><a href="/de/blog/">Blog</a></li>
+                        <li><a href="/de/vertrauen-sicherheit.html">Vertrauen &amp; Sicherheit</a></li>
+                        <li><a href="/de/barrierefreiheit-vpat.html">Barrierefreiheit</a></li>
+                        <li><a href="/de/zum-start-benachrichtigen.html">Zum Start benachrichtigen</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Alle Rechte vorbehalten.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Sprache" translate="no"><ul><li><a href="/salesforce-calendar-interview-scheduling.html" hreflang="en" lang="en">English</a></li><li><a href="/de/salesforce-interviewplanung.html" hreflang="de" lang="de" aria-current="page">Deutsch</a></li><li><a href="/es/calendario-salesforce-programar-entrevistas.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/planification-entretiens-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/pianificazione-colloqui-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/salesforce-calendar-interview-scheduling.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/salesforce-calendar-interview-scheduling.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/salesforce-calendar-interview-scheduling.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Bild vergrößern</p><p data-k="expand-diagram">Diagramm vergrößern</p><p data-k="close">Schließen</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

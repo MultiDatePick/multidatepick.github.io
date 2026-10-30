@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datas de campanha no Salesforce: cada dia do evento, sem Apex</title>
+    <meta name="description" content="Acompanhe todas as datas de uma campanha do Salesforce em um calendário: paradas de turnê, séries de webinars e dias de voluntariado como registros filhos, por status.">
+    <link rel="canonical" href="https://multidatepick.com/pt-br/blog/varias-datas-campanha-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Campaign post: same look as the Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Datas de campanha no Salesforce: cada dia do evento, sem Apex">
+    <meta property="og:description" content="Acompanhe todas as datas de uma campanha do Salesforce em um calendário: paradas de turnê, séries de webinars e dias de voluntariado como registros filhos, por status.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/pt-br/blog/varias-datas-campanha-salesforce.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Datas de campanha no Salesforce: cada dia do evento, sem Apex">
+    <meta name="twitter:description" content="Acompanhe todas as datas de uma campanha do Salesforce em um calendário: paradas de turnê, séries de webinars e dias de voluntariado como registros filhos, por status.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-kampagne-mehrere-termine.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/fechas-de-campana-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/campagne-salesforce-plusieurs-dates.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/date-multiple-campagne-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/varias-datas-campanha-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-campaign-multiple-dates.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Em breve no Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Fechar aviso" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/pt-br/" class="logo"><img src="/images/logo.png" alt="Logotipo do MultiDatePick: calendário de várias datas e reserva de recursos para Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Abrir ou fechar o menu"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">Date</a></li>
+                        <li><a href="/pt-br/seletor-de-data-e-hora-salesforce.html">Date Time</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Cinco visualizações de calendário</a></li>
+                        <li><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a></li>
+                        <li><a href="/pt-br/confianca-e-seguranca.html">Confiança e segurança</a></li>
+                        <li><a href="/pt-br/acessibilidade-vpat.html">Acessibilidade (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">Soluções <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/calendario-salesforce.html">Calendário Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas</a></li>
+                        <li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html">Reserva de salas de reunião</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html" class="active">Datas de campanha</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">Governo / Section 508</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pt-br/precos.html">Preços</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentação <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/primeiros-passos.html">Primeiros passos</a></li>
+                        <li><a href="/pt-br/guia-do-usuario.html">Guia do usuário</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">Guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html">Páginas de aplicativo, iniciais e do Experience Cloud</a></li>
+                        <li><a href="/pt-br/implantar-fluxo-vs-code.html">Implantar um fluxo (VS Code)</a></li>
+                        <li><a href="/pt-br/solucao-de-problemas.html">Solução de problemas</a></li>
+                        <li><a href="/pt-br/perguntas-frequentes.html">Perguntas frequentes</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pt-br/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Experimente a demo ao vivo</a></li>
+                <li><a href="/pt-br/avise-me-no-lancamento.html" class="nav-cta">Avise-me no lançamento</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Datas de campanha no Salesforce: cada dia do evento, sem Apex",
+                "description": "Acompanhe todas as datas de uma campanha do Salesforce em um calendário: paradas de turnê, séries de webinars e dias de voluntariado como registros filhos, por status.",
+                "datePublished": "2026-10-19",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/pt-br/blog/varias-datas-campanha-salesforce.html",
+                "image": "https://multidatepick.com/images/blog/salesforce-campaign-multiple-dates.gif",
+                "inLanguage": "pt-BR"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Uma campanha do Salesforce pode ter várias datas?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Uma campanha padrão tem uma Data de início e uma Data de término. Para acompanhar cada dia de uma turnê, uma série de webinars ou um programa de voluntariado, crie um pequeno objeto filho com um campo lookup para Campanha e coloque o componente Dates do MultiDatePick na página de registro da campanha. Cada data em que você clica é salva como um registro filho próprio."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Preciso de Apex ou de um desenvolvedor para adicionar datas às campanhas?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Não. O objeto filho e seus campos são criados com cliques no Gerenciador de objetos, o Assistente de Configuração grava a configuração do calendário e o componente entra na página pelo Lightning App Builder. Não há código específico de campanha para escrever ou instalar."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Onde ficam armazenadas as datas da campanha?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "No seu próprio objeto personalizado, por exemplo Campaign Date, com um registro por data e um campo lookup para a campanha. São registros comuns do Salesforce, então modos de exibição de lista, relatórios, fluxos e compartilhamento funcionam neles normalmente."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Cada data da campanha pode ter seu próprio status?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. Adicione uma lista de opções com valores como Planned, Confirmed, Completed e Cancelled, escolha uma cor para cada valor, e o calendário pinta cada data com a cor do seu status. O Modo de Edição permite selecionar várias datas e mudar o status, movê-las ou excluí-las de uma só vez."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Posso usar em um fluxo de tela em vez da página de registro?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. Adicione o componente Dates a uma tela de fluxo e defina Config Name com a configuração salva no Assistente de Configuração. Passe o Id da campanha em Parent Record Id e o próprio componente salva os registros filhos, ou deixe em branco e percorra a saída Selected Dates com um loop."
+                        }
+                    }
+                ],
+                "inLanguage": "pt-BR"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/blog/salesforce-campaign-multiple-dates.gif",
+                "caption": "Demo animada do MultiDatePick na página de registro de uma campanha do Salesforce: as datas de uma turnê de doadores em cores de status, o mouse sobre uma parada confirmada, a escolha de duas datas novas e a gravação delas como registros Campaign Date",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Datas de campanha no Salesforce: cada dia do evento em um só calendário</h1>
+                <p class="subtitle">Uma campanha tem uma data de início e uma data de término. Sua turnê, série de webinars ou programa de voluntariado tem muitas. Coloque todas no registro da campanha, cada uma como um registro de verdade com status, sem escrever Apex.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Publicado em 19 de outubro de 2026 &middot; Atualizado em 21 de outubro de 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"Como adiciono mais de uma data a uma campanha do Salesforce?" "Onde acompanho cada parada do roadshow?" "Quais sessões do webinar estão confirmadas?" Uma campanha só sabe quando começa e quando termina. Tudo o que fica no meio acaba em uma planilha ou em um campo de descrição enorme.</p>
+
+                <p>O MultiDatePick coloca um calendário na página de registro da campanha. Clique nos dias, salve, e cada um vira um registro filho próprio, vinculado à campanha e colorido por status. Funciona em campanhas do mesmo jeito que em qualquer objeto: por configuração. <strong>Sem Apex.</strong></p>
+
+                <figure class="sc-shot">
+                    <img src="/images/blog/salesforce-campaign-multiple-dates.gif" alt="Demo animada do MultiDatePick na página de registro de uma campanha do Salesforce: as datas de uma turnê de doadores em cores de status, o mouse sobre uma parada confirmada, a escolha de duas datas novas e a gravação delas como registros Campaign Date" loading="lazy" width="790" height="980" data-zoomable>
+                    <figcaption>Uma turnê de doadores na sua campanha: passe o mouse sobre uma parada para ver local e status, clique em mais dois dias, salve. Cada data é um registro.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">O que você ganha na página da campanha</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>Todas as datas de relance</h3><p>Todas as datas da campanha aparecem no calendário quando o registro abre. Nenhuma lista relacionada para rolar.</p></div>
+                    <div class="tl-feat"><h3>Cores de status</h3><p>Planned, Confirmed, Completed, Cancelled: cada status tem sua cor, e os botões acima do calendário filtram por status.</p></div>
+                    <div class="tl-feat"><h3>Detalhes ao passar o mouse</h3><p>Aponte para uma data para ver o registro por trás dela, como o nome da parada, o local e o status, com um link para abri-lo.</p></div>
+                    <div class="tl-feat"><h3>Padrões recorrentes</h3><p>Toda terça durante oito semanas é um padrão e um clique. Prático para séries de webinars e cronogramas de envio.</p></div>
+                    <div class="tl-feat"><h3>Modo de edição</h3><p>Selecione várias datas e mude o status, mova para outro dia ou exclua de uma só vez.</p></div>
+                    <div class="tl-feat"><h3>Registros de verdade</h3><p>Cada data é um registro filho com um campo lookup para a campanha. Crie relatórios, monte fluxos e compartilhe como qualquer outro registro.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Configure em três passos</h2>
+                <p>Os componentes não dependem de objeto. Eles não sabem nem se importam se o pai é uma campanha; só precisam de um objeto filho onde salvar e de um campo lookup que aponte de volta. Essa é toda a integração.</p>
+                <ol class="cp-steps">
+                    <li><strong>Crie o objeto filho.</strong> No Gerenciador de objetos, crie um objeto personalizado como <em>Campaign Date</em>. Dê a ele um campo lookup para Campanha e um campo de data. Adicione uma lista de opções de status (Planned, Confirmed, Completed, Cancelled) e os campos de detalhe que quiser ver ao passar o mouse, como Venue.</li>
+                    <li><strong>Execute o Assistente de Configuração.</strong> Abra a guia do Assistente de Configuração do MultiDatePick e configure o componente Dates. Escolha Campaign Date como objeto, o campo lookup de campanha como campo de relacionamento e o seu campo de data. Em Status &amp; Exibição, escolha o campo de status, uma cor por valor e os campos ao passar o mouse. Salve a configuração com um nome como <code>Campaign_Dates</code>.</li>
+                    <li><strong>Coloque o componente na página da campanha.</strong> Abra qualquer campanha, clique em Editar página, arraste o componente Dates do MultiDatePick para o layout e informe o nome da configuração em <strong>Config Name</strong>. Salve e ative. Agora toda campanha tem o seu calendário.</li>
+                </ol>
+                <p>Precisa de horários além dos dias, como um webinar às 11:00 e uma reprise às 15:00? Use o componente Date Time e adicione campos de hora inicial e final ao objeto filho. Os passos são os mesmos.</p>
+
+                <h2 style="margin-top:44px;">Prefere um fluxo de tela?</h2>
+                <p>A mesma configuração funciona dentro do Flow. Adicione o componente Dates a uma tela e defina <strong>Config Name</strong>; todas as definições vêm da configuração, sem caixas de seleção para marcar no Flow Builder. Passe o Id da campanha em <strong>Parent Record Id</strong> e o próprio componente salva os registros filhos. Deixe em branco se preferir percorrer a saída Selected Dates com um loop e criar os registros do seu jeito. O artigo sobre <a href="/pt-br/blog/varias-datas-fluxo-de-tela-salesforce.html">várias datas em um fluxo de tela</a> mostra os dois padrões.</p>
+
+                <h2 style="margin-top:44px;">O que as equipes acompanham nas campanhas</h2>
+                <p>Tudo o que uma campanha faz em mais de um dia cabe no mesmo objeto filho:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Eventos de vários dias</strong><span>Conferências, congressos e galas com dias de montagem, evento e desmontagem, cada um com seu status.</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>Roadshows e turnês</strong><span>Um registro por parada, com local e status, para todos verem quais cidades estão confirmadas.</span></div></div>
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Séries de webinars</strong><span>Um padrão recorrente monta a série inteira; as cores mostram quais sessões já aconteceram.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Dias de voluntariado</strong><span>Mutirões e campanhas de arrecadação ao longo de uma temporada, cada um um registro para relatórios.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>Cronogramas de envio</strong><span>As datas planejadas de envio de uma régua de e-mails ou de mala direta, visíveis na campanha a que pertencem.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Datas bloqueadas</strong><span>Aponte Blocked Dates para o seu objeto de feriados e ninguém planeja um envio ou evento nesses dias.</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">As configurações que a definem</h2>
+                <p>Cada um é um campo no Assistente de Configuração e uma propriedade do componente, então nada aqui exige código:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Configuração</th><th>O que faz</th><th style="width:22%;">Nome da API</th></tr></thead>
+                    <tbody>
+                    <tr><td>Objeto Relacionado (Child Object API Name)</td><td>O objeto filho onde cada data é salva, como Campaign_Date__c.</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>Campo de Relacionamento (Relationship Field API Name)</td><td>O campo lookup nesse objeto que aponta para Campanha. O componente o preenche a partir da página de registro.</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>Campo de Data (Date Field API Name)</td><td>O campo de data que guarda cada dia escolhido.</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>Campo de Status e Cores de Status de Reserva (Status Field and Status Colors)</td><td>A lista de opções de status e uma cor por valor, como Confirmed:#22C55E.</td><td><code>statusField</code>, <code>statusColors</code></td></tr>
+                    <tr><td>Campos ao Passar o Mouse (Hover Popover Fields)</td><td>Os campos exibidos quando você aponta para uma data, como nome, local e status.</td><td><code>hoverFields</code></td></tr>
+                    <tr><td>Mostrar Padrão Recorrente (Show Recurring Pattern Button)</td><td>Mostra o botão Adicionar Padrão Recorrente para repetições semanais ou mensais.</td><td><code>showRecurringPattern</code></td></tr>
+                    <tr><td>Ativar Modo de Edição (Enable Edit Mode)</td><td>Mostra o botão Editar para mudar o status, mover ou excluir várias datas de uma vez.</td><td><code>enableEditMode</code></td></tr>
+                    <tr><td>Nome da Configuração (Config Name)</td><td>A configuração salva pelo Assistente de Configuração. Defina esta e deixe o resto em branco.</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Mais que uma grade mensal.</strong> O MultiDatePick mostra os mesmos registros como calendário, linha do tempo, semana, lista de agenda ou grade de ocupação, alternando em um só componente. <a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Veja as cinco visualizações</a>.</div>
+
+                <h2 style="margin-top:44px;">Perguntas frequentes</h2>
+                <div class="tl-faq">
+                    <details><summary>Uma campanha do Salesforce pode ter várias datas?</summary><p>Uma campanha padrão tem uma Data de início e uma Data de término. Para acompanhar cada dia de uma turnê, uma série de webinars ou um programa de voluntariado, crie um pequeno objeto filho com um campo lookup para Campanha e coloque o componente Dates do MultiDatePick na página de registro da campanha. Cada data em que você clica é salva como um registro filho próprio.</p></details>
+                    <details><summary>Preciso de Apex ou de um desenvolvedor para adicionar datas às campanhas?</summary><p>Não. O objeto filho e seus campos são criados com cliques no Gerenciador de objetos, o Assistente de Configuração grava a configuração do calendário e o componente entra na página pelo Lightning App Builder. Não há código específico de campanha para escrever ou instalar.</p></details>
+                    <details><summary>Onde ficam armazenadas as datas da campanha?</summary><p>No seu próprio objeto personalizado, por exemplo Campaign Date, com um registro por data e um campo lookup para a campanha. São registros comuns do Salesforce, então modos de exibição de lista, relatórios, fluxos e compartilhamento funcionam neles normalmente.</p></details>
+                    <details><summary>Cada data da campanha pode ter seu próprio status?</summary><p>Sim. Adicione uma lista de opções com valores como Planned, Confirmed, Completed e Cancelled, escolha uma cor para cada valor, e o calendário pinta cada data com a cor do seu status. O Modo de Edição permite selecionar várias datas e mudar o status, movê-las ou excluí-las de uma só vez.</p></details>
+                    <details><summary>Posso usar em um fluxo de tela em vez da página de registro?</summary><p>Sim. Adicione o componente Dates a uma tela de fluxo e defina Config Name com a configuração salva no Assistente de Configuração. Passe o Id da campanha em Parent Record Id e o próprio componente salva os registros filhos, ou deixe em branco e percorra a saída Selected Dates com um loop.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Todas as datas da campanha, na própria campanha.</h2>
+                    <p>Clique em datas na demo ao vivo, ou comece com uma configuração pronta da <a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-campaign-multiple-dates" class="btn btn-demo" target="_blank" rel="noopener">Experimente a demo ao vivo</a> <a href="/pt-br/avise-me-no-lancamento.html" class="btn btn-primary">Avise-me no lançamento</a> <a href="/pt-br/primeiros-passos.html" class="btn btn-secondary">Primeiros passos</a>
+                    </div>
+                    <ul class="check-list"><li>US$ 20/usuário/mês, todos os recursos</li><li>Teste grátis de 30 dias, sem cartão</li><li>100% nativo do Salesforce</li><li>Sem Apex</li><li>Em breve no Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Leia também</h3>
+                    <ul>
+                        <li><a href="/pt-br/blog/varias-datas-fluxo-de-tela-salesforce.html">Várias datas em um fluxo de tela do Salesforce</a></li>
+                        <li><a href="/pt-br/blog/datas-recorrentes-salesforce.html">Padrões de datas recorrentes sem escrever a lógica</a></li>
+                        <li><a href="/pt-br/blog/assistente-de-configuracao-calendario-salesforce.html">O Assistente de Configuração do MultiDatePick</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Cinco visualizações de calendário, um componente Salesforce</a></li>
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">O componente Dates</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/pt-br/" class="logo">
+                        <img src="/images/logo.png" alt="Logotipo do MultiDatePick: calendário de várias datas e reserva de recursos para Salesforce" width="180" height="45">
+                    </a>
+                    <p>O pacote de componentes de calendário mais personalizável para Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produto</h4>
+                    <ul>
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">Date</a></li>
+                        <li><a href="/pt-br/seletor-de-data-e-hora-salesforce.html">Date Time</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Cinco visualizações de calendário</a></li>
+                        <li><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluções</h4>
+                    <ul>
+                        <li><a href="/pt-br/calendario-salesforce.html">Calendário Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas</a></li>
+                        <li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html">Reserva de salas de reunião</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html">Datas de campanha</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">Governo / Section 508</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentação</h4>
+                    <ul>
+                        <li><a href="/pt-br/primeiros-passos.html">Primeiros passos</a></li>
+                        <li><a href="/pt-br/guia-do-usuario.html">Guia do usuário</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">Guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html">Páginas de aplicativo, iniciais e do Experience Cloud</a></li>
+                        <li><a href="/pt-br/implantar-fluxo-vs-code.html">Implantar um fluxo (VS Code)</a></li>
+                        <li><a href="/pt-br/solucao-de-problemas.html">Solução de problemas</a></li>
+                        <li><a href="/pt-br/perguntas-frequentes.html">Perguntas frequentes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="/pt-br/precos.html">Preços</a></li>
+                        <li><a href="/pt-br/blog/">Blog</a></li>
+                        <li><a href="/pt-br/confianca-e-seguranca.html">Confiança e segurança</a></li>
+                        <li><a href="/pt-br/acessibilidade-vpat.html">Acessibilidade</a></li>
+                        <li><a href="/pt-br/avise-me-no-lancamento.html">Avise-me no lançamento</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Suporte</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Todos os direitos reservados.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Idioma" translate="no"><ul><li><a href="/blog/salesforce-campaign-multiple-dates.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/fechas-de-campana-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/campagne-salesforce-plusieurs-dates.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/date-multiple-campagne-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html" hreflang="pt-BR" lang="pt-BR" aria-current="page">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-campaign-multiple-dates.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-campaign-multiple-dates.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-campaign-multiple-dates.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ampliar imagem</p><p data-k="expand-diagram">Ampliar diagrama</p><p data-k="close">Fechar</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

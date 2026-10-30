@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce でダブルブッキングを防ぐ: 競合と定員</title>
+    <meta name="description" content="入力規則が動くのは、ユーザーが選んだあと。選ぶ前に空き状況を確認する方法と、複数の予約が入る定員の扱い方を解説します。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/prevent-double-booking-in-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce でダブルブッキングを防ぐ: 競合と定員">
+    <meta property="og:description" content="入力規則が動くのは、ユーザーが選んだあと。選ぶ前に空き状況を確認する方法と、複数の予約が入る定員の扱い方を解説します。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/prevent-double-booking-in-salesforce.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce でダブルブッキングを防ぐ: 競合と定員">
+    <meta name="twitter:description" content="入力規則が動くのは、ユーザーが選んだあと。選ぶ前に空き状況を確認する方法と、複数の予約が入る定員の扱い方を解説します。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/prevent-double-booking-in-salesforce.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-doppelbuchungen-verhindern.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/evitar-reservas-duplicadas-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/eviter-doubles-reservations-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/evitare-doppie-prenotazioni-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/evitar-reservas-duplicadas-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/prevent-double-booking-in-salesforce.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/prevent-double-booking-in-salesforce.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/prevent-double-booking-in-salesforce.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/prevent-double-booking-in-salesforce.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce でダブルブッキングを防ぐ: 競合検出と定員管理",
+                "description": "入力規則が動くのは、ユーザーが選んだあと。選ぶ前に空き状況を確認する方法と、複数の予約が入る定員の扱い方を解説します。",
+                "datePublished": "2026-07-21",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/prevent-double-booking-in-salesforce.html",
+                "image": "https://multidatepick.com/images/marketing/salesforce-calendar-capacity.png",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-capacity.png",
+                "caption": "各時間枠に定員バッジを表示し、競合検出でダブルブッキングを防ぐ Salesforce 予約カレンダー",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png",
+                "caption": "MultiDatePick の Salesforce 稼働率ヒートマップのアニメーションデモ: 縦にアドバイザー、日ごとに予約数/定員を表示。満員の日にカーソルを合わせ、クリックするとそのアドバイザーの週を表示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce でダブルブッキングを防ぐ</h1>
+                <p class="subtitle">入力規則はほかのレコードを参照できません。この 1 つの制約のせいで、多くの Salesforce 予約システムは競合に 1 日遅れで気づくことになります。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 7 月 21 日 &middot; 更新日 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+                <p class="sc-lead">ダブルブッキングはタイミングの問題です。標準の Salesforce の仕組みが「その会議室は埋まっています」と伝えられる頃には、ユーザーはもう会議室を選び、フォームの残りを入力して、次の作業に移っています。</p>
+
+                <h2 style="margin-top:44px;">定番のツールがうまくいかない理由</h2>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:26%;">ツール</th><th style="width:34%;">できること</th><th>足りない点</th></tr></thead>
+                    <tbody>
+                    <tr><td>入力規則</td><td class="bp-yes">保存するレコードの項目をチェック</td><td class="bp-no">ほかのレコードをまったく検索できない</td></tr>
+                    <tr><td>重複ルール</td><td class="bp-yes">項目の値の一致で判定</td><td class="bp-no">9:00〜10:00 と 9:30〜10:30 は重なっているのに一致しない</td></tr>
+                    <tr><td>レコードトリガーフロー</td><td class="bp-yes">保存時に検索してブロック</td><td class="bp-no">ユーザーが確定したあとに動く。素直に作ると一括処理で破綻する</td></tr>
+                    <tr><td>カスタムコード</td><td class="bp-yes">完全に制御でき、重なりのロジックも正確</td><td class="bp-no">結局は保存時に拒否するうえ、コードの保守も自社で負う</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>どれも同じ形をしています。選んだ<em>あと</em>でユーザーを拒否するのです。正しく作ったカスタムの仕組みでも、出てくるのは「その枠は埋まっています。もう一度お試しください」。最初からその枠を提示しないほうが、ずっと良い体験です。</p>
+
+                <h2 style="margin-top:44px;">重なりは一致ではない</h2>
+                <p>重複ルールに頼りたくなる人が多いので、ルールを示しておきます。2 つの予約が競合するのは、一方がもう一方の終了前に始まり、もう一方の開始後に終わるときです。9:00〜10:00 の予約と 9:30〜10:30 の予約は 30 分重なっていますが、同じ値の項目は 1 つもありません。値の一致に基づく方法では、毎回見逃します。</p>
+
+                <h2 style="margin-top:44px;">競合と定員は別の問題</h2>
+                <p>この 2 つはよく混同されます。</p>
+                <div class="bp-cards">
+                    <div class="bp-card" style="--c:#E11D48;"><h3>競合</h3><p>1 つしか受け入れられないリソースを 2 つが奪い合う状態。会議室、面接官、車両など。</p></div>
+                    <div class="bp-card" style="--c:#0176D3;"><h3>定員</h3><p>複数を受け入れられるリソース。問題は残りがいくつかです。20 席のクラス、看護師 4 人が必要なシフト、60 席のフリーアドレスエリアなど。</p></div>
+                </div>
+                <p>定員のあるリソースを競合のリソースとして扱うと、2 人目を予約できなくなります。競合のリソースを定員 1 として扱うのは一応動きますが、レポートに使いたいはずの件数が失われます。</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-utilization-view-demo-poster.png" data-gif="/images/views/salesforce-utilization-view-demo.gif" alt="MultiDatePick の Salesforce 稼働率ヒートマップのアニメーションデモ: 縦にアドバイザー、日ごとに予約数/定員を表示。満員の日にカーソルを合わせ、クリックするとそのアドバイザーの週を表示" width="880" height="780" loading="lazy" decoding="async" data-zoomable>
+                    <figcaption>チーム全体の定員: 日ごとに予約数/定員を表示し、予約過多の日はオレンジの枠で表示。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">妥当な 3 つの動作</h2>
+                <p>「ブロックする」が常に正しいとは限りません。12 日を選んだうち 2 日が重なっているだけで送信全体を拒否するのは、ユーザーに不親切です。使えるシステムは選択肢を用意しています。</p>
+                <div class="bp-cards">
+                    <div class="bp-card" style="--c:#E11D48;"><h3>Block</h3><p>保存を拒否し、競合を報告。すべての日付が重要な場合に適しています。</p></div>
+                    <div class="bp-card" style="--c:#16A34A;"><h3>Skip</h3><p>空いている 10 日を保存し、空いていなかった 2 日を報告。まとめて選ぶ場合は、たいていこれが親切な既定値です。</p></div>
+                    <div class="bp-card" style="--c:#7C3AED;"><h3>Allow</h3><p>重複を意図的に許可。あえて予約を多めに受ける業種もあります。</p></div>
+                </div>
+                <figure class="sc-shot">
+                    <img src="/images/marketing/salesforce-calendar-capacity.png" alt="各時間枠に定員バッジを表示し、競合検出でダブルブッキングを防ぐ Salesforce 予約カレンダー" loading="lazy" data-zoomable width="1004" height="900">
+                    <figcaption>各時間枠に定員をリアルタイムで表示するので、クリックする前に競合がわかります。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">本当の解決策はもっと手前に</h2>
+                <p>上の仕組みはどれも保存時に動きます。解決策は、チェックを<em>選択</em>の時点に移すことです。カレンダーを読み込むときに既存の予約を検索し、グリッドに表示して、埋まった枠は最初から提示しない。保存時のチェックは、2 人が同じ空き枠を同時に見ている本当の競合状態に備えた安全網として残しますが、主な防御ではなくなります。</p>
+                <div class="sc-note">
+                    <strong>MultiDatePick の仕組み。</strong> カレンダーの表示時に既存のレコードを読み込み、埋まった枠は埋まっていると表示し、予約数/定員のバッジで定員をリアルタイムに数え、保存時にも競合を再チェックします。<strong>Conflict Behavior</strong>（競合の動作） で block、skip、allow を設定します。画面フロー (Screen Flow) では、<strong>Conflict Dates</strong> と <strong>Successful Bookings Count</strong> の出力で、次の画面に何が起きたかを正確に伝えます。</div>
+
+                <div class="bp-end">
+                    <h2>選ぶ瞬間にダブルブッキングを防ぐ</h2>
+                    <p>ライブデモで枠を予約して、埋まった時間がグリッドから消えるのを確かめてください。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=prevent-double-booking-in-salesforce" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/salesforce-add-to-calendar.html">カレンダーに追加: 予約を Outlook と Google に</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-time-slot-picker.html">Salesforce で時間枠を選べるカレンダーを作る</a></li>
+                        <li><a href="/ja/blog/salesforce-utilization-heatmap.html">Salesforce の稼働率ヒートマップ</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking コンポーネントの詳細</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/prevent-double-booking-in-salesforce.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-doppelbuchungen-verhindern.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/evitar-reservas-duplicadas-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/eviter-doubles-reservations-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/evitare-doppie-prenotazioni-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/evitar-reservas-duplicadas-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/prevent-double-booking-in-salesforce.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/prevent-double-booking-in-salesforce.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/prevent-double-booking-in-salesforce.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

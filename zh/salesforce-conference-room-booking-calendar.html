@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 会议室预订与工位预订</title>
+    <meta name="description" content="在 Salesforce 中预订会议室和工位。所有会议室一条时间轴，杜绝重复预订，每间会议室单独设置时间和关闭日，附使用率热力图。无需代码。">
+    <link rel="canonical" href="https://multidatepick.com/zh/salesforce-conference-room-booking-calendar.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="preload" as="image" href="/images/multidatepick-booking-demo-poster.png" fetchpriority="high">
+    <meta property="og:title" content="Salesforce 会议室预订与工位预订">
+    <meta property="og:description" content="在 Salesforce 中预订会议室和工位。所有会议室一条时间轴，杜绝重复预订，每间会议室单独设置时间和关闭日，附使用率热力图。无需代码。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/salesforce-conference-room-booking-calendar.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 会议室预订与工位预订">
+    <meta name="twitter:description" content="在 Salesforce 中预订会议室和工位。所有会议室一条时间轴，杜绝重复预订，每间会议室单独设置时间和关闭日，附使用率热力图。无需代码。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "name": "Salesforce 会议室预订与工位预订",
+                "url": "https://multidatepick.com/zh/salesforce-conference-room-booking-calendar.html",
+                "description": "用 MultiDatePick Booking 在 Salesforce 中预订会议室和工位：会议室可来自任意对象，提供会议室排期时间轴、冲突检测、按会议室设置的时间和关闭日、工位容量以及使用率热力图。无需代码。",
+                "isPartOf": {
+                    "@id": "https://multidatepick.com/zh/#website"
+                },
+                "about": {
+                    "@id": "https://multidatepick.com/zh/#software"
+                },
+                "primaryImageOfPage": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce 能预订会议室吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "开箱即用的功能不行。标准 Salesforce 没有会议室预订控件。MultiDatePick Booking 补上了这一块：把会议室作为记录保存在任意对象上，用户选择会议室，选择一个或多个日期，单击空闲时间段即可预订。每项预订都作为记录保存在您自己的预订对象上。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "如何防止两个人预订同一间会议室？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "将“冲突行为”设为 Block。已占用的时间段会显示为已占用且无法单击，每次保存时还会再次与现有预订比对，因此冲突的预订永远不会被保存。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "能在 Salesforce 中实现工位预订或共享工位（hoteling）吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "可以。把每个工位区设为一个资源并指定容量字段，再开启 Show Availability Count（显示可用数量），用户就能看到该区还剩多少个工位，直到满员。开启 Disable Time Slot Grid (Full-Day Mode)（禁用时间段网格（全天模式））即可按整天预订工位。Config Library 中的 共享工位预订 配置可以直接作为起点。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "能在一个屏幕上查看所有会议室的日程吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "可以。时间轴视图将所有会议室纵向排列，日期横向展开，多日占用显示为一整条横条。使用率视图以热力图显示每间会议室每天的占用程度，周视图则按小时显示一天的安排。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "一次预订能同时预留多间会议室吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "可以。开启 Allow Booking Multiple Resources，用户就能在一次操作中为同一时间段勾选多间会议室。Capacity Aggregation 决定多间会议室的容量如何累计。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "每间会议室能有自己的开放时间和关闭日吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "可以。Business Hours Start Field（营业时间开始字段）和 Business Hours End Field（营业时间结束字段）从会议室记录中读取每间会议室的开放时间。屏蔽日期来自您自己的关闭记录，可以是整天或半天，可以针对所有会议室或仅一间。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "用户可以从哪里预订会议室？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "任何放置了 Booking 组件的地方：记录页面、应用程序页面或主页、屏幕 Flow（Screen Flow），或 Experience Cloud 站点页面。在应用程序页面、主页和 Experience 页面上，需要设置 Config Name（配置名称）和 Static Parent Record Id。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick 多少钱？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "每用户每月 $20，包含所有组件和功能，30 天免费试用，无需信用卡。100% Salesforce 原生，即将登陆 Salesforce AppExchange。"
+                        }
+                    }
+                ],
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/multidatepick-booking-demo-poster.png",
+                "caption": "MultiDatePick Salesforce 预订日历的动画演示：选择顾问，填写客户，选择日期和一个空闲的 30 分钟时间段，然后保存申请",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-booking-grid.png",
+                "caption": "MultiDatePick 中的 Salesforce 会议室预订日历：带复选框的会议室“选择资源”列表、状态颜色，以及一整月的已预订日期",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo-poster.png",
+                "caption": "MultiDatePick Salesforce 资源时间轴的动画演示：左侧列出顾问，多日客户项目显示为一整条横条，悬停查看其中一个项目的卡片，再从周缩放到月并向后翻页",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png",
+                "caption": "MultiDatePick Salesforce 使用率热力图的动画演示：左侧列出顾问，显示每天已预订占容量，悬停在已满的一天上，单击后打开该顾问当周",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo-poster.png",
+                "caption": "MultiDatePick Salesforce 周视图的动画演示：选择一位顾问后，其客户会议显示为按状态着色、长度与会议时长一致的色块，悬停卡片显示客户、会议类型和状态",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule-poster.png",
+                "caption": "在 MultiDatePick Salesforce 时间轴上改期的动画演示：拖动一个项目的右边缘将其延长两天，再拖动另一个项目整体推后两天，松开即保存，横条上显示新日期",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-capacity-lanes.png",
+                "caption": "Salesforce 时间轴特写：每个资源下重叠的多日预订分道堆叠，汇总容量条显示每天的占用程度",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/salesforce-booking-capacity-calendar.png",
+                "caption": "MultiDatePick 中某位顾问的 Salesforce 预订日历：每天按预约状态着色，状态混合的一天按对角线分割，以及带“已预订占容量”标记的 30 分钟时间段网格",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+    <style>
+        .hm-wrap{max-width:1040px;margin:0 auto;padding:0 16px;}
+        .hm-hero{background:linear-gradient(170deg,var(--blue-50,#F0F9FF) 0%,#E0F2FE 60%,#fff 100%);padding:44px 0 40px;}
+        .bk-hero{display:grid;grid-template-columns:1.15fr 1fr;gap:32px;align-items:center;}
+        .hm-hero h1{font-size:2.35rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1.12;margin:0;}
+        .hm-hero h1 .pre{display:block;font-size:1rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#C2410C;margin-bottom:8px;}
+        .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+        .hm-hero .subtitle{font-size:1.08rem;color:var(--gray-600,#4b5563);margin:14px 0 0;max-width:560px;}
+        .hm-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}
+        .hm-ctas .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .hm-ctas .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .hm-demo-link{display:inline-block;margin-top:12px;font-size:.92rem;font-weight:600;}
+        .bk-hero .gs-fig{margin:0;max-width:400px;justify-self:center;width:100%;}
+        .hm-live{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;padding:26px 0;scroll-margin-top:80px;}
+        .hm-live .hm-wrap{display:flex;gap:18px 28px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+        .hm-live h2{color:#fff;font-size:1.3rem;margin:0 0 4px;}
+        .hm-live p{color:#cdd9e8;margin:0;font-size:.95rem;max-width:680px;}
+        .hm-live .tag{display:block;color:#FDBA74;font-size:.75rem;font-weight:800;letter-spacing:.12em;margin-bottom:8px;}
+        .hm-live .btn{background:#F97316;color:#fff;white-space:nowrap;}
+        .hm-live .btn:hover{background:#EA580C;color:#fff;}
+        .gs-sec{padding:56px 0;scroll-margin-top:80px;}
+        .gs-sec.alt{background:var(--blue-50,#F0F9FF);}
+        .gs-sec h2{font-size:1.6rem;color:var(--blue-900,#0C4A6E);margin:0 0 6px;padding-left:17px;position:relative;line-height:1.25;} .gs-sec h2::before{content:"";position:absolute;left:0;top:calc(.625em - 11px);width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-sec h3{font-size:1.15rem;color:var(--blue-900,#0C4A6E);margin:32px 0 6px;scroll-margin-top:80px;}
+        .gs-lead{color:var(--gray-600,#4b5563);margin:0 0 20px;font-size:1rem;max-width:760px;}
+        .gs-sec code{background:#f3f4f6;padding:1px 5px;border-radius:3px;color:#c2410c;font-size:.88em;word-break:break-word;}
+        .gs-fig{margin:18px 0 8px;}
+        .gs-fig img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #E5E7EB;box-shadow:0 4px 20px rgba(15,45,82,.08);background:#fff;}
+        .gs-fig figcaption{text-align:center;font-size:.88rem;color:var(--gray-500,#6b7280);margin-top:8px;}
+        .gs-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE3EC;border-radius:10px;overflow:hidden;font-size:.93rem;}
+        .gs-table th,.gs-table td{padding:11px 14px;border-bottom:1px solid #E8EDF3;border-right:1px solid #E8EDF3;text-align:left;vertical-align:top;}
+        .gs-table th:last-child,.gs-table td:last-child{border-right:none;}
+        .gs-table thead th{background:#0F2D52;color:#fff;font-weight:600;font-size:.85rem;}
+        .gs-table thead th.mdp{background:#C2410C;}
+        .gs-table tbody tr:last-child td{border-bottom:none;}
+        .gs-table td:first-child{font-weight:600;color:var(--blue-900,#0C4A6E);}
+        .gs-table .old{color:var(--gray-500,#6b7280);}
+        .gs-table .new{color:#065F46;font-weight:600;}
+        .gs-table small{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);font-weight:400;}
+        .hm-scroll{overflow-x:auto;}
+        .gs-chain{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-wrap:wrap;gap:8px 4px;align-items:center;font-size:.9rem;}
+        .gs-chain li{background:#fff;border:1px solid #BFDBFE;color:#1E3A8A;border-radius:999px;padding:5px 14px;font-weight:600;}
+        .gs-chain li b{color:#F97316;margin-right:4px;}
+        .gs-chain li.arr{background:none;border:none;color:#94A3B8;padding:0 2px;}
+        .gs-two{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+        .gs-two .gs-fig{margin-top:0;}
+        .bk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 0;}
+        .bk-tile{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:12px 14px 12px 18px;position:relative;} .bk-tile::before{content:"";position:absolute;left:0;top:13px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#10b981;}
+        .bk-tile b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;margin-bottom:3px;}
+        .bk-tile span{display:block;font-size:.85rem;color:var(--gray-600,#4b5563);}
+        .bk-tile .comp{display:inline-block;margin-top:8px;font-size:.72rem;font-weight:700;letter-spacing:.04em;color:#1E3A8A;background:#EFF6FF;border-radius:999px;padding:1px 9px;}
+        .gs-paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0;}
+        .gs-paths.three{grid-template-columns:repeat(3,1fr);}
+        .gs-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;font-size:.92rem;color:var(--gray-600,#4b5563);}
+        .gs-card b{display:block;color:var(--blue-900,#0C4A6E);font-size:1rem;margin-bottom:6px;}
+        .gs-card.bk,.gs-card.rs,.gs-card.sf{position:relative;padding-left:18px;} .gs-card.bk{--rail:#F97316;}
+        .gs-card.rs{--rail:#10b981;}
+        .gs-card.sf{--rail:#0176D3;} .gs-card.bk::before,.gs-card.rs::before,.gs-card.sf::before{content:"";position:absolute;left:0;top:15px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .hm-checks{list-style:none;padding:0;margin:0;}
+        .hm-checks li{padding:5px 0 5px 24px;position:relative;border-bottom:1px solid #F1F5F9;}
+        .hm-checks li:last-child{border-bottom:none;}
+        .hm-checks li::before{content:"\2713";position:absolute;left:2px;color:#10b981;font-weight:700;}
+        .gs-note{margin:16px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 18px 14px 22px;font-size:.92rem;color:#7C2D12;position:relative;} .gs-note::before{content:"";position:absolute;left:0;top:14px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-note b{color:#9A3412;}
+        .bk-views{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:8px;}
+        .bk-views .gs-fig{margin:0;}
+        .cf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 0;}
+        .cf-grid.two{grid-template-columns:1fr 1fr;}
+        .cf-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px 12px 18px;position:relative;display:flex;flex-direction:column;} .cf-card::before{content:"";position:absolute;left:0;top:16px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .cf-card .cf-type{font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#C2410C;}
+        .cf-card h3{margin:2px 0 4px;font-size:1.05rem;}
+        .cf-card p{margin:0 0 10px;font-size:.86rem;color:var(--gray-600,#4b5563);}
+        .cf-set{list-style:none;padding:0;margin:0 0 12px;font-size:.85rem;}
+        .cf-set li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #F1F5F9;}
+        .cf-set li:last-child{border-bottom:none;}
+        .cf-set li span{color:var(--blue-900,#0C4A6E);font-weight:600;}
+        .cf-set li em{font-style:normal;color:#334155;text-align:right;}
+        .cf-links{margin-top:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:.86rem;font-weight:600;}
+        .gs-faq details{background:#fff;border:1px solid #DCE3EC;border-radius:10px;margin:0 0 10px;padding:0 18px;}
+        .gs-faq summary{cursor:pointer;font-weight:600;color:var(--blue-900,#0C4A6E);padding:14px 0;list-style-position:outside;}
+        .gs-faq details p{margin:0 0 14px;color:var(--gray-600,#4b5563);font-size:.93rem;}
+        .gs-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .gs-links a{display:block;background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;text-decoration:none;transition:border-color .15s ease;}
+        .gs-links a:hover{border-color:#F97316;}
+        .gs-links b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;}
+        .gs-links span{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);}
+        .hm-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .hm-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .hm-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .hm-final .hm-ctas{justify-content:center;}
+        .hm-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .hm-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .hm-final .contact{margin:20px 0 0;font-size:.9rem;color:#cdd9e8;}
+        @media (max-width:900px){
+            .bk-hero,.gs-two{grid-template-columns:1fr;}
+            .bk-grid{grid-template-columns:1fr 1fr;}
+            .gs-links,.gs-paths.three,.cf-grid{grid-template-columns:1fr 1fr;}
+        }
+        @media (max-width:600px){
+            .hm-hero{padding:30px 0 28px;}
+            .hm-hero h1{font-size:1.75rem;}
+            .bk-views,.gs-paths,.gs-paths.three,.gs-links,.cf-grid,.cf-grid.two{grid-template-columns:1fr;}
+            .gs-sec{padding:40px 0;}
+            .gs-sec h2{font-size:1.35rem;}
+            .gs-table{font-size:.86rem;}
+            .gs-table th,.gs-table td{padding:9px 8px;}
+            .hm-final h2{font-size:1.45rem;}
+        }
+    </style>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/salesforce-conference-room-booking-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/salesforce-besprechungsraum-buchung.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/reserva-salas-reuniones-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/reservation-salle-reunion-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/prenotazione-sale-riunioni-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/reserva-de-salas-de-reuniao-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/salesforce-conference-room-booking-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/salesforce-conference-room-booking-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/salesforce-conference-room-booking-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/salesforce-conference-room-booking-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html" class="active">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <section class="hm-hero">
+            <div class="hm-wrap bk-hero">
+                <div>
+                    <h1><span class="pre">会议室预订<span class="vh">：</span></span>Salesforce 会议室预订日历</h1>
+                    <p class="subtitle">在 Salesforce 内预订会议室和工位。一眼看到所有会议室，选择日期和空闲时间段，保存即可。杜绝重复预订。</p>
+                    <div class="hm-ctas">
+                        <a href="/zh/notify-me-at-launch.html" class="btn btn-cta">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">入门指南</a>
+                    </div>
+                    <a class="hm-demo-link" href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-conference-room-booking-calendar" target="_blank" rel="noopener">或立即试用在线演示，无需登录 &rarr;</a>
+                </div>
+                <figure class="gs-fig">
+                    <img src="/images/multidatepick-booking-demo-poster.png" data-gif="/images/multidatepick-booking-demo.gif" alt="MultiDatePick Salesforce 预订日历的动画演示：选择顾问，填写客户，选择日期和一个空闲的 30 分钟时间段，然后保存申请" title="Salesforce 预订日历演示" width="700" height="1010" fetchpriority="high" decoding="async" data-zoomable>
+                    <figcaption>选择资源、日期和空闲时间段，预订完成。</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ═══════════════ LIVE DEMO ═══════════════ -->
+        <section class="hm-live" id="live-demo">
+            <div class="hm-wrap">
+                <div>
+                    <span class="tag">在线试用：无需安装，无需登录</span>
+                    <h2>在在线演示中预订一个时间段</h2>
+                    <p>演示在公开的 Salesforce 站点上预订顾问。会议室使用的是同一个 Booking 组件，只是把会议室作为资源。</p>
+                </div>
+                <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-conference-room-booking-calendar" target="_blank" rel="noopener" class="btn">打开在线演示 &rarr;</a>
+            </div>
+        </section>
+
+        <!-- ═══════════════ OVERVIEW ═══════════════ -->
+        <section class="gs-sec" id="overview">
+            <div class="hm-wrap">
+                <h2>在 Salesforce 中预订会议室，只需四次单击</h2>
+                <p class="gs-lead">您的会议室本来就是记录。MultiDatePick 把它们变成预订日历，每项预订都保存在您自己的对象上。</p>
+                <ul class="gs-chain" aria-label="如何预订会议室">
+                    <li><b>1</b>选择会议室</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li><b>2</b>选择一天或多天</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li><b>3</b>单击空闲时间段</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li><b>4</b>预订：记录已保存</li>
+                </ul>
+                <div class="bk-grid">
+                    <div class="bk-tile"><b>会议室可来自任意对象</b><span>按楼宇、楼层或大小筛选。</span></div>
+                    <div class="bk-tile"><b>显示已占用时间段</b><span>在任何人单击之前，按状态着色。</span></div>
+                    <div class="bk-tile"><b>每间会议室单独设置时间</b><span>实验室 24 小时开放，董事会会议室朝九晚五。</span></div>
+                    <div class="bk-tile"><b>关闭日</b><span>整天或半天，一间或全部。</span></div>
+                    <div class="bk-tile"><b>一次预订多间会议室</b><span>一次操作，在每间会议室预订同一时间段。</span></div>
+                    <div class="bk-tile"><b>任意时间段长度</b><span>常见为 15、30 或 60 分钟。</span></div>
+                    <div class="bk-tile"><b>行内编辑</b><span>移动、改时间或取消，无需删除。</span></div>
+                    <div class="bk-tile"><b>五种视图</b><span>日历、时间轴、周、使用率、日程。</span></div>
+                </div>
+                <div class="gs-two" style="margin-top:26px;">
+                    <div class="hm-scroll">
+                    <table class="gs-table">
+                        <thead><tr><th>会议室任务</th><th>标准 Salesforce</th><th class="mdp">使用 MultiDatePick</th></tr></thead>
+                        <tbody>
+                            <tr><td>一间会议室，四个下午</td><td class="old">手动建四条记录</td><td class="new">单击四次，保存一次</td></tr>
+                            <tr><td>有空吗？</td><td class="old">先跑一份报表</td><td class="new">网格上直接显示已占用时间段</td></tr>
+                            <tr><td>会议室开放时间 9 点到 5 点</td><td class="old">晚上 7 点也能订，没人拦</td><td class="new">开放时间取自会议室记录</td></tr>
+                            <tr><td>培训需要三间会议室</td><td class="old">预订三次</td><td class="new">勾选三间，预订一次</td></tr>
+                            <tr><td>维护期间关闭</td><td class="old">某处的一条备注</td><td class="new">当天显示为灰色</td></tr>
+<tr><td>会议之间需要清场</td><td class="old">下一组人直接撞进来</td><td class="new">每项预订后自动留出缓冲时间</td></tr>
+<tr><td>提前一年就被订走</td><td class="old">占着却没人用</td><td class="new">最多只能提前 N 天预订</td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                    <figure class="gs-fig">
+                        <img src="/images/marketing/salesforce-calendar-booking-grid.png" alt="MultiDatePick 中的 Salesforce 会议室预订日历：带复选框的会议室“选择资源”列表、状态颜色，以及一整月的已预订日期" title="Salesforce 会议室预订日历" width="1004" height="858" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>勾选一间或多间会议室。已预订的日期按状态着色。</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ VIEWS ═══════════════ -->
+        <section class="gs-sec alt" id="views">
+            <div class="hm-wrap">
+                <h2>一个日历排期所有会议室</h2>
+                <p class="gs-lead">会议室超过三四间，月历就不太管用了。切换视图，同一批预订就能回答设施管理的问题。</p>
+                <div class="bk-views">
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-timeline-view-demo-poster.png" data-gif="/images/views/salesforce-timeline-view-demo.gif" alt="MultiDatePick Salesforce 资源时间轴的动画演示：左侧列出顾问，多日客户项目显示为一整条横条，悬停查看其中一个项目的卡片，再从周缩放到月并向后翻页" title="Salesforce 资源时间轴演示" width="880" height="880" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>时间轴：每间会议室一行。哪间有空，什么时候有空？</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-utilization-view-demo-poster.png" data-gif="/images/views/salesforce-utilization-view-demo.gif" alt="MultiDatePick Salesforce 使用率热力图的动画演示：左侧列出顾问，显示每天已预订占容量，悬停在已满的一天上，单击后打开该顾问当周" title="Salesforce 使用率热图演示" width="880" height="780" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>使用率：每间会议室每天的占用程度。</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-week-view-demo-poster.png" data-gif="/images/views/salesforce-week-view-demo.gif" alt="MultiDatePick Salesforce 周视图的动画演示：选择一位顾问后，其客户会议显示为按状态着色、长度与会议时长一致的色块，悬停卡片显示客户、会议类型和状态" title="Salesforce 周视图演示" width="880" height="1080" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>周：按小时查看一间会议室的一天。</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-timeline-drag-to-reschedule-poster.png" data-gif="/images/views/salesforce-timeline-drag-to-reschedule.gif" alt="在 MultiDatePick Salesforce 时间轴上改期的动画演示：拖动一个项目的右边缘将其延长两天，再拖动另一个项目整体推后两天，松开即保存，横条上显示新日期" title="在 Salesforce 时间轴上拖动改期" width="880" height="880" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>占用时间要延长？拖一下，松开即保存。</figcaption>
+                    </figure>
+                </div>
+                <p class="gs-note"><b>有八十间会议室？</b>Max View Resources 会优先绘制最繁忙的会议室，Timeline Window (Days)（时间轴窗口）决定屏幕上显示多少天（默认 14 天）。</p>
+                <p style="margin:14px 0 0;font-size:.93rem;">深入阅读：<a href="/zh/blog/salesforce-timeline-view.html">Salesforce 时间轴视图</a>和<a href="/zh/blog/salesforce-utilization-heatmap.html">使用率热力图</a>。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ ROOMS VS DESKS ═══════════════ -->
+        <section class="gs-sec" id="desk-booking">
+            <div class="hm-wrap">
+                <h2>Salesforce 工位预订：同一个组件</h2>
+                <p class="gs-lead">一间会议室每个时间段只接受一项预订，一个工位区可以接受很多项。区别只在一个设置。</p>
+                <div class="gs-two">
+                    <div>
+                        <div class="gs-paths" style="margin-top:0;">
+                            <div class="gs-card bk">
+                                <b>会议室</b>
+                                <ul class="hm-checks">
+                                    <li>每个时间段一项预订</li>
+                                    <li>冲突行为：Block</li>
+                                    <li>时间段限定在会议室开放时间内</li>
+                                    <li>一次预订多间会议室</li>
+                                </ul>
+                            </div>
+                            <div class="gs-card rs">
+                                <b>工位与工位区</b>
+                                <ul class="hm-checks">
+                                    <li>工位区上的容量字段</li>
+                                    <li>实时显示 3/8 这样的标记</li>
+                                    <li>整天模式，没有时间网格</li>
+                                    <li>工位区满员即关闭</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <figure class="gs-fig">
+                            <img src="/images/views/salesforce-timeline-capacity-lanes.png" alt="Salesforce 时间轴特写：每个资源下重叠的多日预订分道堆叠，汇总容量条显示每天的占用程度" title="带容量泳道的 Salesforce 时间轴" width="1622" height="894" loading="lazy" decoding="async" data-zoomable>
+                            <figcaption>重叠的预订分道堆叠。顶部的条显示汇总容量。</figcaption>
+                        </figure>
+                    </div>
+                    <figure class="gs-fig" style="max-width:380px;justify-self:center;">
+                        <img src="/images/salesforce-booking-capacity-calendar.png" alt="MultiDatePick 中某位顾问的 Salesforce 预订日历：每天按预约状态着色，状态混合的一天按对角线分割，以及带“已预订占容量”标记的 30 分钟时间段网格" title="带容量标记的 Salesforce 预订日历" width="1362" height="1938" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>每个时间段显示已预订占容量。已满的时间段自动关闭。</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ CONFIGS ═══════════════ -->
+        <section class="gs-sec alt" id="configuration">
+            <div class="hm-wrap">
+                <h2>从现成配置开始</h2>
+                <p class="gs-lead">Config Library 提供 40 多个现成配置。导入设置向导，从下拉列表中映射您自己的对象，保存即可。</p>
+                <div class="cf-grid">
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>会议室预订</h3>
+                        <p>会议室，带实时容量和状态颜色。</p>
+                        <ul class="cf-set">
+                            <li><span>Conflict Behavior（冲突行为）</span><em>阻止</em></li>
+                            <li><span>Time Slot Interval</span><em>30 分钟</em></li>
+                            <li><span>Ignored Statuses</span><em>Cancelled</em></li>
+                            <li><span>Available Views（可用视图）</span><em>日历、时间轴、周、使用率</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/zh/configlibrary.html#meeting-room-booking">Config Library &rarr;</a><a href="/downloads/configs/Meeting_Room_Booking.json" download>JSON</a></div>
+                    </div>
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>共享工位预订</h3>
+                        <p>按整天预订工位，显示每个工位区的剩余座位。</p>
+                        <ul class="cf-set">
+                            <li><span>Disable Time Slot Grid</span><em>开启</em></li>
+                            <li><span>Capacity Field（容量字段）</span><em>工位区的座位数</em></li>
+                            <li><span>Show Availability Count</span><em>开启</em></li>
+                            <li><span>View</span><em>时间轴</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/zh/configlibrary.html#desk-hoteling">Config Library &rarr;</a><a href="/downloads/configs/Desk_Hoteling.json" download>JSON</a></div>
+                    </div>
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>Active Conference Rooms</h3>
+                        <p>选择器中只显示启用中的会议室。</p>
+                        <ul class="cf-set">
+                            <li><span>Resource Filter Field</span><em>Active, Type</em></li>
+                            <li><span>Resource Filter Value（资源筛选值）</span><em>true; Conference Room</em></li>
+                            <li><span>Allow Booking Multiple Resources</span><em>开启</em></li>
+                            <li><span>Capacity Aggregation</span><em>Combined</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/zh/configlibrary.html#active-conference-rooms">Config Library &rarr;</a><a href="/downloads/configs/Active_Conference_Rooms.json" download>JSON</a></div>
+                    </div>
+                </div>
+                <p class="gs-note"><b>需要按小时关闭？</b>从 <b>按小时关闭资源</b> 开始：半天关闭，可针对一间会议室或整个区域。</p>
+                <p style="margin:14px 0 0;font-size:.93rem;">然后把它放到页面或屏幕 Flow 上，设置 Config Name。在应用程序页面、主页和 Experience 页面上，还需设置 Static Parent Record Id。详细步骤见<a href="/zh/gettingstarted.html">入门指南</a>。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FAQ ═══════════════ -->
+        <section class="gs-sec" id="faq">
+            <div class="hm-wrap gs-faq">
+                <h2>Salesforce 会议室预订常见问题</h2>
+                <p class="gs-lead">大家常搜的问题，简短作答。</p>
+                <details>
+                    <summary>Salesforce 能预订会议室吗？</summary>
+                    <p>开箱即用的功能不行。标准 Salesforce 没有会议室预订控件。MultiDatePick Booking 补上了这一块：把会议室作为记录保存在任意对象上，用户选择会议室，选择一个或多个日期，单击空闲时间段即可预订。每项预订都作为记录保存在您自己的预订对象上。</p>
+                </details>
+                <details>
+                    <summary>如何防止两个人预订同一间会议室？</summary>
+                    <p>将“冲突行为”设为 Block。已占用的时间段会显示为已占用且无法单击，每次保存时还会再次与现有预订比对，因此冲突的预订永远不会被保存。</p>
+                </details>
+                <details>
+                    <summary>能在 Salesforce 中实现工位预订或共享工位（hoteling）吗？</summary>
+                    <p>可以。把每个工位区设为一个资源并指定容量字段，再开启 Show Availability Count（显示可用数量），用户就能看到该区还剩多少个工位，直到满员。开启 Disable Time Slot Grid (Full-Day Mode)（禁用时间段网格（全天模式））即可按整天预订工位。Config Library 中的 共享工位预订 配置可以直接作为起点。</p>
+                </details>
+                <details>
+                    <summary>能在一个屏幕上查看所有会议室的日程吗？</summary>
+                    <p>可以。时间轴视图将所有会议室纵向排列，日期横向展开，多日占用显示为一整条横条。使用率视图以热力图显示每间会议室每天的占用程度，周视图则按小时显示一天的安排。</p>
+                </details>
+                <details>
+                    <summary>一次预订能同时预留多间会议室吗？</summary>
+                    <p>可以。开启 Allow Booking Multiple Resources，用户就能在一次操作中为同一时间段勾选多间会议室。Capacity Aggregation 决定多间会议室的容量如何累计。</p>
+                </details>
+                <details>
+                    <summary>每间会议室能有自己的开放时间和关闭日吗？</summary>
+                    <p>可以。Business Hours Start Field（营业时间开始字段）和 Business Hours End Field（营业时间结束字段）从会议室记录中读取每间会议室的开放时间。屏蔽日期来自您自己的关闭记录，可以是整天或半天，可以针对所有会议室或仅一间。</p>
+                </details>
+                <details>
+                    <summary>用户可以从哪里预订会议室？</summary>
+                    <p>任何放置了 Booking 组件的地方：记录页面、应用程序页面或主页、屏幕 Flow（Screen Flow），或 Experience Cloud 站点页面。在应用程序页面、主页和 Experience 页面上，需要设置 Config Name（配置名称）和 Static Parent Record Id。</p>
+                </details>
+                <details>
+                    <summary>MultiDatePick 多少钱？</summary>
+                    <p>每用户每月 $20，包含所有组件和功能，30 天免费试用，无需信用卡。100% Salesforce 原生，即将登陆 Salesforce AppExchange。</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- ═══════════════ RELATED ═══════════════ -->
+        <section class="gs-sec alt" id="related">
+            <div class="hm-wrap">
+                <h2>继续了解</h2>
+                <div class="gs-links" style="margin-top:16px;">
+                    <a href="/zh/salesforce-booking-calendar.html"><b>Booking 组件</b><span>全部资源预订功能</span></a> <a href="/zh/salesforce-calendar-vs-lightning-scheduler.html"><b>对比 Salesforce Scheduler</b><span>会议室、许可和数据模型对比</span></a> <a href="/zh/blog/prevent-double-booking-in-salesforce.html"><b>防止重复预订</b><span>冲突与容量详解</span></a> <a href="/zh/salesforce-calendar-experience-cloud-booking.html"><b>Experience Cloud 预订</b><span>在站点上自助预订</span></a> <a href="/zh/configlibrary.html"><b>Config Library</b><span>40 多个可导入的现成配置</span></a> <a href="/zh/pricing.html"><b>价格</b><span>$20/用户/月，全部功能</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FINAL CTA ═══════════════ -->
+        <section class="hm-final">
+            <div class="hm-wrap">
+                <h2>会议室和工位预订，无需另一套工具</h2>
+                <p>即将登陆 Salesforce AppExchange。现在就试用在线演示，或留下邮箱，上线时我们第一时间通知您。</p>
+                <div class="hm-ctas">
+                    <a href="/zh/notify-me-at-launch.html" class="btn btn-cta">上线时通知我</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-conference-room-booking-calendar" class="btn btn-ghost" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/gettingstarted.html" class="btn btn-ghost">入门指南</a>
+                </div>
+                <p class="contact">$20/用户/月，30 天免费试用，无需信用卡。已通过 AppExchange 安全审查。100% Salesforce 原生。</p>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>解决方案</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>文档</h4>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>公司</h4>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/salesforce-conference-room-booking-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/salesforce-besprechungsraum-buchung.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/reserva-salas-reuniones-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/reservation-salle-reunion-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/prenotazione-sale-riunioni-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/salesforce-conference-room-booking-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/salesforce-conference-room-booking-calendar.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/salesforce-conference-room-booking-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Lightning Scheduler 替代方案：MultiDatePick</title>
+    <meta name="description" content="Salesforce Lightning Scheduler（现名 Salesforce Scheduler）与 MultiDatePick 对比：许可证、数据模型、Experience Cloud 预订，以及如何选择。">
+    <link rel="canonical" href="https://multidatepick.com/zh/salesforce-calendar-vs-lightning-scheduler.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Salesforce Lightning Scheduler 替代方案：MultiDatePick">
+    <meta property="og:description" content="Salesforce Lightning Scheduler（现名 Salesforce Scheduler）与 MultiDatePick 对比：许可证、数据模型、Experience Cloud 预订，以及如何选择。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/salesforce-calendar-vs-lightning-scheduler.html">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="zh_CN">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce Lightning Scheduler 替代方案：MultiDatePick">
+    <meta name="twitter:description" content="Salesforce Lightning Scheduler（现名 Salesforce Scheduler）与 MultiDatePick 对比：许可证、数据模型、Experience Cloud 预订，以及如何选择。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce Lightning Scheduler 替代方案：在您自己的对象上预订",
+                "description": "Salesforce Lightning Scheduler（现名 Salesforce Scheduler）与 MultiDatePick 对比：许可证、数据模型、Experience Cloud 预订，以及如何选择。",
+                "datePublished": "2026-08-18",
+                "dateModified": "2026-10-20",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/zh/salesforce-calendar-vs-lightning-scheduler.html",
+                "about": [
+                    {
+                        "@type": "SoftwareApplication",
+                        "name": "Salesforce Scheduler",
+                        "alternateName": "Lightning Scheduler"
+                    },
+                    {
+                        "@type": "SoftwareApplication",
+                        "name": "MultiDatePick"
+                    }
+                ],
+                "image": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "什么是 Salesforce Lightning Scheduler？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Salesforce 自己的预约排程产品。它利用服务区域、工作类型组、工作类型、服务资源和服务预约，在某个地点和时间为客户匹配一位合格的人员。预订由引导式的 Inbound 和 Outbound Flow 完成。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Lightning Scheduler 和 Salesforce Scheduler 是同一个产品吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "是的。Lightning Scheduler 是早先的名称。Salesforce 文档和 Trailhead 现在称之为 Salesforce Scheduler，部分许可证名称仍沿用 Lightning Scheduler。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce Scheduler 需要额外付费吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "需要。它在 Lightning Experience 的 Enterprise、Performance 和 Unlimited 版本中需额外付费购买，而且每个服务资源都需要 Salesforce Scheduler 权限集许可证。用于会议室和设备的 Asset Scheduling 还要另外付费。MultiDatePick 只有一个方案：每用户每月 $20，30 天免费试用。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce Scheduler 能在 Experience Cloud 上使用吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "可以。先为访客用户开放服务资源、服务区域、工作类型和工作类型组的访问权限，再把 Inbound New Guest Appointment Flow 放到公开的 Experience Cloud 页面上。MultiDatePick 同样可以在 Experience Cloud 页面上运行，读取和保存您自己的对象。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "能在 Salesforce 中预订会议室和设备吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "在 Salesforce Scheduler 中，会议室和设备属于资产资源，需要额外付费的 Asset Scheduling 选项。在 MultiDatePick 中，Booking 组件可以把任何记录当作资源来预订，例如会议室、车辆、设备或 User，并提供容量和冲突检查。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "适用于自定义对象的 Lightning Scheduler 替代方案有哪些？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "MultiDatePick：适合想要一个直接读写您自己对象的日历、而不想采用 Scheduler 数据模型的团队。它可以在一个日历上选择多个日期、时间和预订，以五种视图显示，并通过设置向导配置，无需 Apex。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "标准 Salesforce 日历是预订工具吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "不是。标准日历在月视图或周视图中显示事件和对象记录。它是查看工具，不是输入控件，无法选中九个日期并创建九条记录。"
+                        }
+                    }
+                ],
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/multidatepick-booking-demo-poster.png",
+                "caption": "MultiDatePick 中 Salesforce 预约预订的动画演示：选择顾问，填写客户，选择日期和一个空闲的 30 分钟时间段，然后保存申请",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/salesforce-booking-capacity-calendar.png",
+                "caption": "MultiDatePick 中某位顾问的 Salesforce 预订日历：每天按预约状态着色，状态混合的一天按对角线分割，以及带“已预订占容量”标记的 30 分钟时间段网格",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo-poster.png",
+                "caption": "Salesforce 中 MultiDatePick Dates 组件的动画演示：拖选感恩节那周的三天，单击加上周五，四天一次全部保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-resource-timeline-view.png",
+                "caption": "Salesforce 上的 MultiDatePick 资源时间轴：左侧列出人员，顶部横向排列日期，每天一条容量条，多日预订显示为一整条横条，重叠时分道堆叠",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+    <style>
+        .hm-wrap{max-width:1040px;margin:0 auto;padding:0 16px;}
+        .hm-hero{background:linear-gradient(170deg,var(--blue-50,#F0F9FF) 0%,#E0F2FE 60%,#fff 100%);padding:48px 0 40px;text-align:center;}
+        .hm-hero h1{font-size:2.5rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1.12;margin:0 auto;max-width:860px;}
+        .hm-hero .subtitle{font-size:1.08rem;color:var(--gray-600,#4b5563);margin:14px auto 0;max-width:700px;}
+        .hm-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px;}
+        .hm-ctas .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .hm-ctas .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .hm-demo-link{display:block;margin-top:12px;font-size:.92rem;font-weight:600;}
+        .vs-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:28px auto 0;max-width:900px;text-align:left;}
+        .vs-card{position:relative;--rail:#0176D3;background:#fff;border:1px solid #DCE3EC;border-radius:12px;padding:16px 18px;box-shadow:0 4px 20px rgba(15,45,82,.06);}
+        .vs-card.mdp{--rail:#F97316;} .vs-card::before{content:"";position:absolute;left:0;top:18px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .vs-card h2{font-size:1.1rem;color:var(--blue-900,#0C4A6E);margin:0 0 2px;border:0;padding:0;}
+        .vs-card .tag{font-size:.85rem;color:var(--gray-500,#6b7280);margin:0 0 10px;}
+        .gs-sec{padding:56px 0;scroll-margin-top:80px;}
+        .gs-sec.alt{background:var(--blue-50,#F0F9FF);}
+        .gs-sec h2{font-size:1.6rem;color:var(--blue-900,#0C4A6E);margin:0 0 6px;padding-left:17px;position:relative;line-height:1.25;} .gs-sec h2::before{content:"";position:absolute;left:0;top:calc(.625em - 11px);width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-sec h3{font-size:1.15rem;color:var(--blue-900,#0C4A6E);margin:32px 0 6px;scroll-margin-top:80px;}
+        .gs-lead{color:var(--gray-600,#4b5563);margin:0 0 20px;font-size:1rem;max-width:760px;}
+        .gs-fig{margin:18px 0 8px;}
+        .gs-fig img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #E5E7EB;box-shadow:0 4px 20px rgba(15,45,82,.08);background:#fff;}
+        .gs-fig figcaption{text-align:center;font-size:.88rem;color:var(--gray-500,#6b7280);margin-top:8px;}
+        .gs-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE3EC;border-radius:10px;overflow:hidden;font-size:.93rem;}
+        .gs-table th,.gs-table td{padding:11px 14px;border-bottom:1px solid #E8EDF3;border-right:1px solid #E8EDF3;text-align:left;vertical-align:top;}
+        .gs-table th:last-child,.gs-table td:last-child{border-right:none;}
+        .gs-table thead th{background:#0F2D52;color:#fff;font-weight:600;font-size:.85rem;}
+        .gs-table thead th.mdp{background:#C2410C;}
+        .gs-table tbody tr:last-child td{border-bottom:none;}
+        .gs-table td:first-child{font-weight:600;color:var(--blue-900,#0C4A6E);}
+        .gs-table.kv td:first-child{width:24%;}
+        .gs-table .c{text-align:center;width:22%;}
+        .gs-table .y{color:#10b981;font-size:1.15rem;}
+        .gs-table .n{color:#CBD5E1;}
+        .gs-table .x{color:#B91C1C;font-weight:700;margin-right:6px;}
+        .gs-table .ok{color:#047857;font-weight:700;margin-right:6px;}
+        .gs-table td.new{background:#FFF7ED;color:#7C2D12;}
+        .gs-table td.old{color:var(--gray-600,#4b5563);}
+        .gs-table small{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);font-weight:400;}
+        .hm-scroll{overflow-x:auto;}
+        .gs-chain{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-wrap:wrap;gap:6px 4px;align-items:center;font-size:.85rem;}
+        .gs-chain li{background:#fff;border:1px solid #BFDBFE;color:#1E3A8A;border-radius:999px;padding:4px 12px;font-weight:600;}
+        .gs-chain li.arr{background:none;border:none;color:#94A3B8;padding:0 2px;}
+        .gs-paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0;}
+        .gs-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;font-size:.92rem;color:var(--gray-600,#4b5563);}
+        .gs-card b{display:block;color:var(--blue-900,#0C4A6E);font-size:1rem;margin-bottom:6px;}
+        .gs-card.sf{position:relative;padding-left:18px;--rail:#0176D3;}
+        .gs-card.mdp{position:relative;padding-left:18px;--rail:#F97316;} .gs-card.sf::before,.gs-card.mdp::before{content:"";position:absolute;left:0;top:15px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .hm-checks{list-style:none;padding:0;margin:0;}
+        .hm-checks li{padding:5px 0 5px 24px;position:relative;border-bottom:1px solid #F1F5F9;}
+        .hm-checks li:last-child{border-bottom:none;}
+        .hm-checks li::before{content:"\2713";position:absolute;left:2px;color:#10b981;font-weight:700;}
+        .gs-note{margin:16px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 18px 14px 22px;font-size:.92rem;color:#7C2D12;position:relative;} .gs-note::before{content:"";position:absolute;left:0;top:14px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-note b{color:#9A3412;}
+        .gs-two{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+        .gs-two .gs-fig{margin-top:0;}
+        .hm-price{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+        .hm-price .gs-card{display:flex;flex-direction:column;gap:6px;}
+        .hm-price .amt{font-size:2.2rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1;}
+        .hm-price .amt small{font-size:1rem;font-weight:600;color:var(--gray-500,#6b7280);}
+        .hm-price .amt.word{font-size:1.4rem;}
+        .gs-faq details{background:#fff;border:1px solid #DCE3EC;border-radius:10px;margin:0 0 10px;padding:0 18px;}
+        .gs-faq summary{cursor:pointer;font-weight:600;color:var(--blue-900,#0C4A6E);padding:14px 0;list-style-position:outside;}
+        .gs-faq details p{margin:0 0 14px;color:var(--gray-600,#4b5563);font-size:.93rem;}
+        .gs-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .gs-links a{display:block;background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;text-decoration:none;transition:border-color .15s ease;}
+        .gs-links a:hover{border-color:#F97316;}
+        .gs-links b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;}
+        .gs-links span{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);}
+        .vs-src{font-size:.82rem;color:var(--gray-500,#6b7280);margin:12px 0 0;}
+        .hm-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .hm-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .hm-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .hm-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .hm-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .hm-final .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;}
+        .hm-final .btn-cta:hover{background:#EA580C;color:#fff;}
+        .hm-final .contact{margin:20px 0 0;font-size:.9rem;color:#cdd9e8;}
+        @media (max-width:900px){
+            .gs-two{grid-template-columns:1fr;}
+            .gs-links{grid-template-columns:1fr 1fr;}
+        }
+        @media (max-width:600px){
+            .hm-hero{padding:32px 0 28px;}
+            .hm-hero h1{font-size:1.8rem;}
+            .vs-pair,.gs-paths,.gs-links,.hm-price{grid-template-columns:1fr;}
+            .gs-sec{padding:40px 0;}
+            .gs-sec h2{font-size:1.35rem;}
+            .gs-table{font-size:.86rem;}
+            .gs-table th,.gs-table td{padding:9px 8px;}
+            .hm-final h2{font-size:1.45rem;}
+        }
+    </style>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/salesforce-calendar-vs-lightning-scheduler.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/salesforce-lightning-scheduler-alternative.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/alternativa-salesforce-lightning-scheduler.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/calendrier-salesforce-vs-lightning-scheduler.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/alternativa-salesforce-lightning-scheduler.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/alternativa-salesforce-lightning-scheduler.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/salesforce-calendar-vs-lightning-scheduler.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/salesforce-calendar-vs-lightning-scheduler.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/salesforce-calendar-vs-lightning-scheduler.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/salesforce-calendar-vs-lightning-scheduler.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html" class="active">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <section class="hm-hero">
+            <div class="hm-wrap">
+                <h1>Salesforce Lightning Scheduler 替代方案：在您自己的对象上预订</h1>
+                <p class="subtitle">MultiDatePick 可预订预约、会议室和人员，一次处理多个日期，直接保存到您已有的 Salesforce 对象中。通过向导设置，无需 Apex。</p>
+                <div class="hm-ctas">
+                    <a href="/zh/notify-me-at-launch.html" class="btn btn-cta">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">了解设置方式</a>
+                </div>
+                <a class="hm-demo-link" href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-vs-lightning-scheduler" target="_blank" rel="noopener">或立即试用在线演示，无需登录 &rarr;</a>
+                <div class="vs-pair">
+                    <div class="vs-card mdp">
+                        <h2>MultiDatePick</h2>
+                        <p class="tag">一个日历，处理多个日期、时间和预订，适用于任何对象。</p>
+                        <ul class="check-list"><li>任何对象</li><li>五种视图</li><li>容量</li><li>设置向导</li><li>屏幕 Flow</li><li>Experience Cloud</li><li>无需 Apex</li></ul>
+                    </div>
+                    <div class="vs-card">
+                        <h2>Salesforce Scheduler</h2>
+                        <p class="tag">前身为 Lightning Scheduler。基于其专有数据模型的客户预约。</p>
+                        <ul class="check-list check-list--plain"><li>服务区域</li><li>工作类型</li><li>服务资源</li><li>附加许可证</li></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ WHEN TO CHOOSE ═══════════════ -->
+        <section class="gs-sec alt" id="choose">
+            <div class="hm-wrap">
+                <h2>Lightning Scheduler 还是 MultiDatePick：如何选择</h2>
+                <p class="gs-lead">对于大多数在 Salesforce 中预订时间的团队，MultiDatePick 上手更快、更简单。</p>
+                <div class="gs-paths">
+                    <div class="gs-card mdp">
+                        <b>以下情况选择 MultiDatePick</b>
+                        <ul class="hm-checks">
+                            <li>在您自己的对象上预订预约、会议室、设备或人员</li>
+                            <li>一次选择多个日期、日期范围或循环模式</li>
+                            <li>时间段可共享至容量上限，保存时检查冲突</li>
+                            <li>以五种方式查看预订：日历、时间轴、周、使用率、日程</li>
+                            <li>放到记录页面、屏幕 Flow（Screen Flow） 和 Experience Cloud 站点上</li>
+                            <li>通过向导设置，无需 Apex，无需新的数据模型</li>
+                            <li>每用户一个价格，包含全部功能</li>
+                        </ul>
+                    </div>
+                    <div class="gs-card sf">
+                        <b>以下情况选择 Salesforce Scheduler</b>
+                        <ul class="hm-checks">
+                            <li>必须按技能和网点区域为客户匹配员工</li>
+                            <li>您本来就要采用它的服务区域和工作类型模型</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="gs-note"><b>一句话总结。</b>除非您需要按技能和区域自动匹配，否则为了一个日历去采用 Scheduler，要搭建的东西太多了。MultiDatePick 同样可以预订预约。</p>
+                <div class="hm-ctas" style="justify-content:flex-start;">
+                    <a href="/zh/notify-me-at-launch.html" class="btn btn-cta">上线时通知我</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-vs-lightning-scheduler" class="btn btn-secondary" target="_blank" rel="noopener">试用在线演示</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ BOOKING ═══════════════ -->
+        <section class="gs-sec" id="booking">
+            <div class="hm-wrap">
+                <h2>基于您自己对象的 Salesforce 预订日历</h2>
+                <p class="gs-lead">MultiDatePick 这边：选择资源、日期和空闲时间段，然后保存。容量和冲突会自动检查。</p>
+                <div class="gs-two">
+                    <figure class="gs-fig">
+                        <img src="/images/multidatepick-booking-demo-poster.png" data-gif="/images/multidatepick-booking-demo.gif" alt="MultiDatePick 中 Salesforce 预约预订的动画演示：选择顾问，填写客户，选择日期和一个空闲的 30 分钟时间段，然后保存申请" title="Salesforce 预约预订演示" width="700" height="1010" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>一次顾问预约，在一个屏幕上完成预订和保存。</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/salesforce-booking-capacity-calendar.png" alt="MultiDatePick 中某位顾问的 Salesforce 预订日历：每天按预约状态着色，状态混合的一天按对角线分割，以及带“已预订占容量”标记的 30 分钟时间段网格" title="带容量标记的 Salesforce 预订日历" width="1362" height="1938" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>日期按状态着色，每个时间段都显示已预订占容量。</figcaption>
+                    </figure>
+                </div>
+                <p style="margin:14px 0 0;font-size:.93rem;">更多内容：<a href="/zh/salesforce-booking-calendar.html">Salesforce 预订日历</a>和 <a href="/zh/salesforce-conference-room-booking-calendar.html">Salesforce 会议室预订</a>。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FEATURE TABLE ═══════════════ -->
+        <section class="gs-sec alt" id="compare">
+            <div class="hm-wrap">
+                <h2>Salesforce Scheduler 与 MultiDatePick 功能逐项对比</h2>
+                <p class="gs-lead">打勾表示内置提供，无需额外许可证。</p>
+                <div class="hm-scroll">
+                <table class="gs-table">
+                    <thead><tr><th>功能</th><th>Salesforce Scheduler</th><th class="mdp">MultiDatePick</th></tr></thead>
+                    <tbody>
+                        <tr><td>数据模型</td><td class="old">专有模型：服务区域、工作类型、服务资源、服务预约</td><td class="new"><span class="ok">&#10003;</span>您自己的。任何标准或自定义对象</td></tr>
+                        <tr><td>预订谁</td><td class="old">按技能和服务区域匹配</td><td class="new"><span class="ok">&#10003;</span>由用户选择资源；实时检查可用性和冲突</td></tr>
+                        <tr><td>一次预订多个资源</td><td class="old">多资源预约</td><td class="new"><span class="ok">&#10003;</span>多资源总体可用性</td></tr>
+                        <tr><td>一次选择多个日期</td><td class="old">围绕一次一个预约设计</td><td class="new"><span class="ok">&#10003;</span>多个日期、日期范围、循环模式</td></tr>
+                        <tr><td>同一时间段多项预订</td><td class="old"><span class="ok">&#10003;</span>并发排程</td><td class="new"><span class="ok">&#10003;</span>容量模式，带 3/10 实时标记</td></tr>
+                        <tr><td>会议室和设备</td><td class="old">Asset Scheduling，需额外付费</td><td class="new"><span class="ok">&#10003;</span>任何记录都可作为资源，已包含</td></tr>
+                        <tr><td>日历布局</td><td class="old">预订屏幕，外加 Salesforce 日历</td><td class="new"><span class="ok">&#10003;</span>日历、时间轴、周、使用率、日程</td></tr>
+                        <tr><td>在屏幕 Flow（Screen Flow） 中</td><td class="old">Flow 模板，与其数据模型绑定</td><td class="new"><span class="ok">&#10003;</span>原生屏幕组件，输出可复用</td></tr>
+                        <tr><td>Experience Cloud</td><td class="old"><span class="ok">&#10003;</span>公开页面上的访客 Flow</td><td class="new"><span class="ok">&#10003;</span>同一个组件可用于任何站点页面</td></tr>
+                        <tr><td>设置工作量</td><td class="old">需要一个实施项目</td><td class="new"><span class="ok">&#10003;</span>一个向导，或导入现成配置</td></tr>
+                        <tr><td>许可证</td><td class="old">Enterprise、Performance 或 Unlimited 版本的附加产品</td><td class="new"><span class="ok">&#10003;</span>一个安装包，$20/用户/月，全部功能</td></tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ WHAT IS SCHEDULER ═══════════════ -->
+        <section class="gs-sec" id="what-is-lightning-scheduler">
+            <div class="hm-wrap">
+                <h2>什么是 Salesforce Lightning Scheduler？</h2>
+                <p class="gs-lead">Salesforce 自己的预约排程产品，现名 Salesforce Scheduler。它擅长一件事：在合适的时间、合适的网点，为客户匹配合适的合格人员。</p>
+                <table class="gs-table kv">
+                    <tbody>
+                        <tr><td>适用于</td><td>客户预约，例如银行和诊所为客户预约网点中有资质的员工。</td></tr>
+                        <tr><td>Booking</td><td>引导式 <b>Inbound</b>（客户预订）和 <b>Outbound</b>（员工预订）Flow 模板，另有面向潜在客户的访客 Flow。</td></tr>
+                        <tr><td>附加功能</td><td>并发排程、多资源预约（最多五个必需资源）、参与者人数上限、地图和地点搜索。</td></tr>
+                        <tr><td>许可证</td><td>Lightning Experience 中 Enterprise、Performance 和 Unlimited 版本的付费附加产品。每个服务资源都需要一个 Salesforce Scheduler 权限集许可证。</td></tr>
+                    </tbody>
+                </table>
+                <h3>使用它就要采用的数据模型</h3>
+                <ul class="gs-chain" aria-label="Salesforce Scheduler 数据模型">
+                    <li>服务区域</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>工作类型组</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>工作类型</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>服务资源</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>服务预约</li>
+                </ul>
+                <p class="vs-src">来源：Salesforce <a href="https://resources.docs.salesforce.com/latest/latest/en-us/sfdc/pdf/salesforce_scheduler_implementation_guide_for_financial_services.pdf" target="_blank" rel="noopener">Salesforce Scheduler 实施指南</a>，以及 Trailhead <a href="https://trailhead.salesforce.com/content/learn/modules/multi-resource-concurrent-and-inbound-scheduling-with-lightning-scheduler/set-up-inbound-scheduling-for-prospective-customers" target="_blank" rel="noopener">使用 Salesforce Scheduler 进行多资源、Inbound 和并发排程</a>。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ MANY DATES + VIEWS ═══════════════ -->
+        <section class="gs-sec alt" id="views">
+            <div class="hm-wrap">
+                <h2>在任何 Salesforce 对象上进行资源排程</h2>
+                <p class="gs-lead">一次处理多个日期，同一批记录有五种布局。布局只是一个设置，而不是路线图上的待办项。</p>
+                <div class="gs-two">
+                    <figure class="gs-fig">
+                        <img src="/images/components/salesforce-multi-date-picker-demo-poster.png" data-gif="/images/components/salesforce-multi-date-picker-demo.gif" alt="Salesforce 中 MultiDatePick Dates 组件的动画演示：拖选感恩节那周的三天，单击加上周五，四天一次全部保存" title="Salesforce 多日期选择器演示" width="700" height="640" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>四天休假，保存一次。Scheduler 一次只能预订一个预约。</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-resource-timeline-view.png" alt="Salesforce 上的 MultiDatePick 资源时间轴：左侧列出人员，顶部横向排列日期，每天一条容量条，多日预订显示为一整条横条，重叠时分道堆叠" title="带容量条的 Salesforce 资源时间轴" width="1722" height="1782" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>资源纵向排列，日期横向展开。让资源指向 User，就成了员工排班表。</figcaption>
+                    </figure>
+                </div>
+                <div class="hm-scroll" style="margin-top:18px;">
+                <table class="gs-table">
+                    <thead><tr><th>您需要</th><th class="mdp">MultiDatePick 设置</th></tr></thead>
+                    <tbody>
+                        <tr><td>资源纵向排列，日期横向展开</td><td><code>view="timeline"</code></td></tr>
+                        <tr><td>按资源显示的容量热力图</td><td><code>view="utilization"</code> 加上 <code>capacityField</code></td></tr>
+                        <tr><td>让用户切换布局</td><td><code>availableViews</code> 控制切换按钮</td></tr>
+                        <tr><td>排程对象是人员而非资产</td><td>让资源查找字段指向 <code>User</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ EXPERIENCE CLOUD ═══════════════ -->
+        <section class="gs-sec" id="experience-cloud">
+            <div class="hm-wrap">
+                <h2>Salesforce Scheduler 与 Experience Cloud 预订</h2>
+                <p class="gs-lead">两者都能在公开站点上预订，但需要设置的内容不同。</p>
+                <div class="hm-scroll">
+                <table class="gs-table">
+                    <thead><tr><th>步骤</th><th>Salesforce Scheduler</th><th class="mdp">MultiDatePick</th></tr></thead>
+                    <tbody>
+                        <tr><td>放到站点上</td><td class="old">用 Flow 组件运行 Inbound New Guest Appointment Flow</td><td class="new">把组件拖到页面上，设置 Config Name（配置名称）</td></tr>
+                        <tr><td>访客访问权限</td><td class="old">为服务资源、服务区域、工作类型和工作类型组设置共享</td><td class="new">开放您自己的预订对象和资源对象的访问权限</td></tr>
+                        <tr><td>站点访客</td><td class="old">以访客身份预订</td><td class="new">以访客身份直接在日历上预订</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p style="margin:14px 0 0;font-size:.93rem;">完整演练：<a href="/zh/salesforce-calendar-experience-cloud-booking.html">在 Salesforce Experience Cloud 站点上实现自助预订</a>。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ COST ═══════════════ -->
+        <section class="gs-sec alt" id="cost">
+            <div class="hm-wrap">
+                <h2>各自的费用</h2>
+                <p class="gs-lead">一个统一价格包含全部功能，对比在您的版本之上再加购附加许可证。</p>
+                <div class="hm-price">
+                    <div class="gs-card mdp">
+                        <b>MultiDatePick</b>
+                        <div class="amt">$20<small>/用户/月</small></div>
+                        <ul class="hm-checks">
+                            <li>一个方案，三个组件，全部功能</li>
+                            <li>30 天免费试用，无需信用卡</li>
+                            <li>不按记录数计费：50 个日期还是 50,000 个，价格相同</li>
+                        </ul>
+                        <a href="/zh/pricing.html" style="font-weight:600;font-size:.9rem;margin-top:4px;">查看 MultiDatePick 价格 &rarr;</a>
+                    </div>
+                    <div class="gs-card sf">
+                        <b>Salesforce Scheduler</b>
+                        <div class="amt word">附加许可证</div>
+                        <ul class="hm-checks">
+                            <li>在您的 Salesforce 版本之外额外付费</li>
+                            <li>每个服务资源一个权限集许可证</li>
+                            <li>会议室所需的 Asset Scheduling 还要另外付费</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FAQ ═══════════════ -->
+        <section class="gs-sec" id="faq">
+            <div class="hm-wrap gs-faq">
+                <h2>Salesforce Lightning Scheduler 常见问题</h2>
+                <p class="gs-lead">大家常搜的问题，简短作答。</p>
+                <details>
+                    <summary>什么是 Salesforce Lightning Scheduler？</summary>
+                    <p>Salesforce 自己的预约排程产品。它利用服务区域、工作类型组、工作类型、服务资源和服务预约，在某个地点和时间为客户匹配一位合格的人员。预订由引导式的 Inbound 和 Outbound Flow 完成。</p>
+                </details>
+                <details>
+                    <summary>Lightning Scheduler 和 Salesforce Scheduler 是同一个产品吗？</summary>
+                    <p>是的。Lightning Scheduler 是早先的名称。Salesforce 文档和 Trailhead 现在称之为 Salesforce Scheduler，部分许可证名称仍沿用 Lightning Scheduler。</p>
+                </details>
+                <details>
+                    <summary>Salesforce Scheduler 需要额外付费吗？</summary>
+                    <p>需要。它在 Lightning Experience 的 Enterprise、Performance 和 Unlimited 版本中需额外付费购买，而且每个服务资源都需要 Salesforce Scheduler 权限集许可证。用于会议室和设备的 Asset Scheduling 还要另外付费。MultiDatePick 只有一个方案：每用户每月 $20，30 天免费试用。</p>
+                </details>
+                <details>
+                    <summary>Salesforce Scheduler 能在 Experience Cloud 上使用吗？</summary>
+                    <p>可以。先为访客用户开放服务资源、服务区域、工作类型和工作类型组的访问权限，再把 Inbound New Guest Appointment Flow 放到公开的 Experience Cloud 页面上。MultiDatePick 同样可以在 Experience Cloud 页面上运行，读取和保存您自己的对象。</p>
+                </details>
+                <details>
+                    <summary>能在 Salesforce 中预订会议室和设备吗？</summary>
+                    <p>在 Salesforce Scheduler 中，会议室和设备属于资产资源，需要额外付费的 Asset Scheduling 选项。在 MultiDatePick 中，Booking 组件可以把任何记录当作资源来预订，例如会议室、车辆、设备或 User，并提供容量和冲突检查。</p>
+                </details>
+                <details>
+                    <summary>适用于自定义对象的 Lightning Scheduler 替代方案有哪些？</summary>
+                    <p>MultiDatePick：适合想要一个直接读写您自己对象的日历、而不想采用 Scheduler 数据模型的团队。它可以在一个日历上选择多个日期、时间和预订，以五种视图显示，并通过设置向导配置，无需 Apex。</p>
+                </details>
+                <details>
+                    <summary>标准 Salesforce 日历是预订工具吗？</summary>
+                    <p>不是。标准日历在月视图或周视图中显示事件和对象记录。它是查看工具，不是输入控件，无法选中九个日期并创建九条记录。</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- ═══════════════ RELATED ═══════════════ -->
+        <section class="gs-sec alt" id="related">
+            <div class="hm-wrap">
+                <h2>继续了解</h2>
+                <p class="gs-lead">与您对比内容相关的 MultiDatePick 页面。</p>
+                <div class="gs-links">
+                    <a href="/zh/salesforce-booking-calendar.html"><b>Salesforce 预订日历</b><span>资源、时间段、容量</span></a> <a href="/zh/salesforce-conference-room-booking-calendar.html"><b>会议室预订</b><span>所有会议室，一个日历</span></a> <a href="/zh/salesforce-calendar-experience-cloud-booking.html"><b>Experience Cloud 预订</b><span>在公开站点上自助预订</span></a> <a href="/zh/gettingstarted.html"><b>入门指南</b><span>从安装到第一个日历</span></a> <a href="/zh/pricing.html"><b>价格</b><span>$20/用户/月，30 天试用</span></a> <a href="/zh/troubleshooting.html"><b>故障排除</b><span>找到您看到的问题，然后解决</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FINAL CTA ═══════════════ -->
+        <section class="hm-final">
+            <div class="hm-wrap">
+                <h2>预约、预订和多日期排程，全部基于您自己的对象</h2>
+                <p>即将登陆 Salesforce AppExchange。现在就试用在线演示，或留下邮箱，上线时我们第一时间通知您。</p>
+                <div class="hm-ctas">
+                    <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-vs-lightning-scheduler" class="btn btn-cta" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-ghost">上线时通知我</a>
+                </div>
+                <p class="contact">100% Salesforce 原生。您的数据和配置始终留在您的组织内。</p>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>解决方案</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>文档</h4>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>公司</h4>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/salesforce-calendar-vs-lightning-scheduler.html" hreflang="en" lang="en">English</a></li><li><a href="/de/salesforce-lightning-scheduler-alternative.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/alternativa-salesforce-lightning-scheduler.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/calendrier-salesforce-vs-lightning-scheduler.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/alternativa-salesforce-lightning-scheduler.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/salesforce-calendar-vs-lightning-scheduler.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

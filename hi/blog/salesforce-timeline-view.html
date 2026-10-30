@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce टाइमलाइन व्यू: हर संसाधन एक स्क्रीन पर</title>
+    <meta name="description" content="Salesforce संसाधन टाइमलाइन: किनारे पर रूम, लोग और उपकरण, बाएँ से दाएँ तारीखें, कई दिनों की बुकिंग एक बार के रूप में, और ड्रैग करके रीशेड्यूल। बिना कोड।">
+    <link rel="canonical" href="https://multidatepick.com/hi/blog/salesforce-timeline-view.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Timeline post: shares the views post's look. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce टाइमलाइन व्यू: हर संसाधन एक स्क्रीन पर">
+    <meta property="og:description" content="Salesforce संसाधन टाइमलाइन: किनारे पर रूम, लोग और उपकरण, बाएँ से दाएँ तारीखें, कई दिनों की बुकिंग एक बार के रूप में, और ड्रैग करके रीशेड्यूल। बिना कोड।">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/hi/blog/salesforce-timeline-view.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="hi_IN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce टाइमलाइन व्यू: हर संसाधन एक स्क्रीन पर">
+    <meta name="twitter:description" content="Salesforce संसाधन टाइमलाइन: किनारे पर रूम, लोग और उपकरण, बाएँ से दाएँ तारीखें, कई दिनों की बुकिंग एक बार के रूप में, और ड्रैग करके रीशेड्यूल। बिना कोड।">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-timeline-view.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-zeitachse-ressourcen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/linea-de-tiempo-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/vue-chronologie-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/cronologia-timeline-risorse-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/linha-do-tempo-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-timeline-view.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-timeline-view.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-timeline-view.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-timeline-view.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">जल्द ही Salesforce AppExchange पर <button class="banner-close" id="bannerClose" aria-label="बैनर हटाएँ" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/hi/" class="logo"><img src="/images/logo.png" alt="MultiDatePick लोगो: Salesforce मल्टी-डेट कैलेंडर और संसाधन बुकिंग कंपोनेंट" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="नेविगेशन खोलें/बंद करें"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">प्रोडक्ट <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/multidatepickdates.html">Date</a></li>
+                        <li><a href="/hi/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/hi/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/hi/blog/salesforce-calendar-views.html">पाँच कैलेंडर व्यू</a></li>
+                        <li><a href="/hi/configlibrary.html">Config Library</a></li>
+                        <li><a href="/hi/trust.html">भरोसा और सुरक्षा</a></li>
+                        <li><a href="/hi/accessibility.html">सुगम्यता (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">समाधान <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/salesforce-calendar.html">Salesforce कैलेंडर</a></li>
+                        <li><a href="/hi/salesforce-calendar-staffing-recruiting.html">स्टाफ़िंग और रिक्रूटिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-interview-scheduling.html">इंटरव्यू शेड्यूलिंग</a></li>
+                        <li><a href="/hi/salesforce-conference-room-booking-calendar.html">कॉन्फ़्रेंस रूम बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-experience-cloud-booking.html">Experience Cloud बुकिंग</a></li>
+                        <li><a href="/hi/blog/salesforce-campaign-multiple-dates.html">Campaign की तारीखें</a></li>
+                        <li><a href="/hi/blog/salesforce-section-508-government-calendar.html">सरकारी विभाग / Section 508</a></li>
+                        <li><a href="/hi/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/hi/pricing.html">कीमत</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">डॉक्स <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/gettingstarted.html">शुरुआत करें</a></li>
+                        <li><a href="/hi/user-guide.html">यूज़र गाइड</a></li>
+                        <li><a href="/hi/flowcheatsheet.html">Screen Flow गाइड</a></li>
+                        <li><a href="/hi/home-app-experience.html">ऐप, होम और Experience पेज</a></li>
+                        <li><a href="/hi/deploy-flow-vscode.html">Flow डिप्लॉय करें (VS Code)</a></li>
+                        <li><a href="/hi/troubleshooting.html">समस्या निवारण</a></li>
+                        <li><a href="/hi/faq.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/hi/blog/">ब्लॉग</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">लाइव डेमो आज़माएँ</a></li>
+                <li><a href="/hi/notify-me-at-launch.html" class="nav-cta">लॉन्च पर सूचना पाएँ</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce टाइमलाइन व्यू: हर संसाधन एक स्क्रीन पर",
+                "description": "Salesforce संसाधन टाइमलाइन: किनारे पर रूम, लोग और उपकरण, बाएँ से दाएँ तारीखें, कई दिनों की बुकिंग एक बार के रूप में, और ड्रैग करके रीशेड्यूल। बिना कोड।",
+                "datePublished": "2026-10-12",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/hi/blog/salesforce-timeline-view.html",
+                "image": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif",
+                "inLanguage": "hi"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "क्या Salesforce में संसाधनों के लिए टाइमलाइन व्यू है?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "आपके अपने ऑब्जेक्ट के लिए स्टैंडर्ड Lightning कंपोनेंट के रूप में नहीं। Salesforce के कैलेंडर एक व्यक्ति के इवेंट दिखाते हैं, और Gantt जैसे चार्ट के लिए आम तौर पर प्रोजेक्ट के लिए बना कोई ऐड-ऑन चाहिए। MultiDatePick एक संसाधन टाइमलाइन जोड़ता है जो किसी भी कस्टम या स्टैंडर्ड ऑब्जेक्ट को पढ़ती है: बुकिंग वाला ऑब्जेक्ट और संसाधन वाला ऑब्जेक्ट चुनें, और हर संसाधन एक पंक्ति बन जाता है।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "क्या मैं टाइमलाइन पर बुकिंग को ड्रैग करके रीशेड्यूल कर सकता हूँ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "हाँ। संपादन मोड चालू हो, तो बार को बीच से पकड़कर दूसरे दिनों पर ले जाएँ, या किसी किनारे को पकड़कर उसका आरंभ या अंत बदलें। ड्रैग करते समय बार अपनी नई तारीखें दिखाता है और छोड़ते ही सहेजा जाता है। Day ज़ूम में यही तरीके बुकिंग के आरंभ और अंत समय को खिसकाते और बढ़ाते हैं।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "क्या पंक्तियाँ रूम की जगह लोग हो सकते हैं?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "हाँ। संसाधन कोई भी ऑब्जेक्ट हो सकता है, User भी। इसे User पर सेट करें और टाइमलाइन स्टाफ़ रोस्टर बन जाती है: हर व्यक्ति एक पंक्ति, उनकी शिफ़्ट, विज़िट या असाइनमेंट बार के रूप में।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "संसाधनों की लंबी सूची को पंक्तियों की दीवार बनने से कैसे रोकें?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Max View Resources सेट करें ताकि सिर्फ़ सबसे व्यस्त पंक्तियाँ दिखें, Timeline Group By Field से पंक्तियों को किसी picklist या lookup के हिसाब से समूहों में रखें, और चुनें कि पंक्तियों में सारे संसाधन दिखें या सिर्फ़ बुकिंग वाले। हर संसाधन फिर भी क्षमता में गिना जाता है; ये सेटिंग सिर्फ़ यह बदलती हैं कि क्या दिखे।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "क्या टाइमलाइन Experience Cloud साइट और रिकॉर्ड पेज पर काम करती है?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "हाँ। यह उसी कंपोनेंट के पाँच व्यू में से एक है, इसलिए जहाँ कंपोनेंट चलता है वहाँ यह भी चलती है: रिकॉर्ड पेज, ऐप और होम पेज, Flow स्क्रीन और Experience Cloud साइट।"
+                        }
+                    }
+                ],
+                "inLanguage": "hi"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo-poster.png",
+                "caption": "MultiDatePick में Salesforce संसाधन टाइमलाइन का एनिमेटेड डेमो: किनारे पर सलाहकार, क्लाइंट एंगेजमेंट उतने दिनों में फैले लगातार बार जितने दिन वे चलते हैं, एक पर होवर कार्ड, फिर सप्ताह से महीना ज़ूम",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule-poster.png",
+                "caption": "Salesforce टाइमलाइन पर रीशेड्यूलिंग का एनिमेटेड डेमो: एक बुकिंग के दाएँ किनारे को ड्रैग करने से वह दो दिन बढ़ जाती है, दूसरी को ड्रैग करने से वह दो दिन आगे खिसक जाती है, और छोड़ते ही हर बदलाव सहेजा जाता है",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-capacity-lanes.png",
+                "caption": "Salesforce टाइमलाइन का क्लोज़-अप: हर संसाधन के नीचे ओवरलैप होने वाली कई दिनों की बुकिंग अलग-अलग लेन में, और संयुक्त क्षमता पट्टी जो बताती है कि हर दिन कितना भरा है",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-resource-timeline-view.png",
+                "caption": "लोगों को पंक्तियों के रूप में दिखाती Salesforce संसाधन टाइमलाइन: किनारे पर हर सलाहकार, ऊपर आने वाले दिन, और हर क्लाइंट एंगेजमेंट एक बार के रूप में",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce टाइमलाइन व्यू: हर संसाधन एक स्क्रीन पर</h1>
+                <p class="subtitle">किनारे पर रूम, लोग, उपकरण या प्रोजेक्ट, ऊपर तारीखें, और हर बुकिंग एक बार के रूप में। किसी भी Salesforce ऑब्जेक्ट के लिए संसाधन टाइमलाइन, बिना कोड के सेट।</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">प्रकाशित 12 अक्टूबर 2026 &middot; अपडेट 21 अक्टूबर 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"अगले मंगलवार कौन-सा रूम खाली है?" "इस हफ़्ते टीम में किसके पास समय है?" "वैन कब लौटेगी?" ये सब कई दिनों में फैले कई संसाधनों के सवाल हैं, और महीने का कैलेंडर इनका जवाब एक बार में एक संसाधन के हिसाब से देता है। टाइमलाइन एक नज़र में जवाब देती है।</p>
+
+                <p>MultiDatePick का टाइमलाइन व्यू हर संसाधन को उसकी अपनी पंक्ति में और हर बुकिंग को ऐसे बार में रखता है जो ठीक उतना लंबा है जितनी बुकिंग चलती है। यह आपके अपने Salesforce ऑब्जेक्ट पढ़ता है, कंपोनेंट के बाकी हिस्सों के ही रास्ते से सहेजता है, और किसी भी जगह लगाने के लिए बस एक कॉन्फ़िगरेशन फ़ील्ड की दूरी पर है।</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-view-demo-poster.png" data-gif="/images/views/salesforce-timeline-view-demo.gif" alt="MultiDatePick में Salesforce संसाधन टाइमलाइन का एनिमेटेड डेमो: किनारे पर सलाहकार, क्लाइंट एंगेजमेंट उतने दिनों में फैले लगातार बार जितने दिन वे चलते हैं, एक पर होवर कार्ड, फिर सप्ताह से महीना ज़ूम" loading="lazy" decoding="async" width="880" height="880" data-zoomable>
+                    <figcaption>किनारे पर सलाहकार, एंगेजमेंट बार के रूप में, सप्ताह से महीने तक ज़ूम। विवरण के लिए किसी भी बार पर होवर करें।</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">टाइमलाइन वह क्या करती है जो कैलेंडर नहीं कर सकता</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>हर बुकिंग का एक बार</h3><p>सोमवार से शुक्रवार तक चलने वाली बुकिंग एक लगातार बार है, इसलिए उसकी लंबाई एक नज़र में दिखती है।</p></div>
+                    <div class="tl-feat"><h3>ओवरलैप के लिए लेन</h3><p>किसी संसाधन की ओवरलैप होने वाली बुकिंग अलग-अलग लेन में रखी जाती हैं। व्यस्त दिन एक गिनती में सिमट जाता है, जिसे आप वहीं खोल सकते हैं।</p></div>
+                    <div class="tl-feat"><h3>क्षमता पट्टी</h3><p>हर समूह के ऊपर की पट्टी दिखाती है कि संसाधनों की संयुक्त क्षमता के मुकाबले हर दिन कितना भरा है।</p></div>
+                    <div class="tl-feat"><h3>दिन, सप्ताह और महीना ज़ूम</h3><p>आज के लिए घंटे, योजना के लिए दो सप्ताह, लंबे नज़रिए के लिए एक महीना। इनके बीच बस एक क्लिक।</p></div>
+                    <div class="tl-feat"><h3>ड्रैग करके रीशेड्यूल करें</h3><p>बार को खिसकाकर बुकिंग आगे-पीछे करें, किनारा खींचकर उसे बढ़ाएँ। छोड़ते ही सहेजा जाता है और वहीं रहता है जहाँ आपने रखा।</p></div>
+                    <div class="tl-feat"><h3>ग्रिड से ही बुक करें</h3><p>किसी संसाधन की पंक्ति में खाली दिनों पर ड्रैग करके उन्हें चुनें, फिर बुक करें। पंक्ति अपने आप संसाधन चुन लेती है।</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">ड्रैग करके रीशेड्यूल करें, खींचकर बढ़ाएँ</h2>
+                <p>योजनाएँ बदलती हैं, और किसी एक को बदलने के लिए रिकॉर्ड खोलना, दो तारीख फ़ील्ड एडिट करना और सहेजना नहीं पड़ना चाहिए। टाइमलाइन पर आप बार को पकड़ते हैं। उसका दायाँ किनारा खींचें और बुकिंग लंबी हो जाती है; बीच से पकड़ें और वह दूसरे दिनों पर खिसक जाती है। ड्रैग करते समय बार वे तारीखें दिखाता है जिन पर वह पहुँचेगा, छोड़ते ही सहेजा जाता है, और थोड़ी देर हाइलाइट के साथ अपनी लेन में रहता है ताकि आप ठीक-ठीक देख सकें कि क्या बदला।</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-drag-to-reschedule-poster.png" data-gif="/images/views/salesforce-timeline-drag-to-reschedule.gif" alt="Salesforce टाइमलाइन पर रीशेड्यूलिंग का एनिमेटेड डेमो: एक बुकिंग के दाएँ किनारे को ड्रैग करने से वह दो दिन बढ़ जाती है, दूसरी को ड्रैग करने से वह दो दिन आगे खिसक जाती है, और छोड़ते ही हर बदलाव सहेजा जाता है" loading="lazy" decoding="async" width="880" height="880" data-zoomable>
+                    <figcaption>किनारे से खींचकर बढ़ाएँ, बीच से पकड़कर खिसकाएँ। छोड़ते ही हर बदलाव सहेजा जाता है।</figcaption>
+                </figure>
+                <p><strong>Day</strong> ज़ूम पर जाएँ और कॉलम घंटे बन जाते हैं। तब यही तरीके बुकिंग के आरंभ और अंत <em>समय</em> को खिसकाते और बढ़ाते हैं, इसलिए देर तक चली मीटिंग को ठीक करने के लिए बस एक ड्रैग चाहिए।</p>
+
+                <h2 style="margin-top:44px;">क्षमता, एक नज़र में</h2>
+                <p>पंक्तियों के ऊपर एक क्षमता पट्टी हर दिन को इस हिसाब से रंगती है कि संसाधनों की संयुक्त क्षमता का कितना हिस्सा बुक है, ताकि भीड़ वाले सप्ताह किसी के पूछने से पहले ही दिख जाएँ। पंक्तियों को किसी picklist या lookup (बिल्डिंग, टीम, क्षेत्र) के हिसाब से समूहों में रखें, और हर समूह को अपनी पट्टी मिलती है। जब एक संसाधन की एक ही दिन कई बुकिंग हों, तो वे अलग-अलग लेन में रखी जाती हैं; जिस दिन कुछ से ज़्यादा हों, वह एक गिनती में सिमट जाता है जो क्लिक करने पर वहीं खुल जाती है।</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-capacity-lanes.png" alt="Salesforce टाइमलाइन का क्लोज़-अप: हर संसाधन के नीचे ओवरलैप होने वाली कई दिनों की बुकिंग अलग-अलग लेन में, और संयुक्त क्षमता पट्टी जो बताती है कि हर दिन कितना भरा है" loading="lazy" width="1622" height="894" data-zoomable>
+                    <figcaption>ओवरलैप होने वाली बुकिंग अलग-अलग लेन में, और पट्टी दिखाती है कि हर दिन कितना भरा है।</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Salesforce टाइमलाइन कौन इस्तेमाल करता है</h2>
+                <p>संसाधन कोई भी ऑब्जेक्ट हो सकता है, इसलिए यही व्यू बहुत अलग-अलग टीमों के काम आता है:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>कॉन्फ़्रेंस रूम और डेस्क</strong><span>हर रूम एक पंक्ति; एक भी दिन खोले बिना देखें कि गुरुवार को कौन-सा खाली है।</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>उपकरण और वाहन</strong><span>वैन, कैमरे, लैब उपकरण: कई दिनों का चेकआउट एक बार के रूप में दिखता है, इसलिए हफ़्ते भर बाहर रहना साफ़ दिखता है।</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>स्टाफ़ रोस्टर</strong><span>संसाधन को User पर सेट करें और पंक्तियाँ लोग बन जाती हैं: शिफ़्ट, विज़िट और असाइनमेंट एक नज़र में।</span></div></div>
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>क्लाइंट एंगेजमेंट और प्रोजेक्ट</strong><span>किनारे पर सलाहकार, कंसल्टेंट या क्रू, हर एंगेजमेंट उतने दिनों में फैला जितने दिन वह चलता है।</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>छुट्टी और अवकाश</strong><span>कौन बाहर है, और कब। ओवरलैप होने वाली छुट्टियाँ एक बार के पीछे छिपने की जगह अलग-अलग लेन में दिखती हैं।</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>फ़ील्ड सर्विस टीमें</strong><span>टीमें पंक्तियों के रूप में, काम बार के रूप में; मौसम बदलने पर काम को दूसरे दिन पर ड्रैग करें।</span></div></div>
+                </div>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-resource-timeline-view.png" alt="लोगों को पंक्तियों के रूप में दिखाती Salesforce संसाधन टाइमलाइन: किनारे पर हर सलाहकार, ऊपर आने वाले दिन, और हर क्लाइंट एंगेजमेंट एक बार के रूप में" loading="lazy" width="1722" height="1782" data-zoomable>
+                    <figcaption>लोग संसाधन के रूप में: हर सलाहकार एक पंक्ति, हर एंगेजमेंट एक बार।</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">इसे आकार देने वाली सेटिंग्स</h2>
+                <p>इनमें से हर एक कंपोनेंट की एक प्रॉपर्टी और Setup Wizard का एक फ़ील्ड है, इसलिए यहाँ कोड की ज़रूरत नहीं:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">सेटिंग</th><th>यह क्या करता है</th><th style="width:22%;">API नाम</th></tr></thead>
+                    <tbody>
+                    <tr><td>दृश्य (View)</td><td>टाइमलाइन पर खोलने के लिए <code>timeline</code> सेट करें, या स्विचर में देने के लिए इसे Available Views (उपलब्ध दृश्य) में शामिल करें।</td><td><code>view</code></td></tr>
+                    <tr><td>टाइमलाइन ज़ूम (Timeline Zoom)</td><td>किस ज़ूम पर खुले: <code>day</code> (बाएँ से दाएँ घंटे), <code>week</code> या <code>month</code>। यूज़र पिल से बदलते हैं।</td><td><code>timelineZoom</code></td></tr>
+                    <tr><td>टाइमलाइन अवधि (Timeline Window (Days))</td><td>एक साथ स्क्रीन पर कितने दिन दिखें। डिफ़ॉल्ट दो सप्ताह है; पूरे महीने के कॉलम तंग हो जाते हैं।</td><td><code>timelineWindowDays</code></td></tr>
+                    <tr><td>टाइमलाइन समूहन फ़ील्ड (Timeline Group By Field)</td><td>संसाधन का कोई picklist या lookup जो पंक्तियों को खुलने-बंद होने वाले शीर्षकों के नीचे समूहों में रखता है, हर एक की अपनी क्षमता पट्टी के साथ।</td><td><code>timelineGroupByField</code></td></tr>
+                    <tr><td>व्यू में अधिकतम संसाधन (Max View Resources)</td><td>सिर्फ़ इतनी पंक्तियाँ दिखाएँ, सबसे व्यस्त पहले। बाकी सब फिर भी क्षमता में गिने जाते हैं।</td><td><code>maxViewResources</code></td></tr>
+                    <tr><td>संसाधन पंक्तियाँ (Resource Rows)</td><td>हर संसाधन दिखाएँ, या सिर्फ़ वे जिनकी इस अवधि में बुकिंग है।</td><td><code>resourceViewFilter</code></td></tr>
+                    <tr><td>क्षमता फ़ील्ड (Capacity Field)</td><td>संसाधन का एक संख्या फ़ील्ड। क्षमता पट्टी और लेन की गिनती इसी के हिसाब से चलती है।</td><td><code>capacityField</code></td></tr>
+                    <tr><td>संपादन मोड सक्षम करें (Enable Edit Mode)</td><td>बुकिंग को ड्रैग करके खिसकाने और बढ़ाने, और Edit पैनल से एक साथ कई एडिट करने की सुविधा चालू करता है।</td><td><code>enableEditMode</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>एक कंपोनेंट, पाँच व्यू।</strong> टाइमलाइन उसी कंपोनेंट में कैलेंडर, सप्ताह, उपयोग और एजेंडा के साथ रहती है और वही रिकॉर्ड पढ़ती है। हर पेज को जो व्यू चाहिए वे दें, बाकी स्विचर संभाल लेता है। <a href="/hi/blog/salesforce-calendar-views.html">पाँचों व्यू देखें</a>।</div>
+
+                <h2 style="margin-top:44px;">लोग अक्सर पूछते हैं</h2>
+                <div class="tl-faq">
+                    <details><summary>क्या Salesforce में संसाधनों के लिए टाइमलाइन व्यू है?</summary><p>आपके अपने ऑब्जेक्ट के लिए स्टैंडर्ड Lightning कंपोनेंट के रूप में नहीं। Salesforce के कैलेंडर एक व्यक्ति के इवेंट दिखाते हैं, और Gantt जैसे चार्ट के लिए आम तौर पर प्रोजेक्ट के लिए बना कोई ऐड-ऑन चाहिए। MultiDatePick एक संसाधन टाइमलाइन जोड़ता है जो किसी भी कस्टम या स्टैंडर्ड ऑब्जेक्ट को पढ़ती है: बुकिंग वाला ऑब्जेक्ट और संसाधन वाला ऑब्जेक्ट चुनें, और हर संसाधन एक पंक्ति बन जाता है।</p></details>
+                    <details><summary>क्या मैं टाइमलाइन पर बुकिंग को ड्रैग करके रीशेड्यूल कर सकता हूँ?</summary><p>हाँ। संपादन मोड चालू हो, तो बार को बीच से पकड़कर दूसरे दिनों पर ले जाएँ, या किसी किनारे को पकड़कर उसका आरंभ या अंत बदलें। ड्रैग करते समय बार अपनी नई तारीखें दिखाता है और छोड़ते ही सहेजा जाता है। Day ज़ूम में यही तरीके बुकिंग के आरंभ और अंत समय को खिसकाते और बढ़ाते हैं।</p></details>
+                    <details><summary>क्या पंक्तियाँ रूम की जगह लोग हो सकते हैं?</summary><p>हाँ। संसाधन कोई भी ऑब्जेक्ट हो सकता है, User भी। इसे User पर सेट करें और टाइमलाइन स्टाफ़ रोस्टर बन जाती है: हर व्यक्ति एक पंक्ति, उनकी शिफ़्ट, विज़िट या असाइनमेंट बार के रूप में।</p></details>
+                    <details><summary>संसाधनों की लंबी सूची को पंक्तियों की दीवार बनने से कैसे रोकें?</summary><p>Max View Resources सेट करें ताकि सिर्फ़ सबसे व्यस्त पंक्तियाँ दिखें, Timeline Group By Field से पंक्तियों को किसी picklist या lookup के हिसाब से समूहों में रखें, और चुनें कि पंक्तियों में सारे संसाधन दिखें या सिर्फ़ बुकिंग वाले। हर संसाधन फिर भी क्षमता में गिना जाता है; ये सेटिंग सिर्फ़ यह बदलती हैं कि क्या दिखे।</p></details>
+                    <details><summary>क्या टाइमलाइन Experience Cloud साइट और रिकॉर्ड पेज पर काम करती है?</summary><p>हाँ। यह उसी कंपोनेंट के पाँच व्यू में से एक है, इसलिए जहाँ कंपोनेंट चलता है वहाँ यह भी चलती है: रिकॉर्ड पेज, ऐप और होम पेज, Flow स्क्रीन और Experience Cloud साइट।</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>आपके पहले से मौजूद ऑब्जेक्ट के लिए संसाधन टाइमलाइन।</h2>
+                    <p>लाइव डेमो में टाइमलाइन पर कोई बुकिंग ड्रैग करें, या <a href="/hi/configlibrary.html">Config Library</a> में रूम, वाहन और रोस्टर के तैयार कॉन्फ़िगरेशन देखें।</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-timeline-view" class="btn btn-demo" target="_blank" rel="noopener">लाइव डेमो आज़माएँ</a> <a href="/hi/notify-me-at-launch.html" class="btn btn-primary">लॉन्च पर सूचना पाएँ</a> <a href="/hi/gettingstarted.html" class="btn btn-secondary">शुरुआत करें</a>
+                    </div>
+                    <ul class="check-list"><li>$20/यूज़र/माह, हर फ़ीचर</li><li>30 दिन का फ़्री ट्रायल, कार्ड नहीं</li><li>100% नेटिव Salesforce</li><li>कोई Apex नहीं</li><li>जल्द ही Salesforce AppExchange पर</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>संबंधित लेख</h3>
+                    <ul>
+                        <li><a href="/hi/blog/salesforce-calendar-views.html">Salesforce कैलेंडर के पाँच व्यू, एक ही कंपोनेंट में</a></li>
+                        <li><a href="/hi/blog/salesforce-utilization-heatmap.html">Salesforce उपयोग हीटमैप</a></li>
+                        <li><a href="/hi/salesforce-conference-room-booking-calendar.html">Salesforce में कॉन्फ़्रेंस रूम बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-staffing-recruiting.html">स्टाफ़िंग और रिक्रूटिंग शेड्यूलिंग</a></li>
+                        <li><a href="/hi/blog/prevent-double-booking-in-salesforce.html">Salesforce में डबल बुकिंग कैसे रोकें</a></li>
+                        <li><a href="/hi/salesforce-booking-calendar.html">Booking कंपोनेंट</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/hi/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick लोगो: Salesforce मल्टी-डेट कैलेंडर और संसाधन बुकिंग कंपोनेंट" width="180" height="45">
+                    </a>
+                    <p>Salesforce के लिए सबसे ज़्यादा कस्टमाइज़ करने योग्य कैलेंडर कंपोनेंट सुइट।</p>
+                </div>
+                <div class="footer-links">
+                    <h4>प्रोडक्ट</h4>
+                    <ul>
+                        <li><a href="/hi/multidatepickdates.html">Date</a></li>
+                        <li><a href="/hi/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/hi/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/hi/blog/salesforce-calendar-views.html">पाँच कैलेंडर व्यू</a></li>
+                        <li><a href="/hi/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>समाधान</h4>
+                    <ul>
+                        <li><a href="/hi/salesforce-calendar.html">Salesforce कैलेंडर</a></li>
+                        <li><a href="/hi/salesforce-calendar-staffing-recruiting.html">स्टाफ़िंग और रिक्रूटिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-interview-scheduling.html">इंटरव्यू शेड्यूलिंग</a></li>
+                        <li><a href="/hi/salesforce-conference-room-booking-calendar.html">कॉन्फ़्रेंस रूम बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-experience-cloud-booking.html">Experience Cloud बुकिंग</a></li>
+                        <li><a href="/hi/blog/salesforce-campaign-multiple-dates.html">Campaign की तारीखें</a></li>
+                        <li><a href="/hi/blog/salesforce-section-508-government-calendar.html">सरकारी विभाग / Section 508</a></li>
+                        <li><a href="/hi/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>डॉक्स</h4>
+                    <ul>
+                        <li><a href="/hi/gettingstarted.html">शुरुआत करें</a></li>
+                        <li><a href="/hi/user-guide.html">यूज़र गाइड</a></li>
+                        <li><a href="/hi/flowcheatsheet.html">Screen Flow गाइड</a></li>
+                        <li><a href="/hi/home-app-experience.html">ऐप, होम और Experience पेज</a></li>
+                        <li><a href="/hi/deploy-flow-vscode.html">Flow डिप्लॉय करें (VS Code)</a></li>
+                        <li><a href="/hi/troubleshooting.html">समस्या निवारण</a></li>
+                        <li><a href="/hi/faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>कंपनी</h4>
+                    <ul>
+                        <li><a href="/hi/pricing.html">कीमत</a></li>
+                        <li><a href="/hi/blog/">ब्लॉग</a></li>
+                        <li><a href="/hi/trust.html">भरोसा और सुरक्षा</a></li>
+                        <li><a href="/hi/accessibility.html">सुगम्यता</a></li>
+                        <li><a href="/hi/notify-me-at-launch.html">लॉन्च पर सूचना पाएँ</a></li>
+                        <li><a href="mailto:support@multidatepick.com">सपोर्ट</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. सर्वाधिकार सुरक्षित।</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="भाषा" translate="no"><ul><li><a href="/blog/salesforce-timeline-view.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-zeitachse-ressourcen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/linea-de-tiempo-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/vue-chronologie-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/cronologia-timeline-risorse-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/linha-do-tempo-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-timeline-view.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-timeline-view.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-timeline-view.html" hreflang="hi" lang="hi" aria-current="page">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">इमेज बड़ी करें</p><p data-k="expand-diagram">आरेख बड़ा करें</p><p data-k="close">बंद करें</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

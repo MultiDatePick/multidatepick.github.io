@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce उपयोग हीटमैप: देखें कौन ओवरबुक है</title>
+    <meta name="description" content="Salesforce उपयोग हीटमैप (utilization heatmap): किनारे पर हर संसाधन, हर दिन क्षमता में से कितनी बुकिंग, ओवरबुकिंग चिह्नित, एक क्लिक में शेड्यूल।">
+    <link rel="canonical" href="https://multidatepick.com/hi/blog/salesforce-utilization-heatmap.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Utilization post: same look as the Timeline and views posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce उपयोग हीटमैप: देखें कौन ओवरबुक है">
+    <meta property="og:description" content="Salesforce उपयोग हीटमैप (utilization heatmap): किनारे पर हर संसाधन, हर दिन क्षमता में से कितनी बुकिंग, ओवरबुकिंग चिह्नित, एक क्लिक में शेड्यूल।">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/hi/blog/salesforce-utilization-heatmap.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="hi_IN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce उपयोग हीटमैप: देखें कौन ओवरबुक है">
+    <meta name="twitter:description" content="Salesforce उपयोग हीटमैप (utilization heatmap): किनारे पर हर संसाधन, हर दिन क्षमता में से कितनी बुकिंग, ओवरबुकिंग चिह्नित, एक क्लिक में शेड्यूल।">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-utilization-heatmap.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-auslastungs-heatmap.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/mapa-de-calor-ocupacion-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/heatmap-occupation-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/heatmap-utilizzo-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/mapa-de-calor-ocupacao-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-utilization-heatmap.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-utilization-heatmap.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-utilization-heatmap.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-utilization-heatmap.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">जल्द ही Salesforce AppExchange पर <button class="banner-close" id="bannerClose" aria-label="बैनर हटाएँ" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/hi/" class="logo"><img src="/images/logo.png" alt="MultiDatePick लोगो: Salesforce मल्टी-डेट कैलेंडर और संसाधन बुकिंग कंपोनेंट" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="नेविगेशन खोलें/बंद करें"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">प्रोडक्ट <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/multidatepickdates.html">Date</a></li>
+                        <li><a href="/hi/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/hi/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/hi/blog/salesforce-calendar-views.html">पाँच कैलेंडर व्यू</a></li>
+                        <li><a href="/hi/configlibrary.html">Config Library</a></li>
+                        <li><a href="/hi/trust.html">भरोसा और सुरक्षा</a></li>
+                        <li><a href="/hi/accessibility.html">सुगम्यता (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">समाधान <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/salesforce-calendar.html">Salesforce कैलेंडर</a></li>
+                        <li><a href="/hi/salesforce-calendar-staffing-recruiting.html">स्टाफ़िंग और रिक्रूटिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-interview-scheduling.html">इंटरव्यू शेड्यूलिंग</a></li>
+                        <li><a href="/hi/salesforce-conference-room-booking-calendar.html">कॉन्फ़्रेंस रूम बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-experience-cloud-booking.html">Experience Cloud बुकिंग</a></li>
+                        <li><a href="/hi/blog/salesforce-campaign-multiple-dates.html">Campaign की तारीखें</a></li>
+                        <li><a href="/hi/blog/salesforce-section-508-government-calendar.html">सरकारी विभाग / Section 508</a></li>
+                        <li><a href="/hi/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/hi/pricing.html">कीमत</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">डॉक्स <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/gettingstarted.html">शुरुआत करें</a></li>
+                        <li><a href="/hi/user-guide.html">यूज़र गाइड</a></li>
+                        <li><a href="/hi/flowcheatsheet.html">Screen Flow गाइड</a></li>
+                        <li><a href="/hi/home-app-experience.html">ऐप, होम और Experience पेज</a></li>
+                        <li><a href="/hi/deploy-flow-vscode.html">Flow डिप्लॉय करें (VS Code)</a></li>
+                        <li><a href="/hi/troubleshooting.html">समस्या निवारण</a></li>
+                        <li><a href="/hi/faq.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/hi/blog/">ब्लॉग</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">लाइव डेमो आज़माएँ</a></li>
+                <li><a href="/hi/notify-me-at-launch.html" class="nav-cta">लॉन्च पर सूचना पाएँ</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce उपयोग हीटमैप: देखें कौन ओवरबुक है",
+                "description": "Salesforce उपयोग हीटमैप (utilization heatmap): किनारे पर हर संसाधन, हर दिन क्षमता में से कितनी बुकिंग, ओवरबुकिंग चिह्नित, एक क्लिक में शेड्यूल।",
+                "datePublished": "2026-10-13",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/hi/blog/salesforce-utilization-heatmap.html",
+                "image": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "inLanguage": "hi"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce में संसाधन का उपयोग (resource utilization) कैसे देखें?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "स्टैंडर्ड Salesforce में आपके अपने बुकिंग ऑब्जेक्ट के लिए कोई उपयोग व्यू नहीं है; हर सवाल के लिए एक रिपोर्ट बनानी पड़ती। MultiDatePick कैलेंडर कंपोनेंट में एक उपयोग (Utilization) व्यू जोड़ता है: हर संसाधन एक पंक्ति, हर दिन एक सेल जो उस संसाधन की क्षमता में से बुकिंग दिखाता है, पूरे समूह के लिए एक संयुक्त पंक्ति, और दाईं ओर औसत और खाली जगहों की गिनती।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "2/2 या 3/4 जैसे सेल का क्या मतलब है?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "उस दिन की बुकिंग, संसाधन की क्षमता के मुकाबले। 3/4 का मतलब है चार में से तीन जगहें भर चुकी हैं। नीला जितना गहरा, दिन उतना भरा; और क्षमता से ज़्यादा बुक दिन के चारों ओर नारंगी घेरा आता है ताकि वह अलग दिखे।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "अगर मेरे संसाधन ऑब्जेक्ट में क्षमता फ़ील्ड न हो तो?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "हीटमैप फिर भी काम करता है। सेल उसी नीले पैमाने पर बुकिंग की सीधी गिनती दिखाते हैं, और ग्रिड के नीचे एक नोट यही बताता है। जब प्रतिशत और खाली जगहें देखनी हों, तब क्षमता के लिए एक नंबर फ़ील्ड जोड़ दें।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "क्या मैं उपयोग व्यू से बुक या एडिट कर सकता हूँ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "उपयोग व्यू जान-बूझकर केवल पढ़ने के लिए है: यह बताता है कि चीज़ें कितनी भरी हैं। किसी भी बुक सेल पर क्लिक करें और कंपोनेंट उस दिन पर उस संसाधन का सप्ताह खोल देता है, जहाँ आप बुक कर सकते हैं, खिसका सकते हैं या एडिट कर सकते हैं।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "क्या पंक्तियाँ रूम की जगह लोग हो सकते हैं?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "हाँ। संसाधन कोई भी ऑब्जेक्ट हो सकता है, User भी। User पर एक क्षमता नंबर जोड़ें और हीटमैप टीम क्षमता का डैशबोर्ड बन जाता है: कौन पूरा भरा है, किसके पास जगह है, और कौन-से सप्ताह ओवरलोड हैं।"
+                        }
+                    }
+                ],
+                "inLanguage": "hi"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png",
+                "caption": "MultiDatePick Salesforce उपयोग हीटमैप (utilization heatmap) का एनिमेटेड डेमो: किनारे पर सलाहकार और हर दिन क्षमता में से कितनी बुकिंग, एक भरे हुए दिन पर होवर, फिर क्लिक करके उस सलाहकार का सप्ताह खोलना",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-heatmap.png",
+                "caption": "सलाहकार अपॉइंटमेंट के लिए Salesforce उपयोग हीटमैप: हर सलाहकार की रोज़ की बुकिंग क्षमता में से, ऊपर संयुक्त उपलब्धता की पंक्ति और दाईं ओर औसत और खाली जगहों का कॉलम",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-project-capacity.png",
+                "caption": "कई दिनों के क्लाइंट एंगेजमेंट का Salesforce उपयोग हीटमैप: दो-दो एंगेजमेंट की क्षमता वाले तीन सलाहकार, पूरा महीना, जिसमें दिखता है कि हर सलाहकार किन दिनों पूरी तरह व्यस्त है",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce उपयोग हीटमैप: देखें कौन ओवरबुक है</h1>
+                <p class="subtitle">हर रूम, व्यक्ति या उपकरण किनारे पर, हर दिन ऊपर, और हर सेल बताता है कि उसकी क्षमता का कितना हिस्सा बुक है। आपके अपने Salesforce ऑब्जेक्ट के लिए क्षमता डैशबोर्ड, बिना कोड के सेटअप।</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">प्रकाशित 13 अक्टूबर 2026 &middot; अपडेट 21 अक्टूबर 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"क्या अगले सप्ताह टीम ओवरबुक है?" "कौन-सा रूम महीने में ज़्यादातर खाली रहता है?" "क्या हम एक और एंगेजमेंट ले सकते हैं?" ये क्षमता के सवाल हैं। कैलेंडर बताता है कि क्या बुक है; यह नहीं बताता कि कुछ कितना भरा है। उपयोग हीटमैप यही बताता है।</p>
+
+                <p>MultiDatePick का उपयोग व्यू वही बुकिंग पढ़ता है जो उसका कैलेंडर और टाइमलाइन पढ़ते हैं, और उन्हें भराव के स्तरों के ग्रिड में बदल देता है: हर संसाधन की एक पंक्ति, हर दिन का एक सेल, और हर सेल बताता है कि उस संसाधन की कितनी जगहें भर चुकी हैं। किसी भी प्लेसमेंट में यह बस एक कॉन्फ़िगरेशन फ़ील्ड की दूरी पर है, और इसे क्षमता के लिए संसाधन पर एक नंबर के अलावा कुछ नहीं चाहिए।</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-utilization-view-demo-poster.png" data-gif="/images/views/salesforce-utilization-view-demo.gif" alt="MultiDatePick Salesforce उपयोग हीटमैप (utilization heatmap) का एनिमेटेड डेमो: किनारे पर सलाहकार और हर दिन क्षमता में से कितनी बुकिंग, एक भरे हुए दिन पर होवर, फिर क्लिक करके उस सलाहकार का सप्ताह खोलना" loading="lazy" decoding="async" width="880" height="780" data-zoomable>
+                    <figcaption>किनारे पर सलाहकार, हर सेल में क्षमता में से बुकिंग। किसी दिन पर होवर करें तो उसकी बुकिंग दिखती हैं, क्लिक करें तो वह सप्ताह खुलता है।</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">हीटमैप क्या दिखाता है</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>क्षमता में से बुकिंग</h3><p>हर सेल 3/4 जैसा दिखता है: चार में से तीन जगहें भरीं। दिन जितना भरा, नीला उतना गहरा।</p></div>
+                    <div class="tl-feat"><h3>ओवरबुकिंग चिह्नित</h3><p>क्षमता से ज़्यादा बुक दिन पर नारंगी घेरा आता है। उसे चुपचाप "भरा" पर रोककर नहीं दिखाया जाता।</p></div>
+                    <div class="tl-feat"><h3>संयुक्त उपलब्धता</h3><p>ऊपर की एक पंक्ति हर दिन पूरे समूह का भराव प्रतिशत में दिखाती है, ताकि सबसे व्यस्त दिन तुरंत दिखें।</p></div>
+                    <div class="tl-feat"><h3>औसत और खाली</h3><p>दाईं ओर का कॉलम हर संसाधन का महीने का औसत, और आज से कितनी जगहें अभी खाली हैं, बताता है।</p></div>
+                    <div class="tl-feat"><h3>क्लिक करके अंदर जाएँ</h3><p>किसी बुक सेल पर क्लिक करें और कंपोनेंट उस दिन पर उस संसाधन का सप्ताह खोल देता है, बुक या एडिट करने के लिए तैयार।</p></div>
+                    <div class="tl-feat"><h3>क्षमता के बिना भी काम करता है</h3><p>अभी क्षमता फ़ील्ड नहीं है? सेल उसी पैमाने पर बुकिंग की सीधी गिनती दिखाते हैं, और ग्रिड यह बता देता है।</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">एक नज़र में पूरे महीने की क्षमता</h2>
+                <p>रिपोर्ट उपयोग बता सकती हैं, पर एक बार में एक सवाल का जवाब। हीटमैप पूरा महीना एक साथ दिखाता है, इसलिए ऐसे पैटर्न तुरंत दिखते हैं जो कोई रिपोर्ट सामने नहीं लाती: वह सलाहकार जो हर मंगलवार भरा रहता है, वह रूम जिसे शुक्रवार को कोई बुक नहीं करता, वह सप्ताह जब सब एक साथ पूरी क्षमता पर हैं। ग्रिड आज की तारीख पर खुलता है, स्क्रॉल करते समय संसाधनों के नाम स्थिर रखता है, और खाली जगहें केवल आज से आगे गिनता है, क्योंकि पिछले सप्ताह की बची क्षमता अब बुक नहीं हो सकती।</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-utilization-heatmap.png" alt="सलाहकार अपॉइंटमेंट के लिए Salesforce उपयोग हीटमैप: हर सलाहकार की रोज़ की बुकिंग क्षमता में से, ऊपर संयुक्त उपलब्धता की पंक्ति और दाईं ओर औसत और खाली जगहों का कॉलम" loading="lazy" width="2000" height="1247" data-zoomable>
+                    <figcaption>सलाहकार अपॉइंटमेंट का एक महीना। सबसे गहरे सेल पूरे भरे दिन हैं; दाईं ओर का कॉलम बताता है कि कितनी जगह बची है।</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">कई दिनों का काम हर उस दिन गिना जाता है जब वह चलता है</h2>
+                <p>क्षमता केवल मीटिंग तक सीमित नहीं। एक कंसल्टेंट एक साथ दो क्लाइंट एंगेजमेंट संभाल सकता है; एक क्रू एक बार में एक साइट पर काम कर सकता है; एक ट्रेनिंग रूम पूरे सप्ताह एक कोर्स चलाता है। हीटमैप कई दिनों की बुकिंग को उसके हर दिन पर गिनता है, इसलिए सोमवार से शुक्रवार तक चलने वाला एंगेजमेंट पाँचों सेल भरता है। क्षमता को उतनी चीज़ों पर सेट करें जितनी एक संसाधन एक साथ संभाल सकता है, और ग्रिड ठीक-ठीक दिखाता है कि हर व्यक्ति कब पूरी तरह व्यस्त है।</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-utilization-project-capacity.png" alt="कई दिनों के क्लाइंट एंगेजमेंट का Salesforce उपयोग हीटमैप: दो-दो एंगेजमेंट की क्षमता वाले तीन सलाहकार, पूरा महीना, जिसमें दिखता है कि हर सलाहकार किन दिनों पूरी तरह व्यस्त है" loading="lazy" width="2000" height="761" data-zoomable>
+                    <figcaption>हर सलाहकार की दो की क्षमता के मुकाबले क्लाइंट एंगेजमेंट। 2/2 का मतलब है उस दिन पूरी तरह व्यस्त।</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Salesforce उपयोग हीटमैप कौन इस्तेमाल करता है</h2>
+                <p>संसाधन कोई भी ऑब्जेक्ट हो सकता है, इसलिए यही व्यू बहुत अलग-अलग टीमों के क्षमता से जुड़े सवालों का जवाब देता है:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>टीम क्षमता प्लानिंग</strong><span>संसाधन को क्षमता नंबर के साथ User पर सेट करें और देखें कौन भरा है और कौन और काम ले सकता है।</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>कॉन्फ़्रेंस और ट्रेनिंग रूम</strong><span>अगली लीज़ साइन करने से पहले जानें कौन-से रूम खाली पड़े रहते हैं और किन दिनों हर रूम भरा है।</span></div></div>
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>कंसल्टेंट और सलाहकार</strong><span>एंगेजमेंट या अपॉइंटमेंट, इस हिसाब से कि हर व्यक्ति एक साथ कितने संभाल सकता है।</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>क्लिनिक और डॉक्टर</strong><span>हर डॉक्टर के रोज़ के अपॉइंटमेंट स्लॉट, ओवरबुक दिनों पर नारंगी घेरे के साथ।</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>उपकरण और वाहन</strong><span>हर वाहन, उपकरण या किट कितनी बार बाहर रहता है, और किनके बिना काम चल सकता है।</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>इवेंट और क्लास</strong><span>महीने के हर सेशन में उपलब्ध सीटों के मुकाबले बुक सीटें।</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">इसे आकार देने वाली सेटिंग्स</h2>
+                <p>इनमें से हर एक कंपोनेंट की एक प्रॉपर्टी और Setup Wizard का एक फ़ील्ड है, इसलिए यहाँ कोड की ज़रूरत नहीं:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">सेटिंग</th><th>यह क्या करता है</th><th style="width:22%;">API नाम</th></tr></thead>
+                    <tbody>
+                    <tr><td>दृश्य (View)</td><td>इसी व्यू में खोलने के लिए <code>utilization</code> सेट करें, या स्विचर में दिखाने के लिए इसे Available Views (उपलब्ध दृश्य) में जोड़ें।</td><td><code>view</code></td></tr>
+                    <tr><td>क्षमता फ़ील्ड (Capacity Field)</td><td>संसाधन पर एक नंबर फ़ील्ड: वह एक साथ कितनी बुकिंग ले सकता है। सेल इसी के मुकाबले बुकिंग दिखाते हैं। खाली छोड़ें तो सेल गिनती दिखाते हैं।</td><td><code>capacityField</code></td></tr>
+                    <tr><td>व्यू में अधिकतम संसाधन (Max View Resources)</td><td>केवल इतनी पंक्तियाँ दिखाएँ, सबसे व्यस्त पहले। संयुक्त पंक्ति में फिर भी हर संसाधन गिना जाता है।</td><td><code>maxViewResources</code></td></tr>
+                    <tr><td>संसाधन पंक्तियाँ (Resource Rows)</td><td>हर संसाधन दिखाएँ, या केवल वे जिनकी महीने में बुकिंग है।</td><td><code>resourceViewFilter</code></td></tr>
+                    <tr><td>स्थिति फ़ील्ड (Status Field)</td><td>स्थिति के रंग चालू हों तो ग्रिड के ऊपर की स्थिति पिल तय करती हैं कि क्या गिना जाए। Cancelled बंद करें और वे बुकिंग हर सेल से हट जाती हैं।</td><td><code>statusField</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>एक कंपोनेंट, पाँच व्यू।</strong> उपयोग व्यू उसी कंपोनेंट में कैलेंडर, टाइमलाइन, सप्ताह और एजेंडा के साथ रहता है, और वही रिकॉर्ड पढ़ता है। इसे उस व्यू के बगल में रखें जिसमें लोग बुक करते हैं, बाकी काम स्विचर कर देता है। <a href="/hi/blog/salesforce-calendar-views.html">पाँचों व्यू देखें</a>।</div>
+
+                <h2 style="margin-top:44px;">लोग अक्सर पूछते हैं</h2>
+                <div class="tl-faq">
+                    <details><summary>Salesforce में संसाधन का उपयोग (resource utilization) कैसे देखें?</summary><p>स्टैंडर्ड Salesforce में आपके अपने बुकिंग ऑब्जेक्ट के लिए कोई उपयोग व्यू नहीं है; हर सवाल के लिए एक रिपोर्ट बनानी पड़ती। MultiDatePick कैलेंडर कंपोनेंट में एक उपयोग (Utilization) व्यू जोड़ता है: हर संसाधन एक पंक्ति, हर दिन एक सेल जो उस संसाधन की क्षमता में से बुकिंग दिखाता है, पूरे समूह के लिए एक संयुक्त पंक्ति, और दाईं ओर औसत और खाली जगहों की गिनती।</p></details>
+                    <details><summary>2/2 या 3/4 जैसे सेल का क्या मतलब है?</summary><p>उस दिन की बुकिंग, संसाधन की क्षमता के मुकाबले। 3/4 का मतलब है चार में से तीन जगहें भर चुकी हैं। नीला जितना गहरा, दिन उतना भरा; और क्षमता से ज़्यादा बुक दिन के चारों ओर नारंगी घेरा आता है ताकि वह अलग दिखे।</p></details>
+                    <details><summary>अगर मेरे संसाधन ऑब्जेक्ट में क्षमता फ़ील्ड न हो तो?</summary><p>हीटमैप फिर भी काम करता है। सेल उसी नीले पैमाने पर बुकिंग की सीधी गिनती दिखाते हैं, और ग्रिड के नीचे एक नोट यही बताता है। जब प्रतिशत और खाली जगहें देखनी हों, तब क्षमता के लिए एक नंबर फ़ील्ड जोड़ दें।</p></details>
+                    <details><summary>क्या मैं उपयोग व्यू से बुक या एडिट कर सकता हूँ?</summary><p>उपयोग व्यू जान-बूझकर केवल पढ़ने के लिए है: यह बताता है कि चीज़ें कितनी भरी हैं। किसी भी बुक सेल पर क्लिक करें और कंपोनेंट उस दिन पर उस संसाधन का सप्ताह खोल देता है, जहाँ आप बुक कर सकते हैं, खिसका सकते हैं या एडिट कर सकते हैं।</p></details>
+                    <details><summary>क्या पंक्तियाँ रूम की जगह लोग हो सकते हैं?</summary><p>हाँ। संसाधन कोई भी ऑब्जेक्ट हो सकता है, User भी। User पर एक क्षमता नंबर जोड़ें और हीटमैप टीम क्षमता का डैशबोर्ड बन जाता है: कौन पूरा भरा है, किसके पास जगह है, और कौन-से सप्ताह ओवरलोड हैं।</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>क्षमता जो दिखती है, उन्हीं ऑब्जेक्ट पर जो आपके पास पहले से हैं।</h2>
+                    <p>लाइव डेमो में उपयोग व्यू खोलें, या <a href="/hi/configlibrary.html">Config Library</a> के टीम क्षमता योजना कॉन्फ़िगरेशन से शुरू करें।</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-utilization-heatmap" class="btn btn-demo" target="_blank" rel="noopener">लाइव डेमो आज़माएँ</a> <a href="/hi/notify-me-at-launch.html" class="btn btn-primary">लॉन्च पर सूचना पाएँ</a> <a href="/hi/gettingstarted.html" class="btn btn-secondary">शुरुआत करें</a>
+                    </div>
+                    <ul class="check-list"><li>$20/यूज़र/माह, हर फ़ीचर</li><li>30 दिन का फ़्री ट्रायल, कार्ड नहीं</li><li>100% नेटिव Salesforce</li><li>कोई Apex नहीं</li><li>जल्द ही Salesforce AppExchange पर</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>संबंधित लेख</h3>
+                    <ul>
+                        <li><a href="/hi/blog/salesforce-timeline-view.html">Salesforce टाइमलाइन व्यू</a></li>
+                        <li><a href="/hi/blog/salesforce-calendar-views.html">Salesforce कैलेंडर के पाँच व्यू, एक ही कंपोनेंट में</a></li>
+                        <li><a href="/hi/blog/prevent-double-booking-in-salesforce.html">Salesforce में डबल बुकिंग कैसे रोकें</a></li>
+                        <li><a href="/hi/salesforce-conference-room-booking-calendar.html">Salesforce में कॉन्फ़्रेंस रूम बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-booking-calendar.html">Booking कंपोनेंट</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/hi/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick लोगो: Salesforce मल्टी-डेट कैलेंडर और संसाधन बुकिंग कंपोनेंट" width="180" height="45">
+                    </a>
+                    <p>Salesforce के लिए सबसे ज़्यादा कस्टमाइज़ करने योग्य कैलेंडर कंपोनेंट सुइट।</p>
+                </div>
+                <div class="footer-links">
+                    <h4>प्रोडक्ट</h4>
+                    <ul>
+                        <li><a href="/hi/multidatepickdates.html">Date</a></li>
+                        <li><a href="/hi/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/hi/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/hi/blog/salesforce-calendar-views.html">पाँच कैलेंडर व्यू</a></li>
+                        <li><a href="/hi/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>समाधान</h4>
+                    <ul>
+                        <li><a href="/hi/salesforce-calendar.html">Salesforce कैलेंडर</a></li>
+                        <li><a href="/hi/salesforce-calendar-staffing-recruiting.html">स्टाफ़िंग और रिक्रूटिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-interview-scheduling.html">इंटरव्यू शेड्यूलिंग</a></li>
+                        <li><a href="/hi/salesforce-conference-room-booking-calendar.html">कॉन्फ़्रेंस रूम बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-experience-cloud-booking.html">Experience Cloud बुकिंग</a></li>
+                        <li><a href="/hi/blog/salesforce-campaign-multiple-dates.html">Campaign की तारीखें</a></li>
+                        <li><a href="/hi/blog/salesforce-section-508-government-calendar.html">सरकारी विभाग / Section 508</a></li>
+                        <li><a href="/hi/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>डॉक्स</h4>
+                    <ul>
+                        <li><a href="/hi/gettingstarted.html">शुरुआत करें</a></li>
+                        <li><a href="/hi/user-guide.html">यूज़र गाइड</a></li>
+                        <li><a href="/hi/flowcheatsheet.html">Screen Flow गाइड</a></li>
+                        <li><a href="/hi/home-app-experience.html">ऐप, होम और Experience पेज</a></li>
+                        <li><a href="/hi/deploy-flow-vscode.html">Flow डिप्लॉय करें (VS Code)</a></li>
+                        <li><a href="/hi/troubleshooting.html">समस्या निवारण</a></li>
+                        <li><a href="/hi/faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>कंपनी</h4>
+                    <ul>
+                        <li><a href="/hi/pricing.html">कीमत</a></li>
+                        <li><a href="/hi/blog/">ब्लॉग</a></li>
+                        <li><a href="/hi/trust.html">भरोसा और सुरक्षा</a></li>
+                        <li><a href="/hi/accessibility.html">सुगम्यता</a></li>
+                        <li><a href="/hi/notify-me-at-launch.html">लॉन्च पर सूचना पाएँ</a></li>
+                        <li><a href="mailto:support@multidatepick.com">सपोर्ट</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. सर्वाधिकार सुरक्षित।</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="भाषा" translate="no"><ul><li><a href="/blog/salesforce-utilization-heatmap.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-auslastungs-heatmap.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/mapa-de-calor-ocupacion-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/heatmap-occupation-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/heatmap-utilizzo-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/mapa-de-calor-ocupacao-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-utilization-heatmap.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-utilization-heatmap.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-utilization-heatmap.html" hreflang="hi" lang="hi" aria-current="page">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">इमेज बड़ी करें</p><p data-k="expand-diagram">आरेख बड़ा करें</p><p data-k="close">बंद करें</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

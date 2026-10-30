@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce タイムライン表示: 全リソースを 1 画面で</title>
+    <meta name="description" content="Salesforce のリソースタイムライン。縦に会議室・人・機材、横に日付。複数日の予約は 1 本のバーで、ドラッグで日程変更。コード不要。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/salesforce-timeline-view.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Timeline post: shares the views post's look. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce タイムライン表示: 全リソースを 1 画面で">
+    <meta property="og:description" content="Salesforce のリソースタイムライン。縦に会議室・人・機材、横に日付。複数日の予約は 1 本のバーで、ドラッグで日程変更。コード不要。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/salesforce-timeline-view.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce タイムライン表示: 全リソースを 1 画面で">
+    <meta name="twitter:description" content="Salesforce のリソースタイムライン。縦に会議室・人・機材、横に日付。複数日の予約は 1 本のバーで、ドラッグで日程変更。コード不要。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-timeline-view.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-zeitachse-ressourcen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/linea-de-tiempo-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/vue-chronologie-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/cronologia-timeline-risorse-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/linha-do-tempo-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-timeline-view.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-timeline-view.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-timeline-view.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-timeline-view.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce タイムライン表示: 全リソースを 1 画面で",
+                "description": "Salesforce のリソースタイムライン。縦に会議室・人・機材、横に日付。複数日の予約は 1 本のバーで、ドラッグで日程変更。コード不要。",
+                "datePublished": "2026-10-12",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/salesforce-timeline-view.html",
+                "image": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce にリソースのタイムライン表示はありますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "自社のオブジェクト向けの標準 Lightning コンポーネントとしてはありません。Salesforce のカレンダーは 1 人分の行動を表示するもので、ガントチャート形式のビューは通常、プロジェクト向けのアドオンが必要です。MultiDatePick は、カスタム・標準を問わず任意のオブジェクトを読み込めるリソースタイムラインを追加します。予約を保存するオブジェクトとリソースを保存するオブジェクトを選ぶだけで、各リソースが 1 行になります。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "タイムライン上で予約をドラッグして日程を変更できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。編集モードをオンにして、バーの中央をつかめば別の日に移動でき、両端をつかめば開始日や終了日を変更できます。ドラッグ中はバーに新しい日付が表示され、手を離すと保存されます。日単位のズームでは、同じ操作で予約の開始時刻と終了時刻を移動・延長できます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "行を会議室ではなく人にできますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。リソースには User を含め任意のオブジェクトを使えます。User を指定すれば、タイムラインはスタッフの勤務表になります。1 人が 1 行で、シフト、訪問、担当業務がバーで表示されます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "リソースが多いとき、行がずらりと並びすぎないようにするには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Max View Resources を設定すると最も予約の多い行だけを表示し、Timeline Group By Field で選択リストや参照項目ごとに行をグループ化できます。また、すべてのリソースを表示するか、予約のあるリソースだけを表示するかも選べます。どのリソースも定員の計算には含まれ、設定で変わるのは表示内容だけです。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "タイムラインは Experience Cloud サイトやレコードページでも使えますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。同じコンポーネントにある 5 つの表示の 1 つなので、コンポーネントが動く場所ならどこでも使えます。レコードページ、アプリケーションページ、ホームページ、フロー画面、Experience Cloud サイトです。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo-poster.png",
+                "caption": "MultiDatePick の Salesforce リソースタイムラインのアニメーションデモ: 縦にアドバイザー、顧客案件は期間全体にわたる 1 本のバーで表示。1 つにカーソルを合わせてカードを表示し、週から月にズーム",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule-poster.png",
+                "caption": "Salesforce タイムラインでの日程変更のアニメーションデモ: 予約の右端をドラッグして 2 日延長し、別の予約をドラッグして 2 日後にずらす。いずれも手を離すと保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-capacity-lanes.png",
+                "caption": "Salesforce タイムラインの拡大図: 重なる複数日の予約が各リソースの下で段に分かれて積み重なり、全体の定員バーで各日の埋まり具合を表示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-resource-timeline-view.png",
+                "caption": "人を行にした Salesforce リソースタイムライン: 縦に各アドバイザー、横に今後の日付、顧客案件はそれぞれ 1 本のバーで表示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce のタイムライン表示: すべてのリソースを 1 画面で</h1>
+                <p class="subtitle">縦に会議室、人、機材、プロジェクト、横に日付。すべての予約を 1 本のバーで表示します。任意の Salesforce オブジェクトに使えるリソースタイムラインを、コードなしで設定できます。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 10 月 12 日 &middot; 更新日 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">「来週の火曜に空いている会議室は?」「今週、手が空いているのはチームの誰?」「バンはいつ戻ってくる?」どれも、多くのリソースを多くの日にわたって見る質問です。月カレンダーではリソースを 1 つずつ確認するしかありませんが、タイムラインならひと目でわかります。</p>
+
+                <p>MultiDatePick のタイムライン表示では、リソースごとに 1 行、予約ごとに実際の期間どおりの長さのバーを表示します。自社の Salesforce オブジェクトを読み込み、コンポーネントのほかの部分と同じ処理で保存し、設定項目 1 つでどの配置場所にも使えます。</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-view-demo-poster.png" data-gif="/images/views/salesforce-timeline-view-demo.gif" alt="MultiDatePick の Salesforce リソースタイムラインのアニメーションデモ: 縦にアドバイザー、顧客案件は期間全体にわたる 1 本のバーで表示。1 つにカーソルを合わせてカードを表示し、週から月にズーム" loading="lazy" decoding="async" width="880" height="880" data-zoomable>
+                    <figcaption>縦にアドバイザー、案件はバーで表示し、週から月へズーム。バーにカーソルを合わせると詳細が表示されます。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">カレンダーにはできない、タイムラインの機能</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>1 件の予約に 1 本のバー</h3><p>月曜から金曜までの予約は途切れない 1 本のバーなので、期間の長さがひと目でわかります。</p></div>
+                    <div class="tl-feat"><h3>重なりは段に分けて</h3><p>同じリソースで重なる予約は段に分けて積み重ねます。予約の多い日は件数表示にまとまり、その場で展開できます。</p></div>
+                    <div class="tl-feat"><h3>定員バー</h3><p>各グループの上のバーに、リソース全体の定員に対する各日の埋まり具合を表示します。</p></div>
+                    <div class="tl-feat"><h3>日・週・月のズーム</h3><p>今日は時間単位で、計画には 2 週間、長期の見通しには 1 か月。ワンクリックで切り替えられます。</p></div>
+                    <div class="tl-feat"><h3>ドラッグで日程変更</h3><p>バーをずらせば移動、端を引っぱれば延長。手を離すと保存され、置いた場所にそのまま残ります。</p></div>
+                    <div class="tl-feat"><h3>グリッドから予約</h3><p>リソースの行で空いている日をドラッグして選択し、予約します。リソースは行から自動で選ばれます。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">ドラッグで日程変更、端を伸ばして延長</h2>
+                <p>予定は変わるもの。変更のたびにレコードを開き、2 つの日付項目を編集して保存するのは手間です。タイムラインならバーをつかむだけ。右端を引っぱれば予約が延び、中央をつかめば別の日にずれます。ドラッグ中は移動先の日付がバーに表示され、手を離した瞬間に保存。バーは自分の段に残り、短くハイライトされるので、何が変わったかが正確にわかります。</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-drag-to-reschedule-poster.png" data-gif="/images/views/salesforce-timeline-drag-to-reschedule.gif" alt="Salesforce タイムラインでの日程変更のアニメーションデモ: 予約の右端をドラッグして 2 日延長し、別の予約をドラッグして 2 日後にずらす。いずれも手を離すと保存" loading="lazy" decoding="async" width="880" height="880" data-zoomable>
+                    <figcaption>端を引いて延長、中央をつかんで移動。変更は手を離すと保存されます。</figcaption>
+                </figure>
+                <p><strong>日</strong>単位のズームに切り替えると、列が時間になります。同じ操作で予約の開始と終了の<em>時刻</em>を移動・延長できるので、長引いた会議もドラッグ 1 回で直せます。</p>
+
+                <h2 style="margin-top:44px;">定員がひと目でわかる</h2>
+                <p>行の上にある定員バーは、リソース全体の定員のうちどれだけ予約されているかで各日を色の濃淡で示すので、誰かに聞かれる前に繁忙週が浮かび上がります。選択リストや参照項目 (建物、チーム、地域など) で行をグループ化すれば、グループごとに定員バーが付きます。1 つのリソースに同じ日の予約が複数あると段に分けて積み重なり、数件を超える日は件数表示にまとまって、クリックするとその場で展開します。</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-capacity-lanes.png" alt="Salesforce タイムラインの拡大図: 重なる複数日の予約が各リソースの下で段に分かれて積み重なり、全体の定員バーで各日の埋まり具合を表示" loading="lazy" width="1622" height="894" data-zoomable>
+                    <figcaption>重なる予約は段に分けて積み重なり、バーで各日の埋まり具合がわかります。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Salesforce のタイムラインを使っているチーム</h2>
+                <p>リソースには任意のオブジェクトを使えるので、同じ表示がまったく違うチームに合います。</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>会議室・座席</strong><span>会議室ごとに 1 行。日ごとに開かなくても、木曜に空いている会議室がわかります。</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>機材・車両</strong><span>バン、カメラ、実験機器。複数日の貸し出しは 1 本のバーなので、1 週間の不在も一目瞭然です。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>スタッフの勤務表</strong><span>リソースに User を指定すれば行は人になり、シフト、訪問、担当業務がひと目でわかります。</span></div></div>
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>顧客案件・プロジェクト</strong><span>縦にアドバイザー、コンサルタント、作業チーム。各案件は実施期間にわたって表示されます。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>有給休暇・休暇</strong><span>誰がいつ不在か。重なる休暇は 1 本のバーに隠れず、段に分けて表示されます。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>フィールドサービスの作業チーム</strong><span>チームを行に、作業をバーに。天候で延期になったら作業を別の日にドラッグするだけです。</span></div></div>
+                </div>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-resource-timeline-view.png" alt="人を行にした Salesforce リソースタイムライン: 縦に各アドバイザー、横に今後の日付、顧客案件はそれぞれ 1 本のバーで表示" loading="lazy" width="1722" height="1782" data-zoomable>
+                    <figcaption>人をリソースに: アドバイザーごとに 1 行、案件ごとに 1 本のバー。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">動作を決める設定</h2>
+                <p>いずれもコンポーネントのプロパティとセットアップウィザードの項目なので、コードは一切不要です。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">設定</th><th>機能</th><th style="width:22%;">API 参照名</th></tr></thead>
+                    <tbody>
+                    <tr><td>表示</td><td><code>timeline</code> にすると最初にタイムラインで開きます。Available Views（利用可能な表示） に含めれば切り替えの選択肢になります。</td><td><code>view</code></td></tr>
+                    <tr><td>タイムラインのズーム（Timeline Zoom）</td><td>最初に開くズーム: <code>day</code> (横に時間)、<code>week</code>、<code>month</code>。ユーザーはボタンで切り替えられます。</td><td><code>timelineZoom</code></td></tr>
+                    <tr><td>タイムラインの表示期間 (日)（Timeline Window (Days)）</td><td>一度に画面に表示する日数。既定は 2 週間です。1 か月分の列を並べると窮屈になります。</td><td><code>timelineWindowDays</code></td></tr>
+                    <tr><td>タイムラインのグループ化項目（Timeline Group By Field）</td><td>リソースの選択リストまたは参照項目。行を折りたたみ可能な見出しの下にまとめ、グループごとに定員バーを表示します。</td><td><code>timelineGroupByField</code></td></tr>
+                    <tr><td>リソース行の最大数（Max View Resources）</td><td>予約の多い順に、この行数だけを表示。表示しない行も定員の計算には含まれます。</td><td><code>maxViewResources</code></td></tr>
+                    <tr><td>リソース行（Resource Rows）</td><td>すべてのリソースを表示するか、表示期間内に予約のあるリソースだけを表示するか。</td><td><code>resourceViewFilter</code></td></tr>
+                    <tr><td>定員項目（Capacity Field）</td><td>リソースの数値項目。定員バーと段数の基準になります。</td><td><code>capacityField</code></td></tr>
+                    <tr><td>編集モードを有効化（Enable Edit Mode）</td><td>ドラッグによる予約の移動・延長と、編集パネルからの一括編集を有効にします。</td><td><code>enableEditMode</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>1 つのコンポーネントに 5 つの表示。</strong> タイムラインは、カレンダー、週、稼働率、予定一覧と同じコンポーネントにあり、同じレコードを読み込みます。ページごとに必要な表示を提供すれば、あとは切り替えボタンにお任せです。<a href="/ja/blog/salesforce-calendar-views.html">5 つの表示をすべて見る</a>。</div>
+
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="tl-faq">
+                    <details><summary>Salesforce にリソースのタイムライン表示はありますか?</summary><p>自社のオブジェクト向けの標準 Lightning コンポーネントとしてはありません。Salesforce のカレンダーは 1 人分の行動を表示するもので、ガントチャート形式のビューは通常、プロジェクト向けのアドオンが必要です。MultiDatePick は、カスタム・標準を問わず任意のオブジェクトを読み込めるリソースタイムラインを追加します。予約を保存するオブジェクトとリソースを保存するオブジェクトを選ぶだけで、各リソースが 1 行になります。</p></details>
+                    <details><summary>タイムライン上で予約をドラッグして日程を変更できますか?</summary><p>はい。編集モードをオンにして、バーの中央をつかめば別の日に移動でき、両端をつかめば開始日や終了日を変更できます。ドラッグ中はバーに新しい日付が表示され、手を離すと保存されます。日単位のズームでは、同じ操作で予約の開始時刻と終了時刻を移動・延長できます。</p></details>
+                    <details><summary>行を会議室ではなく人にできますか?</summary><p>はい。リソースには User を含め任意のオブジェクトを使えます。User を指定すれば、タイムラインはスタッフの勤務表になります。1 人が 1 行で、シフト、訪問、担当業務がバーで表示されます。</p></details>
+                    <details><summary>リソースが多いとき、行がずらりと並びすぎないようにするには?</summary><p>Max View Resources を設定すると最も予約の多い行だけを表示し、Timeline Group By Field で選択リストや参照項目ごとに行をグループ化できます。また、すべてのリソースを表示するか、予約のあるリソースだけを表示するかも選べます。どのリソースも定員の計算には含まれ、設定で変わるのは表示内容だけです。</p></details>
+                    <details><summary>タイムラインは Experience Cloud サイトやレコードページでも使えますか?</summary><p>はい。同じコンポーネントにある 5 つの表示の 1 つなので、コンポーネントが動く場所ならどこでも使えます。レコードページ、アプリケーションページ、ホームページ、フロー画面、Experience Cloud サイトです。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>今あるオブジェクトで使えるリソースタイムライン。</h2>
+                    <p>ライブデモでタイムラインの予約をドラッグしてみるか、<a href="/ja/configlibrary.html">Config Library</a> で会議室、車両、勤務表の既製の設定をご覧ください。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-timeline-view" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">Salesforce カレンダー表示 5 種類を 1 つのコンポーネントで</a></li>
+                        <li><a href="/ja/blog/salesforce-utilization-heatmap.html">Salesforce の稼働率ヒートマップ</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">Salesforce で会議室を予約する</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用のスケジュール管理</a></li>
+                        <li><a href="/ja/blog/prevent-double-booking-in-salesforce.html">Salesforce でダブルブッキングを防ぐ</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking コンポーネント</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/salesforce-timeline-view.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-zeitachse-ressourcen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/linea-de-tiempo-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/vue-chronologie-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/cronologia-timeline-risorse-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/linha-do-tempo-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-timeline-view.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/salesforce-timeline-view.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-timeline-view.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

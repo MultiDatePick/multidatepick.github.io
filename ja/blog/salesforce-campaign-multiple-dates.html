@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce キャンペーンに複数の日付を: Apex 不要</title>
+    <meta name="description" content="Salesforce キャンペーンのすべての日程を 1 つのカレンダーで管理。ツアーの各会場、ウェビナーシリーズ、ボランティア日を子レコードとして保存し、状況で色分け。Apex 不要。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Campaign post: same look as the Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce キャンペーンに複数の日付を: Apex 不要">
+    <meta property="og:description" content="Salesforce キャンペーンのすべての日程を 1 つのカレンダーで管理。ツアーの各会場、ウェビナーシリーズ、ボランティア日を子レコードとして保存し、状況で色分け。Apex 不要。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/salesforce-campaign-multiple-dates.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce キャンペーンに複数の日付を: Apex 不要">
+    <meta name="twitter:description" content="Salesforce キャンペーンのすべての日程を 1 つのカレンダーで管理。ツアーの各会場、ウェビナーシリーズ、ボランティア日を子レコードとして保存し、状況で色分け。Apex 不要。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-kampagne-mehrere-termine.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/fechas-de-campana-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/campagne-salesforce-plusieurs-dates.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/date-multiple-campagne-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/varias-datas-campanha-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-campaign-multiple-dates.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html" class="active">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce キャンペーンに複数の日付を: Apex 不要",
+                "description": "Salesforce キャンペーンのすべての日程を 1 つのカレンダーで管理。ツアーの各会場、ウェビナーシリーズ、ボランティア日を子レコードとして保存し、状況で色分け。Apex 不要。",
+                "datePublished": "2026-10-19",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/salesforce-campaign-multiple-dates.html",
+                "image": "https://multidatepick.com/images/blog/salesforce-campaign-multiple-dates.gif",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce のキャンペーンに複数の日付を持たせられますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "標準のキャンペーンにあるのは開始日と終了日が 1 つずつだけです。ツアー、ウェビナーシリーズ、ボランティアプログラムの各日を管理するには、キャンペーンへの参照関係を持つ小さな子オブジェクトを追加し、キャンペーンのレコードページに MultiDatePick の Dates コンポーネントを配置します。クリックした日付はそれぞれ個別の子レコードとして保存されます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "キャンペーンに日付を追加するのに Apex や開発者は必要ですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。子オブジェクトとその項目はオブジェクトマネージャーでクリック操作だけで作成でき、カレンダーの設定はセットアップウィザードが書き出し、コンポーネントは Lightning App Builder でページに配置します。キャンペーン専用のコードを書いたりインストールしたりする必要はありません。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "キャンペーンの日付はどこに保存されますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "自社のカスタムオブジェクト (たとえば Campaign Date) に、日付ごとに 1 件、キャンペーンへの参照関係付きで保存されます。通常の Salesforce レコードなので、リストビュー、レポート、フロー、共有もいつもどおり使えます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "キャンペーンの日付ごとに状況を付けられますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。Planned、Confirmed、Completed、Cancelled などの選択リストを追加し、値ごとに色を選べば、カレンダーが各日付を状況の色で表示します。編集モードでは複数の日付を選んで、状況の変更、移動、削除を一度に行えます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "レコードページではなく画面フロー (Screen Flow) で使えますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。Dates コンポーネントをフロー画面に追加し、Config Name（設定名） にセットアップウィザードで保存した設定を指定します。Parent Record Id にキャンペーンの Id を渡せばコンポーネント自身が子レコードを保存し、空欄のままなら Selected Dates の出力をループ処理できます。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/blog/salesforce-campaign-multiple-dates.gif",
+                "caption": "Salesforce のキャンペーンレコードページで動く MultiDatePick のアニメーションデモ: 寄付者向けツアーの日程を状況の色で表示し、確定した会場にカーソルを合わせ、新しい日付を 2 つ選んで Campaign Date レコードとして保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce キャンペーンの日程: すべての開催日を 1 つのカレンダーで</h1>
+                <p class="subtitle">キャンペーンの開始日と終了日は 1 つずつ。でも、ツアーやウェビナーシリーズ、ボランティアプログラムの日程はたくさんあります。そのすべてを、状況付きの実際のレコードとしてキャンペーンレコードに。Apex は書きません。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 10 月 19 日 &middot; 更新日 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">「Salesforce のキャンペーンに複数の日付を追加するには?」「ロードショーの各会場はどこで管理する?」「どのウェビナー回が確定している?」キャンペーンが知っているのは始まりと終わりだけ。その間のことは、スプレッドシートか長い説明項目に書かれることになります。</p>
+
+                <p>MultiDatePick は、キャンペーンのレコードページにカレンダーを置きます。日をクリックして保存すれば、それぞれがキャンペーンに紐付いた個別の子レコードになり、状況で色分けされます。ほかのオブジェクトと同じく、キャンペーンでも設定だけで動きます。<strong>Apex は不要です。</strong></p>
+
+                <figure class="sc-shot">
+                    <img src="/images/blog/salesforce-campaign-multiple-dates.gif" alt="Salesforce のキャンペーンレコードページで動く MultiDatePick のアニメーションデモ: 寄付者向けツアーの日程を状況の色で表示し、確定した会場にカーソルを合わせ、新しい日付を 2 つ選んで Campaign Date レコードとして保存" loading="lazy" width="790" height="980" data-zoomable>
+                    <figcaption>キャンペーン上の寄付者向けツアー。会場にカーソルを合わせると会場名と状況を表示し、さらに 2 日をクリックして保存。日付はそれぞれ個別のレコードです。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">キャンペーンページでできること</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>すべての日程をひと目で</h3><p>レコードを開くと、キャンペーンのすべての日付がカレンダーに読み込まれます。関連リストをスクロールする必要はありません。</p></div>
+                    <div class="tl-feat"><h3>状況の色分け</h3><p>Planned、Confirmed、Completed、Cancelled。状況ごとに色が付き、カレンダー上部のボタンで状況ごとに絞り込めます。</p></div>
+                    <div class="tl-feat"><h3>ホバーで詳細を表示</h3><p>日付にカーソルを合わせると、その日のレコードの会場名、場所、状況などがリンク付きで表示されます。</p></div>
+                    <div class="tl-feat"><h3>繰り返しパターン</h3><p>8 週間の毎週火曜も、1 つのパターンとワンクリックで。ウェビナーシリーズや配信スケジュールに便利です。</p></div>
+                    <div class="tl-feat"><h3>編集モード</h3><p>複数の日付を選んで、状況の変更、別の日への移動、削除を一度に。</p></div>
+                    <div class="tl-feat"><h3>実際のレコード</h3><p>日付はそれぞれキャンペーンへの参照関係を持つ子レコードです。レポートもフローも共有も、ほかのレコードと同じように使えます。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">3 ステップで設定</h2>
+                <p>コンポーネントはオブジェクトを選びません。親がキャンペーンであることを知る必要もなく、必要なのは保存先の子オブジェクトと、親を指す参照関係だけです。連携はそれで完了です。</p>
+                <ol class="cp-steps">
+                    <li><strong>子オブジェクトを作成します。</strong> オブジェクトマネージャーで <em>Campaign Date</em> などのカスタムオブジェクトを作成します。キャンペーンへの参照関係項目と日付項目を追加し、Status 選択リスト (Planned、Confirmed、Completed、Cancelled) と、会場などホバー時に表示したい詳細項目を追加します。</li>
+                    <li><strong>セットアップウィザードを実行します。</strong> MultiDatePick セットアップウィザードのタブを開き、Dates コンポーネントを設定します。オブジェクトに Campaign Date、リレーション項目にキャンペーンへの参照関係、そして日付項目を選びます。「状況と表示」で状況項目、値ごとの色、ホバー時の項目を選び、<code>Campaign_Dates</code> のような名前で設定を保存します。</li>
+                    <li><strong>キャンペーンページにコンポーネントを配置します。</strong> 任意のキャンペーンを開いて [ページを編集] をクリックし、MultiDatePick の Dates コンポーネントをレイアウトにドラッグして、<strong>Config Name</strong> に設定名を入力します。保存して有効化すれば、すべてのキャンペーンにカレンダーが付きます。</li>
+                </ol>
+                <p>11:00 のウェビナーと 15:00 の再放送のように、日だけでなく時刻も必要ですか? その場合は Date Time コンポーネントを使い、子オブジェクトに開始時刻と終了時刻の項目を追加します。手順は同じです。</p>
+
+                <h2 style="margin-top:44px;">画面フローで使いたい場合</h2>
+                <p>同じ設定がフローでもそのまま使えます。Dates コンポーネントを画面に追加して <strong>Config Name</strong> を設定するだけで、すべての設定は設定から読み込まれ、Flow Builder でチェックボックスを設定する必要はありません。<strong>Parent Record Id</strong> にキャンペーンの Id を渡せばコンポーネント自身が子レコードを保存します。Selected Dates の出力をループして独自の方法でレコードを作成したい場合は空欄のままにします。両方のパターンは<a href="/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html">画面フローで複数の日付を選ぶ</a>の記事で解説しています。</p>
+
+                <h2 style="margin-top:44px;">キャンペーンで管理されているもの</h2>
+                <p>キャンペーンで複数日にわたって行うことなら、何でも同じ子オブジェクトで管理できます。</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>複数日のイベント</strong><span>設営日、開催日、撤収日があるカンファレンス、サミット、ガラ。それぞれに状況を付けられます。</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>ロードショー・ツアー</strong><span>会場ごとに 1 件のレコードに会場名と状況。どの都市が確定したか全員にわかります。</span></div></div>
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>ウェビナーシリーズ</strong><span>繰り返しパターンでシリーズ全体を配置。色で開催済みの回がわかります。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>ボランティア日</strong><span>シーズンを通じた奉仕活動日や募金活動。それぞれがレポートに使えるレコードです。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>配信スケジュール</strong><span>メールや郵送のステップ配信の予定日を、所属するキャンペーン上に表示。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>配信停止日</strong><span>Blocked Dates に休日のオブジェクトを指定すれば、その日に配信やイベントを計画する人はいなくなります。</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">動作を決める設定</h2>
+                <p>いずれもセットアップウィザードの項目とコンポーネントのプロパティなので、コードは一切不要です。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">設定</th><th>機能</th><th style="width:22%;">API 参照名</th></tr></thead>
+                    <tbody>
+                    <tr><td>子オブジェクトの API 参照名（Child Object API Name）</td><td>各日付の保存先の子オブジェクト (Campaign_Date__c など)。</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>関連項目の API 参照名（Relationship Field API Name）</td><td>そのオブジェクトにある、キャンペーンを指す参照関係項目。コンポーネントがレコードページから値を入れます。</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>日付項目の API 参照名（Date Field API Name）</td><td>選んだ各日を保存する日付項目。</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>状況項目と状況の色（Status Field and Status Colors）</td><td>状況の選択リストと値ごとの色 (例: Confirmed:#22C55E)。</td><td><code>statusField</code>、<code>statusColors</code></td></tr>
+                    <tr><td>ホバー項目（Hover Popover Fields）</td><td>日付にカーソルを合わせたときに表示する項目 (名前、会場、状況など)。</td><td><code>hoverFields</code></td></tr>
+                    <tr><td>繰り返しパターンを表示（Show Recurring Pattern Button）</td><td>毎週や毎月の繰り返し用に「繰り返しパターンを追加」ボタンを表示します。</td><td><code>showRecurringPattern</code></td></tr>
+                    <tr><td>編集モードを有効化（Enable Edit Mode）</td><td>複数の日付の状況変更、移動、削除を一度に行う編集ボタンを表示します。</td><td><code>enableEditMode</code></td></tr>
+                    <tr><td>設定名（Config Name）</td><td>セットアップウィザードで保存した設定。これを設定すれば、ほかは空欄のままで構いません。</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>月表示のグリッドだけではありません。</strong> MultiDatePick は同じレコードを、カレンダー、タイムライン、週、予定一覧、稼働率のグリッドで表示でき、1 つのコンポーネントで切り替えられます。<a href="/ja/blog/salesforce-calendar-views.html">5 つの表示をすべて見る</a>。</div>
+
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="tl-faq">
+                    <details><summary>Salesforce のキャンペーンに複数の日付を持たせられますか?</summary><p>標準のキャンペーンにあるのは開始日と終了日が 1 つずつだけです。ツアー、ウェビナーシリーズ、ボランティアプログラムの各日を管理するには、キャンペーンへの参照関係を持つ小さな子オブジェクトを追加し、キャンペーンのレコードページに MultiDatePick の Dates コンポーネントを配置します。クリックした日付はそれぞれ個別の子レコードとして保存されます。</p></details>
+                    <details><summary>キャンペーンに日付を追加するのに Apex や開発者は必要ですか?</summary><p>いいえ。子オブジェクトとその項目はオブジェクトマネージャーでクリック操作だけで作成でき、カレンダーの設定はセットアップウィザードが書き出し、コンポーネントは Lightning App Builder でページに配置します。キャンペーン専用のコードを書いたりインストールしたりする必要はありません。</p></details>
+                    <details><summary>キャンペーンの日付はどこに保存されますか?</summary><p>自社のカスタムオブジェクト (たとえば Campaign Date) に、日付ごとに 1 件、キャンペーンへの参照関係付きで保存されます。通常の Salesforce レコードなので、リストビュー、レポート、フロー、共有もいつもどおり使えます。</p></details>
+                    <details><summary>キャンペーンの日付ごとに状況を付けられますか?</summary><p>はい。Planned、Confirmed、Completed、Cancelled などの選択リストを追加し、値ごとに色を選べば、カレンダーが各日付を状況の色で表示します。編集モードでは複数の日付を選んで、状況の変更、移動、削除を一度に行えます。</p></details>
+                    <details><summary>レコードページではなく画面フロー (Screen Flow) で使えますか?</summary><p>はい。Dates コンポーネントをフロー画面に追加し、Config Name（設定名） にセットアップウィザードで保存した設定を指定します。Parent Record Id にキャンペーンの Id を渡せばコンポーネント自身が子レコードを保存し、空欄のままなら Selected Dates の出力をループ処理できます。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>キャンペーンのすべての日程を、キャンペーン上に。</h2>
+                    <p>ライブデモで日付をクリックしてみるか、<a href="/ja/configlibrary.html">Config Library</a> の既製の設定から始めましょう。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-campaign-multiple-dates" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html">Salesforce 画面フローで複数の日付を選択する</a></li>
+                        <li><a href="/ja/blog/recurring-date-patterns-in-salesforce.html">ロジックを書かずに繰り返しの日付パターンを作る</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-setup-wizard.html">MultiDatePick セットアップウィザード</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">Salesforce カレンダー表示 5 種類を 1 つのコンポーネントで</a></li>
+                        <li><a href="/ja/multidatepickdates.html">Dates コンポーネント</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/salesforce-campaign-multiple-dates.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/fechas-de-campana-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/campagne-salesforce-plusieurs-dates.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/date-multiple-campagne-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-campaign-multiple-dates.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/salesforce-campaign-multiple-dates.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-campaign-multiple-dates.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perché Salesforce non ha un calendario a date multiple</title>
+    <meta name="description" content="Un campo data di Salesforce contiene una sola data e ogni soluzione alternativa ha un punto debole. Perché manca un campo a date multiple e il componente che lo sostituisce.">
+    <link rel="canonical" href="https://multidatepick.com/it/blog/perche-salesforce-non-ha-calendario-date-multiple.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Perché Salesforce non ha un calendario a date multiple">
+    <meta property="og:description" content="Un campo data di Salesforce contiene una sola data e ogni soluzione alternativa ha un punto debole. Perché manca un campo a date multiple e il componente che lo sostituisce.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/it/blog/perche-salesforce-non-ha-calendario-date-multiple.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="it_IT">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Perché Salesforce non ha un calendario a date multiple">
+    <meta name="twitter:description" content="Un campo data di Salesforce contiene una sola data e ogni soluzione alternativa ha un punto debole. Perché manca un campo a date multiple e il componente che lo sostituisce.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/why-salesforce-has-no-multi-date-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-kalender-mehrere-termine.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/por-que-salesforce-no-tiene-calendario-varias-fechas.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/pourquoi-salesforce-na-pas-de-calendrier-multi-dates.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/perche-salesforce-non-ha-calendario-date-multiple.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/por-que-salesforce-nao-tem-calendario-de-varias-datas.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/why-salesforce-has-no-multi-date-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/why-salesforce-has-no-multi-date-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/why-salesforce-has-no-multi-date-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/why-salesforce-has-no-multi-date-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Presto disponibile su Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Chiudi banner" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/it/" class="logo"><img src="/images/logo.png" alt="Logo MultiDatePick: componente calendario a più date e prenotazione risorse per Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Apri/chiudi menu di navigazione"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Prodotto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Date</a></li>
+                        <li><a href="/it/selettore-data-ora-fasce-orarie-salesforce.html">Date Time</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Booking</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Cinque viste calendario</a></li>
+                        <li><a href="/it/configurazioni-calendario-salesforce.html">Config Library</a></li>
+                        <li><a href="/it/affidabilita-e-sicurezza.html">Affidabilità e sicurezza</a></li>
+                        <li><a href="/it/accessibilita-vpat.html">Accessibilità (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Soluzioni <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/calendario-salesforce.html">Calendario Salesforce</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Staffing e recruiting</a></li>
+                        <li><a href="/it/pianificazione-colloqui-salesforce.html">Pianificazione colloqui</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce-experience-cloud.html">Prenotazioni su Experience Cloud</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Date delle campagne</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">Pubblica amministrazione / Section 508</a></li>
+                        <li><a href="/it/alternativa-salesforce-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/it/prezzi.html">Prezzi</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentazione <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/per-iniziare.html">Per iniziare</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente</a></li>
+                        <li><a href="/it/guida-flussi-su-schermo-salesforce.html">Guida ai flussi su schermo</a></li>
+                        <li><a href="/it/pagine-app-home-experience.html">Pagine app, iniziali ed Experience</a></li>
+                        <li><a href="/it/distribuire-flusso-vs-code.html">Distribuire un flusso (VS Code)</a></li>
+                        <li><a href="/it/risoluzione-problemi.html">Risoluzione dei problemi</a></li>
+                        <li><a href="/it/domande-frequenti.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/it/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Prova la demo live</a></li>
+                <li><a href="/it/avvisami-al-lancio.html" class="nav-cta">Avvisami al lancio</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Perché Salesforce non ha un calendario a date multiple",
+                "description": "Un campo data di Salesforce contiene una sola data e ogni soluzione alternativa ha un punto debole. Perché manca un campo a date multiple e il componente che lo sostituisce.",
+                "datePublished": "2026-08-20",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/it/blog/perche-salesforce-non-ha-calendario-date-multiple.html",
+                "image": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo.gif",
+                "inLanguage": "it"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo-poster.png",
+                "caption": "Demo animata del componente MultiDatePick Dates in Salesforce: si dà un nome a una richiesta di ferie, si trascina su tre giorni della settimana del Ringraziamento, si aggiunge il venerdì con un clic e si salvano tutti e quattro i giorni in una volta",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-dates-status.png",
+                "caption": "Calendario Salesforce con molte date selezionate insieme, ognuna salvata come record a sé con uno stato a colori",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Perché Salesforce non ha un calendario a date multiple</h1>
+                <p class="subtitle">Così l'abbiamo creato noi. Fai clic su più date insieme e salva ognuna come record a sé, su qualsiasi oggetto che hai già.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Pubblicato il 20 agosto 2026 &middot; Aggiornato il 21 ottobre 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">Un campo data di Salesforce contiene una sola data. MultiDatePick offre ai tuoi utenti un vero calendario: fai clic sui dodici giorni in cui un candidato è disponibile, sulle sei settimane di chiusura di un edificio o sulle due settimane di ferie di un collega, e ogni selezione viene salvata come record figlio sul tuo oggetto. Un solo passaggio, niente cicli nel flusso, niente dieci campi data.</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/components/salesforce-multi-date-picker-demo-poster.png" data-gif="/images/components/salesforce-multi-date-picker-demo.gif" alt="Demo animata del componente MultiDatePick Dates in Salesforce: si dà un nome a una richiesta di ferie, si trascina su tre giorni della settimana del Ringraziamento, si aggiunge il venerdì con un clic e si salvano tutti e quattro i giorni in una volta" width="700" height="640" loading="lazy" decoding="async" data-zoomable style="max-width:620px;margin:0 auto;">
+                    <figcaption>Trascina su tre giorni, fai clic su un quarto e salva. Quattro date, un solo passaggio.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Le soluzioni alternative e i loro punti deboli</h2>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">Soluzione alternativa</th><th>Punto debole</th></tr></thead>
+                    <tbody>
+                    <tr><td>Dieci campi data</td><td class="bp-no">Devi indovinare il massimo, e la maggior parte resta vuota</td></tr>
+                    <tr><td>Data di inizio e di fine</td><td class="bp-no">Un intervallo non può saltare un giorno</td></tr>
+                    <tr><td>Un ciclo nel flusso</td><td class="bp-no">Una schermata per data, insostenibile oltre le tre</td></tr>
+                    <tr><td>Un calendario a date multiple</td><td class="bp-yes">Tutte le date in un solo passaggio, ognuna salvata come record a sé</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">Tre componenti, un solo pacchetto</h2>
+                <div class="bp-cards">
+                    <div class="bp-card" style="--c:#0176D3;"><h3>Dates</h3><p>Fai clic su quanti giorni vuoi. Le date sparse costano quanto un intervallo continuo, e i giorni adiacenti possono confluire in un unico record con intervallo di date.</p></div>
+                    <div class="bp-card" style="--c:#16A34A;"><h3>Dates &amp; Times</h3><p>Una griglia di fasce orarie per ogni data, con orari diversi in giorni diversi se ti serve.</p></div>
+                    <div class="bp-card"><h3>Resource Booking</h3><p>Scegli una risorsa, vedi la capacità in tempo reale per ogni fascia e blocca le doppie prenotazioni prima del salvataggio.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Configuralo senza codice</h2>
+                <p>Una configurazione guidata ti accompagna passo passo, mostra un'anteprima in tempo reale e scrive la configurazione al posto tuo. Indicale i tuoi oggetti e i tuoi campi. Non c'è nulla da installare oltre al pacchetto e nessun Apex da scrivere.</p>
+                <figure class="sc-shot">
+                    <img src="/images/marketing/salesforce-calendar-dates-status.png" alt="Calendario Salesforce con molte date selezionate insieme, ognuna salvata come record a sé con uno stato a colori" loading="lazy" data-zoomable width="1004" height="682">
+                    <figcaption>Ogni data è un record a sé, colorato in base allo stato.</figcaption>
+                </figure>
+                <ul class="bp-list">
+                    <li><strong>Funziona ovunque.</strong> Pagine record Lightning, pagine app e iniziali, schermate dei flussi e siti Experience Cloud.</li>
+                    <li><strong>Il tuo modello dati.</strong> I componenti leggono e scrivono i tuoi oggetti e campi esistenti.</li>
+                    <li><strong>Colori di stato sul calendario.</strong> Confermato, provvisorio e annullato si vedono già durante la scelta.</li>
+                    <li><strong>I record esistenti si precaricano.</strong> Chi sceglie vede subito cosa è già prenotato.</li>
+                    <li><strong>Modifica sul posto.</strong> Cambia una prenotazione dal calendario senza aprire il record.</li>
+                    <li><strong>Cinque viste.</strong> Calendario, Cronologia, Settimana, Utilizzo e Agenda, da un solo componente.</li>
+                    <li><strong>Nove lingue</strong> e un VPAT pubblicato.</li>
+                </ul>
+
+                <h2 style="margin-top:44px;">Un solo piano, tutte le funzionalità</h2>
+                <p>$20 per utente al mese, con tutti gli aggiornamenti futuri inclusi. Nessun livello, nessuna funzionalità riservata, e 30 giorni di prova gratuita senza carta. <a href="/it/prezzi.html">Vedi i prezzi</a>.</p>
+
+                <div class="sc-note">
+                    <strong>Tutto avviene dentro la tua organizzazione.</strong> MultiDatePick è 100% nativo Salesforce e ha superato la Security Review di AppExchange. Nessun servizio esterno, nessun dato che esce da Salesforce, niente da ospitare.</div>
+
+                <div class="bp-end">
+                    <h2>Provalo su una vera organizzazione Salesforce</h2>
+                    <p>Un sito pubblico con i componenti reali. Nessuna installazione, nessun login, e i dati demo si azzerano ogni ora: fai clic su qualsiasi cosa.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=why-salesforce-has-no-multi-date-calendar" class="btn btn-demo" target="_blank" rel="noopener">Prova la demo live</a> <a href="/it/avvisami-al-lancio.html" class="btn btn-primary">Avvisami al lancio</a> <a href="/it/per-iniziare.html" class="btn btn-secondary">Per iniziare</a>
+                    </div>
+                    <ul class="check-list"><li>$20/utente/mese, tutte le funzionalità</li><li>Prova gratuita di 30 giorni, senza carta</li><li>100% nativo Salesforce</li><li>Senza Apex</li><li>Presto disponibile su Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Letture correlate</h3>
+                    <ul>
+                        <li><a href="/it/blog/date-multiple-flusso-su-schermo-salesforce.html">Date multiple in un flusso su schermo Salesforce</a></li>
+                        <li><a href="/it/blog/date-ricorrenti-salesforce.html">Date ricorrenti in Salesforce</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Cinque viste calendario, un solo componente Salesforce</a></li>
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Il componente Dates</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/it/" class="logo">
+                        <img src="/images/logo.png" alt="Logo MultiDatePick: componente calendario a più date e prenotazione risorse per Salesforce" width="180" height="45">
+                    </a>
+                    <p>La suite di componenti calendario più personalizzabile per Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Prodotto</h4>
+                    <ul>
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Date</a></li>
+                        <li><a href="/it/selettore-data-ora-fasce-orarie-salesforce.html">Date Time</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Booking</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Cinque viste calendario</a></li>
+                        <li><a href="/it/configurazioni-calendario-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluzioni</h4>
+                    <ul>
+                        <li><a href="/it/calendario-salesforce.html">Calendario Salesforce</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Staffing e recruiting</a></li>
+                        <li><a href="/it/pianificazione-colloqui-salesforce.html">Pianificazione colloqui</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce-experience-cloud.html">Prenotazioni su Experience Cloud</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Date delle campagne</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">Pubblica amministrazione / Section 508</a></li>
+                        <li><a href="/it/alternativa-salesforce-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentazione</h4>
+                    <ul>
+                        <li><a href="/it/per-iniziare.html">Per iniziare</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente</a></li>
+                        <li><a href="/it/guida-flussi-su-schermo-salesforce.html">Guida ai flussi su schermo</a></li>
+                        <li><a href="/it/pagine-app-home-experience.html">Pagine app, iniziali ed Experience</a></li>
+                        <li><a href="/it/distribuire-flusso-vs-code.html">Distribuire un flusso (VS Code)</a></li>
+                        <li><a href="/it/risoluzione-problemi.html">Risoluzione dei problemi</a></li>
+                        <li><a href="/it/domande-frequenti.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Azienda</h4>
+                    <ul>
+                        <li><a href="/it/prezzi.html">Prezzi</a></li>
+                        <li><a href="/it/blog/">Blog</a></li>
+                        <li><a href="/it/affidabilita-e-sicurezza.html">Affidabilità e sicurezza</a></li>
+                        <li><a href="/it/accessibilita-vpat.html">Accessibilità</a></li>
+                        <li><a href="/it/avvisami-al-lancio.html">Avvisami al lancio</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Supporto</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Tutti i diritti riservati.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Lingua" translate="no"><ul><li><a href="/blog/why-salesforce-has-no-multi-date-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-kalender-mehrere-termine.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/por-que-salesforce-no-tiene-calendario-varias-fechas.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/pourquoi-salesforce-na-pas-de-calendrier-multi-dates.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/perche-salesforce-non-ha-calendario-date-multiple.html" hreflang="it" lang="it" aria-current="page">Italiano</a></li><li><a href="/pt-br/blog/por-que-salesforce-nao-tem-calendario-de-varias-datas.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/why-salesforce-has-no-multi-date-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/why-salesforce-has-no-multi-date-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/why-salesforce-has-no-multi-date-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ingrandisci immagine</p><p data-k="expand-diagram">Ingrandisci diagramma</p><p data-k="close">Chiudi</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

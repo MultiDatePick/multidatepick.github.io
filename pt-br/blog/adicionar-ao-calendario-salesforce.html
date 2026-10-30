@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar ao calendário no Salesforce: Outlook e Google Agenda</title>
+    <meta name="description" content="Dê a cada reserva do Salesforce um botão Adicionar ao calendário: um arquivo .ics para Outlook, Google Agenda e Apple após salvar, até para convidados do Experience Cloud.">
+    <link rel="canonical" href="https://multidatepick.com/pt-br/blog/adicionar-ao-calendario-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Campaign post: same look as the Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Adicionar ao calendário no Salesforce: Outlook e Google Agenda">
+    <meta property="og:description" content="Dê a cada reserva do Salesforce um botão Adicionar ao calendário: um arquivo .ics para Outlook, Google Agenda e Apple após salvar, até para convidados do Experience Cloud.">
+    <meta property="og:image" content="https://multidatepick.com/images/blog/salesforce-add-to-calendar.png">
+    <meta property="og:url" content="https://multidatepick.com/pt-br/blog/adicionar-ao-calendario-salesforce.html">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="pt_BR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Adicionar ao calendário no Salesforce: Outlook e Google Agenda">
+    <meta name="twitter:description" content="Dê a cada reserva do Salesforce um botão Adicionar ao calendário: um arquivo .ics para Outlook, Google Agenda e Apple após salvar, até para convidados do Experience Cloud.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/blog/salesforce-add-to-calendar.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-add-to-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-zum-kalender-hinzufuegen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/anadir-al-calendario-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/ajouter-au-calendrier-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/aggiungi-al-calendario-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/adicionar-ao-calendario-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-add-to-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-add-to-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-add-to-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-add-to-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Em breve no Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Fechar aviso" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/pt-br/" class="logo"><img src="/images/logo.png" alt="Logotipo do MultiDatePick: calendário de várias datas e reserva de recursos para Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Abrir ou fechar o menu"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">Date</a></li>
+                        <li><a href="/pt-br/seletor-de-data-e-hora-salesforce.html">Date Time</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Cinco visualizações de calendário</a></li>
+                        <li><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a></li>
+                        <li><a href="/pt-br/confianca-e-seguranca.html">Confiança e segurança</a></li>
+                        <li><a href="/pt-br/acessibilidade-vpat.html">Acessibilidade (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">Soluções <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/calendario-salesforce.html">Calendário Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas</a></li>
+                        <li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html">Reserva de salas de reunião</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html" class="active">Datas de campanha</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">Governo / Section 508</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pt-br/precos.html">Preços</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentação <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/primeiros-passos.html">Primeiros passos</a></li>
+                        <li><a href="/pt-br/guia-do-usuario.html">Guia do usuário</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">Guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html">Páginas de aplicativo, iniciais e do Experience Cloud</a></li>
+                        <li><a href="/pt-br/implantar-fluxo-vs-code.html">Implantar um fluxo (VS Code)</a></li>
+                        <li><a href="/pt-br/solucao-de-problemas.html">Solução de problemas</a></li>
+                        <li><a href="/pt-br/perguntas-frequentes.html">Perguntas frequentes</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pt-br/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Experimente a demo ao vivo</a></li>
+                <li><a href="/pt-br/avise-me-no-lancamento.html" class="nav-cta">Avise-me no lançamento</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Adicionar ao calendário no Salesforce: Outlook e Google Agenda",
+                "description": "Dê a cada reserva do Salesforce um botão Adicionar ao calendário: um arquivo .ics para Outlook, Google Agenda e Apple após salvar, até para convidados do Experience Cloud.",
+                "datePublished": "2026-10-26",
+                "dateModified": "2026-10-27",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/pt-br/blog/adicionar-ao-calendario-salesforce.html",
+                "image": "https://multidatepick.com/images/blog/salesforce-add-to-calendar.png",
+                "inLanguage": "pt-BR"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "O Salesforce tem um botão Adicionar ao calendário para reservas?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Não para registros nos seus próprios objetos. Os Eventos do Salesforce podem sincronizar com o Outlook ou o Google pelo Einstein Activity Capture, mas uma reserva salva como registro personalizado não tem como chegar ao calendário da própria pessoa. O MultiDatePick acrescenta um botão Adicionar ao calendário que aparece depois de cada gravação e entrega à pessoa um arquivo de calendário com exatamente o que ela reservou."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Funciona com Outlook, Google Agenda e o Calendário da Apple?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. O botão baixa um arquivo de calendário .ics padrão, o formato que todo calendário importante abre: Outlook no Windows e no Mac, Google Agenda, o Calendário da Apple no Mac, iPhone e iPad, e a maioria dos outros. Quando o navegador não consegue gerar o arquivo, uma reserva única recebe um link Adicionar ao Google Agenda no lugar."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Funciona para convidados do Experience Cloud em uma página pública de reservas?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. O arquivo é gerado no navegador do visitante, então um convidado que reserva por uma página pública do Experience Cloud recebe o mesmo botão Adicionar ao calendário que um usuário logado. Nada muda no acesso do convidado."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Se a reserva mudar depois, o evento no calendário é atualizado?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Não. O Adicionar ao calendário entrega um arquivo avulso, não uma sincronização ao vivo, então uma reserva que muda depois precisa de um arquivo novo. Cada evento leva o Id do registro do Salesforce como identificador único, e assim um calendário que atualiza por ID reconhece o novo arquivo como a mesma reserva, e não como uma segunda."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Algum dado sai do Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Só o arquivo que a pessoa decide baixar. Não há aplicativo conectado, nenhuma chamada externa e nenhum serviço de calendário de terceiros; o MultiDatePick continua 100% nativo. O arquivo contém o nome da reserva, a data, os horários, o recurso, o local do recurso quando você escolhe um, e o status. Nada mais."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Preciso de Apex ou de um desenvolvedor para ativar?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Não. É uma caixa de seleção, Show Add to Calendar After Saving, no componente no Lightning App Builder, no Experience Builder ou em uma tela de fluxo, ou na configuração no Assistente de Configuração."
+                        }
+                    }
+                ],
+                "inLanguage": "pt-BR"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/blog/salesforce-add-to-calendar.gif",
+                "caption": "Demo animada do Adicionar ao calendário no Salesforce: em um calendário de pedido de folga, um padrão recorrente de Dias Personalizados seleciona segunda, quarta e sábado em semanas alternadas de 1º de fevereiro a 6 de março, um único Salvar cria 9 registros de folga e o Adicionar ao calendário baixa um só arquivo com os 9 eventos",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/blog/salesforce-add-to-calendar-month-view.png",
+                "caption": "Calendário de reservas do MultiDatePick no Salesforce, visualização mensal, logo após o pedido de uma consulta: uma barra com a mensagem Salvo. Adicione ao seu calendário, com um botão Adicionar ao calendário acima do calendário de novembro",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/blog/salesforce-add-to-calendar.png",
+                "caption": "Adicionar ao calendário no Salesforce: reservas no Outlook e no Google Agenda (imagem de capa do artigo)",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Adicionar ao calendário no Salesforce: reservas direto no Outlook, Google Agenda e Calendário da Apple</h1>
+                <p class="subtitle">Uma reserva salva no Salesforce só está pela metade até entrar no calendário da própria pessoa. O Adicionar ao calendário termina o serviço: um clique depois de salvar, e o compromisso está no Outlook, no Google Agenda ou no Calendário da Apple.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Publicado em 26 de outubro de 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"O Salesforce consegue mandar a reserva para o meu Outlook?" "Como os clientes colocam o compromisso no Google Agenda?" "Por que as pessoas esquecem reuniões que elas mesmas marcaram?" A reserva está segura no Salesforce, mas muitas vezes o dia da pessoa vive no calendário dela, e nada faz essa ponte.</p>
+
+                <p>O MultiDatePick fecha essa lacuna. Ative <strong>Show Add to Calendar After Saving (Mostrar "Adicionar ao calendário" após Salvar)</strong> e cada gravação bem-sucedida oferece um botão <strong>Adicionar ao calendário</strong>. Um clique baixa um arquivo de calendário com um evento para cada registro que acabou de ser salvo: a data e o horário certos, a sala ou a pessoa, o status. Funciona em páginas de registro, páginas de aplicativo, fluxos de tela (Screen Flow) e páginas públicas de reserva do Experience Cloud.</p>
+
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/blog/salesforce-add-to-calendar-poster.png" data-gif="/images/blog/salesforce-add-to-calendar.gif" alt="Demo animada do Adicionar ao calendário no Salesforce: em um calendário de pedido de folga, um padrão recorrente de Dias Personalizados seleciona segunda, quarta e sábado em semanas alternadas de 1º de fevereiro a 6 de março, um único Salvar cria 9 registros de folga e o Adicionar ao calendário baixa um só arquivo com os 9 eventos" title="Nove datas na agenda com um clique" loading="lazy" decoding="async" width="700" height="1000" data-zoomable>
+                    <figcaption>Segunda, quarta e sábado em semanas alternadas, escolhidos com um padrão, salvos de uma vez e enviados ao calendário em um só arquivo.</figcaption>
+                </figure>
+
+                <div class="atc-math" role="img" aria-label="9 datas escolhidas, 1 gravação, 1 arquivo de calendário, 9 eventos no calendário">
+                    <div><b>9</b><span>datas escolhidas</span></div><i aria-hidden="true">&rarr;</i>
+                    <div><b>1</b><span>Salvar</span></div><i aria-hidden="true">&rarr;</i>
+                    <div><b>1</b><span>arquivo de calendário</span></div><i aria-hidden="true">&rarr;</i>
+                    <div><b>9</b><span>eventos</span></div>
+                </div>
+                <p>É a gravação acima. Um <a href="/pt-br/blog/datas-recorrentes-salesforce.html">padrão de Dias Personalizados</a> escolhe segunda, quarta e sábado em semanas alternadas de 1º de fevereiro a 6 de março, um único Salvar cria 9 registros de folga, e o arquivo baixado traz 9 eventos de dia inteiro, um para cada data. Um mês de licença, um semestre de aulas ou uma temporada de turnos vai para o calendário com <span class="sc-hl-orange">um clique, e não um por data</span>.</p>
+
+                <h2 style="margin-top:44px;">O que o Adicionar ao calendário entrega a quem reservou</h2>
+                <div class="bp-cards">
+                    <div class="bp-card"><h3>Um arquivo para tudo o que foi salvo</h3><p>Reserve cinco datas ou vinte horários em uma gravação e o arquivo traz um evento para cada um, então um clique adiciona todos.</p></div>
+                    <div class="bp-card"><h3>Os horários certos</h3><p>Reservas com horário mantêm início e fim. Registros só de data, como folgas, chegam como eventos de dia inteiro.</p></div>
+                    <div class="bp-card"><h3>Quem e onde</h3><p>O consultor, a sala ou o veículo reservado vai no título do evento. Reserve uma sala e o endereço dela pode preencher também o local do evento, para que o convite diga quem e onde.</p></div>
+                    <div class="bp-card"><h3>Feito também para convidados</h3><p>O arquivo é gerado no navegador, então as páginas públicas de reserva do Experience Cloud recebem o recurso sem nenhum acesso extra.</p></div>
+                    <div class="bp-card"><h3>Nada para instalar</h3><p>Sem aplicativo conectado, sem OAuth, sem chamadas externas. Seus dados ficam no Salesforce até a pessoa baixar o próprio arquivo.</p></div>
+                    <div class="bp-card"><h3>Qualquer calendário</h3><p>Um arquivo .ics padrão abre no Outlook, no Google Agenda e no Calendário da Apple. Uma reserva única também pode ir direto para o Google.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Por que um arquivo de calendário, e não uma sincronização</h2>
+                <p>Sincronizar o Salesforce com o Outlook ou o Google exige um aplicativo conectado, consentimento OAuth de cada usuário e dados saindo da sua organização para um terceiro, que é exatamente o que uma revisão de segurança questiona. Um arquivo de calendário não precisa de nada disso. O evento é montado no navegador a partir da reserva recém-salva, e nada sai do Salesforce até a pessoa baixar o arquivo. O MultiDatePick continua 100% nativo.</p>
+                <p>A contrapartida é justa e simples: é um arquivo avulso, não um vínculo ao vivo. Se a reserva mudar depois, a pessoa baixa um arquivo novo. Cada evento leva o Id do registro do Salesforce como identificador único, então os calendários que comparam por ID tratam o novo arquivo como a mesma reserva, e não como uma duplicata.</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/blog/salesforce-add-to-calendar-month-view.png" alt="Calendário de reservas do MultiDatePick no Salesforce, visualização mensal, logo após o pedido de uma consulta: uma barra com a mensagem Salvo. Adicione ao seu calendário, com um botão Adicionar ao calendário acima do calendário de novembro" title="Adicionar ao calendário no calendário mensal do Salesforce" loading="lazy" decoding="async" width="700" height="776" data-zoomable>
+                    <figcaption>O mesmo botão na visualização mensal Calendário, no momento em que uma consulta é solicitada.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">O que vai em cada evento do calendário</h2>
+                <table class="bp-grid">
+                    <tr><th style="width:28%;">Campo do calendário</th><th>Preenchido a partir do Salesforce</th></tr>
+                    <tr><td>Título do evento</td><td>O nome do registro (ou o título do calendário, quando o registro não tem nome), seguido do recurso: <em>Request a consultation: Priya Nair</em></td></tr>
+                    <tr><td>Início e fim</td><td>A data e os horários salvos. Registros só de data viram eventos de dia inteiro; um intervalo vira um único evento de ponta a ponta</td></tr>
+                    <tr><td>Local</td><td>Opcional: um campo que você escolhe no recurso, como o endereço de uma sala, definido em <strong>Calendar File Location Field (Campo de local do arquivo de calendário)</strong>. Fica vazio quando você reserva pessoas, que já aparecem no título</td></tr>
+                    <tr><td>Descrição</td><td>O status, como Requested ou Confirmed</td></tr>
+                    <tr><td>ID único</td><td>O Id do registro do Salesforce, para o calendário saber que um novo download é a mesma reserva</td></tr>
+                </table>
+                <p>Os horários chegam como o horário de relógio que foi reservado, então uma consulta das 10:00 aparece às 10:00.</p>
+
+                <h2 style="margin-top:44px;">Ative em dois minutos</h2>
+                <ol class="cp-steps">
+                    <li><strong>Abra o componente ou a configuração.</strong> No Lightning App Builder, no Experience Builder ou em uma tela de fluxo, selecione o componente MultiDatePick. Ou edite a configuração no <a href="/pt-br/blog/assistente-de-configuracao-calendario-salesforce.html">Assistente de Configuração</a>.</li>
+                    <li><strong>Marque Show Add to Calendar After Saving.</strong> Vem desativado por padrão, então nada muda até você escolher.</li>
+                    <li><strong>Reservando salas? Defina Calendar File Location Field</strong> com o campo de endereço da sala, e cada evento mostra aonde ir. Deixe vazio quando reservar pessoas, como consultores.</li>
+                    <li><strong>Em um site público, marque também Show In-Component Toast</strong> para que os convidados vejam a confirmação e o botão juntos. O <a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">guia de reservas no Experience Cloud</a> cobre o resto de uma página para convidados.</li>
+                    <li><strong>Salve e faça uma reserva.</strong> A barra Adicionar ao calendário aparece abaixo da confirmação e fica até ser fechada ou até a próxima gravação.</li>
+                </ol>
+
+                <h2 style="margin-top:44px;">Onde as equipes usam</h2>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Atendimentos de clientes e pacientes</strong><span>O cliente reserva no seu site e sai com a reunião no calendário, o que significa menos faltas.</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Agendamento de entrevistas</strong><span>Os candidatos adicionam a entrevista assim que escolhem um horário, com o entrevistador indicado como local.</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>Reserva de salas e mesas</strong><span>A sala entra no calendário do participante junto com a reserva, então horário e local ficam no celular dele.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Folgas e licenças</strong><span>Os dias aprovados chegam como eventos de dia inteiro, então a ausência aparece no calendário que todo mundo já consulta.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Treinamentos e eventos</strong><span>Inscreva-se em quatro sessões e adicione as quatro com um clique.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>Páginas públicas de reserva</strong><span>Os convidados do Experience Cloud recebem o mesmo botão que a sua equipe, sem login.</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Perguntas frequentes</h2>
+                <div class="bp-faq">
+                    <details><summary>O Salesforce tem um botão Adicionar ao calendário para reservas?</summary><p>Não para registros nos seus próprios objetos. Os Eventos do Salesforce podem sincronizar com o Outlook ou o Google pelo Einstein Activity Capture, mas uma reserva salva como registro personalizado não tem como chegar ao calendário da própria pessoa. O MultiDatePick acrescenta um botão Adicionar ao calendário que aparece depois de cada gravação e entrega à pessoa um arquivo de calendário com exatamente o que ela reservou.</p></details>
+                    <details><summary>Funciona com Outlook, Google Agenda e o Calendário da Apple?</summary><p>Sim. O botão baixa um arquivo de calendário .ics padrão, o formato que todo calendário importante abre: Outlook no Windows e no Mac, Google Agenda, o Calendário da Apple no Mac, iPhone e iPad, e a maioria dos outros. Quando o navegador não consegue gerar o arquivo, uma reserva única recebe um link Adicionar ao Google Agenda no lugar.</p></details>
+                    <details><summary>Funciona para convidados do Experience Cloud em uma página pública de reservas?</summary><p>Sim. O arquivo é gerado no navegador do visitante, então um convidado que reserva por uma página pública do Experience Cloud recebe o mesmo botão Adicionar ao calendário que um usuário logado. Nada muda no acesso do convidado.</p></details>
+                    <details><summary>Se a reserva mudar depois, o evento no calendário é atualizado?</summary><p>Não. O Adicionar ao calendário entrega um arquivo avulso, não uma sincronização ao vivo, então uma reserva que muda depois precisa de um arquivo novo. Cada evento leva o Id do registro do Salesforce como identificador único, e assim um calendário que atualiza por ID reconhece o novo arquivo como a mesma reserva, e não como uma segunda.</p></details>
+                    <details><summary>Algum dado sai do Salesforce?</summary><p>Só o arquivo que a pessoa decide baixar. Não há aplicativo conectado, nenhuma chamada externa e nenhum serviço de calendário de terceiros; o MultiDatePick continua 100% nativo. O arquivo contém o nome da reserva, a data, os horários, o recurso, o local do recurso quando você escolhe um, e o status. Nada mais.</p></details>
+                    <details><summary>Preciso de Apex ou de um desenvolvedor para ativar?</summary><p>Não. É uma caixa de seleção, Show Add to Calendar After Saving, no componente no Lightning App Builder, no Experience Builder ou em uma tela de fluxo, ou na configuração no Assistente de Configuração.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Reserve no Salesforce. Mantenha no calendário de cada um.</h2>
+                    <p>Solicite uma consulta na demo ao vivo e adicione ao seu próprio calendário, ou comece com uma configuração de reserva pronta da <a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-add-to-calendar" class="btn btn-demo" target="_blank" rel="noopener">Experimente a demo ao vivo</a> <a href="/pt-br/avise-me-no-lancamento.html" class="btn btn-primary">Avise-me no lançamento</a> <a href="/pt-br/primeiros-passos.html" class="btn btn-secondary">Primeiros passos</a>
+                    </div>
+                    <ul class="check-list"><li>US$ 20/usuário/mês, todos os recursos</li><li>Teste grátis de 30 dias, sem cartão</li><li>100% nativo do Salesforce</li><li>Sem Apex</li><li>Em breve no Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Leia também</h3>
+                    <ul>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Autoatendimento de reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/evitar-reservas-duplicadas-salesforce.html">Como evitar reservas duplicadas no Salesforce</a></li>
+                        <li><a href="/pt-br/blog/seletor-de-horarios-calendario-salesforce.html">Como criar um seletor de horários no calendário do Salesforce</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas no Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">O componente Booking</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/pt-br/" class="logo">
+                        <img src="/images/logo.png" alt="Logotipo do MultiDatePick: calendário de várias datas e reserva de recursos para Salesforce" width="180" height="45">
+                    </a>
+                    <p>O pacote de componentes de calendário mais personalizável para Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produto</h4>
+                    <ul>
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">Date</a></li>
+                        <li><a href="/pt-br/seletor-de-data-e-hora-salesforce.html">Date Time</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Cinco visualizações de calendário</a></li>
+                        <li><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluções</h4>
+                    <ul>
+                        <li><a href="/pt-br/calendario-salesforce.html">Calendário Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas</a></li>
+                        <li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html">Reserva de salas de reunião</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html">Datas de campanha</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">Governo / Section 508</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentação</h4>
+                    <ul>
+                        <li><a href="/pt-br/primeiros-passos.html">Primeiros passos</a></li>
+                        <li><a href="/pt-br/guia-do-usuario.html">Guia do usuário</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">Guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html">Páginas de aplicativo, iniciais e do Experience Cloud</a></li>
+                        <li><a href="/pt-br/implantar-fluxo-vs-code.html">Implantar um fluxo (VS Code)</a></li>
+                        <li><a href="/pt-br/solucao-de-problemas.html">Solução de problemas</a></li>
+                        <li><a href="/pt-br/perguntas-frequentes.html">Perguntas frequentes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="/pt-br/precos.html">Preços</a></li>
+                        <li><a href="/pt-br/blog/">Blog</a></li>
+                        <li><a href="/pt-br/confianca-e-seguranca.html">Confiança e segurança</a></li>
+                        <li><a href="/pt-br/acessibilidade-vpat.html">Acessibilidade</a></li>
+                        <li><a href="/pt-br/avise-me-no-lancamento.html">Avise-me no lançamento</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Suporte</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Todos os direitos reservados.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Idioma" translate="no"><ul><li><a href="/blog/salesforce-add-to-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-zum-kalender-hinzufuegen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/anadir-al-calendario-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/ajouter-au-calendrier-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/aggiungi-al-calendario-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/adicionar-ao-calendario-salesforce.html" hreflang="pt-BR" lang="pt-BR" aria-current="page">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-add-to-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-add-to-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-add-to-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ampliar imagem</p><p data-k="expand-diagram">Ampliar diagrama</p><p data-k="close">Fechar</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

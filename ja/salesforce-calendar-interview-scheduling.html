@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 面接日程調整カレンダー</title>
+    <meta name="description" content="Salesforce で面接日程を週表示のグリッドで調整。自由な枠の長さ、保存時の競合チェック、面接官の人数枠、勤務時間、候補者の自己予約に対応。">
+    <link rel="canonical" href="https://multidatepick.com/ja/salesforce-calendar-interview-scheduling.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="preload" as="image" href="/images/components/salesforce-date-time-scheduling-demo-poster.png" fetchpriority="high">
+    <meta property="og:title" content="Salesforce 面接日程調整カレンダー">
+    <meta property="og:description" content="Salesforce で面接日程を週表示のグリッドで調整。自由な枠の長さ、保存時の競合チェック、面接官の人数枠、勤務時間、候補者の自己予約に対応。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/salesforce-calendar-interview-scheduling.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 面接日程調整カレンダー">
+    <meta name="twitter:description" content="Salesforce で面接日程を週表示のグリッドで調整。自由な枠の長さ、保存時の競合チェック、面接官の人数枠、勤務時間、候補者の自己予約に対応。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "name": "Salesforce 面接日程調整カレンダー",
+                "url": "https://multidatepick.com/ja/salesforce-calendar-interview-scheduling.html",
+                "description": "MultiDatePick による Salesforce での面接日程調整: 任意の長さの日付と時間枠を 1 画面で選択、週表示のグリッド、勤務時間を持つリソースとしての面接官、保存時の競合検出、パネル面接の定員、Experience Cloud での候補者による自己予約。コード不要。",
+                "isPartOf": {
+                    "@id": "https://multidatepick.com/ja/#website"
+                },
+                "about": {
+                    "@id": "https://multidatepick.com/ja/#software"
+                },
+                "primaryImageOfPage": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo.gif",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce で面接の日程調整はできますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい、MultiDatePick を使えばできます。採用担当者は 1 つの画面で 1 日または複数の日付と時間枠を選び、各面接は候補者に紐付いたレコードとして自社のオブジェクトに保存されます。既存の面接はグリッドに表示されるので、予約する前に埋まっている枠がわかります。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "面接枠を 45 分にできますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。Time Interval (Minutes)（時間間隔） には任意の数値を指定できます。15、30、60 分が一般的ですが、45 分や 90 分も同じように使えます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "面接官のダブルブッキングを防ぐには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "面接官をリソース (多くの場合 User オブジェクト) にして、Conflict Behavior（競合の動作） を Block に設定します。保存のたびに既存の予約と照合されます。パネル面接なら Capacity Field（定員項目） を追加すると、全員分の枠が埋まるまで時間枠が開いたままになります。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "候補者が自分で面接を予約できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。同じコンポーネントを Experience Cloud サイトのページに配置し、Config Name（設定名） と Static Parent Record Id を設定します。候補者には面接官の勤務時間内の空き枠だけが表示され、予約はそのまま組織に保存されます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce Scheduler との違いは?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Salesforce Scheduler は、予約用の独自データモデルの上に構築された有料アドオンです。MultiDatePick は自社のオブジェクトで予約でき、複数日付の選択、定員、5 つのカレンダー表示を備えています。Salesforce Lightning Scheduler と MultiDatePick の詳しい比較をご覧ください。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick の料金はいくらですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "すべてのコンポーネントと機能が 1 ユーザーあたり月額 $20。30 日間の無料トライアル付きで、クレジットカードは不要です。100% Salesforce ネイティブで、Salesforce AppExchange で近日公開予定です。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo-poster.png",
+                "caption": "Salesforce の MultiDatePick DateTime コンポーネントのアニメーションデモ: 新入社員オンボーディングの予定に名前を付け、月曜から木曜までをドラッグし、共通のタイムグリッドで 09:00〜12:00 をドラッグして、1 日 1 シフトずつ保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-time-slots.png",
+                "caption": "MultiDatePick の Salesforce 面接日程調整カレンダー: 1 か月分の面接日を状況 (Confirmed、Tentative、Pending) で色分けし、各日の下にその日の状況ごとのドットを表示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo-poster.png",
+                "caption": "MultiDatePick の Salesforce 週表示のアニメーションデモ: アドバイザーを選ぶと顧客との面談が状況の色のブロックで実際の長さどおりに表示され、ホバーカードで顧客、面談の種類、状況を確認",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-agenda-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-agenda-view-demo-poster.png",
+                "caption": "MultiDatePick の Salesforce 予定一覧のアニメーションデモ: 今後の予定を日付順に、時刻、顧客、状況ラベル、アドバイザー付きで一覧表示し、2 件にホバーカードを表示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+    <style>
+        .hm-wrap{max-width:1040px;margin:0 auto;padding:0 16px;}
+        .hm-hero{background:linear-gradient(170deg,var(--blue-50,#F0F9FF) 0%,#E0F2FE 60%,#fff 100%);padding:44px 0 40px;}
+        .bk-hero{display:grid;grid-template-columns:1.15fr 1fr;gap:32px;align-items:center;}
+        .hm-hero h1{font-size:2.35rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1.12;margin:0;}
+        .hm-hero h1 .pre{display:block;font-size:1rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#C2410C;margin-bottom:8px;}
+        .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+        .hm-hero .subtitle{font-size:1.08rem;color:var(--gray-600,#4b5563);margin:14px 0 0;max-width:560px;}
+        .hm-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}
+        .hm-ctas .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .hm-ctas .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .hm-demo-link{display:inline-block;margin-top:12px;font-size:.92rem;font-weight:600;}
+        .bk-hero .gs-fig{margin:0;max-width:400px;justify-self:center;width:100%;}
+        .hm-live{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;padding:26px 0;scroll-margin-top:80px;}
+        .hm-live .hm-wrap{display:flex;gap:18px 28px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+        .hm-live h2{color:#fff;font-size:1.3rem;margin:0 0 4px;}
+        .hm-live p{color:#cdd9e8;margin:0;font-size:.95rem;max-width:680px;}
+        .hm-live .tag{display:block;color:#FDBA74;font-size:.75rem;font-weight:800;letter-spacing:.12em;margin-bottom:8px;}
+        .hm-live .btn{background:#F97316;color:#fff;white-space:nowrap;}
+        .hm-live .btn:hover{background:#EA580C;color:#fff;}
+        .gs-sec{padding:56px 0;scroll-margin-top:80px;}
+        .gs-sec.alt{background:var(--blue-50,#F0F9FF);}
+        .gs-sec h2{font-size:1.6rem;color:var(--blue-900,#0C4A6E);margin:0 0 6px;padding-left:17px;position:relative;line-height:1.25;} .gs-sec h2::before{content:"";position:absolute;left:0;top:calc(.625em - 11px);width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-sec h3{font-size:1.15rem;color:var(--blue-900,#0C4A6E);margin:32px 0 6px;scroll-margin-top:80px;}
+        .gs-lead{color:var(--gray-600,#4b5563);margin:0 0 20px;font-size:1rem;max-width:760px;}
+        .gs-sec code{background:#f3f4f6;padding:1px 5px;border-radius:3px;color:#c2410c;font-size:.88em;word-break:break-word;}
+        .gs-fig{margin:18px 0 8px;}
+        .gs-fig img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #E5E7EB;box-shadow:0 4px 20px rgba(15,45,82,.08);background:#fff;}
+        .gs-fig figcaption{text-align:center;font-size:.88rem;color:var(--gray-500,#6b7280);margin-top:8px;}
+        .gs-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE3EC;border-radius:10px;overflow:hidden;font-size:.93rem;}
+        .gs-table th,.gs-table td{padding:11px 14px;border-bottom:1px solid #E8EDF3;border-right:1px solid #E8EDF3;text-align:left;vertical-align:top;}
+        .gs-table th:last-child,.gs-table td:last-child{border-right:none;}
+        .gs-table thead th{background:#0F2D52;color:#fff;font-weight:600;font-size:.85rem;}
+        .gs-table thead th.mdp{background:#C2410C;}
+        .gs-table tbody tr:last-child td{border-bottom:none;}
+        .gs-table td:first-child{font-weight:600;color:var(--blue-900,#0C4A6E);}
+        .gs-table .old{color:var(--gray-500,#6b7280);}
+        .gs-table .new{color:#065F46;font-weight:600;}
+        .gs-table small{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);font-weight:400;}
+        .hm-scroll{overflow-x:auto;}
+        .gs-chain{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-wrap:wrap;gap:8px 4px;align-items:center;font-size:.9rem;}
+        .gs-chain li{background:#fff;border:1px solid #BFDBFE;color:#1E3A8A;border-radius:999px;padding:5px 14px;font-weight:600;}
+        .gs-chain li b{color:#F97316;margin-right:4px;}
+        .gs-chain li.arr{background:none;border:none;color:#94A3B8;padding:0 2px;}
+        .gs-two{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+        .gs-two .gs-fig{margin-top:0;}
+        .bk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 0;}
+        .bk-tile{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:12px 14px 12px 18px;position:relative;} .bk-tile::before{content:"";position:absolute;left:0;top:13px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#10b981;}
+        .bk-tile b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;margin-bottom:3px;}
+        .bk-tile span{display:block;font-size:.85rem;color:var(--gray-600,#4b5563);}
+        .bk-tile .comp{display:inline-block;margin-top:8px;font-size:.72rem;font-weight:700;letter-spacing:.04em;color:#1E3A8A;background:#EFF6FF;border-radius:999px;padding:1px 9px;}
+        .gs-paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0;}
+        .gs-paths.three{grid-template-columns:repeat(3,1fr);}
+        .gs-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;font-size:.92rem;color:var(--gray-600,#4b5563);}
+        .gs-card b{display:block;color:var(--blue-900,#0C4A6E);font-size:1rem;margin-bottom:6px;}
+        .gs-card.bk,.gs-card.rs,.gs-card.sf{position:relative;padding-left:18px;} .gs-card.bk{--rail:#F97316;}
+        .gs-card.rs{--rail:#10b981;}
+        .gs-card.sf{--rail:#0176D3;} .gs-card.bk::before,.gs-card.rs::before,.gs-card.sf::before{content:"";position:absolute;left:0;top:15px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .hm-checks{list-style:none;padding:0;margin:0;}
+        .hm-checks li{padding:5px 0 5px 24px;position:relative;border-bottom:1px solid #F1F5F9;}
+        .hm-checks li:last-child{border-bottom:none;}
+        .hm-checks li::before{content:"\2713";position:absolute;left:2px;color:#10b981;font-weight:700;}
+        .gs-note{margin:16px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 18px 14px 22px;font-size:.92rem;color:#7C2D12;position:relative;} .gs-note::before{content:"";position:absolute;left:0;top:14px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-note b{color:#9A3412;}
+        .bk-views{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:8px;}
+        .bk-views .gs-fig{margin:0;}
+        .cf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 0;}
+        .cf-grid.two{grid-template-columns:1fr 1fr;}
+        .cf-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px 12px 18px;position:relative;display:flex;flex-direction:column;} .cf-card::before{content:"";position:absolute;left:0;top:16px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .cf-card .cf-type{font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#C2410C;}
+        .cf-card h3{margin:2px 0 4px;font-size:1.05rem;}
+        .cf-card p{margin:0 0 10px;font-size:.86rem;color:var(--gray-600,#4b5563);}
+        .cf-set{list-style:none;padding:0;margin:0 0 12px;font-size:.85rem;}
+        .cf-set li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #F1F5F9;}
+        .cf-set li:last-child{border-bottom:none;}
+        .cf-set li span{color:var(--blue-900,#0C4A6E);font-weight:600;}
+        .cf-set li em{font-style:normal;color:#334155;text-align:right;}
+        .cf-links{margin-top:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:.86rem;font-weight:600;}
+        .gs-faq details{background:#fff;border:1px solid #DCE3EC;border-radius:10px;margin:0 0 10px;padding:0 18px;}
+        .gs-faq summary{cursor:pointer;font-weight:600;color:var(--blue-900,#0C4A6E);padding:14px 0;list-style-position:outside;}
+        .gs-faq details p{margin:0 0 14px;color:var(--gray-600,#4b5563);font-size:.93rem;}
+        .gs-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .gs-links a{display:block;background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;text-decoration:none;transition:border-color .15s ease;}
+        .gs-links a:hover{border-color:#F97316;}
+        .gs-links b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;}
+        .gs-links span{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);}
+        .hm-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .hm-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .hm-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .hm-final .hm-ctas{justify-content:center;}
+        .hm-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .hm-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .hm-final .contact{margin:20px 0 0;font-size:.9rem;color:#cdd9e8;}
+        @media (max-width:900px){
+            .bk-hero,.gs-two{grid-template-columns:1fr;}
+            .bk-grid{grid-template-columns:1fr 1fr;}
+            .gs-links,.gs-paths.three,.cf-grid{grid-template-columns:1fr 1fr;}
+        }
+        @media (max-width:600px){
+            .hm-hero{padding:30px 0 28px;}
+            .hm-hero h1{font-size:1.75rem;}
+            .bk-views,.gs-paths,.gs-paths.three,.gs-links,.cf-grid,.cf-grid.two{grid-template-columns:1fr;}
+            .gs-sec{padding:40px 0;}
+            .gs-sec h2{font-size:1.35rem;}
+            .gs-table{font-size:.86rem;}
+            .gs-table th,.gs-table td{padding:9px 8px;}
+            .hm-final h2{font-size:1.45rem;}
+        }
+    </style>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/salesforce-calendar-interview-scheduling.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/salesforce-interviewplanung.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/calendario-salesforce-programar-entrevistas.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/planification-entretiens-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/pianificazione-colloqui-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/agendamento-de-entrevistas-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/salesforce-calendar-interview-scheduling.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/salesforce-calendar-interview-scheduling.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/salesforce-calendar-interview-scheduling.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/salesforce-calendar-interview-scheduling.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html" class="active">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <section class="hm-hero">
+            <div class="hm-wrap bk-hero">
+                <div>
+                    <h1><span class="pre">面接日程調整<span class="vh">:</span></span> Salesforce の面接日程調整カレンダー</h1>
+                    <p class="subtitle">実際に空いている面接枠を提示し、重複を起こる前に防ぎ、すべての面接を Salesforce にそのまま保存。メールの往復も、外部の日程調整ツールも、コードも不要です。</p>
+                    <div class="hm-ctas">
+                        <a href="/ja/notify-me-at-launch.html" class="btn btn-cta">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <a class="hm-demo-link" href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-interview-scheduling" target="_blank" rel="noopener">または今すぐライブデモで時間枠を予約 (ログイン不要) &rarr;</a>
+                </div>
+                <figure class="gs-fig">
+                    <img src="/images/components/salesforce-date-time-scheduling-demo-poster.png" data-gif="/images/components/salesforce-date-time-scheduling-demo.gif" alt="Salesforce の MultiDatePick DateTime コンポーネントのアニメーションデモ: 新入社員オンボーディングの予定に名前を付け、月曜から木曜までをドラッグし、共通のタイムグリッドで 09:00〜12:00 をドラッグして、1 日 1 シフトずつ保存" title="Salesforce 日時スケジュールのデモ" width="700" height="961" fetchpriority="high" decoding="async" data-zoomable>
+                    <figcaption>日を選び、時間をドラッグして、保存。ブロックごとに 1 件のレコード。</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ═══════════════ LIVE DEMO ═══════════════ -->
+        <section class="hm-live" id="live-demo">
+            <div class="hm-wrap">
+                <div>
+                    <span class="tag">今すぐ試せる: インストール不要、ログイン不要</span>
+                    <h2>候補者の立場で枠を予約してみる</h2>
+                    <p>ライブデモは、訪問者が 30 分単位でアドバイザーを予約できる公開 Salesforce サイトです。面接官も同じ仕組みで使えます。</p>
+                </div>
+                <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-interview-scheduling" target="_blank" rel="noopener" class="btn">ライブデモを開く &rarr;</a>
+            </div>
+        </section>
+
+        <!-- ═══════════════ OVERVIEW ═══════════════ -->
+        <section class="gs-sec" id="overview">
+            <div class="hm-wrap">
+                <h2>面接の日程調整がほかと違う点</h2>
+                <p class="gs-lead">面接の日程調整は、予約する人が誰の予定が埋まっているか見えないところで破綻します。MultiDatePick は、選ぶその瞬間にそれを見せます。</p>
+                <div class="bk-grid">
+                    <div class="bk-tile"><b>日付と時刻をまとめて</b><span>枠の長さは自由。15、30、60 分が一般的で、45 分も使えます。</span></div>
+                    <div class="bk-tile"><b>面接官をリソースに</b><span>各面接官の勤務時間は本人のレコードから。</span></div>
+                    <div class="bk-tile"><b>保存時に競合をチェック</b><span>重複をブロック、スキップ、または許可。</span></div>
+                    <div class="bk-tile"><b>パネル面接は定員で</b><span>1 つの枠に面接官 3 人が入ったら締め切り。</span></div>
+                </div>
+                <div class="gs-two" style="margin-top:26px;">
+                    <div class="hm-scroll">
+                    <table class="gs-table">
+                        <thead><tr><th>調整担当者の作業</th><th>標準の Salesforce</th><th class="mdp">MultiDatePick なら</th></tr></thead>
+                        <tbody>
+                            <tr><td>候補日を 3 つ提示</td><td class="old">メールに手入力</td><td class="new">リアルタイムのグリッドから選択</td></tr>
+                            <tr><td>面接官は空いている?</td><td class="old">別タブで確認して、あとは祈るだけ</td><td class="new">グリッドに面接官の予約を表示</td></tr>
+                            <tr><td>2 人の担当者が同時に予約</td><td class="old">最後に保存した人が勝つ</td><td class="new">保存時に重複を検出</td></tr>
+                            <tr><td>3 人のパネル面接</td><td class="old">別々のレコードが 3 件</td><td class="new">枠に 2/3 のバッジをリアルタイム表示</td></tr>
+<tr><td>面接が連続する</td><td class="old">準備する時間がない</td><td class="new">各面接のあとにバッファーを確保</td></tr>
+<tr><td>1 時間後の枠に予約が入る</td><td class="old">面接官が驚く</td><td class="new">最低事前通知でブロック</td></tr>
+<tr><td>本人のカレンダーへ</td><td class="old">手作業でコピー</td><td class="new">保存後に「カレンダーに追加」ファイル</td></tr>
+                            <tr><td>候補者が日程を変更</td><td class="old">削除して作り直す</td><td class="new">日付、時刻、面接官をその場で編集</td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                    <figure class="gs-fig">
+                        <img src="/images/marketing/salesforce-calendar-time-slots.png" alt="MultiDatePick の Salesforce 面接日程調整カレンダー: 1 か月分の面接日を状況 (Confirmed、Tentative、Pending) で色分けし、各日の下にその日の状況ごとのドットを表示" title="Salesforce 面接日程調整カレンダー" width="1004" height="682" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>面接日を状況で表示。状況ごとにドットが 1 つ。</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ VIEWS ═══════════════ -->
+        <section class="gs-sec alt" id="views">
+            <div class="hm-wrap">
+                <h2>面接には週表示のグリッドが最適</h2>
+                <p class="gs-lead">面接は「何時に」が肝心ですが、月表示のグリッドでは時刻が見えません。週表示なら営業時間に合わせて 7 日間を表示し、各面接を実際の長さどおりの高さで表示します。</p>
+                <div class="bk-views">
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-week-view-demo-poster.png" data-gif="/images/views/salesforce-week-view-demo.gif" alt="MultiDatePick の Salesforce 週表示のアニメーションデモ: アドバイザーを選ぶと顧客との面談が状況の色のブロックで実際の長さどおりに表示され、ホバーカードで顧客、面談の種類、状況を確認" title="Salesforce 週表示のデモ" width="880" height="1080" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>週表示: 営業時間内に、面接の実際の長さで。</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-agenda-view-demo-poster.png" data-gif="/images/views/salesforce-agenda-view-demo.gif" alt="MultiDatePick の Salesforce 予定一覧のアニメーションデモ: 今後の予定を日付順に、時刻、顧客、状況ラベル、アドバイザー付きで一覧表示し、2 件にホバーカードを表示" title="Salesforce 予定一覧表示のデモ" width="700" height="860" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>予定一覧: 当日の朝に確認する一覧。スマートフォンでも読みやすい。</figcaption>
+                    </figure>
+                </div>
+                <p class="gs-note"><b>どの表示でも保存処理は 1 つ。</b> 調整担当者が週表示から予定一覧やカレンダーに切り替えても、作成される面接レコードは常に同じです。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ SELF BOOKING + FLOWS ═══════════════ -->
+        <section class="gs-sec" id="self-booking">
+            <div class="hm-wrap">
+                <h2>候補者に予約してもらうか、画面フロー (Screen Flow) で運用するか</h2>
+                <p class="gs-lead">同じコンポーネント、同じ設定。データは組織の外に出ず、セキュリティレビューに外部の日程調整ベンダーが登場することもありません。</p>
+                <div class="gs-paths">
+                    <div class="gs-card bk">
+                        <b>Experience Cloud で候補者が自己予約</b>
+                        <ul class="hm-checks">
+                            <li>リンクを送れば、候補者が空き枠を選択</li>
+                            <li>提示するのは面接官の勤務時間内の枠だけ</li>
+                            <li>自社のレコードからブロック日付を設定</li>
+                            <li>予約はすぐに通常のレコードとして保存</li>
+                        </ul>
+                    </div>
+                    <div class="gs-card sf">
+                        <b>採用の画面フローの中で</b>
+                        <ul class="hm-checks">
+                            <li>Config Name を設定するだけ。チェックボックスはすべて設定から読み込まれます</li>
+                            <li>候補者を Parent Record Id に渡す</li>
+                            <li>予約した枠と競合が出力として返る</li>
+                            <li>次のステップ: 招待を送り、推薦状況を更新</li>
+                        </ul>
+                    </div>
+                </div>
+                <p style="margin:14px 0 0;font-size:.93rem;">詳しい手順: <a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a>と<a href="/ja/flowcheatsheet.html">画面フローガイド</a>。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ CONFIGS ═══════════════ -->
+        <section class="gs-sec alt" id="configuration">
+            <div class="hm-wrap">
+                <h2>設定から始める</h2>
+                <p class="gs-lead">40 以上の用意された設定から 1 つをセットアップウィザードにインポートし、自社のオブジェクトと項目をドロップダウンから選んで保存します。</p>
+                <div class="cf-grid two">
+                    <div class="cf-card">
+                        <span class="cf-type">Date Time</span>
+                        <h3>面接日程調整</h3>
+                        <p>複数日にわたる複数回の面接。</p>
+                        <ul class="cf-set">
+                            <li><span>Time Interval (Minutes)</span><em>30、長めの面接なら 45</em></li>
+                            <li><span>Conflict Behavior（競合の動作）</span><em>ブロック</em></li>
+                            <li><span>Second Picklist Field</span><em>選考段階</em></li>
+                            <li><span>View</span><em>週表示 (カレンダーと予定一覧も)</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/ja/configlibrary.html#interview-scheduling">Config Library &rarr;</a><a href="/downloads/configs/Interview_Scheduling.json" download>JSON</a></div>
+                    </div>
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>アドバイザーとの面談予約</h3>
+                        <p>ユーザーの一覧から面接官を選択。</p>
+                        <ul class="cf-set">
+                            <li><span>Resource</span><em>User (面接官に絞り込み)</em></li>
+                            <li><span>Business Hours Start / End Field</span><em>ユーザーの勤務時間</em></li>
+                            <li><span>Conflict Behavior（競合の動作）</span><em>ブロック</em></li>
+                            <li><span>Load Existing Bookings</span><em>オン</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/ja/configlibrary.html#advisor-appointment-booking">Config Library &rarr;</a><a href="/downloads/configs/Advisor_Appointment_Booking.json" download>JSON</a></div>
+                    </div>
+                </div>
+                <p class="gs-note"><b>複数回の面接をまとめて予約する場合は?</b> Conflict Behavior を Skip に設定します。空いている枠は保存され、重複した枠は調整担当者向けに一覧表示されます。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FAQ ═══════════════ -->
+        <section class="gs-sec" id="faq">
+            <div class="hm-wrap gs-faq">
+                <h2>Salesforce での面接日程調整に関する質問</h2>
+                <p class="gs-lead">よく検索される疑問に簡潔にお答えします。</p>
+                <details>
+                    <summary>Salesforce で面接の日程調整はできますか?</summary>
+                    <p>はい、MultiDatePick を使えばできます。採用担当者は 1 つの画面で 1 日または複数の日付と時間枠を選び、各面接は候補者に紐付いたレコードとして自社のオブジェクトに保存されます。既存の面接はグリッドに表示されるので、予約する前に埋まっている枠がわかります。</p>
+                </details>
+                <details>
+                    <summary>面接枠を 45 分にできますか?</summary>
+                    <p>はい。Time Interval (Minutes)（時間間隔） には任意の数値を指定できます。15、30、60 分が一般的ですが、45 分や 90 分も同じように使えます。</p>
+                </details>
+                <details>
+                    <summary>面接官のダブルブッキングを防ぐには?</summary>
+                    <p>面接官をリソース (多くの場合 User オブジェクト) にして、Conflict Behavior（競合の動作） を Block に設定します。保存のたびに既存の予約と照合されます。パネル面接なら Capacity Field（定員項目） を追加すると、全員分の枠が埋まるまで時間枠が開いたままになります。</p>
+                </details>
+                <details>
+                    <summary>候補者が自分で面接を予約できますか?</summary>
+                    <p>はい。同じコンポーネントを Experience Cloud サイトのページに配置し、Config Name（設定名） と Static Parent Record Id を設定します。候補者には面接官の勤務時間内の空き枠だけが表示され、予約はそのまま組織に保存されます。</p>
+                </details>
+                <details>
+                    <summary>Salesforce Scheduler との違いは?</summary>
+                    <p>Salesforce Scheduler は、予約用の独自データモデルの上に構築された有料アドオンです。MultiDatePick は自社のオブジェクトで予約でき、複数日付の選択、定員、5 つのカレンダー表示を備えています。<a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Salesforce Lightning Scheduler と MultiDatePick の詳しい比較</a>をご覧ください。</p>
+                </details>
+                <details>
+                    <summary>MultiDatePick の料金はいくらですか?</summary>
+                    <p>すべてのコンポーネントと機能が 1 ユーザーあたり月額 $20。30 日間の無料トライアル付きで、クレジットカードは不要です。100% Salesforce ネイティブで、Salesforce AppExchange で近日公開予定です。</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- ═══════════════ RELATED ═══════════════ -->
+        <section class="gs-sec alt" id="related">
+            <div class="hm-wrap">
+                <h2>さらに詳しく</h2>
+                <div class="gs-links" style="margin-top:16px;">
+                    <a href="/ja/salesforce-calendar-staffing-recruiting.html"><b>人材派遣・採用</b><span>空き状況、シフト、勤務表</span></a> <a href="/ja/salesforce-calendar-vs-lightning-scheduler.html"><b>Salesforce Scheduler との比較</b><span>データモデルとライセンスを比較</span></a> <a href="/ja/multidatepickdatetime.html"><b>Date Time コンポーネント</b><span>日付と時間枠をまとめて</span></a> <a href="/ja/blog/prevent-double-booking-in-salesforce.html"><b>ダブルブッキングを防ぐ</b><span>競合と定員を解説</span></a> <a href="/ja/salesforce-calendar-experience-cloud-booking.html"><b>Experience Cloud での予約</b><span>公開サイトでのセルフサービス</span></a> <a href="/ja/configlibrary.html"><b>Config Library</b><span>すぐにインポートできる 40 以上の設定</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FINAL CTA ═══════════════ -->
+        <section class="hm-final">
+            <div class="hm-wrap">
+                <h2>面接の日程調整を受信トレイから解放しよう</h2>
+                <p>Salesforce AppExchange で近日公開。今すぐライブデモを試すか、公開のお知らせの送り先を教えてください。</p>
+                <div class="hm-ctas">
+                    <a href="/ja/notify-me-at-launch.html" class="btn btn-cta">公開時に通知を受け取る</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-interview-scheduling" class="btn btn-ghost" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/gettingstarted.html" class="btn btn-ghost">はじめに</a>
+                </div>
+                <p class="contact">$20/ユーザー/月、30 日間の無料トライアル、クレジットカード不要。AppExchange セキュリティレビュー合格。100% Salesforce ネイティブ。</p>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/salesforce-calendar-interview-scheduling.html" hreflang="en" lang="en">English</a></li><li><a href="/de/salesforce-interviewplanung.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/calendario-salesforce-programar-entrevistas.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/planification-entretiens-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/pianificazione-colloqui-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/salesforce-calendar-interview-scheduling.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/salesforce-calendar-interview-scheduling.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/salesforce-calendar-interview-scheduling.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

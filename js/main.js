@@ -2,6 +2,14 @@
    MultiDatePick Website — main.js
    ═══════════════════════════════════════════════════ */
 
+// Text that scripts put on screen lives in the page, in hidden .mdp-strings blocks, so the
+// translated pages carry it in their own language. mdpText('close', 'Close') reads it, falling
+// back to the English given when a page has no such string.
+window.mdpText = function (key, fallback) {
+    const el = document.querySelector('.mdp-strings [data-k="' + key + '"]');
+    return el ? el.innerHTML.trim() : fallback;
+};
+
 document.addEventListener('DOMContentLoaded', () => {
 
     /* ── Announcement Banner Dismiss ── */
@@ -100,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const btn = document.createElement('button');
         btn.className = 'zoom-btn';
-        btn.setAttribute('aria-label', 'Expand image');
+        btn.setAttribute('aria-label', mdpText('expand-image', 'Expand image'));
         btn.innerHTML = expandSvg;
         wrap.appendChild(btn);
 
@@ -127,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const btn = document.createElement('button');
         btn.className = 'zoom-btn';
-        btn.setAttribute('aria-label', 'Expand diagram');
+        btn.setAttribute('aria-label', mdpText('expand-diagram', 'Expand diagram'));
         btn.innerHTML = expandSvg;
         wrap.appendChild(btn);
 
@@ -162,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.createElement('div');
         overlay.id = 'lightbox';
         overlay.className = 'lightbox-overlay';
-        overlay.innerHTML = '<button class="lightbox-close" aria-label="Close"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><img src="" alt=""><div class="lightbox-svg-host" style="display:none;"></div>';
+        overlay.innerHTML = '<button class="lightbox-close" aria-label="' + mdpText('close', 'Close') + '"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><img src="" alt=""><div class="lightbox-svg-host" style="display:none;"></div>';
         document.body.appendChild(overlay);
 
         function closeLightbox() {

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 市场活动多日期：每个活动日一目了然，无需 Apex</title>
+    <meta name="description" content="在一个日历上跟踪 Salesforce 市场活动的每个日期：巡展站点、网络研讨会系列和志愿者日保存为子记录，按状态着色。无需 Apex。">
+    <link rel="canonical" href="https://multidatepick.com/zh/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Campaign post: same look as the Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce 市场活动多日期：每个活动日一目了然，无需 Apex">
+    <meta property="og:description" content="在一个日历上跟踪 Salesforce 市场活动的每个日期：巡展站点、网络研讨会系列和志愿者日保存为子记录，按状态着色。无需 Apex。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/blog/salesforce-campaign-multiple-dates.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 市场活动多日期：每个活动日一目了然，无需 Apex">
+    <meta name="twitter:description" content="在一个日历上跟踪 Salesforce 市场活动的每个日期：巡展站点、网络研讨会系列和志愿者日保存为子记录，按状态着色。无需 Apex。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-kampagne-mehrere-termine.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/fechas-de-campana-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/campagne-salesforce-plusieurs-dates.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/date-multiple-campagne-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/varias-datas-campanha-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-campaign-multiple-dates.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-campaign-multiple-dates.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html" class="active">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce 市场活动多日期：每个活动日一目了然，无需 Apex",
+                "description": "在一个日历上跟踪 Salesforce 市场活动的每个日期：巡展站点、网络研讨会系列和志愿者日保存为子记录，按状态着色。无需 Apex。",
+                "datePublished": "2026-10-19",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/zh/blog/salesforce-campaign-multiple-dates.html",
+                "image": "https://multidatepick.com/images/blog/salesforce-campaign-multiple-dates.gif",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "一个 Salesforce 市场活动可以有多个日期吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "标准市场活动（Campaign）只有一个开始日期和一个结束日期。要跟踪巡展、网络研讨会系列或志愿者项目的每一天，可以添加一个带有市场活动查找字段的小型子对象，再把 MultiDatePick Dates 组件放到市场活动记录页面上。您单击的每个日期都会保存为一条独立的子记录。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "给市场活动添加日期需要 Apex 或开发人员吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "不需要。子对象及其字段在对象管理器中点击即可创建，设置向导负责编写日历配置，组件则在 Lightning App Builder 中放到页面上。不需要编写或安装任何市场活动专用的代码。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "市场活动的日期存储在哪里？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "存储在您自己的自定义对象中，例如 Campaign Date，每个日期一条记录，并带有指向市场活动的查找字段。它们是普通的 Salesforce 记录，列表视图、报表、Flow 和共享都照常适用。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "每个市场活动日期可以有自己的状态吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "可以。添加一个选项列表，例如 Planned、Confirmed、Completed 和 Cancelled，为每个值选一种颜色，日历就会用对应的状态颜色显示每个日期。在编辑模式下，可以选中多个日期，一步完成更改状态、移动或删除。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "可以在屏幕 Flow 中使用，而不是放在记录页面上吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "可以。把 Dates 组件添加到 Flow 屏幕上，将 Config Name（配置名称）设为您在设置向导中保存的配置。把市场活动 Id 传入 Parent Record Id，组件会自己保存子记录；也可以留空，然后循环处理 Selected Dates 输出。"
+                        }
+                    }
+                ],
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/blog/salesforce-campaign-multiple-dates.gif",
+                "caption": "MultiDatePick 在 Salesforce 市场活动记录页面上的动画演示：捐赠人巡访的日期按状态着色，悬停查看一个已确认的站点，再选择两个新日期并保存为 Campaign Date 记录",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce 市场活动日期：所有活动日尽在一个日历</h1>
+                <p class="subtitle">一个市场活动只有一个开始日期和一个结束日期，而您的巡展、网络研讨会系列或志愿者项目却有很多个日期。把它们全部放到市场活动记录上，每个都是一条带状态的真实记录，无需编写 Apex。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">发布于 2026 年 10 月 19 日 &middot; 更新于 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">“怎样给 Salesforce 市场活动添加多个日期？”“路演的每一站在哪里跟踪？”“哪几场网络研讨会已经确认？”市场活动只知道自己何时开始、何时结束，中间的一切最后都落到了电子表格或一个长长的描述字段里。</p>
+
+                <p>MultiDatePick 在市场活动记录页面上放一个日历。单击日期，保存，每个日期都会成为一条关联到该市场活动的独立子记录，并按状态着色。它在市场活动上的用法和在任何对象上一样：靠配置完成。<strong>无需 Apex。</strong></p>
+
+                <figure class="sc-shot">
+                    <img src="/images/blog/salesforce-campaign-multiple-dates.gif" alt="MultiDatePick 在 Salesforce 市场活动记录页面上的动画演示：捐赠人巡访的日期按状态着色，悬停查看一个已确认的站点，再选择两个新日期并保存为 Campaign Date 记录" loading="lazy" width="790" height="980" data-zoomable>
+                    <figcaption>一个捐赠人巡访市场活动：悬停某一站查看场地和状态，再单击两天，保存。每个日期都是独立的记录。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">市场活动页面上能得到什么</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>所有日期一目了然</h3><p>打开记录时，市场活动的所有日期都会加载到日历上。无需滚动查看相关列表。</p></div>
+                    <div class="tl-feat"><h3>状态颜色</h3><p>Planned、Confirmed、Completed、Cancelled：每种状态都有自己的颜色，日历上方的状态标签可按状态筛选。</p></div>
+                    <div class="tl-feat"><h3>悬停查看详情</h3><p>指向一个日期即可查看其背后的记录，例如站点名称、场地和状态，并附有打开记录的链接。</p></div>
+                    <div class="tl-feat"><h3>循环模式</h3><p>连续八周的每周二，只需一个模式、单击一次。很适合网络研讨会系列和邮件发送计划。</p></div>
+                    <div class="tl-feat"><h3>编辑模式</h3><p>选中多个日期，然后一步完成更改状态、移到另一天或删除。</p></div>
+                    <div class="tl-feat"><h3>真实的记录</h3><p>每个日期都是一条带有市场活动查找字段的子记录。可以对它做报表、基于它构建 Flow，也能像其他记录一样共享。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">三步完成设置</h2>
+                <p>这些组件不依赖于特定对象。它们不知道也不在乎父记录是不是市场活动；它们只需要一个用来保存的子对象，以及一个指回父记录的查找字段。整个集成就这么多。</p>
+                <ol class="cp-steps">
+                    <li><strong>创建子对象。</strong>在对象管理器中创建一个自定义对象，例如 <em>Campaign Date</em>。为它添加一个指向市场活动的查找字段和一个日期字段。再添加一个 Status 选项列表（Planned、Confirmed、Completed、Cancelled），以及任何您想在悬停时显示的详细字段，例如 Venue。</li>
+                    <li><strong>运行设置向导。</strong>打开 MultiDatePick 设置向导选项卡，配置 Dates 组件。选择 Campaign Date 作为对象，市场活动查找字段作为关系字段，再选择您的日期字段。在“状态与显示”步骤中，选择状态字段、为每个值选一种颜色，并选择悬停字段。用 <code>Campaign_Dates</code> 这样的名称保存配置。</li>
+                    <li><strong>把组件放到市场活动页面上。</strong>打开任意一个市场活动，单击“编辑页面”，把 MultiDatePick Dates 组件拖到布局上，并在 <strong>Config Name</strong> 中输入配置名称。保存并激活。现在每个市场活动都有了自己的日历。</li>
+                </ol>
+                <p>除了日期还需要时间，比如 11:00 一场网络研讨会、3:00 再重播一场？那就改用 Date Time 组件，并在子对象上添加开始时间和结束时间字段。步骤完全相同。</p>
+
+                <h2 style="margin-top:44px;">更喜欢用屏幕 Flow？</h2>
+                <p>同一份配置在 Flow 中同样适用。把 Dates 组件添加到屏幕上并设置 <strong>Config Name</strong>；所有设置都来自该配置，无需在 Flow Builder 中勾选任何复选框。把市场活动 Id 传入 <strong>Parent Record Id</strong>，组件会自己保存子记录。如果您更想循环处理 Selected Dates 输出、按自己的方式创建记录，就把它留空。<a href="/zh/blog/multiple-dates-in-a-salesforce-screen-flow.html">在屏幕 Flow 中选择多个日期</a>一文详细介绍了这两种模式。</p>
+
+                <h2 style="margin-top:44px;">团队在市场活动上跟踪哪些内容</h2>
+                <p>市场活动中凡是涉及多天的事情，都适用同一个子对象：</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>多日活动</strong><span>会议、峰会和晚宴，包括布展日、活动日和撤展日，每天都有自己的状态。</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>路演和巡展</strong><span>每一站一条记录，带场地和状态，大家都能看到哪些城市已经确认。</span></div></div>
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>网络研讨会系列</strong><span>用循环模式排出整个系列；颜色显示哪些场次已经举办。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>志愿者日</strong><span>一个季度内的服务日和募集活动，每一天都是可以做报表的记录。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>发送计划</strong><span>邮件或直邮培育序列的计划发送日期，显示在所属的市场活动上。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>禁用日期</strong><span>让屏蔽日期指向您的节假日对象，就不会有人在这些日子安排发送或活动。</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">决定其行为的设置</h2>
+                <p>以下每一项都是设置向导中的一个字段，也是组件上的一个属性，因此这里没有任何内容需要代码：</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">设置项</th><th>作用</th><th style="width:22%;">API 名称</th></tr></thead>
+                    <tbody>
+                    <tr><td>子对象 API 名称</td><td>每个日期保存到的子对象，例如 Campaign_Date__c。</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>关系字段 API 名称</td><td>该对象上指向市场活动的查找字段。组件会根据记录页面自动填写它。</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>日期字段 API 名称</td><td>存放每个所选日期的日期字段。</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>状态字段和状态颜色（Status Field and Status Colors）</td><td>状态选项列表以及每个值对应的颜色，例如 Confirmed:#22C55E。</td><td><code>statusField</code>、<code>statusColors</code></td></tr>
+                    <tr><td>悬停字段</td><td>指向某个日期时显示的字段，例如名称、场地和状态。</td><td><code>hoverFields</code></td></tr>
+                    <tr><td>显示循环模式（Show Recurring Pattern Button）</td><td>显示“添加循环模式”按钮，用于每周或每月重复的日期。</td><td><code>showRecurringPattern</code></td></tr>
+                    <tr><td>启用编辑模式（Enable Edit Mode）</td><td>显示“编辑”按钮，可一次更改多个日期的状态、移动或删除它们。</td><td><code>enableEditMode</code></td></tr>
+                    <tr><td>配置名称（Config Name）</td><td>设置向导保存的配置。设置这一项，其余留空即可。</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>不只是月视图。</strong>MultiDatePick 可以用日历、时间轴、周、日程列表或使用率网格来显示同一批记录，在一个组件里即可切换。<a href="/zh/blog/salesforce-calendar-views.html">查看全部五种视图</a>。</div>
+
+                <h2 style="margin-top:44px;">常见问题</h2>
+                <div class="tl-faq">
+                    <details><summary>一个 Salesforce 市场活动可以有多个日期吗？</summary><p>标准市场活动（Campaign）只有一个开始日期和一个结束日期。要跟踪巡展、网络研讨会系列或志愿者项目的每一天，可以添加一个带有市场活动查找字段的小型子对象，再把 MultiDatePick Dates 组件放到市场活动记录页面上。您单击的每个日期都会保存为一条独立的子记录。</p></details>
+                    <details><summary>给市场活动添加日期需要 Apex 或开发人员吗？</summary><p>不需要。子对象及其字段在对象管理器中点击即可创建，设置向导负责编写日历配置，组件则在 Lightning App Builder 中放到页面上。不需要编写或安装任何市场活动专用的代码。</p></details>
+                    <details><summary>市场活动的日期存储在哪里？</summary><p>存储在您自己的自定义对象中，例如 Campaign Date，每个日期一条记录，并带有指向市场活动的查找字段。它们是普通的 Salesforce 记录，列表视图、报表、Flow 和共享都照常适用。</p></details>
+                    <details><summary>每个市场活动日期可以有自己的状态吗？</summary><p>可以。添加一个选项列表，例如 Planned、Confirmed、Completed 和 Cancelled，为每个值选一种颜色，日历就会用对应的状态颜色显示每个日期。在编辑模式下，可以选中多个日期，一步完成更改状态、移动或删除。</p></details>
+                    <details><summary>可以在屏幕 Flow 中使用，而不是放在记录页面上吗？</summary><p>可以。把 Dates 组件添加到 Flow 屏幕上，将 Config Name（配置名称）设为您在设置向导中保存的配置。把市场活动 Id 传入 Parent Record Id，组件会自己保存子记录；也可以留空，然后循环处理 Selected Dates 输出。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>市场活动的每个日期，都在市场活动上。</h2>
+                    <p>在在线演示中单击日期，或从 <a href="/zh/configlibrary.html">Config Library</a> 中的现成配置开始。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-campaign-multiple-dates" class="btn btn-demo" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-primary">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">入门指南</a>
+                    </div>
+                    <ul class="check-list"><li>$20/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>100% Salesforce 原生</li><li>无需 Apex</li><li>即将登陆 Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>相关阅读</h3>
+                    <ul>
+                        <li><a href="/zh/blog/multiple-dates-in-a-salesforce-screen-flow.html">在 Salesforce 屏幕 Flow 中选择多个日期</a></li>
+                        <li><a href="/zh/blog/recurring-date-patterns-in-salesforce.html">无需编写逻辑的循环日期模式</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-setup-wizard.html">MultiDatePick 设置向导</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图，一个 Salesforce 组件</a></li>
+                        <li><a href="/zh/multidatepickdates.html">Date 组件</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>解决方案</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>文档</h4>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>公司</h4>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/blog/salesforce-campaign-multiple-dates.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/fechas-de-campana-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/campagne-salesforce-plusieurs-dates.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/date-multiple-campagne-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-campaign-multiple-dates.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-campaign-multiple-dates.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/blog/salesforce-campaign-multiple-dates.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

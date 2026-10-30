@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loop no Salesforce Flow: um registro para cada data ou turno</title>
+    <meta name="description" content="Como criar vários registros em um fluxo de tela do Salesforce: converta as datas, use um loop e salve uma vez depois dele. Três fluxos prontos.">
+    <link rel="canonical" href="https://multidatepick.com/pt-br/blog/loop-salesforce-flow-varios-registros.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line tables, rail cards, FAQ, end CTA. */
+        .section .container > p { margin: 0 0 14px; }
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code, .section p code, .bp-list code { font-size: 0.85rem; color: #0F2D52; background: #F1F5F9; padding: 1px 5px; border-radius: 4px; }
+        .bp-steps { list-style: none; counter-reset: s; padding: 0; margin: 22px 0; display: grid; gap: 10px; }
+        .bp-steps li { counter-increment: s; position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px 16px 12px 54px; color: #374151; }
+        .bp-steps li::before { content: counter(s); position: absolute; left: 14px; top: 11px; width: 26px; height: 26px; border-radius: 50%; background: #0F2D52; color: #fff; font-weight: 700; font-size: 0.85rem; display: grid; place-items: center; }
+        .bp-steps li strong { color: #0F2D52; }
+        .bp-pair { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 22px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-starter { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px 16px 22px; margin: 22px 0; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-starter::before { content: ""; position: absolute; left: 0; top: 20px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-starter h3 { margin: 0 0 4px; font-size: 1.05rem; color: #0F2D52; }
+        .bp-starter p { margin: 0 0 12px; color: #4B5563; font-size: 0.93rem; line-height: 1.55; }
+        .bp-starter .bp-file { font-family: Consolas, Menlo, monospace; font-size: 0.82rem; color: #64748B; }
+        .bp-starter-ctas { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .bp-copied { color: #16A34A; font-weight: 600; font-size: 0.88rem; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 8px 0 8px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 720px) { .bp-pair { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) { .bp-end { padding: 20px 18px; } .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; } }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Loop no Salesforce Flow: um registro para cada data ou turno">
+    <meta property="og:description" content="Como criar vários registros em um fluxo de tela do Salesforce: converta as datas, use um loop e salve uma vez depois dele. Três fluxos prontos.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/pt-br/blog/loop-salesforce-flow-varios-registros.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Loop no Salesforce Flow: um registro para cada data ou turno">
+    <meta name="twitter:description" content="Como criar vários registros em um fluxo de tela do Salesforce: converta as datas, use um loop e salve uma vez depois dele. Três fluxos prontos.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-flow-schleife-mehrere-datensaetze.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/bucle-flow-salesforce-varios-registros.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/boucle-flux-salesforce-plusieurs-enregistrements.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/ciclo-flusso-salesforce-piu-record.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/loop-salesforce-flow-varios-registros.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-flow-loop-multiple-records.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Em breve no Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Fechar aviso" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/pt-br/" class="logo"><img src="/images/logo.png" alt="Logotipo do MultiDatePick: calendário de várias datas e reserva de recursos para Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Abrir ou fechar o menu"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">Date</a></li>
+                        <li><a href="/pt-br/seletor-de-data-e-hora-salesforce.html">Date Time</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Cinco visualizações de calendário</a></li>
+                        <li><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a></li>
+                        <li><a href="/pt-br/confianca-e-seguranca.html">Confiança e segurança</a></li>
+                        <li><a href="/pt-br/acessibilidade-vpat.html">Acessibilidade (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Soluções <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/calendario-salesforce.html">Calendário Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas</a></li>
+                        <li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html">Reserva de salas de reunião</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html">Datas de campanha</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">Governo / Section 508</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pt-br/precos.html">Preços</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentação <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/primeiros-passos.html">Primeiros passos</a></li>
+                        <li><a href="/pt-br/guia-do-usuario.html">Guia do usuário</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">Guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html">Páginas de aplicativo, iniciais e do Experience Cloud</a></li>
+                        <li><a href="/pt-br/implantar-fluxo-vs-code.html">Implantar um fluxo (VS Code)</a></li>
+                        <li><a href="/pt-br/solucao-de-problemas.html">Solução de problemas</a></li>
+                        <li><a href="/pt-br/perguntas-frequentes.html">Perguntas frequentes</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pt-br/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Experimente a demo ao vivo</a></li>
+                <li><a href="/pt-br/avise-me-no-lancamento.html" class="nav-cta">Avise-me no lançamento</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Loop no Salesforce Flow: um registro para cada data ou turno",
+                "description": "Como criar vários registros em um fluxo de tela do Salesforce: converta as datas, use um loop e salve uma vez depois dele. Três fluxos prontos.",
+                "datePublished": "2026-10-29",
+                "dateModified": "2026-10-29",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/pt-br/blog/loop-salesforce-flow-varios-registros.html",
+                "image": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png",
+                "inLanguage": "pt-BR"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Como criar vários registros a partir de um único fluxo de tela (Screen Flow) do Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Reúna as escolhas em uma tela, percorra-as em um loop e, dentro do loop, use uma Atribuição para preencher uma variável de registro e adicioná-la a uma coleção de registros. Depois do loop, um único elemento Criar registros salva a coleção inteira."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "O Criar registros deve ficar dentro de um loop do Flow?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Não. Um Criar registros dentro de um loop salva uma vez por item, e uma transação permite 150 desses salvamentos, então uma lista longa falha e toda lista fica mais lenta. Monte uma coleção de registros no loop e salve-a uma vez, quando o loop terminar."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Como percorrer um JSON em um loop no Salesforce Flow?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "O Flow não lê JSON sozinho. Transforme-o antes em uma coleção: o MultiDatePick inclui uma ação, Parse Date Entries from JSON, que converte a saída JSON do calendário em uma lista de entradas com fromDate, toDate, startTime e endTime, que um elemento Loop consegue percorrer."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Como adicionar vários turnos a uma vaga no Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Coloque um seletor de data e hora em um fluxo de tela iniciado a partir do registro da vaga, deixe o recrutador escolher os dias e horários dos turnos, converta as escolhas em uma lista e percorra-a em um loop para montar um registro de turno por dia, vinculado à vaga. Salve todos em um único Criar registros depois do loop."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Preciso de Apex para percorrer as datas escolhidas?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Não. A ação de conversão vem com o MultiDatePick, e o loop, a atribuição e o salvamento são elementos padrão do Flow. Para dias inteiros, você nem precisa da ação: o calendário também devolve uma lista simples dos dias escolhidos."
+                        }
+                    }
+                ],
+                "inLanguage": "pt-BR"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png",
+                "caption": "Um fluxo de tela do Salesforce no Flow Builder que adiciona turnos: uma tela do MultiDatePick, uma ação Parse Date Entries, um loop que monta cada turno e um único Criar registros depois do loop",
+                "width": 940,
+                "height": 1780,
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-shift-picker.png",
+                "caption": "Seletor de data e hora do MultiDatePick em um fluxo de tela do Salesforce: três dias de turno escolhidos em novembro, com 13:00 às 14:00 selecionado para todos",
+                "width": 1900,
+                "height": 1917,
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Loop no Salesforce Flow: um registro para cada data ou turno</h1>
+                <p class="subtitle">Uma tela, muitos registros. O padrão de loop de que todo criador de fluxos de tela precisa, com três fluxos prontos para copiar: turnos, folgas e intervalos de datas.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Publicado em 29 de outubro de 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">Um recrutador precisa adicionar doze turnos a uma vaga. Uma gestora aprova uma semana de folga. Um organizador de eventos reserva um workshop de três dias e mais um dia de acompanhamento. Cada caso é uma única decisão em uma única tela, e cada um deveria virar vários registros.</p>
+
+                <p>O fluxo de tela não tem um elemento que diga "crie um registro por data". Você monta isso com três peças padrão: um loop, uma atribuição e um único salvamento. Este post mostra esse padrão passo a passo e entrega três fluxos prontos construídos com ele.</p>
+
+                <p>O padrão nasceu em um projeto de recrutamento no TalentRover, em que os recrutadores precisavam adicionar uma série de turnos a uma vaga. Lançar um registro de cada vez levava mais tempo do que o próprio agendamento. Escolher os dias e horários uma vez e deixar um loop gravar os turnos resolveu o problema, e funciona do mesmo jeito para qualquer objeto.</p>
+
+                <h2 style="margin-top:44px;">O padrão em cinco elementos</h2>
+                <div class="bp-pair">
+                    <figure class="sc-shot">
+                        <img src="/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png" alt="Um fluxo de tela do Salesforce no Flow Builder que adiciona turnos: uma tela do MultiDatePick, uma ação Parse Date Entries, um loop que monta cada turno e um único Criar registros depois do loop" loading="lazy" decoding="async" width="940" height="1780" data-zoomable>
+                        <figcaption>O fluxo pronto Add Shifts. O salvamento fica depois do loop, não dentro dele.</figcaption>
+                    </figure>
+                    <ol class="bp-steps">
+                        <li><strong>Tela.</strong> Um calendário do MultiDatePick em que o usuário escolhe todas as datas, e os horários se você precisar, de uma vez.</li>
+                        <li><strong>Conversão.</strong> A ação <code>Parse Date Entries from JSON</code> transforma as escolhas em uma lista que o Flow consegue percorrer.</li>
+                        <li><strong>Loop.</strong> Um elemento Loop percorre a lista, uma entrada por vez.</li>
+                        <li><strong>Atribuição.</strong> Dentro do loop: copie a data e os horários da entrada para uma variável de registro e depois adicione esse registro a uma coleção de registros.</li>
+                        <li><strong>Criar registros.</strong> Depois do loop, um único Criar registros salva a coleção inteira.</li>
+                    </ol>
+                </div>
+
+                <h2 style="margin-top:44px;">Por que o salvamento fica depois do loop</h2>
+                <p>É tentador colocar um Criar registros dentro do loop: uma passada, um registro. Funciona com três datas e quebra com trinta. Cada Criar registros é um salvamento separado no banco de dados, e o Salesforce permite 150 deles por transação, divididos com todos os acionadores e fluxos que esses salvamentos disparam. Um salvamento dentro do loop gasta um por data.</p>
+                <p>Montar uma coleção e salvá-la uma vez gasta um único salvamento no total, não importa o que o usuário escolheu. Também é mais rápido, e salva tudo ou nada, então uma falha nunca deixa metade dos turnos para trás.</p>
+                <table class="bp-grid">
+                    <thead><tr><th></th><th>Criar registros dentro do loop</th><th>Coleção salva depois do loop</th></tr></thead>
+                    <tbody>
+                        <tr><td>Salvamentos para 30 datas</td><td>30</td><td>1</td></tr>
+                        <tr><td>Risco de limite</td><td>Cresce a cada data escolhida</td><td>Nenhum vindo do loop</td></tr>
+                        <tr><td>Em caso de erro</td><td>Alguns registros salvos, outros não</td><td>Tudo ou nada</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 style="margin-top:44px;">Caso de uso: adicionar turnos a uma vaga</h2>
+                <p>O recrutador abre o fluxo a partir da vaga, escolhe os dias dos turnos no calendário e os horários na grade de horários e clica em Avançar. O fluxo grava um turno por dia, vinculado à vaga.</p>
+                <figure class="sc-shot">
+                    <img src="/images/flow-guide/salesforce-flow-loop-shift-picker.png" alt="Seletor de data e hora do MultiDatePick em um fluxo de tela do Salesforce: três dias de turno escolhidos em novembro, com 13:00 às 14:00 selecionado para todos" loading="lazy" decoding="async" width="1900" height="1917" data-zoomable>
+                    <figcaption>Três dias de turno e um intervalo de horário, escolhidos em uma única tela. O fluxo transforma isso em três registros de turno.</figcaption>
+                </figure>
+                <p>O calendário entrega as escolhas ao fluxo como JSON na saída <code>selectedDatesWithTimesJson</code>. O Flow não lê JSON, e é aí que entra o conversor. Cada entrada que ele devolve tem estes campos:</p>
+                <table class="bp-grid">
+                    <thead><tr><th>Campo</th><th>Tipo</th><th>Contém</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>fromDate</code></td><td>Date</td><td>O dia do turno</td></tr>
+                        <tr><td><code>toDate</code></td><td>Date</td><td>O mesmo dia, para um turno; o último dia, para um intervalo</td></tr>
+                        <tr><td><code>startTime</code></td><td>Horário</td><td>O primeiro horário escolhido</td></tr>
+                        <tr><td><code>endTime</code></td><td>Horário</td><td>O fim do último horário escolhido</td></tr>
+                    </tbody>
+                </table>
+                <p>Horários vizinhos formam um único turno, então 13:00 e 13:30 viram 13:00 às 14:00. Escolher dois blocos separados no mesmo dia, como uma manhã e uma tarde, gera duas entradas e dois turnos naquele dia.</p>
+
+                <div class="bp-starter">
+                    <h3>Fluxo pronto: Add Shifts</h3>
+                    <p>Escolha dias e horários e salve um turno por bloco, vinculado ao registro a partir do qual o fluxo foi iniciado. <span class="bp-file">MDP_Starter_Add_Shifts.flow-meta.xml</span></p>
+                    <div class="bp-starter-ctas">
+                        <button type="button" class="btn btn-primary btn-sm bp-copy" data-flow="MDP_Starter_Add_Shifts.flow-meta.xml">Copiar XML do fluxo</button> <a class="btn btn-secondary btn-sm" href="/downloads/flows/MDP_Starter_Add_Shifts.flow-meta.xml" download>Baixar</a> <span class="bp-copied" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
+                <h2 style="margin-top:44px;">Caso de uso: um registro para cada dia de folga</h2>
+                <p>Folgas normalmente são controladas por dia: a folha de pagamento conta dias, e um pedido aprovado só em parte precisa ser dividido por dia de qualquer jeito. Aqui você nem precisa do conversor. O componente Date também devolve <code>selectedDates</code>, uma lista de texto simples com cada dia escolhido, com os intervalos desdobrados dia a dia.</p>
+                <p>Percorra essa lista diretamente em um loop. O único detalhe é que cada item é um texto como <code>2026-11-09</code>, então uma fórmula de uma linha, <code>DATEVALUE({!Loop_Days})</code>, o transforma em data antes de a atribuição copiá-lo para o registro.</p>
+
+                <div class="bp-starter">
+                    <h3>Fluxo pronto: Record per Day</h3>
+                    <p>Escolha dias e intervalos e salve um registro para cada dia, sem precisar do conversor. <span class="bp-file">MDP_Starter_Record_Per_Day.flow-meta.xml</span></p>
+                    <div class="bp-starter-ctas">
+                        <button type="button" class="btn btn-primary btn-sm bp-copy" data-flow="MDP_Starter_Record_Per_Day.flow-meta.xml">Copiar XML do fluxo</button> <a class="btn btn-secondary btn-sm" href="/downloads/flows/MDP_Starter_Record_Per_Day.flow-meta.xml" download>Baixar</a> <span class="bp-copied" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
+                <h2 style="margin-top:44px;">Caso de uso: um registro por intervalo de datas</h2>
+                <p>Algumas coisas duram vários dias, mas são uma coisa só: um workshop de três dias, a locação de um equipamento, uma visita técnica de segunda a quarta. Elas pedem um registro com data de início e data de término, não três.</p>
+                <p>Para isso existe a saída <code>selectedDateRangesJson</code>. O calendário junta dias vizinhos em um único intervalo, então escolher os dias 9, 10 e 11 gera uma entrada do dia 9 ao dia 11. Converta, percorra em um loop e copie <code>fromDate</code> e <code>toDate</code> para os campos de início e de término.</p>
+
+                <div class="bp-starter">
+                    <h3>Fluxo pronto: Record per Range</h3>
+                    <p>Escolha datas e intervalos e salve um registro por intervalo, com a data de início e de término. <span class="bp-file">MDP_Starter_Record_Per_Range.flow-meta.xml</span></p>
+                    <div class="bp-starter-ctas">
+                        <button type="button" class="btn btn-primary btn-sm bp-copy" data-flow="MDP_Starter_Record_Per_Range.flow-meta.xml">Copiar XML do fluxo</button> <a class="btn btn-secondary btn-sm" href="/downloads/flows/MDP_Starter_Record_Per_Range.flow-meta.xml" download>Baixar</a> <span class="bp-copied" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Vai reservar um recurso? Você não precisa de loop.</strong> O <a href="/pt-br/calendario-de-reservas-salesforce.html">componente Booking</a> salva as próprias reservas, verificando capacidade e conflitos pelo caminho, e informa ao fluxo quantas salvou em <code>bookingSuccessCount</code> e quais datas entraram em conflito em <code>bookingConflictDates</code>.</div>
+
+                <h2 style="margin-top:44px;">Use um fluxo pronto na sua organização</h2>
+                <p>Os fluxos prontos salvam nos objetos Schedule e Event que vêm com o MultiDatePick, então são implantados do jeito que estão e funcionam logo após a instalação. Troque pelos seus próprios objetos depois de vê-los funcionando.</p>
+                <ol class="bp-steps">
+                    <li><strong>Copie ou baixe</strong> o XML do fluxo acima.</li>
+                    <li><strong>Implante-o</strong> pelo VS Code. <a href="/pt-br/implantar-fluxo-vs-code.html">Implantar um fluxo com o VS Code</a> mostra o passo a passo.</li>
+                    <li><strong>Abra-o no Flow Builder</strong> e clique no calendário da primeira tela. Digite o <strong>Config Name</strong> de uma configuração que você salvou no Assistente de Configuração, ou de uma que importou da <a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a>, para aplicar as suas configurações.</li>
+                    <li><strong>Aponte-o para os seus objetos</strong>, se não for usar Schedule e Event: mude o objeto da variável de registro e os campos da atribuição.</li>
+                    <li><strong>Ative-o</strong> e adicione-o à página de registro com o componente Flow ou como uma ação. Ele lê o Id do registro na variável <code>recordId</code>.</li>
+                </ol>
+
+                <h2 style="margin-top:44px;">Erros que custam uma tarde</h2>
+                <ul class="bp-list">
+                    <li><strong>Salvar dentro do loop.</strong> Funciona em um teste com três datas e dá erro de limite em produção com quarenta.</li>
+                    <li><strong>Esquecer de adicionar o registro à coleção.</strong> A atribuição precisa de duas partes: definir os campos e depois <em>Adicionar</em> a variável de registro à coleção. Sem a segunda, o salvamento no final não tem nada para salvar.</li>
+                    <li><strong>Atribuir texto a um campo de data.</strong> A lista <code>selectedDates</code> é texto. Envolva cada item em <code>DATEVALUE()</code> antes.</li>
+                    <li><strong>Deixar o Output As JSON desligado.</strong> As saídas JSON só são preenchidas quando a opção Output As JSON do calendário está ligada. Os fluxos prontos já a ligam.</li>
+                    <li><strong>Iniciar do lugar errado.</strong> O fluxo vincula cada registro a <code>recordId</code>. Execute-o a partir da vaga, do evento ou da pessoa a que os registros pertencem, ou o vínculo fica vazio.</li>
+                </ul>
+
+                <h2 style="margin-top:44px;">Perguntas frequentes</h2>
+                <div class="bp-faq">
+                    <details><summary>Como criar vários registros a partir de um único fluxo de tela (Screen Flow) do Salesforce?</summary><p>Reúna as escolhas em uma tela, percorra-as em um loop e, dentro do loop, use uma Atribuição para preencher uma variável de registro e adicioná-la a uma coleção de registros. Depois do loop, um único elemento Criar registros salva a coleção inteira.</p></details>
+                    <details><summary>O Criar registros deve ficar dentro de um loop do Flow?</summary><p>Não. Um Criar registros dentro de um loop salva uma vez por item, e uma transação permite 150 desses salvamentos, então uma lista longa falha e toda lista fica mais lenta. Monte uma coleção de registros no loop e salve-a uma vez, quando o loop terminar.</p></details>
+                    <details><summary>Como percorrer um JSON em um loop no Salesforce Flow?</summary><p>O Flow não lê JSON sozinho. Transforme-o antes em uma coleção: o MultiDatePick inclui uma ação, Parse Date Entries from JSON, que converte a saída JSON do calendário em uma lista de entradas com fromDate, toDate, startTime e endTime, que um elemento Loop consegue percorrer.</p></details>
+                    <details><summary>Como adicionar vários turnos a uma vaga no Salesforce?</summary><p>Coloque um seletor de data e hora em um fluxo de tela iniciado a partir do registro da vaga, deixe o recrutador escolher os dias e horários dos turnos, converta as escolhas em uma lista e percorra-a em um loop para montar um registro de turno por dia, vinculado à vaga. Salve todos em um único Criar registros depois do loop.</p></details>
+                    <details><summary>Preciso de Apex para percorrer as datas escolhidas?</summary><p>Não. A ação de conversão vem com o MultiDatePick, e o loop, a atribuição e o salvamento são elementos padrão do Flow. Para dias inteiros, você nem precisa da ação: o calendário também devolve uma lista simples dos dias escolhidos.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Uma tela, todos os registros que ela deve gerar.</h2>
+                    <p>Copie um fluxo pronto acima, ou experimente antes o calendário na demo ao vivo.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-flow-loop-multiple-records" class="btn btn-demo" target="_blank" rel="noopener">Experimente a demo ao vivo</a> <a href="/pt-br/avise-me-no-lancamento.html" class="btn btn-primary">Avise-me no lançamento</a> <a href="/pt-br/guia-fluxo-de-tela-salesforce.html" class="btn btn-secondary">Guia de fluxo de tela</a>
+                    </div>
+                    <ul class="check-list"><li>US$ 20/usuário/mês, todos os recursos</li><li>Teste grátis de 30 dias, sem cartão</li><li>100% nativo do Salesforce</li><li>Sem Apex</li><li>Em breve no Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Leia também</h3>
+                    <ul>
+                        <li><a href="/pt-br/blog/varias-datas-fluxo-de-tela-salesforce.html">Várias datas em um fluxo de tela do Salesforce</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">O guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/implantar-fluxo-vs-code.html">Implantar um fluxo com o VS Code</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Um calendário Salesforce para staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/blog/datas-recorrentes-salesforce.html">Datas recorrentes no Salesforce</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/pt-br/" class="logo">
+                        <img src="/images/logo.png" alt="Logotipo do MultiDatePick: calendário de várias datas e reserva de recursos para Salesforce" width="180" height="45">
+                    </a>
+                    <p>O pacote de componentes de calendário mais personalizável para Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produto</h4>
+                    <ul>
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">Date</a></li>
+                        <li><a href="/pt-br/seletor-de-data-e-hora-salesforce.html">Date Time</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Cinco visualizações de calendário</a></li>
+                        <li><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluções</h4>
+                    <ul>
+                        <li><a href="/pt-br/calendario-salesforce.html">Calendário Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas</a></li>
+                        <li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html">Reserva de salas de reunião</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html">Datas de campanha</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">Governo / Section 508</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentação</h4>
+                    <ul>
+                        <li><a href="/pt-br/primeiros-passos.html">Primeiros passos</a></li>
+                        <li><a href="/pt-br/guia-do-usuario.html">Guia do usuário</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">Guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html">Páginas de aplicativo, iniciais e do Experience Cloud</a></li>
+                        <li><a href="/pt-br/implantar-fluxo-vs-code.html">Implantar um fluxo (VS Code)</a></li>
+                        <li><a href="/pt-br/solucao-de-problemas.html">Solução de problemas</a></li>
+                        <li><a href="/pt-br/perguntas-frequentes.html">Perguntas frequentes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="/pt-br/precos.html">Preços</a></li>
+                        <li><a href="/pt-br/blog/">Blog</a></li>
+                        <li><a href="/pt-br/confianca-e-seguranca.html">Confiança e segurança</a></li>
+                        <li><a href="/pt-br/acessibilidade-vpat.html">Acessibilidade</a></li>
+                        <li><a href="/pt-br/avise-me-no-lancamento.html">Avise-me no lançamento</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Suporte</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Todos os direitos reservados.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Idioma" translate="no"><ul><li><a href="/blog/salesforce-flow-loop-multiple-records.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-flow-schleife-mehrere-datensaetze.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/bucle-flow-salesforce-varios-registros.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/boucle-flux-salesforce-plusieurs-enregistrements.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/ciclo-flusso-salesforce-piu-record.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/loop-salesforce-flow-varios-registros.html" hreflang="pt-BR" lang="pt-BR" aria-current="page">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-flow-loop-multiple-records.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-flow-loop-multiple-records.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-flow-loop-multiple-records.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <div class="mdp-strings" hidden><p data-k="flow-copied">Copiado. Salve na pasta flows do seu projeto.</p></div>
+    <script src="/js/main.js"></script>
+    <script>
+    // Copy a starter flow's XML. Falls back to opening the file when the clipboard is refused.
+    (function () {
+        document.querySelectorAll('.bp-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var url = '/downloads/flows/' + btn.getAttribute('data-flow');
+                var note = btn.parentNode.querySelector('.bp-copied');
+                fetch(url).then(function (r) { return r.text(); })
+                    .then(function (xml) { return navigator.clipboard.writeText(xml); })
+                    .then(function () { note.innerHTML = window.mdpText('flow-copied', 'Copied. Save it in your project\'s flows folder.'); })
+                    .catch(function () { window.open(url, '_blank'); });
+            });
+        });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ampliar imagem</p><p data-k="expand-diagram">Ampliar diagrama</p><p data-k="close">Fechar</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

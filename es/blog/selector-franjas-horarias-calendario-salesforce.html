@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selector de franjas horarias para Salesforce, sin código</title>
+    <meta name="description" content="Un selector de franjas horarias para Salesforce: calendario con franjas de cualquier duración, horas ocupadas ocultas de antemano, capacidad en vivo y sin código.">
+    <link rel="canonical" href="https://multidatepick.com/es/blog/selector-franjas-horarias-calendario-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Selector de franjas horarias para Salesforce, sin código">
+    <meta property="og:description" content="Un selector de franjas horarias para Salesforce: calendario con franjas de cualquier duración, horas ocupadas ocultas de antemano, capacidad en vivo y sin código.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/es/blog/selector-franjas-horarias-calendario-salesforce.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_ES">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Selector de franjas horarias para Salesforce, sin código">
+    <meta name="twitter:description" content="Un selector de franjas horarias para Salesforce: calendario con franjas de cualquier duración, horas ocupadas ocultas de antemano, capacidad en vivo y sin código.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-calendar-time-slot-picker.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-kalender-zeitfenster-auswahl.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/selector-franjas-horarias-calendario-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/selecteur-creneaux-horaires-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/selettore-fasce-orarie-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/seletor-de-horarios-calendario-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-calendar-time-slot-picker.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-calendar-time-slot-picker.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-calendar-time-slot-picker.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-calendar-time-slot-picker.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Próximamente en Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Cerrar aviso" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/es/" class="logo"><img src="/images/logo.png" alt="Logotipo de MultiDatePick: componente de calendario de varias fechas y reserva de recursos para Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Mostrar u ocultar navegación"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Producto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/selector-varias-fechas-salesforce.html">Date</a></li>
+                        <li><a href="/es/selector-franjas-horarias-salesforce.html">Date Time</a></li>
+                        <li><a href="/es/calendario-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Cinco vistas de calendario</a></li>
+                        <li><a href="/es/biblioteca-configuraciones-calendario-salesforce.html">Config Library</a></li>
+                        <li><a href="/es/confianza-y-seguridad.html">Confianza y seguridad</a></li>
+                        <li><a href="/es/accesibilidad-vpat.html">Accesibilidad (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Soluciones <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/calendario-salesforce.html">Calendario de Salesforce</a></li>
+                        <li><a href="/es/calendario-salesforce-reclutamiento-seleccion-personal.html">Reclutamiento y selección</a></li>
+                        <li><a href="/es/calendario-salesforce-programar-entrevistas.html">Programación de entrevistas</a></li>
+                        <li><a href="/es/reserva-salas-reuniones-salesforce.html">Reserva de salas de reuniones</a></li>
+                        <li><a href="/es/calendario-reservas-experience-cloud-salesforce.html">Reservas en Experience Cloud</a></li>
+                        <li><a href="/es/blog/fechas-de-campana-salesforce.html">Fechas de campaña</a></li>
+                        <li><a href="/es/blog/calendario-salesforce-accesible-sector-publico-section-508.html">Sector público / Section 508</a></li>
+                        <li><a href="/es/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/es/precios.html">Precios</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentación <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/primeros-pasos.html">Primeros pasos</a></li>
+                        <li><a href="/es/guia-del-usuario.html">Guía del usuario</a></li>
+                        <li><a href="/es/guia-flujos-de-pantalla-salesforce.html">Guía de flujos de pantalla</a></li>
+                        <li><a href="/es/paginas-aplicacion-inicio-experience-cloud.html">Páginas de aplicación, inicio y Experience</a></li>
+                        <li><a href="/es/implementar-flujo-vs-code.html">Implementar un flujo (VS Code)</a></li>
+                        <li><a href="/es/solucion-de-problemas.html">Solución de problemas</a></li>
+                        <li><a href="/es/preguntas-frecuentes.html">Preguntas frecuentes</a></li>
+                    </ul>
+                </li>
+                <li><a href="/es/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Prueba la demo en vivo</a></li>
+                <li><a href="/es/avisame-en-el-lanzamiento.html" class="nav-cta">Avísame en el lanzamiento</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Cómo crear un selector de franjas horarias en un calendario de Salesforce",
+                "description": "Un selector de franjas horarias para Salesforce: calendario con franjas de cualquier duración, horas ocupadas ocultas de antemano, capacidad en vivo y sin código.",
+                "datePublished": "2026-06-27",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/es/blog/selector-franjas-horarias-calendario-salesforce.html",
+                "image": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "inLanguage": "es"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "¿Qué es un selector de franjas horarias?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Un calendario en el que eliges un día y, debajo, una cuadrícula que divide ese día en intervalos reservables. Las franjas ya ocupadas aparecen como no disponibles, así que solo se eligen horas libres."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Tiene Salesforce un selector de franjas horarias?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "No para tus propios objetos. Un campo Fecha/hora estándar es un campo de fecha más un desplegable de hora, y no ve los demás registros. MultiDatePick añade un selector de franjas horarias que lee las reservas existentes al cargar el calendario y solo ofrece lo que está libre."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Las franjas pueden durar lo que yo quiera?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sí. El intervalo puede ser cualquier número de minutos. Lo habitual son 15, 30 o 60 minutos, y una franja de entrevista de 45 minutos funciona igual."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Necesito Apex o un desarrollador para añadir un selector de franjas horarias?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "No. El asistente de configuración genera la configuración, y el componente se coloca en una página de registro, una página de aplicación, un sitio de Experience Cloud o un flujo de pantalla (Screen Flow) rellenando Config Name (Nombre de configuración). No hay que escribir código."
+                        }
+                    }
+                ],
+                "inLanguage": "es"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/multidatepick-booking-demo-poster.png",
+                "caption": "Demo de reserva de recursos en Salesforce: elegir un asesor, indicar el cliente, escoger una fecha y una franja libre de 30 minutos y guardar la solicitud",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo-poster.png",
+                "caption": "Demo animada del componente DateTime de MultiDatePick en Salesforce: poner nombre a un plan de incorporación de nuevos empleados, arrastrar de lunes a jueves, arrastrar de 09:00 a 12:00 en la cuadrícula de horarios compartida y guardar un turno por día",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-time-slots.png",
+                "caption": "Selector de franjas horarias en un calendario de Salesforce: cuadrícula con franjas disponibles y no disponibles agrupadas por periodo",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Cómo crear un selector de franjas horarias en un calendario de Salesforce</h1>
+                <p class="subtitle">Salesforce te da un selector de fecha y un campo de hora. No te da una cuadrícula de franjas para elegir. Esto es lo que hace falta para un selector de franjas horarias de verdad en Salesforce, y cómo tenerlo sin desarrollarlo.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Publicado el 27 de junio de 2026 &middot; Actualizado el 21 de octubre de 2026 &middot; MultiDatePick</p>
+                <p class="sc-lead">Un selector de franjas horarias es una interfaz concreta: un calendario en el que eliges un día y, debajo, una cuadrícula con ese día dividido en intervalos reservables, con los ocupados claramente no disponibles. Todo el mundo lo reconoce, porque lo usan todas las webs de reservas. Salesforce no trae ninguno.</p>
+
+                <div class="bp-pair">
+                    <figure class="sc-shot">
+                        <img src="/images/multidatepick-booking-demo-poster.png" data-gif="/images/multidatepick-booking-demo.gif" alt="Demo de reserva de recursos en Salesforce: elegir un asesor, indicar el cliente, escoger una fecha y una franja libre de 30 minutos y guardar la solicitud" width="700" height="1010" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Elige un asesor, un día y una franja libre. Nunca se ofrecen franjas ocupadas.</figcaption>
+                    </figure>
+                    <figure class="sc-shot">
+                        <img src="/images/components/salesforce-date-time-scheduling-demo-poster.png" data-gif="/images/components/salesforce-date-time-scheduling-demo.gif" alt="Demo animada del componente DateTime de MultiDatePick en Salesforce: poner nombre a un plan de incorporación de nuevos empleados, arrastrar de lunes a jueves, arrastrar de 09:00 a 12:00 en la cuadrícula de horarios compartida y guardar un turno por día" width="700" height="961" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Arrastra sobre cuatro días, arrastra de 09:00 a 12:00 y guarda un registro por día.</figcaption>
+                    </figure>
+                </div>
+
+                <h2 style="margin-top:44px;">Lo que Salesforce te da de serie</h2>
+                <p>Un campo Fecha/hora estándar se muestra como un campo de fecha más un desplegable de hora. Es un control de formulario y no sabe qué más está reservado. Nada impide que un usuario elija una franja que ya está ocupada, porque el campo no sabe que existen otros registros. Esa comprobación llega después, en una regla de validación o en un flujo, cuando el usuario ya ha hecho su elección.</p>
+                <p>Ahí está el hueco. Un selector de franjas horarias consulta los registros existentes <em>antes</em> de que el usuario elija, y solo ofrece lo que está libre.</p>
+
+                <h2 style="margin-top:44px;">Lo que tiene que hacer un selector de franjas de verdad</h2>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">Requisito</th><th style="width:30%;">Campos estándar</th><th>Con MultiDatePick</th></tr></thead>
+                    <tbody>
+                    <tr><td>Dividir el día en intervalos</td><td class="bp-no">No existe el concepto de intervalo</td><td class="bp-yes">Cualquier intervalo (lo habitual: 15, 30 o 60 minutos)</td></tr>
+                    <tr><td>Conocer la jornada laboral</td><td class="bp-no">Cualquier hora es válida</td><td class="bp-yes">Hora más temprana y más tardía, o el horario comercial de cada recurso</td></tr>
+                    <tr><td>Mostrar lo ocupado</td><td class="bp-no">No se muestra nada</td><td class="bp-yes">Las reservas existentes dibujadas en la cuadrícula</td></tr>
+                    <tr><td>Varias personas por franja</td><td class="bp-no">No se puede expresar</td><td class="bp-yes">Capacidad con un indicador en vivo de reservas frente a capacidad</td></tr>
+                    <tr><td>Horas distintas en días distintos</td><td class="bp-no">Un campo, un valor</td><td class="bp-yes">Allow Different Times Per Date (Permitir horas distintas)</td></tr>
+                    <tr><td>Evitar un solapamiento al guardar</td><td class="bp-no">Solo con lógica personalizada</td><td class="bp-yes">Conflict Behavior (Comportamiento ante conflictos): bloquear, omitir o permitir</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">Por qué desarrollarlo tú mismo cuesta más de lo que parece</h2>
+                <p>Dibujarlo es lo fácil. Estas son las partes que nadie estima:</p>
+                <div class="bp-cards">
+                    <div class="bp-card"><h3>Consultar las reservas</h3><p>De forma eficiente, sin superar los límites del gobernador cuando alguien abre una vista de dos meses.</p></div>
+                    <div class="bp-card" style="--c:#0176D3;"><h3>Cálculo de solapamientos</h3><p>Se complica en cuanto las reservas pueden tener duraciones distintas.</p></div>
+                    <div class="bp-card" style="--c:#7C3AED;"><h3>Zonas horarias</h3><p>La zona horaria del usuario y la del registro no siempre coinciden.</p></div>
+                    <div class="bp-card" style="--c:#E11D48;"><h3>Condiciones de carrera</h3><p>Dos personas mirando la misma franja libre en el mismo momento.</p></div>
+                    <div class="bp-card" style="--c:#0F766E;"><h3>Seguridad a nivel de campo</h3><p>El componente tiene que respetar lo que el usuario puede ver.</p></div>
+                    <div class="bp-card" style="--c:#16A34A;"><h3>Accesibilidad</h3><p>Una cuadrícula de divs en los que se puede hacer clic no se puede recorrer con el teclado por defecto.</p></div>
+                </div>
+                <p>La accesibilidad es lo que más cuidado exige. Una cuadrícula de franjas necesita semántica de cuadrícula ARIA correcta, navegación con las flechas y un estado que se transmita con algo más que el color. Es lo que la mayoría de los desarrollos internos se saltan, y lo que pregunta una revisión de compras.</p>
+
+                <h2 style="margin-top:44px;">Agrupar las franjas para que se puedan leer de un vistazo</h2>
+                <p>Una jornada de 9:00 a 17:00 en intervalos de 15 minutos son 32 franjas. En una lista plana, eso es un muro. Agruparlas por periodo (mañana, tarde, noche) lo convierte en tres bloques cortos. Es lo que más ayuda cuando quien elige es un cliente desde el móvil.</p>
+                <figure class="sc-shot">
+                    <img src="/images/marketing/salesforce-calendar-time-slots.png" alt="Selector de franjas horarias en un calendario de Salesforce: cuadrícula con franjas disponibles y no disponibles agrupadas por periodo" loading="lazy" data-zoomable width="1004" height="682">
+                    <figcaption>Una cuadrícula de franjas horarias con las ocupadas marcadas, agrupada para que la lista se lea de un vistazo.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Cuando no necesitas el calendario</h2>
+                <p>A veces la fecha ya está implícita. En la página de registro de una cita que ya tiene fecha, un calendario mensual sobra. Time Grid Only (Solo cuadrícula de horarios) quita el calendario y muestra solo la cuadrícula de franjas de esa fecha, tomada de un campo del registro o indicada directamente.</p>
+
+                <h2 style="margin-top:44px;">Los ajustes que forman el selector</h2>
+                <p>Cada uno es un campo del asistente de configuración. Nada de esto necesita código.</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">Ajuste</th><th>Función</th><th style="width:24%;">Nombre de API</th></tr></thead>
+                    <tbody>
+                    <tr><td>Intervalo de tiempo en minutos (Time Slot Interval)</td><td>La duración de cada franja. Cualquier número de minutos.</td><td><code>timeInterval</code></td></tr>
+                    <tr><td>Hora mínima / Hora máxima (Earliest Time / Latest Time)</td><td>El intervalo del día que cubre la cuadrícula en el componente Dates &amp; Times.</td><td><code>minTime</code>, <code>maxTime</code></td></tr>
+                    <tr><td>Campo de inicio / fin del horario comercial (Business Hours Start / End Field)</td><td>El horario laboral de cada recurso en el componente Booking.</td><td><code>businessHoursStartField</code></td></tr>
+                    <tr><td>Campo de capacidad (Capacity Field)</td><td>Cuántas reservas admite un recurso por franja.</td><td><code>capacityField</code></td></tr>
+                    <tr><td>Agrupar franjas horarias por periodo (Group Time Slots by Period)</td><td>Secciones de Mañana, Tarde y Noche.</td><td><code>groupTimeSlotsByPeriod</code></td></tr>
+                    <tr><td>Comportamiento ante conflictos (Conflict Behavior)</td><td>Bloquear, omitir o permitir un solapamiento al guardar.</td><td><code>conflictBehavior</code></td></tr>
+                    <tr><td>Solo cuadrícula de horarios (Time Grid Only)</td><td>Solo la cuadrícula de franjas, para una fecha implícita.</td><td><code>timeGridOnly</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Un selector de franjas horarias que configuras tú.</strong> Lo incluyen tanto el <a href="/es/selector-franjas-horarias-salesforce.html">componente Dates &amp; Times</a> como el <a href="/es/calendario-reservas-salesforce.html">componente Resource Booking</a>. Funcionan en páginas de registro, páginas de aplicación, sitios de Experience Cloud y dentro de flujos de pantalla.</div>
+
+                <h2 style="margin-top:44px;">Preguntas frecuentes</h2>
+                <div class="bp-faq">
+                    <details><summary>¿Qué es un selector de franjas horarias?</summary><p>Un calendario en el que eliges un día y, debajo, una cuadrícula que divide ese día en intervalos reservables. Las franjas ya ocupadas aparecen como no disponibles, así que solo se eligen horas libres.</p></details>
+                    <details><summary>¿Tiene Salesforce un selector de franjas horarias?</summary><p>No para tus propios objetos. Un campo Fecha/hora estándar es un campo de fecha más un desplegable de hora, y no ve los demás registros. MultiDatePick añade un selector de franjas horarias que lee las reservas existentes al cargar el calendario y solo ofrece lo que está libre.</p></details>
+                    <details><summary>¿Las franjas pueden durar lo que yo quiera?</summary><p>Sí. El intervalo puede ser cualquier número de minutos. Lo habitual son 15, 30 o 60 minutos, y una franja de entrevista de 45 minutos funciona igual.</p></details>
+                    <details><summary>¿Necesito Apex o un desarrollador para añadir un selector de franjas horarias?</summary><p>No. El asistente de configuración genera la configuración, y el componente se coloca en una página de registro, una página de aplicación, un sitio de Experience Cloud o un flujo de pantalla (Screen Flow) rellenando Config Name (Nombre de configuración). No hay que escribir código.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Tu selector de franjas horarias de Salesforce, listo para configurar</h2>
+                    <p>Elige una franja libre en la demo en vivo y después sigue Primeros pasos para tener uno en tu organización.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-time-slot-picker" class="btn btn-demo" target="_blank" rel="noopener">Prueba la demo en vivo</a> <a href="/es/avisame-en-el-lanzamiento.html" class="btn btn-primary">Avísame en el lanzamiento</a> <a href="/es/primeros-pasos.html" class="btn btn-secondary">Primeros pasos</a>
+                    </div>
+                    <ul class="check-list"><li>US$20/usuario/mes, todas las funciones</li><li>Prueba gratis de 30 días, sin tarjeta</li><li>100 % nativo de Salesforce</li><li>Sin Apex</li><li>Próximamente en Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Lecturas relacionadas</h3>
+                    <ul>
+                        <li><a href="/es/blog/anadir-al-calendario-salesforce.html">Añadir al calendario: reservas en Outlook y Google</a></li>
+                        <li><a href="/es/blog/evitar-reservas-duplicadas-salesforce.html">Cómo evitar las reservas duplicadas en Salesforce</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Cinco vistas de calendario, incluida la cuadrícula semanal</a></li>
+                        <li><a href="/es/calendario-salesforce-programar-entrevistas.html">Programación de entrevistas en un calendario de Salesforce</a></li>
+                        <li><a href="/es/calendario-reservas-salesforce.html">El componente Resource Booking</a></li>
+                        <li><a href="/es/calendario-salesforce.html">El calendario de Salesforce, a fondo</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/es/" class="logo">
+                        <img src="/images/logo.png" alt="Logotipo de MultiDatePick: componente de calendario de varias fechas y reserva de recursos para Salesforce" width="180" height="45">
+                    </a>
+                    <p>La suite de componentes de calendario más personalizable para Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Producto</h4>
+                    <ul>
+                        <li><a href="/es/selector-varias-fechas-salesforce.html">Date</a></li>
+                        <li><a href="/es/selector-franjas-horarias-salesforce.html">Date Time</a></li>
+                        <li><a href="/es/calendario-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Cinco vistas de calendario</a></li>
+                        <li><a href="/es/biblioteca-configuraciones-calendario-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluciones</h4>
+                    <ul>
+                        <li><a href="/es/calendario-salesforce.html">Calendario de Salesforce</a></li>
+                        <li><a href="/es/calendario-salesforce-reclutamiento-seleccion-personal.html">Reclutamiento y selección</a></li>
+                        <li><a href="/es/calendario-salesforce-programar-entrevistas.html">Programación de entrevistas</a></li>
+                        <li><a href="/es/reserva-salas-reuniones-salesforce.html">Reserva de salas de reuniones</a></li>
+                        <li><a href="/es/calendario-reservas-experience-cloud-salesforce.html">Reservas en Experience Cloud</a></li>
+                        <li><a href="/es/blog/fechas-de-campana-salesforce.html">Fechas de campaña</a></li>
+                        <li><a href="/es/blog/calendario-salesforce-accesible-sector-publico-section-508.html">Sector público / Section 508</a></li>
+                        <li><a href="/es/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentación</h4>
+                    <ul>
+                        <li><a href="/es/primeros-pasos.html">Primeros pasos</a></li>
+                        <li><a href="/es/guia-del-usuario.html">Guía del usuario</a></li>
+                        <li><a href="/es/guia-flujos-de-pantalla-salesforce.html">Guía de flujos de pantalla</a></li>
+                        <li><a href="/es/paginas-aplicacion-inicio-experience-cloud.html">Páginas de aplicación, inicio y Experience</a></li>
+                        <li><a href="/es/implementar-flujo-vs-code.html">Implementar un flujo (VS Code)</a></li>
+                        <li><a href="/es/solucion-de-problemas.html">Solución de problemas</a></li>
+                        <li><a href="/es/preguntas-frecuentes.html">Preguntas frecuentes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="/es/precios.html">Precios</a></li>
+                        <li><a href="/es/blog/">Blog</a></li>
+                        <li><a href="/es/confianza-y-seguridad.html">Confianza y seguridad</a></li>
+                        <li><a href="/es/accesibilidad-vpat.html">Accesibilidad</a></li>
+                        <li><a href="/es/avisame-en-el-lanzamiento.html">Avísame en el lanzamiento</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Soporte</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Todos los derechos reservados.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Idioma" translate="no"><ul><li><a href="/blog/salesforce-calendar-time-slot-picker.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-kalender-zeitfenster-auswahl.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/selector-franjas-horarias-calendario-salesforce.html" hreflang="es" lang="es" aria-current="page">Español</a></li><li><a href="/fr/blog/selecteur-creneaux-horaires-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/selettore-fasce-orarie-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/seletor-de-horarios-calendario-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-calendar-time-slot-picker.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-calendar-time-slot-picker.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-calendar-time-slot-picker.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ampliar imagen</p><p data-k="expand-diagram">Ampliar diagrama</p><p data-k="close">Cerrar</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

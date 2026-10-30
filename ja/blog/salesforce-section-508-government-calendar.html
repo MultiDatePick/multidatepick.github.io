@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>官公庁向け Section 508 対応 Salesforce カレンダー</title>
+    <meta name="description" content="米国の州・地方自治体の WCAG 2.1 AA 対応期限は 2027 年 4 月に。Salesforce の日程管理への影響と、対応済みのカレンダー。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/salesforce-section-508-government-calendar.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="官公庁チーム向けのアクセシブルな Salesforce カレンダー">
+    <meta property="og:description" content="ADA Title II の Web アクセシビリティ規則の期限が 2027 年 4 月に延びました。Salesforce で検査、予約、施設予約を支えるカレンダーに何が求められるのかを解説します。">
+    <meta property="og:image" content="https://multidatepick.com/images/blog/section-508-government.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/salesforce-section-508-government-calendar.html">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="官公庁チーム向けのアクセシブルな Salesforce カレンダー">
+    <meta name="twitter:description" content="ADA Title II の Web アクセシビリティ規則の期限が 2027 年 4 月に延びました。Salesforce で検査、予約、施設予約を支えるカレンダーに何が求められるのかを解説します。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/blog/section-508-government.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-section-508-government-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-barrierefreier-kalender-behoerden.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/calendario-salesforce-accesible-sector-publico-section-508.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/calendrier-salesforce-section-508-secteur-public.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-section-508-government-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-section-508-government-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-section-508-government-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-section-508-government-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html" class="active">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "官公庁チーム向けのアクセシブルな Salesforce カレンダー",
+        "description": "米国の州・地方自治体の WCAG 2.1 AA 対応期限は 2027 年 4 月に。Salesforce の日程管理への影響と、対応済みのカレンダー。",
+        "image": "https://multidatepick.com/images/blog/section-508-government.png",
+        "datePublished": "2026-10-11",
+        "dateModified": "2026-10-26",
+        "author": {
+            "@type": "Organization",
+            "name": "MultiDatePick"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "MultiDatePick"
+        },
+        "mainEntityOfPage": "https://multidatepick.com/ja/blog/salesforce-section-508-government-calendar.html",
+        "keywords": "Section 508 Salesforce, Salesforce 官公庁 カレンダー, ADA Title II WCAG 2.1 AA, アクセシブル スケジュール管理, Salesforce 公共機関, VPAT",
+        "inLanguage": "ja"
+    }
+    </script>
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "州・地方自治体が ADA Title II の Web アクセシビリティ規則に対応すべき期限はいつですか?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "2026 年 4 月 20 日に公布された暫定最終規則により、期限が 1 年延期されました。人口 5 万人以上を対象とする公的機関は 2027 年 4 月 26 日まで、それより小規模な機関と特別区政府は 2028 年 4 月 26 日までに対応する必要があります。技術基準は引き続き WCAG 2.1 レベル AA です。"
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Salesforce 自体がアクセシブルなら、AppExchange コンポーネントもアクセシブルである必要はありますか?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "はい。Salesforce の適合性が保証するのは、Salesforce 自身のページだけです。サードパーティの Lightning Web コンポーネントは独自のマークアップを描画するため、アクセシビリティはそのコンポーネントの作り方次第です。ベンダーに最新の VPAT を求めてください。"
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "MultiDatePick はアクセシブルですか?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "MultiDatePick は WCAG 2.1 AA に準拠して設計されており、WCAG 2.1 A および AA、改正 Section 508、EN 301 549 を対象とした VPAT 2.5 レポートを公開しています。axe-core による自動スキャンでは、3 つのコンポーネントと 5 つのカレンダー表示すべてで違反はゼロです。レポートでは 2 つの達成基準を Partially Supports としており、その理由も明記しています。"
+                }
+            }
+        ],
+        "inLanguage": "ja"
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>官公庁チーム向けのアクセシブルな Salesforce カレンダー</h1>
+                <p class="subtitle">Salesforce を使う行政機関は、検査、窓口予約、施設、現場職員の予定を毎日管理しています。こうしたページをアクセシブルにする連邦の期限は 2027 年 4 月に延びました。カレンダーに何が求められるのか、そして MultiDatePick がどう応えるのかを解説します。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 10 月 11 日 &middot; MultiDatePick</p>
+                <p class="sc-lead">2024 年 4 月、米国司法省は ADA Title II に基づき、州・地方自治体の Web サイトとアプリに明確な技術基準として WCAG 2.1 レベル AA を定めました。そして 2026 年 4 月、行政機関に対応期間をさらに 1 年与えました。この 1 年は、住民や職員が実際に操作する Salesforce 組織の部分を改善するための猶予期間です。その中でも、日程管理のカレンダーは優先度の高い項目です。</p>
+
+                <h2 style="margin-top:44px;">現在適用される期限</h2>
+                <p><a href="https://www.federalregister.gov/documents/2026/04/20/2026-07663/extension-of-compliance-dates-for-nondiscrimination-on-the-basis-of-disability-accessibility-of-web" target="_blank" rel="noopener">2026 年 4 月 20 日に公布された暫定最終規則</a>により、2 つの対応期限がどちらも 1 年延長されました。基準そのものは変わっていません。</p>
+                <div style="overflow-x:auto;">
+                <table class="sc-table">
+                    <tr>
+                        <th style="width:40%;">公的機関</th>
+                        <th style="width:30%;">対応期限</th>
+                        <th style="width:30%;">基準</th>
+                    </tr>
+                    <tr>
+                        <td>人口 5 万人以上を対象</td>
+                        <td class="sc-new"><strong>2027 年 4 月 26 日</strong></td>
+                        <td>WCAG 2.1 AA</td>
+                    </tr>
+                    <tr>
+                        <td>人口 5 万人未満、および特別区政府</td>
+                        <td class="sc-new"><strong>2028 年 4 月 26 日</strong></td>
+                        <td>WCAG 2.1 AA</td>
+                    </tr>
+                </table>
+                </div>
+                <p>見落としやすい点が 2 つあります。1 つ目は、今も多くの記事が 2026 年 4 月を期限として紹介していますが、これはもう古い情報です。2 つ目は、サービスをアクセシブルにする義務は止まっていないと司法省が明言していることです。期限は特定の技術基準の執行が始まる日であり、アクセシビリティが重要になる日ではありません。連邦機関はそもそもこの期限の対象外です。連邦機関には Section 508 が適用され、すでに WCAG 2.0 AA が求められています。その達成基準はすべて 2.1 AA にも含まれています。</p>
+
+                <h2 style="margin-top:44px;">行政機関の組織で日程管理が登場する場面</h2>
+                <p>Salesforce 上の公共サービスには、ほぼ必ずカレンダーがあります。</p>
+                <div class="sc-cards">
+                    <div class="sc-card"><h3>検査</h3><p>住宅所有者が建築検査や許可関連の検査の日を選びます。</p></div>
+                    <div class="sc-card"><h3>窓口予約</h3><p>住民が免許、給付、記録関係の来庁を予約します。</p></div>
+                    <div class="sc-card"><h3>施設の貸し出し</h3><p>家族連れがあずまや、野球場、コミュニティルームを予約します。</p></div>
+                    <div class="sc-card"><h3>診療所</h3><p>1 時間あたりの定員が決まったワクチン接種枠。</p></div>
+                    <div class="sc-card"><h3>現場職員</h3><p>検査官、ケースワーカー、投票所スタッフの 1 か月分のスケジュール。</p></div>
+                    <div class="sc-card"><h3>休業日</h3><p>祝日やメンテナンスで使えない会議室をブロック。</p></div>
+                </div>
+                <div class="sc-note">
+                    <strong>Salesforce がアクセシブルでも、カレンダーまでカバーされるわけではありません。</strong>サードパーティのコンポーネントは独自のマークアップを描画するため、そのアクセシビリティはベンダーの責任です。Experience Cloud 上の住民向けページは Title II、職員向けのページは Section 508 の対象で、どちらにもキーボードやスクリーンリーダーの利用者が最後まで操作できるカレンダーが必要です。VPAT が初めてなら、まず <a href="/ja/blog/salesforce-vpat-accessibility.html">Salesforce の VPAT: 管理者が知っておくべきこと</a>をお読みください。</div>
+
+                <h2 style="margin-top:44px;">達成基準ごとに見る MultiDatePick の対応</h2>
+                <p>MultiDatePick は最初から WCAG 2.1 AA に準拠するよう設計されています。住民や職員が実際に使うコンポーネントでは、次のような形になっています。</p>
+                <div style="overflow-x:auto;">
+                <table class="sc-table">
+                    <tr>
+                        <th style="width:38%;">審査で確認される点</th>
+                        <th style="width:62%;">MultiDatePick の対応</th>
+                    </tr>
+                    <tr>
+                        <td>本物のグリッドのセマンティクス</td>
+                        <td class="sc-new">ARIA グリッドパターン: <code>grid</code>、<code>row</code>、<code>gridcell</code>、<code>columnheader</code> を使い、すべての日付セルに <code>aria-selected</code> を設定</td>
+                    </tr>
+                    <tr>
+                        <td>キーボードだけでの操作</td>
+                        <td class="sc-new">矢印キーで日付間を移動し、Tab キーでカレンダー、状況のボタン、タイムグリッドの間を移動、Enter または Space で選択、Escape で閉じます。キーボードトラップはありません。</td>
+                    </tr>
+                    <tr>
+                        <td>スクリーンリーダーの読み上げ</td>
+                        <td class="sc-new">すべての日付セル、時間枠、アイコンボタンにアクセシブルな名前があります。エラーや確認メッセージは <code>role="alert"</code> と <code>role="status"</code> で、フォーカスを移動させずに読み上げられます。</td>
+                    </tr>
+                    <tr>
+                        <td>自動テスト</td>
+                        <td class="sc-new">Date、Date Time、Booking の各コンポーネントと 5 つのカレンダー表示すべてで <strong>axe-core の違反はゼロ</strong></td>
+                    </tr>
+                    <tr>
+                        <td>多言語対応</td>
+                        <td class="sc-new"><strong>9 言語</strong>の翻訳を標準搭載: 英語、スペイン語、フランス語、ドイツ語、イタリア語、日本語、ヒンディー語、ポルトガル語 (ブラジル)、中国語 (簡体字)</td>
+                    </tr>
+                    <tr>
+                        <td>ドキュメント</td>
+                        <td class="sc-new">WCAG 2.1 A および AA、改正 Section 508、EN 301 549 を対象とした <a href="/ja/accessibility.html">VPAT 2.5 レポート</a>を公開</td>
+                    </tr>
+                </table>
+                </div>
+                <p>VPAT では 2 つの達成基準を Partially Supports としており、その理由を明確に記載しています。コントラスト: デフォルトの配色は 4.5:1 を満たしていますが、管理者が状況の色を自由に選べるため、ベンダーは自分が選んでいない色までは保証できません。リフロー: 幅 320 ピクセルでは、月のグリッドは縦に並び替わらず、7 列のまま幅が狭くなります。調達の審査担当者は、理由のない Supports が並ぶレポートより、部分的な対応を説明しているレポートを信頼します。</p>
+
+                <h2 style="margin-top:44px;">他の選択肢との比較</h2>
+                <p>行政機関が Salesforce に日程管理カレンダーを導入する方法は、通常 4 つ検討されます。複数日付の選択とリソース予約、公開されたアクセシビリティ文書、組織の外に出ない住民データを、初日からすべて実現できるのはそのうち 1 つだけです。</p>
+                <div style="overflow-x:auto;">
+                <table class="sc-table">
+                    <tr>
+                        <th style="width:28%;"></th>
+                        <th style="width:18%;">標準の日付項目</th>
+                        <th style="width:18%;">外部の予約ツール</th>
+                        <th style="width:18%;">独自開発の LWC</th>
+                        <th style="width:18%;">MultiDatePick</th>
+                    </tr>
+                    <tr>
+                        <td>住民データが Salesforce 組織内にとどまる</td>
+                        <td class="sc-new">はい</td>
+                        <td class="sc-old">通常はいいえ</td>
+                        <td class="sc-new">はい</td>
+                        <td class="sc-new"><strong>はい</strong></td>
+                    </tr>
+                    <tr>
+                        <td>複数の日付、時間枠、リソースを一度に</td>
+                        <td class="sc-old">1 項目に 1 つの日付</td>
+                        <td class="sc-new">はい</td>
+                        <td class="sc-old">作った分だけ</td>
+                        <td class="sc-new"><strong>はい</strong></td>
+                    </tr>
+                    <tr>
+                        <td>競合と定員のチェック</td>
+                        <td class="sc-old">いいえ</td>
+                        <td class="sc-new">はい</td>
+                        <td class="sc-old">作った分だけ</td>
+                        <td class="sc-new"><strong>はい</strong></td>
+                    </tr>
+                    <tr>
+                        <td>調達用のアクセシビリティ文書</td>
+                        <td class="sc-new">Salesforce の文書でカバー</td>
+                        <td class="sc-old">ベンダーによる</td>
+                        <td class="sc-old">自分で作成・テスト</td>
+                        <td class="sc-new"><strong>VPAT 2.5 を公開</strong></td>
+                    </tr>
+                    <tr>
+                        <td>フロー、レコードページ、Experience Cloud で動作</td>
+                        <td class="sc-new">はい</td>
+                        <td class="sc-old">埋め込みまたは外部リンク</td>
+                        <td class="sc-old">作った分だけ</td>
+                        <td class="sc-new"><strong>すべてで動作</strong></td>
+                    </tr>
+                    <tr>
+                        <td>カレンダーが使えるまでの期間</td>
+                        <td class="sc-new">すぐ</td>
+                        <td class="sc-old">連携プロジェクトが必要</td>
+                        <td class="sc-old">数か月</td>
+                        <td class="sc-new"><strong>半日、コード不要</strong></td>
+                    </tr>
+                </table>
+                </div>
+                <p>標準の日付項目はアクセシブルですが、保持できる日付は 1 つだけなので、予約には使えません。外部ツールなら予約はできますが、住民の氏名、住所、予約履歴が他社のシステムに保存されることになり、セキュリティ審査とアクセシビリティ審査がもう 1 回ずつ必要になります。独自開発ならデータは手元に残りますが、WCAG のテスト、VPAT、あらゆる修正を自分たちのチームがずっと抱えることになります。すべての行を満たすのは、この中で MultiDatePick だけです。</p>
+
+                <h2 style="margin-top:44px;">行政機関の調達を前提に設計</h2>
+                <ul>
+                    <li><strong>100% Salesforce ネイティブ。</strong>外部サーバーなし、外向きのコールアウトなし、サブプロセッサーなし。住民データは、すでに設定済みの共有設定と項目レベルセキュリティのもとで組織内にとどまるため、新たにデータ処理者を承認する必要はありません。詳しくは<a href="/ja/trust.html">信頼性とセキュリティ</a>をご覧ください。</li>
+                    <li><strong>Salesforce の AppExchange セキュリティレビューに合格。</strong>管理パッケージは、掲載前に Salesforce 自身の審査を通過しています。</li>
+                    <li><strong>住民によるセルフサービス。</strong>Booking コンポーネントは Experience Cloud サイトで動作するため、住民は職員と同じアクセシブルなカレンダーで、検査の時間帯を選んだり施設を予約したりできます。</li>
+                    <li><strong>保守すべきコードなし。</strong>セットアップウィザードが実際のコンポーネントのライブプレビューを見ながら設定を作成するので、少人数の IT チームが、準拠を維持し続けなければならない独自開発を抱え込む必要はありません。</li>
+                </ul>
+
+                <h2 style="margin-top:44px;">2027 年 4 月までに準備すること</h2>
+                <ol>
+                    <li><strong>住民が操作するすべての日付選択を洗い出す。</strong>まず Experience Cloud のページ、次に職員向けの画面フロー (Screen Flow) です。それぞれが標準項目なのか、サードパーティや独自開発のコンポーネントなのかを記録します。</li>
+                    <li><strong>すべてのサードパーティコンポーネントについて最新の VPAT を求める。</strong>レポートの日付と、実際にインストールするパッケージ版でテストされているかを確認します。</li>
+                    <li><strong>予約の流れをキーボードだけでテストする。</strong>日付を選び、時刻を選び、保存します。マウスなしで最後まで操作できないなら、キーボードやスクリーンリーダーを使う住民も同じです。</li>
+                </ol>
+
+                <div class="bp-end">
+                    <h2>期限前に導入できる、アクセシブルな Salesforce カレンダー</h2>
+                    <p>ライブデモをキーボードで試すか、<a href="/ja/accessibility.html">VPAT 2.5 適合性レポート</a>の全文をお読みください。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-section-508-government-calendar" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/salesforce-vpat-accessibility.html">Salesforce の VPAT: 管理者が知っておくべきこと</a></li>
+                        <li><a href="/ja/accessibility.html">VPAT 2.5 適合性レポートの全文</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での住民セルフサービス予約</a></li>
+                        <li><a href="/ja/blog/prevent-double-booking-in-salesforce.html">Salesforce でダブルブッキングを防ぐ</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/salesforce-section-508-government-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/calendario-salesforce-accesible-sector-publico-section-508.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/calendrier-salesforce-section-508-secteur-public.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-section-508-government-calendar.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/salesforce-section-508-government-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-section-508-government-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

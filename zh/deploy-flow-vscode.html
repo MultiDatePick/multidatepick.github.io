@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用 VS Code 部署 Salesforce Flow | MultiDatePick</title>
+    <meta name="description" content="分步指南：使用 VS Code 和 Salesforce CLI，约 15 分钟将现成的 MultiDatePick 屏幕 Flow 部署到您的 Salesforce 组织。">
+    <link rel="canonical" href="https://multidatepick.com/zh/deploy-flow-vscode.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>/* long CLI command blocks scroll inside their own box instead of widening the page on phones */ .guide-content pre.code-block { max-width: 100%; overflow-x: auto; }
+        .df-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .df-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .df-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .df-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+        .df-final .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .df-final .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .df-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .df-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .df-final .contact{margin:20px 0 0;font-size:.9rem;}
+        .df-final .contact a{color:#FDBA74;}
+        @media (max-width:640px){ .df-final{padding:40px 0;} .df-final h2{font-size:1.45rem;} }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <!-- Open Graph -->
+    <meta property="og:title" content="用 VS Code 部署 Salesforce Flow | MultiDatePick">
+    <meta property="og:description" content="分步指南：使用 VS Code 和 Salesforce CLI，约 15 分钟将现成的 MultiDatePick 屏幕 Flow 部署到您的 Salesforce 组织。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/deploy-flow-vscode.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="用 VS Code 部署 Salesforce Flow | MultiDatePick">
+    <meta name="twitter:description" content="分步指南：使用 VS Code 和 Salesforce CLI，约 15 分钟将现成的 MultiDatePick 屏幕 Flow 部署到您的 Salesforce 组织。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "从 VS Code 将 MultiDatePick Flow 部署到 Salesforce",
+        "description": "如何使用 VS Code、Salesforce Extension Pack 和 Salesforce CLI，将 Flow 循环博客文章中的 MultiDatePick 入门 Flow 部署到 Salesforce 组织。",
+        "totalTime": "PT15M",
+        "tool": [
+            {
+                "@type": "HowToTool",
+                "name": "Visual Studio Code"
+            },
+            {
+                "@type": "HowToTool",
+                "name": "Salesforce Extension Pack"
+            },
+            {
+                "@type": "HowToTool",
+                "name": "Salesforce CLI (sf)"
+            }
+        ],
+        "step": [
+            {
+                "@type": "HowToStep",
+                "position": 1,
+                "name": "授权您的组织",
+                "text": "运行 sf org login web，或在 VS Code 中使用 SFDX: Authorize an Org 命令，将 VS Code 连接到您的 Salesforce 组织。"
+            },
+            {
+                "@type": "HowToStep",
+                "position": 2,
+                "name": "打开或创建项目",
+                "text": "在 VS Code 中打开现有的 SFDX 项目，或使用 sf project generate 创建一个，然后打开该文件夹。"
+            },
+            {
+                "@type": "HowToStep",
+                "position": 3,
+                "name": "创建 Flow 文件",
+                "text": "在 force-app/main/default/flows/ 下新建一个以 Flow 名称命名、以 .flow-meta.xml 结尾的文件。"
+            },
+            {
+                "@type": "HowToStep",
+                "position": 4,
+                "name": "粘贴并保存 XML",
+                "text": "粘贴您从 Flow 循环博客文章中复制的入门 Flow XML，然后保存文件。"
+            },
+            {
+                "@type": "HowToStep",
+                "position": 5,
+                "name": "部署到您的组织",
+                "text": "右键单击该文件并选择 SFDX: Deploy Source to Org，或运行指向该文件的 sf project deploy start。"
+            },
+            {
+                "@type": "HowToStep",
+                "position": 6,
+                "name": "在 Flow Builder 中完成",
+                "text": "在设置中打开该 Flow，找到标有 >>> UPDATE 的行，将对象和字段 API 名称改为您组织中的名称，然后保存并激活。"
+            }
+        ],
+        "inLanguage": "zh-Hans"
+    }
+    </script>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/deploy-flow-vscode.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/flow-mit-vs-code-bereitstellen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/implementar-flujo-vs-code.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/deployer-flux-vscode.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/distribuire-flusso-vs-code.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/implantar-fluxo-vs-code.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/deploy-flow-vscode.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/deploy-flow-vscode.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/deploy-flow-vscode.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/deploy-flow-vscode.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html" class="active">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <section class="guide-hero">
+            <div class="container">
+                <h1>从 VS Code 部署 Flow</h1>
+                <p class="subtitle">您已从<a href="/zh/blog/salesforce-flow-loop-multiple-records.html">Flow 循环文章</a>中复制了一个入门 Flow。下面介绍如何使用 VS Code 和 Salesforce CLI 将该 Flow 部署到您的 Salesforce 组织。这是面向开发人员的方式。如果您不想使用代码编辑器，请按照<a href="/zh/flowcheatsheet.html">屏幕 Flow（Screen Flow）指南</a>操作：将组件放到屏幕上并设置 Config Name（配置名称）即可。</p>
+            </div>
+        </section>
+        <!-- ═══════════════ CONTENT ═══════════════ -->
+        <section class="guide-content">
+            <div class="container">
+                <div class="guide-note">
+                    <div><strong>作用：</strong>复制的 XML 是一个现成的屏幕 Flow（Screen Flow），其中嵌入了 MultiDatePick 组件，并已关联一组合理的对象和字段。您只需部署一次，然后将几个 API 名称改为与您组织一致即可。第一次总共约 15 分钟，之后只需几分钟。</div>
+                </div>
+                <h2>1. 准备工作</h2>
+                <p>三个免费工具。安装一次，以后每次部署都能直接使用：</p>
+                <ul>
+                    <li><a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer">Visual Studio Code</a>：代码编辑器。</li>
+                    <li><a href="https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode" target="_blank" rel="noopener noreferrer">Salesforce Extension Pack</a>：为 VS Code 添加 SFDX 命令。在“扩展”面板中搜索“Salesforce Extension Pack”进行安装。</li>
+                    <li><a href="https://developer.salesforce.com/tools/salesforcecli" target="_blank" rel="noopener noreferrer">Salesforce CLI（<code>sf</code>）</a>：执行部署的命令行工具。在 VS Code 终端中运行 <code>sf version</code>，确认已安装。</li>
+                </ul>
+                <h2>2. 一次性设置</h2>
+                <p>如果您已经在使用连接到组织的 SFDX 项目，请跳过本节。</p>
+                <div class="step">
+                    <h4><span class="step-number">A</span> 授权您的组织</h4>
+                    <p>将 VS Code 连接到您的 Salesforce 组织。打开命令面板（<code>Ctrl/Cmd + Shift + P</code>）并运行 <strong>SFDX: Authorize an Org</strong>，或在终端中运行：</p>
+                    <pre class="code-block"><code>sf org login web --alias myorg</code></pre>
+                    <p>浏览器随即打开，登录并批准即可。请先使用沙盒或 Developer 组织，不要直接用生产环境。</p>
+                </div>
+                <div class="step">
+                    <h4><span class="step-number">B</span> 打开或创建项目</h4>
+                    <p>如果已有 SFDX 项目，在 VS Code 中打开其文件夹（<strong>文件 → 打开文件夹</strong>）。如果没有，请创建一个：</p>
+                    <pre class="code-block"><code>sf project generate --name multidatepick-flows
+cd multidatepick-flows</code></pre>
+                    <p>然后在 VS Code 中打开该文件夹。您应能在资源管理器面板中看到 <code>force-app/main/default/</code> 结构。</p>
+                </div>
+                <h2>3. 导入复制的 XML</h2>
+                <div class="step">
+                    <h4><span class="step-number">1</span> 创建 Flow 文件</h4>
+                    <p>在资源管理器中展开 <code>force-app/main/default/</code>，打开（或创建）<code>flows</code> 文件夹。新建一个以 Flow 名称命名、以 <code>.flow-meta.xml</code> 结尾的文件，例如 <code>On_Call_Rotation.flow-meta.xml</code>。文件名会成为 Flow 的 API 名称，因此只能使用字母、数字和下划线。</p>
+                    <p>也可以直接在 VS Code 的集成终端中创建：</p>
+                    <pre class="code-block"><code># Windows (PowerShell)
+New-Item force-app/main/default/flows/On_Call_Rotation.flow-meta.xml -ItemType File -Force
+# macOS / Linux
+mkdir -p force-app/main/default/flows &amp;&amp; touch force-app/main/default/flows/On_Call_Rotation.flow-meta.xml</code></pre>
+                </div>
+                <div class="step">
+                    <h4><span class="step-number">2</span> 粘贴并保存</h4>
+                    <p>将从 Flow 循环文章中复制的入门 Flow XML 粘贴到新文件中并保存（<code>Ctrl/Cmd + S</code>）。</p>
+                </div>
+                <div class="step">
+                    <h4><span class="step-number">3</span> 部署到您的组织</h4>
+                    <p>在资源管理器中右键单击该文件并选择 <strong>SFDX: Deploy Source to Org</strong>，或在终端中运行：</p>
+                    <pre class="code-block"><code>sf project deploy start --source-dir force-app/main/default/flows/On_Call_Rotation.flow-meta.xml</code></pre>
+                    <p>在“输出”面板中查看是否出现 <strong>Deploy Succeeded</strong>。如果报告字段或对象错误，属于正常情况，下一步就会修复。</p>
+                </div>
+                <h2>4. 在 Flow Builder 中完成</h2>
+                <div class="step">
+                    <h4><span class="step-number">4</span> 换成您自己的对象和字段名称</h4>
+                    <p>在您的组织中，转到<strong>设置 → 流</strong>，打开刚部署的 Flow。查找标有 <strong>&gt;&gt;&gt; UPDATE</strong> 的元素和注释，它们指向示例所假定的对象和字段 <em>API 名称</em>。将每一个改为与您自己的对象、日期字段和查找字段一致。然后<strong>保存</strong>并<strong>激活</strong>。</p>
+                    <p>现在将 Flow 放到页面或按钮上，或直接运行，用户就可以开始选择日期了。</p>
+                </div>
+                <div class="guide-note">
+                    <div><strong>命令回顾：</strong>
+                    <pre class="code-block"><code>sf org login web --alias myorg                 # authorize once
+sf project generate --name multidatepick-flows  # only if you need a new project
+sf project deploy start --source-dir force-app/main/default/flows/YOUR_FLOW.flow-meta.xml</code></pre>CLI 遇到问题？Salesforce 的<a href="https://developer.salesforce.com/tools/salesforcecli" target="_blank" rel="noopener noreferrer">CLI 设置指南</a>详细介绍了安装和登录。</div>
+                </div>
+            </div>
+        </section>
+        <!-- ═══════════════ NEXT STEP ═══════════════ -->
+        <section class="df-final">
+            <div class="container">
+                <h2>Flow 已部署。下一步做什么？</h2>
+                <p>在在线演示中查看组件的实际运行效果，了解无需代码的 Config Name 方式，或在 MultiDatePick 登陆 Salesforce AppExchange 当天收到通知。</p>
+                <div class="df-ctas">
+                    <a href="/zh/notify-me-at-launch.html" class="btn btn-cta">上线时通知我</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=deploy-flow-vscode" class="btn btn-ghost" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/flowcheatsheet.html" class="btn btn-ghost">屏幕 Flow 指南</a>
+                </div>
+                <p class="contact">遇到无法判断原因的部署错误？<a href="mailto:Support@MultiDatePick.com">Support@MultiDatePick.com</a></p>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>解决方案</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>文档</h4>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>公司</h4>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/deploy-flow-vscode.html" hreflang="en" lang="en">English</a></li><li><a href="/de/flow-mit-vs-code-bereitstellen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/implementar-flujo-vs-code.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/deployer-flux-vscode.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/distribuire-flusso-vs-code.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/implantar-fluxo-vs-code.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/deploy-flow-vscode.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/deploy-flow-vscode.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/deploy-flow-vscode.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

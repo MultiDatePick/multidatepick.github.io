@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce に複数日付カレンダーがない理由</title>
+    <meta name="description" content="Salesforce の日付項目に入るのは 1 つの日付だけ。回避策はどれもどこかで破綻します。複数日付項目がない理由と、それを補うカレンダーコンポーネントを紹介します。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/why-salesforce-has-no-multi-date-calendar.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce に複数日付カレンダーがない理由">
+    <meta property="og:description" content="Salesforce の日付項目に入るのは 1 つの日付だけ。回避策はどれもどこかで破綻します。複数日付項目がない理由と、それを補うカレンダーコンポーネントを紹介します。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/why-salesforce-has-no-multi-date-calendar.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce に複数日付カレンダーがない理由">
+    <meta name="twitter:description" content="Salesforce の日付項目に入るのは 1 つの日付だけ。回避策はどれもどこかで破綻します。複数日付項目がない理由と、それを補うカレンダーコンポーネントを紹介します。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/why-salesforce-has-no-multi-date-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-kalender-mehrere-termine.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/por-que-salesforce-no-tiene-calendario-varias-fechas.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/pourquoi-salesforce-na-pas-de-calendrier-multi-dates.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/perche-salesforce-non-ha-calendario-date-multiple.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/por-que-salesforce-nao-tem-calendario-de-varias-datas.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/why-salesforce-has-no-multi-date-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/why-salesforce-has-no-multi-date-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/why-salesforce-has-no-multi-date-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/why-salesforce-has-no-multi-date-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce に複数日付カレンダーがない理由",
+                "description": "Salesforce の日付項目に入るのは 1 つの日付だけ。回避策はどれもどこかで破綻します。複数日付項目がない理由と、それを補うカレンダーコンポーネントを紹介します。",
+                "datePublished": "2026-08-20",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/why-salesforce-has-no-multi-date-calendar.html",
+                "image": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo.gif",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo-poster.png",
+                "caption": "Salesforce の MultiDatePick Dates コンポーネントのアニメーションデモ: 休暇申請に名前を付け、感謝祭の週の 3 日間をドラッグで選択し、金曜日をワンクリックで追加して、4 日分をまとめて保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-dates-status.png",
+                "caption": "複数の日付を一度に選択した Salesforce カレンダー。各日付は状況別に色分けされた個別のレコードとして保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce に複数日付カレンダーがない理由</h1>
+                <p class="subtitle">だから私たちが作りました。複数の日付を一度にクリックし、それぞれを個別のレコードとして、既存のどのオブジェクトにも保存できます。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 8 月 20 日 &middot; 更新日 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">Salesforce の日付項目に入るのは 1 つの日付だけです。MultiDatePick はユーザーに本物のカレンダーを提供します。候補者の都合がつく 12 日間、建物が閉まる 6 週間、誰かが休暇を取る 2 週間をクリックするだけで、選んだ日付はすべて自社オブジェクトの子レコードとしてきちんと保存されます。1 回の操作で完了。フローのループも、10 個の日付項目も要りません。</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/components/salesforce-multi-date-picker-demo-poster.png" data-gif="/images/components/salesforce-multi-date-picker-demo.gif" alt="Salesforce の MultiDatePick Dates コンポーネントのアニメーションデモ: 休暇申請に名前を付け、感謝祭の週の 3 日間をドラッグで選択し、金曜日をワンクリックで追加して、4 日分をまとめて保存" width="700" height="640" loading="lazy" decoding="async" data-zoomable style="max-width:620px;margin:0 auto;">
+                    <figcaption>3 日をドラッグし、4 日目をクリックして保存。4 つの日付を 1 回の操作で。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">回避策と、その弱点</h2>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">回避策</th><th>弱点</th></tr></thead>
+                    <tbody>
+                    <tr><td>日付項目を 10 個用意する</td><td class="bp-no">上限は当て推量で、ほとんどの項目は空のまま</td></tr>
+                    <tr><td>開始日と終了日</td><td class="bp-no">範囲では途中の 1 日を飛ばせない</td></tr>
+                    <tr><td>フローのループ</td><td class="bp-no">日付ごとに 1 画面。3 件を超えると苦痛</td></tr>
+                    <tr><td>複数日付カレンダー</td><td class="bp-yes">すべての日付を 1 回で入力し、それぞれを個別のレコードとして保存</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">1 つのパッケージに 3 つのコンポーネント</h2>
+                <div class="bp-cards">
+                    <div class="bp-card" style="--c:#0176D3;"><h3>Dates</h3><p>何日でもクリックできます。飛び飛びの日付も連続した範囲と同じ手間で選べ、隣り合う日は 1 件の期間レコードにまとめることもできます。</p></div>
+                    <div class="bp-card" style="--c:#16A34A;"><h3>Dates &amp; Times</h3><p>日付ごとに時間枠グリッドを表示。必要なら日によって異なる時間を設定できます。</p></div>
+                    <div class="bp-card"><h3>リソース予約</h3><p>リソースを選び、時間枠ごとの定員をリアルタイムで確認し、保存前にダブルブッキングを防ぎます。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">コード不要でセットアップ</h2>
+                <p>セットアップウィザードが手順を案内し、進めながらライブプレビューを表示して、設定を自動で書き出します。使うのは自社のオブジェクトと項目。パッケージ以外にインストールするものはなく、Apex を書く必要もありません。</p>
+                <figure class="sc-shot">
+                    <img src="/images/marketing/salesforce-calendar-dates-status.png" alt="複数の日付を一度に選択した Salesforce カレンダー。各日付は状況別に色分けされた個別のレコードとして保存" loading="lazy" data-zoomable width="1004" height="682">
+                    <figcaption>日付はそれぞれ個別のレコード。状況で色分けされます。</figcaption>
+                </figure>
+                <ul class="bp-list">
+                    <li><strong>どこでも動作。</strong>Lightning レコードページ、アプリケーションページ、ホームページ、フロー画面、Experience Cloud サイトで使えます。</li>
+                    <li><strong>自社のデータモデル。</strong>コンポーネントは既存のオブジェクトと項目を読み書きします。</li>
+                    <li><strong>カレンダー上で状況を色分け。</strong>確定、仮、キャンセルが選びながら見えます。</li>
+                    <li><strong>既存レコードを事前に読み込み。</strong>選ぶ人には予約済みの日付が見えます。</li>
+                    <li><strong>その場で編集。</strong>レコードを開かずに、カレンダーから予約を変更できます。</li>
+                    <li><strong>5 つの表示。</strong>カレンダー、タイムライン、週、稼働率、予定一覧を 1 つのコンポーネントで。</li>
+                    <li><strong>9 か国語に対応</strong>、VPAT も公開済み。</li>
+                </ul>
+
+                <h2 style="margin-top:44px;">1 つのプランですべての機能</h2>
+                <p>1 ユーザーあたり月額 $20。今後のアップグレードもすべて含まれます。プランの階層も機能制限もなく、クレジットカード不要の 30 日間無料トライアルがあります。<a href="/ja/pricing.html">料金を見る</a>。</p>
+
+                <div class="sc-note">
+                    <strong>すべてが組織の中で完結。</strong>MultiDatePick は 100% ネイティブの Salesforce アプリで、AppExchange セキュリティレビューに合格しています。外部サービスなし、Salesforce の外に出るデータなし、ホスティングも不要です。</div>
+
+                <div class="bp-end">
+                    <h2>実際の Salesforce 組織で試す</h2>
+                    <p>本物のコンポーネントが動く公開サイトです。インストールもログインも不要。デモデータは 1 時間ごとにリセットされるので、自由にクリックしてください。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=why-salesforce-has-no-multi-date-calendar" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html">Salesforce 画面フローで複数の日付を選択する</a></li>
+                        <li><a href="/ja/blog/recurring-date-patterns-in-salesforce.html">Salesforce で繰り返しの日付パターンを扱う</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">Salesforce カレンダー表示 5 種類を 1 つのコンポーネントで</a></li>
+                        <li><a href="/ja/multidatepickdates.html">Dates コンポーネント</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/why-salesforce-has-no-multi-date-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-kalender-mehrere-termine.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/por-que-salesforce-no-tiene-calendario-varias-fechas.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/pourquoi-salesforce-na-pas-de-calendrier-multi-dates.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/perche-salesforce-non-ha-calendario-date-multiple.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/por-que-salesforce-nao-tem-calendario-de-varias-datas.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/why-salesforce-has-no-multi-date-calendar.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/why-salesforce-has-no-multi-date-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/why-salesforce-has-no-multi-date-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

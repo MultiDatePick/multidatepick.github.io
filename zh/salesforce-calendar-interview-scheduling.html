@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 面试安排日历</title>
+    <meta name="description" content="在 Salesforce 周视图中安排面试：任意时间段长度、保存时检查冲突、面试小组容量、面试官工作时间和候选人自助预约。">
+    <link rel="canonical" href="https://multidatepick.com/zh/salesforce-calendar-interview-scheduling.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="preload" as="image" href="/images/components/salesforce-date-time-scheduling-demo-poster.png" fetchpriority="high">
+    <meta property="og:title" content="Salesforce 面试安排日历">
+    <meta property="og:description" content="在 Salesforce 周视图中安排面试：任意时间段长度、保存时检查冲突、面试小组容量、面试官工作时间和候选人自助预约。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/salesforce-calendar-interview-scheduling.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 面试安排日历">
+    <meta name="twitter:description" content="在 Salesforce 周视图中安排面试：任意时间段长度、保存时检查冲突、面试小组容量、面试官工作时间和候选人自助预约。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "name": "Salesforce 面试安排日历",
+                "url": "https://multidatepick.com/zh/salesforce-calendar-interview-scheduling.html",
+                "description": "用 MultiDatePick 在 Salesforce 中安排面试：在一个屏幕上选择日期和任意长度的时间段，周视图网格，面试官作为资源并有各自的工作时间，保存时检测冲突，支持面试小组容量，以及在 Experience Cloud 上由候选人自助预约。无需代码。",
+                "isPartOf": {
+                    "@id": "https://multidatepick.com/zh/#website"
+                },
+                "about": {
+                    "@id": "https://multidatepick.com/zh/#software"
+                },
+                "primaryImageOfPage": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo.gif",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "能在 Salesforce 中安排面试吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "能，使用 MultiDatePick。招聘人员在一个屏幕上选择一个或多个日期以及时间段，每场面试都保存为您自己对象上的一条记录，并关联到候选人。已有的面试会显示在网格上，所以在任何人预约之前就能看到哪些时间段已被占用。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "面试时间段可以设为 45 分钟吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "可以。Time Interval (Minutes)（时间间隔（分钟））接受任意数字。常见为 15、30 或 60 分钟，45 或 90 分钟同样适用。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "如何避免面试官被重复安排？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "把面试官设为资源（通常是 User 对象），并将“冲突行为”设为 Block。每次保存都会与现有预订比对。如果是面试小组，再添加一个 Capacity Field（容量字段），时间段会一直开放，直到所有名额都已排满。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "候选人可以自己预约面试吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "可以。把同一个组件放到 Experience Cloud 站点页面上，设置 Config Name（配置名称）和 Static Parent Record Id。候选人只能看到面试官工作时间内的空闲时间段，预约会直接保存到您的组织中。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "这和 Salesforce Scheduler 有什么区别？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Salesforce Scheduler 是付费附加产品，使用自己专门的预约数据模型。MultiDatePick 在您自己的对象上预订，支持多日期选择、容量和五种日历视图。请查看 Salesforce Lightning Scheduler 与 MultiDatePick 的完整对比。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick 多少钱？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "每用户每月 $20，包含所有组件和功能，30 天免费试用，无需信用卡。100% Salesforce 原生，即将登陆 Salesforce AppExchange。"
+                        }
+                    }
+                ],
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo-poster.png",
+                "caption": "Salesforce 中 MultiDatePick DateTime 组件的动画演示：为新员工入职日程命名，拖动选中周一到周四，在共享时间网格中拖动选择 09:00 到 12:00，每天保存一个班次",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-time-slots.png",
+                "caption": "MultiDatePick 中的 Salesforce 面试安排日历：一个月的面试日按状态着色（Confirmed、Tentative、Pending），每天下方为它包含的每种状态各显示一个圆点",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo-poster.png",
+                "caption": "MultiDatePick Salesforce 周视图的动画演示：选择一位顾问后，其客户会议显示为按状态着色、长度与会议时长一致的色块，悬停卡片显示客户、会议类型和状态",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-agenda-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-agenda-view-demo-poster.png",
+                "caption": "MultiDatePick Salesforce 日程视图的动画演示：按日期列出即将到来的预约，含时间、客户、状态标签和顾问，并悬停查看其中两条的卡片",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+    <style>
+        .hm-wrap{max-width:1040px;margin:0 auto;padding:0 16px;}
+        .hm-hero{background:linear-gradient(170deg,var(--blue-50,#F0F9FF) 0%,#E0F2FE 60%,#fff 100%);padding:44px 0 40px;}
+        .bk-hero{display:grid;grid-template-columns:1.15fr 1fr;gap:32px;align-items:center;}
+        .hm-hero h1{font-size:2.35rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1.12;margin:0;}
+        .hm-hero h1 .pre{display:block;font-size:1rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#C2410C;margin-bottom:8px;}
+        .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+        .hm-hero .subtitle{font-size:1.08rem;color:var(--gray-600,#4b5563);margin:14px 0 0;max-width:560px;}
+        .hm-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}
+        .hm-ctas .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .hm-ctas .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .hm-demo-link{display:inline-block;margin-top:12px;font-size:.92rem;font-weight:600;}
+        .bk-hero .gs-fig{margin:0;max-width:400px;justify-self:center;width:100%;}
+        .hm-live{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;padding:26px 0;scroll-margin-top:80px;}
+        .hm-live .hm-wrap{display:flex;gap:18px 28px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+        .hm-live h2{color:#fff;font-size:1.3rem;margin:0 0 4px;}
+        .hm-live p{color:#cdd9e8;margin:0;font-size:.95rem;max-width:680px;}
+        .hm-live .tag{display:block;color:#FDBA74;font-size:.75rem;font-weight:800;letter-spacing:.12em;margin-bottom:8px;}
+        .hm-live .btn{background:#F97316;color:#fff;white-space:nowrap;}
+        .hm-live .btn:hover{background:#EA580C;color:#fff;}
+        .gs-sec{padding:56px 0;scroll-margin-top:80px;}
+        .gs-sec.alt{background:var(--blue-50,#F0F9FF);}
+        .gs-sec h2{font-size:1.6rem;color:var(--blue-900,#0C4A6E);margin:0 0 6px;padding-left:17px;position:relative;line-height:1.25;} .gs-sec h2::before{content:"";position:absolute;left:0;top:calc(.625em - 11px);width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-sec h3{font-size:1.15rem;color:var(--blue-900,#0C4A6E);margin:32px 0 6px;scroll-margin-top:80px;}
+        .gs-lead{color:var(--gray-600,#4b5563);margin:0 0 20px;font-size:1rem;max-width:760px;}
+        .gs-sec code{background:#f3f4f6;padding:1px 5px;border-radius:3px;color:#c2410c;font-size:.88em;word-break:break-word;}
+        .gs-fig{margin:18px 0 8px;}
+        .gs-fig img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #E5E7EB;box-shadow:0 4px 20px rgba(15,45,82,.08);background:#fff;}
+        .gs-fig figcaption{text-align:center;font-size:.88rem;color:var(--gray-500,#6b7280);margin-top:8px;}
+        .gs-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE3EC;border-radius:10px;overflow:hidden;font-size:.93rem;}
+        .gs-table th,.gs-table td{padding:11px 14px;border-bottom:1px solid #E8EDF3;border-right:1px solid #E8EDF3;text-align:left;vertical-align:top;}
+        .gs-table th:last-child,.gs-table td:last-child{border-right:none;}
+        .gs-table thead th{background:#0F2D52;color:#fff;font-weight:600;font-size:.85rem;}
+        .gs-table thead th.mdp{background:#C2410C;}
+        .gs-table tbody tr:last-child td{border-bottom:none;}
+        .gs-table td:first-child{font-weight:600;color:var(--blue-900,#0C4A6E);}
+        .gs-table .old{color:var(--gray-500,#6b7280);}
+        .gs-table .new{color:#065F46;font-weight:600;}
+        .gs-table small{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);font-weight:400;}
+        .hm-scroll{overflow-x:auto;}
+        .gs-chain{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-wrap:wrap;gap:8px 4px;align-items:center;font-size:.9rem;}
+        .gs-chain li{background:#fff;border:1px solid #BFDBFE;color:#1E3A8A;border-radius:999px;padding:5px 14px;font-weight:600;}
+        .gs-chain li b{color:#F97316;margin-right:4px;}
+        .gs-chain li.arr{background:none;border:none;color:#94A3B8;padding:0 2px;}
+        .gs-two{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+        .gs-two .gs-fig{margin-top:0;}
+        .bk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 0;}
+        .bk-tile{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:12px 14px 12px 18px;position:relative;} .bk-tile::before{content:"";position:absolute;left:0;top:13px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#10b981;}
+        .bk-tile b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;margin-bottom:3px;}
+        .bk-tile span{display:block;font-size:.85rem;color:var(--gray-600,#4b5563);}
+        .bk-tile .comp{display:inline-block;margin-top:8px;font-size:.72rem;font-weight:700;letter-spacing:.04em;color:#1E3A8A;background:#EFF6FF;border-radius:999px;padding:1px 9px;}
+        .gs-paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0;}
+        .gs-paths.three{grid-template-columns:repeat(3,1fr);}
+        .gs-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;font-size:.92rem;color:var(--gray-600,#4b5563);}
+        .gs-card b{display:block;color:var(--blue-900,#0C4A6E);font-size:1rem;margin-bottom:6px;}
+        .gs-card.bk,.gs-card.rs,.gs-card.sf{position:relative;padding-left:18px;} .gs-card.bk{--rail:#F97316;}
+        .gs-card.rs{--rail:#10b981;}
+        .gs-card.sf{--rail:#0176D3;} .gs-card.bk::before,.gs-card.rs::before,.gs-card.sf::before{content:"";position:absolute;left:0;top:15px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .hm-checks{list-style:none;padding:0;margin:0;}
+        .hm-checks li{padding:5px 0 5px 24px;position:relative;border-bottom:1px solid #F1F5F9;}
+        .hm-checks li:last-child{border-bottom:none;}
+        .hm-checks li::before{content:"\2713";position:absolute;left:2px;color:#10b981;font-weight:700;}
+        .gs-note{margin:16px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 18px 14px 22px;font-size:.92rem;color:#7C2D12;position:relative;} .gs-note::before{content:"";position:absolute;left:0;top:14px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-note b{color:#9A3412;}
+        .bk-views{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:8px;}
+        .bk-views .gs-fig{margin:0;}
+        .cf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 0;}
+        .cf-grid.two{grid-template-columns:1fr 1fr;}
+        .cf-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px 12px 18px;position:relative;display:flex;flex-direction:column;} .cf-card::before{content:"";position:absolute;left:0;top:16px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .cf-card .cf-type{font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#C2410C;}
+        .cf-card h3{margin:2px 0 4px;font-size:1.05rem;}
+        .cf-card p{margin:0 0 10px;font-size:.86rem;color:var(--gray-600,#4b5563);}
+        .cf-set{list-style:none;padding:0;margin:0 0 12px;font-size:.85rem;}
+        .cf-set li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #F1F5F9;}
+        .cf-set li:last-child{border-bottom:none;}
+        .cf-set li span{color:var(--blue-900,#0C4A6E);font-weight:600;}
+        .cf-set li em{font-style:normal;color:#334155;text-align:right;}
+        .cf-links{margin-top:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:.86rem;font-weight:600;}
+        .gs-faq details{background:#fff;border:1px solid #DCE3EC;border-radius:10px;margin:0 0 10px;padding:0 18px;}
+        .gs-faq summary{cursor:pointer;font-weight:600;color:var(--blue-900,#0C4A6E);padding:14px 0;list-style-position:outside;}
+        .gs-faq details p{margin:0 0 14px;color:var(--gray-600,#4b5563);font-size:.93rem;}
+        .gs-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .gs-links a{display:block;background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;text-decoration:none;transition:border-color .15s ease;}
+        .gs-links a:hover{border-color:#F97316;}
+        .gs-links b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;}
+        .gs-links span{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);}
+        .hm-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .hm-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .hm-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .hm-final .hm-ctas{justify-content:center;}
+        .hm-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .hm-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .hm-final .contact{margin:20px 0 0;font-size:.9rem;color:#cdd9e8;}
+        @media (max-width:900px){
+            .bk-hero,.gs-two{grid-template-columns:1fr;}
+            .bk-grid{grid-template-columns:1fr 1fr;}
+            .gs-links,.gs-paths.three,.cf-grid{grid-template-columns:1fr 1fr;}
+        }
+        @media (max-width:600px){
+            .hm-hero{padding:30px 0 28px;}
+            .hm-hero h1{font-size:1.75rem;}
+            .bk-views,.gs-paths,.gs-paths.three,.gs-links,.cf-grid,.cf-grid.two{grid-template-columns:1fr;}
+            .gs-sec{padding:40px 0;}
+            .gs-sec h2{font-size:1.35rem;}
+            .gs-table{font-size:.86rem;}
+            .gs-table th,.gs-table td{padding:9px 8px;}
+            .hm-final h2{font-size:1.45rem;}
+        }
+    </style>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/salesforce-calendar-interview-scheduling.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/salesforce-interviewplanung.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/calendario-salesforce-programar-entrevistas.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/planification-entretiens-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/pianificazione-colloqui-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/agendamento-de-entrevistas-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/salesforce-calendar-interview-scheduling.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/salesforce-calendar-interview-scheduling.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/salesforce-calendar-interview-scheduling.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/salesforce-calendar-interview-scheduling.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html" class="active">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <section class="hm-hero">
+            <div class="hm-wrap bk-hero">
+                <div>
+                    <h1><span class="pre">面试安排<span class="vh">：</span></span>Salesforce 面试安排日历</h1>
+                    <p class="subtitle">提供真实可选的面试时间段，在冲突发生前就拦下来，每一轮面试都直接保存到 Salesforce。不用来回发邮件，不用外部排期工具，也不用写代码。</p>
+                    <div class="hm-ctas">
+                        <a href="/zh/notify-me-at-launch.html" class="btn btn-cta">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">入门指南</a>
+                    </div>
+                    <a class="hm-demo-link" href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-interview-scheduling" target="_blank" rel="noopener">或立即在在线演示中预约一个时间段，无需登录 &rarr;</a>
+                </div>
+                <figure class="gs-fig">
+                    <img src="/images/components/salesforce-date-time-scheduling-demo-poster.png" data-gif="/images/components/salesforce-date-time-scheduling-demo.gif" alt="Salesforce 中 MultiDatePick DateTime 组件的动画演示：为新员工入职日程命名，拖动选中周一到周四，在共享时间网格中拖动选择 09:00 到 12:00，每天保存一个班次" title="Salesforce 日期和时间预约排程演示" width="700" height="961" fetchpriority="high" decoding="async" data-zoomable>
+                    <figcaption>选日期，拖动选择时段，保存。每个时间块一条记录。</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ═══════════════ LIVE DEMO ═══════════════ -->
+        <section class="hm-live" id="live-demo">
+            <div class="hm-wrap">
+                <div>
+                    <span class="tag">在线试用：无需安装，无需登录</span>
+                    <h2>像候选人一样预约一个时间段</h2>
+                    <p>在线演示是一个公开的 Salesforce 站点，访客可以按半小时预约顾问。面试官的用法完全相同。</p>
+                </div>
+                <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-interview-scheduling" target="_blank" rel="noopener" class="btn">打开在线演示 &rarr;</a>
+            </div>
+        </section>
+
+        <!-- ═══════════════ OVERVIEW ═══════════════ -->
+        <section class="gs-sec" id="overview">
+            <div class="hm-wrap">
+                <h2>面试安排有何不同</h2>
+                <p class="gs-lead">面试安排之所以出问题，是因为预约的人看不到谁正忙。MultiDatePick 在选择的那一刻就把这些显示出来。</p>
+                <div class="bk-grid">
+                    <div class="bk-tile"><b>日期和时间一起选</b><span>任意时间段长度。常见为 15、30 或 60 分钟，45 分钟也可以。</span></div>
+                    <div class="bk-tile"><b>面试官作为资源</b><span>每个人的工作时间来自其本人的记录。</span></div>
+                    <div class="bk-tile"><b>保存时检查冲突</b><span>阻止冲突、跳过冲突，或允许冲突。</span></div>
+                    <div class="bk-tile"><b>面试小组使用容量</b><span>一个时间段排满三位面试官后即关闭。</span></div>
+                </div>
+                <div class="gs-two" style="margin-top:26px;">
+                    <div class="hm-scroll">
+                    <table class="gs-table">
+                        <thead><tr><th>协调员的工作</th><th>标准 Salesforce</th><th class="mdp">使用 MultiDatePick</th></tr></thead>
+                        <tbody>
+                            <tr><td>提供三个可选时间段</td><td class="old">手动打在邮件里</td><td class="new">从实时网格中选择</td></tr>
+                            <tr><td>面试官有空吗？</td><td class="old">另开一个标签页，然后碰运气</td><td class="new">其预订直接显示在网格上</td></tr>
+                            <tr><td>两位协调员同时操作</td><td class="old">后保存的覆盖先保存的</td><td class="new">保存时发现冲突</td></tr>
+                            <tr><td>三人面试小组</td><td class="old">三条互不相关的记录</td><td class="new">时间段上实时显示 2/3 标记</td></tr>
+<tr><td>面试一场接一场</td><td class="old">没有时间缓一缓</td><td class="new">每场之后都预留缓冲时间</td></tr>
+<tr><td>一小时后的面试才被约上</td><td class="old">面试官措手不及</td><td class="new">最短提前时间直接拦下</td></tr>
+<tr><td>加到对方的日历</td><td class="old">手动复制</td><td class="new">保存后提供“添加到日历”文件</td></tr>
+                            <tr><td>候选人要改时间</td><td class="old">删除后重新创建</td><td class="new">直接修改日期、时间或面试官</td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                    <figure class="gs-fig">
+                        <img src="/images/marketing/salesforce-calendar-time-slots.png" alt="MultiDatePick 中的 Salesforce 面试安排日历：一个月的面试日按状态着色（Confirmed、Tentative、Pending），每天下方为它包含的每种状态各显示一个圆点" title="Salesforce 面试安排日历" width="1004" height="682" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>面试日按状态标记，每种状态一个圆点。</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ VIEWS ═══════════════ -->
+        <section class="gs-sec alt" id="views">
+            <div class="hm-wrap">
+                <h2>面试应该放在周视图里</h2>
+                <p class="gs-lead">面试关心的是几点几分，而月视图看不到时间。周视图按您的营业时间显示七天，每场面试的高度与时长一致。</p>
+                <div class="bk-views">
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-week-view-demo-poster.png" data-gif="/images/views/salesforce-week-view-demo.gif" alt="MultiDatePick Salesforce 周视图的动画演示：选择一位顾问后，其客户会议显示为按状态着色、长度与会议时长一致的色块，悬停卡片显示客户、会议类型和状态" title="Salesforce 周视图演示" width="880" height="1080" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>周视图：真实的面试时长，限定在营业时间内。</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-agenda-view-demo-poster.png" data-gif="/images/views/salesforce-agenda-view-demo.gif" alt="MultiDatePick Salesforce 日程视图的动画演示：按日期列出即将到来的预约，含时间、客户、状态标签和顾问，并悬停查看其中两条的卡片" title="Salesforce 日程视图演示" width="700" height="860" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>日程视图：当天早上要看的清单，在手机上也一目了然。</figcaption>
+                    </figure>
+                </div>
+                <p class="gs-note"><b>所有视图共用一条保存路径。</b>协调员无论在周视图、日程视图还是日历视图之间如何切换，创建的面试记录都完全一样。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ SELF BOOKING + FLOWS ═══════════════ -->
+        <section class="gs-sec" id="self-booking">
+            <div class="hm-wrap">
+                <h2>让候选人自助预约，或在屏幕 Flow 中完成</h2>
+                <p class="gs-lead">同一个组件，同一份配置。数据不会离开您的组织，安全审查中也不会多出一家外部排期供应商。</p>
+                <div class="gs-paths">
+                    <div class="gs-card bk">
+                        <b>候选人在 Experience Cloud 上自助预约</b>
+                        <ul class="hm-checks">
+                            <li>发送一个链接，候选人选择一个空闲时间段</li>
+                            <li>只显示您提供的、在面试官工作时间内的时间段</li>
+                            <li>屏蔽日期来自您自己的记录</li>
+                            <li>预约立即保存为一条普通记录</li>
+                        </ul>
+                    </div>
+                    <div class="gs-card sf">
+                        <b>在招聘屏幕 Flow（Screen Flow）中使用</b>
+                        <ul class="hm-checks">
+                            <li>设置 Config Name；所有复选框都来自该配置</li>
+                            <li>把候选人传入 Parent Record Id</li>
+                            <li>已预约的时间段和冲突作为输出返回</li>
+                            <li>后续步骤：发送邀请，更新推荐记录</li>
+                        </ul>
+                    </div>
+                </div>
+                <p style="margin:14px 0 0;font-size:.93rem;">完整教程：<a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a>和<a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a>。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ CONFIGS ═══════════════ -->
+        <section class="gs-sec alt" id="configuration">
+            <div class="hm-wrap">
+                <h2>从现成配置开始</h2>
+                <p class="gs-lead">从 40 多个现成配置中选一个导入设置向导，从下拉列表中选择您自己的对象和字段，然后保存。</p>
+                <div class="cf-grid two">
+                    <div class="cf-card">
+                        <span class="cf-type">Date Time</span>
+                        <h3>面试安排</h3>
+                        <p>跨越多天的多轮面试。</p>
+                        <ul class="cf-set">
+                            <li><span>Time Interval (Minutes)</span><em>30，较长的轮次用 45</em></li>
+                            <li><span>Conflict Behavior（冲突行为）</span><em>阻止</em></li>
+                            <li><span>Second Picklist Field</span><em>轮次</em></li>
+                            <li><span>View</span><em>周视图，另含日历和日程</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/zh/configlibrary.html#interview-scheduling">Config Library &rarr;</a><a href="/downloads/configs/Interview_Scheduling.json" download>JSON</a></div>
+                    </div>
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>顾问预约</h3>
+                        <p>从用户列表中选择面试官。</p>
+                        <ul class="cf-set">
+                            <li><span>资源</span><em>User，仅限面试官</em></li>
+                            <li><span>Business Hours Start / End Field</span><em>User 上的工作时间</em></li>
+                            <li><span>Conflict Behavior（冲突行为）</span><em>阻止</em></li>
+                            <li><span>Load Existing Bookings</span><em>开</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/zh/configlibrary.html#advisor-appointment-booking">Config Library &rarr;</a><a href="/downloads/configs/Advisor_Appointment_Booking.json" download>JSON</a></div>
+                    </div>
+                </div>
+                <p class="gs-note"><b>要一次预约好几轮？</b>把“冲突行为”设为 Skip。空闲的时间段会被保存，冲突的会列出来交给协调员处理。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FAQ ═══════════════ -->
+        <section class="gs-sec" id="faq">
+            <div class="hm-wrap gs-faq">
+                <h2>Salesforce 面试安排常见问题</h2>
+                <p class="gs-lead">大家常搜的问题，简短作答。</p>
+                <details>
+                    <summary>能在 Salesforce 中安排面试吗？</summary>
+                    <p>能，使用 MultiDatePick。招聘人员在一个屏幕上选择一个或多个日期以及时间段，每场面试都保存为您自己对象上的一条记录，并关联到候选人。已有的面试会显示在网格上，所以在任何人预约之前就能看到哪些时间段已被占用。</p>
+                </details>
+                <details>
+                    <summary>面试时间段可以设为 45 分钟吗？</summary>
+                    <p>可以。Time Interval (Minutes)（时间间隔（分钟））接受任意数字。常见为 15、30 或 60 分钟，45 或 90 分钟同样适用。</p>
+                </details>
+                <details>
+                    <summary>如何避免面试官被重复安排？</summary>
+                    <p>把面试官设为资源（通常是 User 对象），并将“冲突行为”设为 Block。每次保存都会与现有预订比对。如果是面试小组，再添加一个 Capacity Field（容量字段），时间段会一直开放，直到所有名额都已排满。</p>
+                </details>
+                <details>
+                    <summary>候选人可以自己预约面试吗？</summary>
+                    <p>可以。把同一个组件放到 Experience Cloud 站点页面上，设置 Config Name（配置名称）和 Static Parent Record Id。候选人只能看到面试官工作时间内的空闲时间段，预约会直接保存到您的组织中。</p>
+                </details>
+                <details>
+                    <summary>这和 Salesforce Scheduler 有什么区别？</summary>
+                    <p>Salesforce Scheduler 是付费附加产品，使用自己专门的预约数据模型。MultiDatePick 在您自己的对象上预订，支持多日期选择、容量和五种日历视图。请查看 <a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">Salesforce Lightning Scheduler 与 MultiDatePick 的完整对比</a>。</p>
+                </details>
+                <details>
+                    <summary>MultiDatePick 多少钱？</summary>
+                    <p>每用户每月 $20，包含所有组件和功能，30 天免费试用，无需信用卡。100% Salesforce 原生，即将登陆 Salesforce AppExchange。</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- ═══════════════ RELATED ═══════════════ -->
+        <section class="gs-sec alt" id="related">
+            <div class="hm-wrap">
+                <h2>继续了解</h2>
+                <div class="gs-links" style="margin-top:16px;">
+                    <a href="/zh/salesforce-calendar-staffing-recruiting.html"><b>人力派遣与招聘</b><span>空闲时间、班次和排班表</span></a> <a href="/zh/salesforce-calendar-vs-lightning-scheduler.html"><b>对比 Salesforce Scheduler</b><span>数据模型与许可证对比</span></a> <a href="/zh/multidatepickdatetime.html"><b>Date Time 组件</b><span>日期和时间段一起选</span></a> <a href="/zh/blog/prevent-double-booking-in-salesforce.html"><b>防止重复预订</b><span>冲突与容量详解</span></a> <a href="/zh/salesforce-calendar-experience-cloud-booking.html"><b>Experience Cloud 预订</b><span>在公开站点上自助服务</span></a> <a href="/zh/configlibrary.html"><b>Config Library</b><span>40 多个可导入的现成配置</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FINAL CTA ═══════════════ -->
+        <section class="hm-final">
+            <div class="hm-wrap">
+                <h2>别再在收件箱里安排面试了</h2>
+                <p>即将登陆 Salesforce AppExchange。现在就试用在线演示，或留下邮箱，上线时我们第一时间通知您。</p>
+                <div class="hm-ctas">
+                    <a href="/zh/notify-me-at-launch.html" class="btn btn-cta">上线时通知我</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-interview-scheduling" class="btn btn-ghost" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/gettingstarted.html" class="btn btn-ghost">入门指南</a>
+                </div>
+                <p class="contact">$20/用户/月，30 天免费试用，无需信用卡。已通过 AppExchange 安全审查。100% Salesforce 原生。</p>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>解决方案</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>文档</h4>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>公司</h4>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/salesforce-calendar-interview-scheduling.html" hreflang="en" lang="en">English</a></li><li><a href="/de/salesforce-interviewplanung.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/calendario-salesforce-programar-entrevistas.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/planification-entretiens-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/pianificazione-colloqui-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/salesforce-calendar-interview-scheduling.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/salesforce-calendar-interview-scheduling.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/salesforce-calendar-interview-scheduling.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

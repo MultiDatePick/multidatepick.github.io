@@ -4,6 +4,9 @@
 
 (function () {
 
+    // Text from the page's hidden .mdp-strings block (translated with the page), else English.
+    function text(key, fallback) { return window.mdpText ? window.mdpText(key, fallback) : fallback; }
+
     /* ── Toast ── */
     function showToast(title, message, duration) {
         let container = document.getElementById('mdp-toast-container');
@@ -33,7 +36,7 @@
      * fall back to a hidden textarea and execCommand('copy').
      */
     function copyFetched(url) {
-        var textP = fetch(url).then(function (r) { return r.text(); });
+        var textP = fetch(url).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); });
         if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
             var item = new ClipboardItem({ 'text/plain': textP.then(function (t) { return new Blob([t], { type: 'text/plain' }); }) });
             return navigator.clipboard.write([item]).catch(function () { return textP.then(legacyCopy); });
@@ -61,16 +64,19 @@
         e.preventDefault();
         const card = e.target.closest('.config-card');
         const configFile = card.dataset.configFile;
-        copyFetched('downloads/configs/' + configFile)
+        // Root-absolute: translated pages sit one folder down (/de/...), where a relative path
+        // fetched a 404 page and still reported "Config Copied".
+        const url = '/downloads/configs/' + configFile;
+        copyFetched(url)
             .then(function () {
-                showToast(
-                    'Config Copied',
+                showToast(text('copied-title', 'Config Copied'), text('copied-body',
                     'Open your Salesforce org and navigate to the <strong>MultiDatePick Setup</strong> app. ' +
-                    'Go to the <strong>Import</strong> tab, paste it and save. Then type its Config Name wherever you place the component.'
-                );
+                    'Go to the <strong>Import</strong> tab, paste it and save. Then type its Config Name wherever you place the component.'));
             })
             .catch(function () {
-                showToast('Copy Failed', 'Your browser blocked clipboard access. <a href="downloads/configs/' + configFile + '" target="_blank" rel="noopener">Open the JSON</a> and copy it from there.', 8000);
+                const link = '<a href="' + url + '" target="_blank" rel="noopener">' + text('open-json', 'Open the JSON') + '</a>';
+                showToast(text('failed-title', 'Copy Failed'),
+                    text('failed-body', 'Your browser blocked clipboard access. {link} and copy it from there.').replace('{link}', link), 8000);
             });
     }
 

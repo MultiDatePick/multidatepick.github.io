@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五种日历视图，一个 Salesforce 组件</title>
+    <meta name="description" content="月历回答不了所有排期问题。时间轴、周、使用率和日程视图与它并列，每个放置位置用一个配置字段选择视图。">
+    <link rel="canonical" href="https://multidatepick.com/zh/blog/salesforce-calendar-views.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Views post (restyled 2026-10-12): accent headings, view cards with live GIFs, config pills. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .vb-views { display: flex; flex-direction: column; gap: 26px; margin: 26px 0 10px;
+            /* wider than the 820px text column, so the GIFs read at a useful size */
+            width: min(1120px, calc(100vw - 40px)); margin-left: calc(50% - min(560px, calc(50vw - 20px))); }
+        .vb-view { display: grid; grid-template-columns: 0.75fr 1.25fr; gap: 30px; align-items: center;
+            background: #fff; border: 1px solid #E2E8F0; border-radius: 14px;
+            padding: 22px 24px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .vb-view.vb-flip { grid-template-columns: 1.25fr 0.75fr; } .vb-text h3 { position: relative; } .vb-text h3::before { content:""; position:absolute; left:-24px; top:calc(.625em - 11px); width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--vb-c); } .vb-view.vb-flip .vb-text h3::before { left:-17px; }
+        .vb-view.vb-flip .vb-text { order: 2; }
+        .vb-tag { display: inline-block; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+            color: color-mix(in srgb, var(--vb-c) 75%, #000); }
+        .vb-text h3 { margin: 12px 0 8px; font-size: 1.42rem; line-height: 1.25; color: #0F2D52; }
+        .vb-text p { margin: 0 0 14px; color: #374151; line-height: 1.6; }
+        .vb-mode { font-size: 0.8rem; font-weight: 700; color: #15803D; }
+        .vb-mode::before { content: "\2713  "; }
+        .vb-mode.vb-ro { color: #64748B; }
+        .vb-mode.vb-ro::before { content: "\25CB  "; }
+        .vb-media { margin: 0; }
+        .vb-media img { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid #E2E8F0; }
+        .vb-aside { color: #4B5563; font-style: italic; }
+        .vb-configs { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+        .vb-cfg { display: grid; grid-template-columns: 1.25fr 210px 1fr; gap: 16px; align-items: center;
+            background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px 16px; }
+        .vb-cfg-what { font-weight: 700; color: #0F2D52; }
+        .vb-cfg-why { color: #64748B; font-size: 0.9rem; }
+        .vb-pills { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+        .vb-pills b { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 700; color: color-mix(in srgb, var(--vb-c) 75%, #000); }
+        .vb-pills b::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--vb-c); }
+        @media (max-width: 760px) {
+            .vb-view, .vb-view.vb-flip { grid-template-columns: 1fr; padding: 18px; } .vb-text h3::before, .vb-view.vb-flip .vb-text h3::before { left:-18px; }
+            .vb-view.vb-flip .vb-text { order: 0; }
+            .vb-cfg { grid-template-columns: 1fr; gap: 6px; }
+        }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="五种日历视图，一个 Salesforce 组件">
+    <meta property="og:description" content="月历回答不了所有排期问题。时间轴、周、使用率和日程视图与它并列，每个放置位置用一个配置字段选择视图。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/blog/salesforce-calendar-views.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="五种日历视图，一个 Salesforce 组件">
+    <meta name="twitter:description" content="月历回答不了所有排期问题。时间轴、周、使用率和日程视图与它并列，每个放置位置用一个配置字段选择视图。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-calendar-views.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-kalenderansichten.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/vistas-calendario-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/vues-calendrier-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/viste-calendario-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/visualizacoes-de-calendario-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-calendar-views.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-calendar-views.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-calendar-views.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-calendar-views.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html" class="active">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-five-views.png",
+                "caption": "MultiDatePick 五种视图中的 Salesforce 预订：带容量条的资源时间轴、按状态着色的月历、使用率热力图、周网格和日程列表",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule-poster.png",
+                "caption": "在 MultiDatePick Salesforce 时间轴上改期的动画演示：拖动一个项目的右边缘将其延长两天，再拖动另一个项目整体推后两天，松开即保存，横条上显示新日期",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-calendar-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-calendar-view-demo-poster.png",
+                "caption": "MultiDatePick Salesforce 日历视图的动画演示：选择一位顾问后，整月按状态着色，悬停某一天会弹出卡片，按客户姓名、时间和状态列出当天的预约",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo-poster.png",
+                "caption": "MultiDatePick Salesforce 资源时间轴的动画演示：左侧列出顾问，多日客户项目显示为一整条横条，悬停查看其中一个项目的卡片，再从周缩放到月并向后翻页",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo-poster.png",
+                "caption": "MultiDatePick Salesforce 周视图的动画演示：选择一位顾问后，其客户会议显示为按状态着色、长度与会议时长一致的色块，悬停卡片显示客户、会议类型和状态",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png",
+                "caption": "MultiDatePick Salesforce 使用率热力图的动画演示：左侧列出顾问，显示每天已预订占容量，悬停在已满的一天上，单击后打开该顾问当周",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-agenda-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-agenda-view-demo-poster.png",
+                "caption": "MultiDatePick Salesforce 日程视图的动画演示：按日期列出即将到来的预约，含时间、客户、状态标签和顾问，并悬停查看其中两条的卡片",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-resource-timeline-view.png",
+                "caption": "Salesforce 预订上的 MultiDatePick 资源时间轴：资源纵向排列，日期横向展开，可按日、周、月缩放，带汇总容量条，多日预订显示为连续横条，重叠时分道堆叠",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "五种日历视图，一个 Salesforce 组件",
+        "datePublished": "2026-08-21",
+        "dateModified": "2026-10-21",
+        "author": {
+            "@type": "Organization",
+            "name": "MultiDatePick"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "MultiDatePick"
+        },
+        "mainEntityOfPage": "https://multidatepick.com/zh/blog/salesforce-calendar-views.html",
+        "inLanguage": "zh-Hans"
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>五种日历视图，一个 Salesforce 组件</h1>
+                <p class="subtitle">人们实际提出的排期问题里，有一半用月历来回答并不合适。下面说说我们为什么又加了四种视图，以及如何让视图选择变成一个配置字段，而不必重新搭建。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">发布于 2026 年 8 月 21 日 &middot; 更新于 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">每个日历最初都是月历，因为“日历”这个词让人想到的就是它。然后大家开始问它答不上来的问题：“周四下午谁有空？”“4 号会议室下周是不是排满了？”“哪个技术员超出容量了？”这些数据月历里都有，只是得一点点去找。</p>
+
+                <p>现在，MultiDatePick 能以五种方式呈现同一批记录。一个组件、一套字段映射、一条保存路径，再加一个改变布局的<strong>视图</strong>设置。</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/marketing/salesforce-calendar-five-views.png" alt="MultiDatePick 以五种视图展示 Salesforce 预订：资源时间轴、月历、使用率热图、周网格和日程列表" loading="lazy" style="width:100%;max-width:100%;height:auto;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid #E2E8F0;display:block;" width="2000" height="1160" data-zoomable>
+                    <figcaption>一个组件，五种布局。每种视图读取相同的字段，以相同的方式保存。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">五种视图，各自回答一个问题</h2>
+
+                <p>每种视图都为一个问题而设计。底层是同一批记录，按这个问题需要的方式呈现。</p>
+
+                <div class="vb-views">
+                <article class="vb-view" style="--vb-c:#0176D3;">
+                    <div class="vb-text">
+                        <span class="vb-tag">日历</span>
+                        <h3>14 号有什么安排？</h3>
+                        <p>一次显示一个月，每天按当天预订的状态填色。混合多种状态的日期会显示其中的每一种状态。这是默认视图，多数情况下仍是最合适的选择。</p>
+                        <span class="vb-mode">可交互</span>
+                    </div>
+                    <figure class="vb-media">
+                        <img src="/images/views/salesforce-calendar-view-demo-poster.png" data-gif="/images/views/salesforce-calendar-view-demo.gif" alt="MultiDatePick Salesforce 日历视图的动画演示：选择一位顾问后，整月按状态着色，悬停某一天会弹出卡片，按客户姓名、时间和状态列出当天的预约" loading="lazy" decoding="async" width="700" height="780" data-zoomable>
+                    </figure>
+                </article>
+                <article class="vb-view vb-flip" style="--vb-c:#F97316;">
+                    <div class="vb-text">
+                        <span class="vb-tag">时间轴</span>
+                        <h3>哪个资源有空，什么时候有空？</h3>
+                        <p>资源纵向排列，日期横向展开。跨三天的预订显示为一整条横条，重叠的预订分道堆叠，容量条显示每天的占用程度。可从单日缩放到整月，拖动横条即可移动或拉长预订。<a href="/zh/blog/salesforce-timeline-view.html">详细了解时间轴视图</a>。</p>
+                        <span class="vb-mode">可交互</span>
+                    </div>
+                    <figure class="vb-media">
+                        <img src="/images/views/salesforce-timeline-view-demo-poster.png" data-gif="/images/views/salesforce-timeline-view-demo.gif" alt="MultiDatePick Salesforce 资源时间轴的动画演示：左侧列出顾问，多日客户项目显示为一整条横条，悬停查看其中一个项目的卡片，再从周缩放到月并向后翻页" loading="lazy" decoding="async" width="880" height="880" data-zoomable>
+                    </figure>
+                </article>
+                <article class="vb-view" style="--vb-c:#16A34A;">
+                    <div class="vb-text">
+                        <span class="vb-tag">周</span>
+                        <h3>周四下午 2 点谁有空？</h3>
+                        <p>横向七天，纵向为营业时间，每项预订按实际时长显示。重叠的预订以各自的状态颜色并排显示，旁边留出空白区域，方便再加一项。</p>
+                        <span class="vb-mode">可交互</span>
+                    </div>
+                    <figure class="vb-media">
+                        <img src="/images/views/salesforce-week-view-demo-poster.png" data-gif="/images/views/salesforce-week-view-demo.gif" alt="MultiDatePick Salesforce 周视图的动画演示：选择一位顾问后，其客户会议显示为按状态着色、长度与会议时长一致的色块，悬停卡片显示客户、会议类型和状态" loading="lazy" decoding="async" width="880" height="1080" data-zoomable>
+                    </figure>
+                </article>
+                <article class="vb-view vb-flip" style="--vb-c:#7C3AED;">
+                    <div class="vb-text">
+                        <span class="vb-tag">使用率</span>
+                        <h3>谁超出了容量？</h3>
+                        <p>按资源、按天显示已预订占容量，统一使用蓝色色阶。超额预订的日期带橙色圆环，汇总行合计整个团队。单击任意单元格即可进入该资源的周视图。<a href="/zh/blog/salesforce-utilization-heatmap.html">详细了解使用率热力图</a>。</p>
+                        <span class="vb-mode vb-ro">只读</span>
+                    </div>
+                    <figure class="vb-media">
+                        <img src="/images/views/salesforce-utilization-view-demo-poster.png" data-gif="/images/views/salesforce-utilization-view-demo.gif" alt="MultiDatePick Salesforce 使用率热力图的动画演示：左侧列出顾问，显示每天已预订占容量，悬停在已满的一天上，单击后打开该顾问当周" loading="lazy" decoding="async" width="880" height="780" data-zoomable>
+                    </figure>
+                </article>
+                <article class="vb-view" style="--vb-c:#0F766E;">
+                    <div class="vb-text">
+                        <span class="vb-tag">日程</span>
+                        <h3>接下来有什么安排？</h3>
+                        <p>未来 60 天的平铺列表，按日期分组，显示时间、状态以及您选择的字段。在手机上和交接班时都很好读。</p>
+                        <span class="vb-mode vb-ro">只读</span>
+                    </div>
+                    <figure class="vb-media">
+                        <img src="/images/views/salesforce-agenda-view-demo-poster.png" data-gif="/images/views/salesforce-agenda-view-demo.gif" alt="MultiDatePick Salesforce 日程视图的动画演示：按日期列出即将到来的预约，含时间、客户、状态标签和顾问，并悬停查看其中两条的卡片" loading="lazy" decoding="async" width="700" height="860" data-zoomable>
+                    </figure>
+                </article>
+                </div>
+
+                <p class="vb-aside">使用率和日程视图特意设计为只读：它们用来回答问题，而不是接受预订。其余三种视图完全可交互。</p>
+
+                <h2 style="margin-top:44px;">五种视图，对预订只有一种定义</h2>
+
+                <p>这类故事通常的结局是再做一个组件：有自己的字段、自己的保存逻辑，还有自己的 bug。而在这里，五种视图通过同一套字段映射读取同一批记录，遵守相同的冲突规则和屏蔽日期，并通过同一条保存路径写入。从日历切换到时间轴，不会改变预订的含义，因为预订只有一种定义。</p>
+
+                <p>由两个设置控制：</p>
+
+                <div class="sc-cards">
+                    <div class="sc-card">
+                        <h3>视图（View）</h3>
+                        <p>组件打开时显示的布局：日历、时间轴、周、使用率或日程。</p>
+                    </div>
+                    <div class="sc-card">
+                        <h3>可用视图（Available Views）</h3>
+                        <p>切换器中提供的视图。留空则提供全部五种，也可以缩小到适合本页面的两种。</p>
+                    </div>
+                </div>
+
+                <p>于是一个组件就变成了三种不同的工具。招聘人员的面试安排页面默认打开周视图，因为面试是按钟点安排的问题。设施经理的会议室预订页面默认打开日历，旁边提供时间轴和使用率，因为会议室是容量问题。墙上的展示屏默认打开日程，完全不提供可编辑的视图。</p>
+
+                <div class="sc-note">
+                    <strong>默认视图始终出现在切换器中</strong>，无论您是否在“可用视图”中列出它。这个列表只需填写额外的视图，从而彻底避免“我限制了视图，结果自己的默认视图不见了”这类困惑。</div>
+
+                <h2 style="margin-top:44px;">每个放置位置单独选择视图</h2>
+
+                <p>全组织统一的日历设置几乎毫无用处，因为一家公司问的从来不是同一个问题。销售想看下周，运营想看下季度，班组经理想按小时看今天，财务想要一个使用率数字。</p>
+
+                <p>视图在组件的每个放置位置上单独设置。把 MultiDatePick 放在四个记录页面、一个 Flow 屏幕、一个主页和一个公开的 Experience Cloud 站点上，每个位置都可以是同一批对象的不同视图。无需再次安装，也无需同步多套字段映射。</p>
+
+                <p>时间轴还有两个专属设置：</p>
+
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">设置项</th><th>作用</th><th style="width:22%;">API 名称</th></tr></thead>
+                    <tbody>
+                    <tr>
+                        <td>时间轴窗口（天）（Timeline Window (Days)）</td>
+                        <td>屏幕上同时显示多少天，默认 14 天。如果显示整月的列，每项预订只有约二十像素宽，所有标签都会被截断，所以这个时间窗口是为了保持视图清晰易读。若想显示整月，请设为 0。</td>
+                        <td><code>timelineWindowDays</code></td>
+                    </tr>
+                    <tr>
+                        <td>视图中最大资源数（Max View Resources）</td>
+                        <td>绘制多少行资源，最繁忙的排在前面。避免八十间会议室的列表把视图变成一堵墙。</td>
+                        <td><code>maxViewResources</code></td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <p>当某个资源有多项重叠预订时，它的行会折叠为带计数的一条，单击后展开为每项预订一道。信息密度由用户自己选择，而不是被数据强加。</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-drag-to-reschedule-poster.png" data-gif="/images/views/salesforce-timeline-drag-to-reschedule.gif" alt="在 MultiDatePick Salesforce 时间轴上改期的动画演示：拖动一个项目的右边缘将其延长两天，再拖动另一个项目整体推后两天，松开即保存，横条上显示新日期" loading="lazy" decoding="async" data-zoomable width="880" height="880">
+                    <figcaption>改期只需拖动。拉动边缘可拉长预订，抓住中间可整体移动。拖动时横条上会显示新日期，松开即保存。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">把资源查找指向 User，就变成了人员排班</h2>
+
+                <p>资源查找可以指向任何对象。指向会议室，就是会议室预订；指向设备，就是设备借用。指向 <strong>User</strong>，上面的每种视图都会变成人员调度工具：时间轴是值班表，周视图是班次网格，使用率是团队容量仪表板。比起会议室，经理们更常问的是“哪个人超出了容量”。</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-resource-timeline-view.png" alt="MultiDatePick 中以人员为资源的 Salesforce 时间轴视图：左侧列出顾问，横向为日期，每项服务显示为一条横条" loading="lazy" style="width:100%;max-width:100%;height:auto;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid #E2E8F0;display:block;" width="1722" height="1782" data-zoomable>
+                    <figcaption><strong>把人员当作资源。</strong>这里的每一行都是一个人。将 Resource Object API Name（资源对象 API 名称）设为 User，您自己的团队就会以同样的方式填满各行。</figcaption>
+                </figure>
+
+                <div class="sc-note">如果您想试试，有两点实用提示。User 没有标准的容量字段，如果希望使用率显示百分比而不是原始数量，请添加一个自定义字段。另外，如果将 Business Hours Start Field（营业时间开始字段）和 Business Hours End Field（营业时间结束字段）指向 User 上的字段，周网格就会按每个人自己的工作时间显示，而不是全组织统一的时段。</div>
+
+                <p>库中正好有两个现成配置：<strong>团队容量规划</strong> 默认打开使用率热力图，<strong>员工排班表</strong> 默认打开时间轴。两者都以 User 作为资源。</p>
+
+                <h2 style="margin-top:44px;">库中的每个配置现在都已预选好视图</h2>
+
+                <p>选择默认视图需要判断，而照搬一个比自己定一个更容易。所以 <a href="/zh/configlibrary.html">Config Library</a> 中的每个配置现在都同时指定了默认视图和切换器列表，依据的是每个配置的实际用途：</p>
+
+                <div class="vb-configs">
+                    <div class="vb-cfg"><span class="vb-cfg-what">面试和预约类配置</span><span class="vb-pills"><b style="--vb-c:#16A34A;">周</b></span><span class="vb-cfg-why">按一天中的钟点打开</span></div>
+                    <div class="vb-cfg"><span class="vb-cfg-what">会议室、工位、车队和实验室类配置</span><span class="vb-pills"><b style="--vb-c:#F97316;">时间轴</b><b style="--vb-c:#7C3AED;">使用率</b></span><span class="vb-cfg-why">谁占用了什么，占用了多少</span></div>
+                    <div class="vb-cfg"><span class="vb-cfg-what">休假、禁用期等日期范围</span><span class="vb-pills"><b style="--vb-c:#F97316;">时间轴</b></span><span class="vb-cfg-why">多日记录显示为一整条横条</span></div>
+                    <div class="vb-cfg"><span class="vb-cfg-what">仅日期类配置</span><span class="vb-pills"><b style="--vb-c:#0176D3;">日历</b><b style="--vb-c:#0F766E;">日程</b></span><span class="vb-cfg-why">日程作为只读的辅助视图</span></div>
+                    <div class="vb-cfg"><span class="vb-cfg-what">任何带容量字段的配置</span><span class="vb-pills"><b style="--vb-c:#7C3AED;">使用率</b></span><span class="vb-cfg-why">容量百分比</span></div>
+                </div>
+                <div class="sc-note"><strong>默认视图始终是可编辑的视图。</strong>只读的默认视图会掩盖配置的主要用途，所以使用率和日程只作为附加视图提供。</div>
+
+                <p style="margin-top:18px;">导入其中任何一个，把字段名重新映射到您自己的架构，视图选择也会一并带过来。</p>
+
+                <div class="bp-end">
+                    <h2>一个组件，五种视图，无需二次安装。</h2>
+                    <p>在在线演示中切换全部五种视图，或在 <a href="/zh/configlibrary.html">Config Library</a> 中查看每个场景默认打开哪种视图。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-views" class="btn btn-demo" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-primary">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">入门指南</a>
+                    </div>
+                    <ul class="check-list"><li>$20/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>100% Salesforce 原生</li><li>无需 Apex</li><li>即将登陆 Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>相关阅读</h3>
+                    <ul>
+                        <li><a href="/zh/blog/salesforce-timeline-view.html">Salesforce 时间轴视图详解</a></li>
+                        <li><a href="/zh/blog/salesforce-utilization-heatmap.html">Salesforce 使用率热力图详解</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-setup-wizard.html">无需编写代码即可配置日历</a></li>
+                        <li><a href="/zh/blog/prevent-double-booking-in-salesforce.html">在 Salesforce 中防止重复预订</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-time-slot-picker.html">打造日历时间段选择器</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking 组件</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘排期</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>解决方案</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>文档</h4>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>公司</h4>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/blog/salesforce-calendar-views.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-kalenderansichten.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/vistas-calendario-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/vues-calendrier-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/viste-calendario-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-calendar-views.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-calendar-views.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/blog/salesforce-calendar-views.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

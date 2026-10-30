@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva de Salas de Reunião e Mesas no Salesforce</title>
+    <meta name="description" content="Reserva de salas de reunião e mesas no Salesforce. Todas as salas em uma linha do tempo, sem reserva duplicada, horário por sala e mapa de calor. Sem código.">
+    <link rel="canonical" href="https://multidatepick.com/pt-br/reserva-de-salas-de-reuniao-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="preload" as="image" href="/images/multidatepick-booking-demo-poster.png" fetchpriority="high">
+    <meta property="og:title" content="Reserva de Salas de Reunião e Mesas no Salesforce">
+    <meta property="og:description" content="Reserva de salas de reunião e mesas no Salesforce. Todas as salas em uma linha do tempo, sem reserva duplicada, horário por sala e mapa de calor. Sem código.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/pt-br/reserva-de-salas-de-reuniao-salesforce.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Reserva de Salas de Reunião e Mesas no Salesforce">
+    <meta name="twitter:description" content="Reserva de salas de reunião e mesas no Salesforce. Todas as salas em uma linha do tempo, sem reserva duplicada, horário por sala e mapa de calor. Sem código.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "name": "Reserva de salas de reunião e de mesas no Salesforce",
+                "url": "https://multidatepick.com/pt-br/reserva-de-salas-de-reuniao-salesforce.html",
+                "description": "Reserva de salas de reunião e de mesas no Salesforce com o MultiDatePick Booking: salas de qualquer objeto, uma linha do tempo de agendamento de salas, detecção de conflitos, horários e fechamentos por sala, capacidade de mesas e um mapa de calor de ocupação. Sem código.",
+                "isPartOf": {
+                    "@id": "https://multidatepick.com/pt-br/#website"
+                },
+                "about": {
+                    "@id": "https://multidatepick.com/pt-br/#software"
+                },
+                "primaryImageOfPage": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "inLanguage": "pt-BR"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Dá para reservar salas de reunião no Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Não de fábrica. O Salesforce padrão não tem um controle de reserva de salas. O MultiDatePick Booking acrescenta um: mantenha suas salas como registros em qualquer objeto, e as pessoas escolhem uma sala, escolhem uma ou várias datas, clicam nos horários livres e reservam. Cada reserva é salva como um registro no seu próprio objeto de reservas."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Como evitar que duas pessoas reservem a mesma sala de reunião?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Defina o Conflict Behavior como Block. Os horários ocupados aparecem como ocupados e não podem ser clicados, e cada salvamento é verificado de novo contra as reservas existentes, então um choque de horários nunca é salvo."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Posso fazer reserva de mesas ou mesas compartilhadas (desk hoteling) no Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. Transforme cada área de mesas em um recurso com um Capacity Field e ative Show Availability Count, para que as pessoas vejam quantas mesas restam até a área lotar. Disable Time Slot Grid (Full-Day Mode) reserva mesas para o dia inteiro. A configuração Reserva de Mesas (Hot Desk) da Config Library é um ponto de partida pronto."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Posso ver a agenda de todas as salas em uma tela?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. A visualização Linha do tempo coloca todas as salas na lateral e as datas no topo, com reservas de vários dias desenhadas como uma única barra. A visualização Ocupação mostra, em um mapa de calor, o quanto cada sala está cheia por dia, e a visualização Semana mostra o dia hora a hora."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Uma reserva pode ocupar várias salas ao mesmo tempo?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. Ative Allow Booking Multiple Resources e as pessoas marcam várias salas para o mesmo horário em uma só ação. O Capacity Aggregation define como a capacidade é somada entre as salas."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Cada sala pode ter os próprios horários e fechamentos?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. Business Hours Start Field e Business Hours End Field leem o horário de cada sala no registro da sala. As datas bloqueadas vêm dos seus próprios registros de fechamento, de dia inteiro ou parcial, para todas as salas ou só para uma."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "De onde as pessoas podem reservar uma sala?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "De qualquer lugar em que você colocar o componente Booking: uma página de registro, uma página de aplicativo ou inicial, um fluxo de tela (Screen Flow) ou uma página de site do Experience Cloud. Em páginas de aplicativo, iniciais e do Experience Cloud, defina o Config Name e o Static Parent Record Id."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Quanto custa o MultiDatePick?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "US$ 20 por usuário por mês para todos os componentes e recursos, com teste grátis de 30 dias e sem cartão de crédito. É 100% nativo do Salesforce e chega em breve ao Salesforce AppExchange."
+                        }
+                    }
+                ],
+                "inLanguage": "pt-BR"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/multidatepick-booking-demo-poster.png",
+                "caption": "Demo animada do calendário de reservas do MultiDatePick no Salesforce: escolher um consultor, informar o cliente, escolher uma data e um horário livre de 30 minutos e salvar a solicitação",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-booking-grid.png",
+                "caption": "Calendário de reserva de salas de reunião do MultiDatePick no Salesforce: uma lista Selecionar Recursos com salas e caixas de seleção, cores de status e um mês de dias reservados",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo-poster.png",
+                "caption": "Demo animada da linha do tempo de recursos do MultiDatePick no Salesforce: consultores na lateral, compromissos de vários dias como uma única barra, um cartão ao passar o mouse sobre um deles, depois zoom de Semana para Mês e avanço de página",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png",
+                "caption": "Demo animada do mapa de calor de ocupação do MultiDatePick no Salesforce: consultores na lateral mostrando a capacidade reservada por dia, mouse sobre um dia lotado e, com um clique, a semana daquele consultor se abre",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo-poster.png",
+                "caption": "Demo animada da visualização semanal do MultiDatePick no Salesforce: ao escolher um consultor, as reuniões com clientes aparecem como blocos coloridos por status, do tamanho real de cada reunião, com cartões ao passar o mouse mostrando cliente, tipo de reunião e status",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule-poster.png",
+                "caption": "Demo animada de reagendamento na linha do tempo do MultiDatePick no Salesforce: arrastar a borda direita de um compromisso o estende por dois dias, depois arrastar outro compromisso o move dois dias para frente; cada um é salvo ao soltar, com as novas datas exibidas na barra",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-capacity-lanes.png",
+                "caption": "Detalhe da linha do tempo no Salesforce: reservas sobrepostas de vários dias empilhadas em faixas sob cada recurso e uma faixa de capacidade combinada mostrando o quanto cada dia está cheio",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/salesforce-booking-capacity-calendar.png",
+                "caption": "Calendário de reservas do Salesforce no MultiDatePick para um consultor: cada dia colorido pelo status do agendamento, um dia misto dividido na diagonal e uma grade de horários de 30 minutos com indicadores de capacidade reservada",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+    <style>
+        .hm-wrap{max-width:1040px;margin:0 auto;padding:0 16px;}
+        .hm-hero{background:linear-gradient(170deg,var(--blue-50,#F0F9FF) 0%,#E0F2FE 60%,#fff 100%);padding:44px 0 40px;}
+        .bk-hero{display:grid;grid-template-columns:1.15fr 1fr;gap:32px;align-items:center;}
+        .hm-hero h1{font-size:2.35rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1.12;margin:0;}
+        .hm-hero h1 .pre{display:block;font-size:1rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#C2410C;margin-bottom:8px;}
+        .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+        .hm-hero .subtitle{font-size:1.08rem;color:var(--gray-600,#4b5563);margin:14px 0 0;max-width:560px;}
+        .hm-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}
+        .hm-ctas .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .hm-ctas .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .hm-demo-link{display:inline-block;margin-top:12px;font-size:.92rem;font-weight:600;}
+        .bk-hero .gs-fig{margin:0;max-width:400px;justify-self:center;width:100%;}
+        .hm-live{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;padding:26px 0;scroll-margin-top:80px;}
+        .hm-live .hm-wrap{display:flex;gap:18px 28px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+        .hm-live h2{color:#fff;font-size:1.3rem;margin:0 0 4px;}
+        .hm-live p{color:#cdd9e8;margin:0;font-size:.95rem;max-width:680px;}
+        .hm-live .tag{display:block;color:#FDBA74;font-size:.75rem;font-weight:800;letter-spacing:.12em;margin-bottom:8px;}
+        .hm-live .btn{background:#F97316;color:#fff;white-space:nowrap;}
+        .hm-live .btn:hover{background:#EA580C;color:#fff;}
+        .gs-sec{padding:56px 0;scroll-margin-top:80px;}
+        .gs-sec.alt{background:var(--blue-50,#F0F9FF);}
+        .gs-sec h2{font-size:1.6rem;color:var(--blue-900,#0C4A6E);margin:0 0 6px;padding-left:17px;position:relative;line-height:1.25;} .gs-sec h2::before{content:"";position:absolute;left:0;top:calc(.625em - 11px);width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-sec h3{font-size:1.15rem;color:var(--blue-900,#0C4A6E);margin:32px 0 6px;scroll-margin-top:80px;}
+        .gs-lead{color:var(--gray-600,#4b5563);margin:0 0 20px;font-size:1rem;max-width:760px;}
+        .gs-sec code{background:#f3f4f6;padding:1px 5px;border-radius:3px;color:#c2410c;font-size:.88em;word-break:break-word;}
+        .gs-fig{margin:18px 0 8px;}
+        .gs-fig img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #E5E7EB;box-shadow:0 4px 20px rgba(15,45,82,.08);background:#fff;}
+        .gs-fig figcaption{text-align:center;font-size:.88rem;color:var(--gray-500,#6b7280);margin-top:8px;}
+        .gs-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE3EC;border-radius:10px;overflow:hidden;font-size:.93rem;}
+        .gs-table th,.gs-table td{padding:11px 14px;border-bottom:1px solid #E8EDF3;border-right:1px solid #E8EDF3;text-align:left;vertical-align:top;}
+        .gs-table th:last-child,.gs-table td:last-child{border-right:none;}
+        .gs-table thead th{background:#0F2D52;color:#fff;font-weight:600;font-size:.85rem;}
+        .gs-table thead th.mdp{background:#C2410C;}
+        .gs-table tbody tr:last-child td{border-bottom:none;}
+        .gs-table td:first-child{font-weight:600;color:var(--blue-900,#0C4A6E);}
+        .gs-table .old{color:var(--gray-500,#6b7280);}
+        .gs-table .new{color:#065F46;font-weight:600;}
+        .gs-table small{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);font-weight:400;}
+        .hm-scroll{overflow-x:auto;}
+        .gs-chain{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-wrap:wrap;gap:8px 4px;align-items:center;font-size:.9rem;}
+        .gs-chain li{background:#fff;border:1px solid #BFDBFE;color:#1E3A8A;border-radius:999px;padding:5px 14px;font-weight:600;}
+        .gs-chain li b{color:#F97316;margin-right:4px;}
+        .gs-chain li.arr{background:none;border:none;color:#94A3B8;padding:0 2px;}
+        .gs-two{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+        .gs-two .gs-fig{margin-top:0;}
+        .bk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 0;}
+        .bk-tile{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:12px 14px 12px 18px;position:relative;} .bk-tile::before{content:"";position:absolute;left:0;top:13px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#10b981;}
+        .bk-tile b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;margin-bottom:3px;}
+        .bk-tile span{display:block;font-size:.85rem;color:var(--gray-600,#4b5563);}
+        .bk-tile .comp{display:inline-block;margin-top:8px;font-size:.72rem;font-weight:700;letter-spacing:.04em;color:#1E3A8A;background:#EFF6FF;border-radius:999px;padding:1px 9px;}
+        .gs-paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0;}
+        .gs-paths.three{grid-template-columns:repeat(3,1fr);}
+        .gs-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;font-size:.92rem;color:var(--gray-600,#4b5563);}
+        .gs-card b{display:block;color:var(--blue-900,#0C4A6E);font-size:1rem;margin-bottom:6px;}
+        .gs-card.bk,.gs-card.rs,.gs-card.sf{position:relative;padding-left:18px;} .gs-card.bk{--rail:#F97316;}
+        .gs-card.rs{--rail:#10b981;}
+        .gs-card.sf{--rail:#0176D3;} .gs-card.bk::before,.gs-card.rs::before,.gs-card.sf::before{content:"";position:absolute;left:0;top:15px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .hm-checks{list-style:none;padding:0;margin:0;}
+        .hm-checks li{padding:5px 0 5px 24px;position:relative;border-bottom:1px solid #F1F5F9;}
+        .hm-checks li:last-child{border-bottom:none;}
+        .hm-checks li::before{content:"\2713";position:absolute;left:2px;color:#10b981;font-weight:700;}
+        .gs-note{margin:16px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 18px 14px 22px;font-size:.92rem;color:#7C2D12;position:relative;} .gs-note::before{content:"";position:absolute;left:0;top:14px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-note b{color:#9A3412;}
+        .bk-views{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:8px;}
+        .bk-views .gs-fig{margin:0;}
+        .cf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 0;}
+        .cf-grid.two{grid-template-columns:1fr 1fr;}
+        .cf-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px 12px 18px;position:relative;display:flex;flex-direction:column;} .cf-card::before{content:"";position:absolute;left:0;top:16px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .cf-card .cf-type{font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#C2410C;}
+        .cf-card h3{margin:2px 0 4px;font-size:1.05rem;}
+        .cf-card p{margin:0 0 10px;font-size:.86rem;color:var(--gray-600,#4b5563);}
+        .cf-set{list-style:none;padding:0;margin:0 0 12px;font-size:.85rem;}
+        .cf-set li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #F1F5F9;}
+        .cf-set li:last-child{border-bottom:none;}
+        .cf-set li span{color:var(--blue-900,#0C4A6E);font-weight:600;}
+        .cf-set li em{font-style:normal;color:#334155;text-align:right;}
+        .cf-links{margin-top:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:.86rem;font-weight:600;}
+        .gs-faq details{background:#fff;border:1px solid #DCE3EC;border-radius:10px;margin:0 0 10px;padding:0 18px;}
+        .gs-faq summary{cursor:pointer;font-weight:600;color:var(--blue-900,#0C4A6E);padding:14px 0;list-style-position:outside;}
+        .gs-faq details p{margin:0 0 14px;color:var(--gray-600,#4b5563);font-size:.93rem;}
+        .gs-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .gs-links a{display:block;background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;text-decoration:none;transition:border-color .15s ease;}
+        .gs-links a:hover{border-color:#F97316;}
+        .gs-links b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;}
+        .gs-links span{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);}
+        .hm-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .hm-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .hm-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .hm-final .hm-ctas{justify-content:center;}
+        .hm-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .hm-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .hm-final .contact{margin:20px 0 0;font-size:.9rem;color:#cdd9e8;}
+        @media (max-width:900px){
+            .bk-hero,.gs-two{grid-template-columns:1fr;}
+            .bk-grid{grid-template-columns:1fr 1fr;}
+            .gs-links,.gs-paths.three,.cf-grid{grid-template-columns:1fr 1fr;}
+        }
+        @media (max-width:600px){
+            .hm-hero{padding:30px 0 28px;}
+            .hm-hero h1{font-size:1.75rem;}
+            .bk-views,.gs-paths,.gs-paths.three,.gs-links,.cf-grid,.cf-grid.two{grid-template-columns:1fr;}
+            .gs-sec{padding:40px 0;}
+            .gs-sec h2{font-size:1.35rem;}
+            .gs-table{font-size:.86rem;}
+            .gs-table th,.gs-table td{padding:9px 8px;}
+            .hm-final h2{font-size:1.45rem;}
+        }
+    </style>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/salesforce-conference-room-booking-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/salesforce-besprechungsraum-buchung.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/reserva-salas-reuniones-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/reservation-salle-reunion-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/prenotazione-sale-riunioni-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/reserva-de-salas-de-reuniao-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/salesforce-conference-room-booking-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/salesforce-conference-room-booking-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/salesforce-conference-room-booking-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/salesforce-conference-room-booking-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Em breve no Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Fechar aviso" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/pt-br/" class="logo"><img src="/images/logo.png" alt="Logotipo do MultiDatePick: calendário de várias datas e reserva de recursos para Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Abrir ou fechar o menu"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">Date</a></li>
+                        <li><a href="/pt-br/seletor-de-data-e-hora-salesforce.html">Date Time</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Cinco visualizações de calendário</a></li>
+                        <li><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a></li>
+                        <li><a href="/pt-br/confianca-e-seguranca.html">Confiança e segurança</a></li>
+                        <li><a href="/pt-br/acessibilidade-vpat.html">Acessibilidade (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">Soluções <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/calendario-salesforce.html">Calendário Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas</a></li>
+                        <li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html" class="active">Reserva de salas de reunião</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html">Datas de campanha</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">Governo / Section 508</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pt-br/precos.html">Preços</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentação <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/primeiros-passos.html">Primeiros passos</a></li>
+                        <li><a href="/pt-br/guia-do-usuario.html">Guia do usuário</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">Guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html">Páginas de aplicativo, iniciais e do Experience Cloud</a></li>
+                        <li><a href="/pt-br/implantar-fluxo-vs-code.html">Implantar um fluxo (VS Code)</a></li>
+                        <li><a href="/pt-br/solucao-de-problemas.html">Solução de problemas</a></li>
+                        <li><a href="/pt-br/perguntas-frequentes.html">Perguntas frequentes</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pt-br/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Experimente a demo ao vivo</a></li>
+                <li><a href="/pt-br/avise-me-no-lancamento.html" class="nav-cta">Avise-me no lançamento</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <section class="hm-hero">
+            <div class="hm-wrap bk-hero">
+                <div>
+                    <h1><span class="pre">Reserva de salas<span class="vh">:</span></span> calendário de reserva de salas de reunião no Salesforce</h1>
+                    <p class="subtitle">Salas de reunião e mesas reservadas dentro do Salesforce. Veja todas as salas de uma vez, escolha os dias e os horários livres, e salve. Sem reservas duplicadas.</p>
+                    <div class="hm-ctas">
+                        <a href="/pt-br/avise-me-no-lancamento.html" class="btn btn-cta">Avise-me no lançamento</a> <a href="/pt-br/primeiros-passos.html" class="btn btn-secondary">Primeiros passos</a>
+                    </div>
+                    <a class="hm-demo-link" href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-conference-room-booking-calendar" target="_blank" rel="noopener">Ou experimente a demo ao vivo agora, sem login &rarr;</a>
+                </div>
+                <figure class="gs-fig">
+                    <img src="/images/multidatepick-booking-demo-poster.png" data-gif="/images/multidatepick-booking-demo.gif" alt="Demo animada do calendário de reservas do MultiDatePick no Salesforce: escolher um consultor, informar o cliente, escolher uma data e um horário livre de 30 minutos e salvar a solicitação" title="Demo de calendário de reservas no Salesforce" width="700" height="1010" fetchpriority="high" decoding="async" data-zoomable>
+                    <figcaption>Escolha um recurso, um dia e um horário livre. Reservado.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ═══════════════ LIVE DEMO ═══════════════ -->
+        <section class="hm-live" id="live-demo">
+            <div class="hm-wrap">
+                <div>
+                    <span class="tag">EXPERIMENTE AO VIVO: SEM INSTALAÇÃO, SEM LOGIN</span>
+                    <h2>Reserve um horário na demo ao vivo</h2>
+                    <p>A demo reserva consultores em um site público do Salesforce. As salas usam o mesmo componente Booking, com a sala como recurso.</p>
+                </div>
+                <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-conference-room-booking-calendar" target="_blank" rel="noopener" class="btn">Abrir a demo ao vivo &rarr;</a>
+            </div>
+        </section>
+
+        <!-- ═══════════════ OVERVIEW ═══════════════ -->
+        <section class="gs-sec" id="overview">
+            <div class="hm-wrap">
+                <h2>Reserva de salas de reunião no Salesforce em quatro cliques</h2>
+                <p class="gs-lead">Suas salas já são registros. O MultiDatePick as transforma em um calendário de reservas, e cada reserva é salva no seu próprio objeto.</p>
+                <ul class="gs-chain" aria-label="Como uma sala é reservada">
+                    <li><b>1</b>Escolha uma sala</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li><b>2</b>Escolha um ou vários dias</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li><b>3</b>Clique nos horários livres</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li><b>4</b>Reserve: registros salvos</li>
+                </ul>
+                <div class="bk-grid">
+                    <div class="bk-tile"><b>Salas de qualquer objeto</b><span>Filtre por prédio, andar ou tamanho.</span></div>
+                    <div class="bk-tile"><b>Horários ocupados à vista</b><span>Antes de qualquer clique, coloridos por status.</span></div>
+                    <div class="bk-tile"><b>Horário por sala</b><span>O laboratório funciona 24 horas, a sala da diretoria das 9 às 17.</span></div>
+                    <div class="bk-tile"><b>Fechamentos</b><span>De dia inteiro ou parcial, uma sala ou todas.</span></div>
+                    <div class="bk-tile"><b>Várias salas de uma vez</b><span>Uma só ação reserva o mesmo horário em cada uma.</span></div>
+                    <div class="bk-tile"><b>Qualquer duração de horário</b><span>15, 30 ou 60 minutos são os mais comuns.</span></div>
+                    <div class="bk-tile"><b>Edição na tela</b><span>Mova, mude o horário ou cancele sem excluir.</span></div>
+                    <div class="bk-tile"><b>Cinco visualizações</b><span>Calendário, Linha do tempo, Semana, Ocupação, Agenda.</span></div>
+                </div>
+                <div class="gs-two" style="margin-top:26px;">
+                    <div class="hm-scroll">
+                    <table class="gs-table">
+                        <thead><tr><th>Tarefa com a sala</th><th>Salesforce padrão</th><th class="mdp">Com o MultiDatePick</th></tr></thead>
+                        <tbody>
+                            <tr><td>Uma sala, quatro tardes</td><td class="old">Quatro registros à mão</td><td class="new">Quatro cliques, um salvamento</td></tr>
+                            <tr><td>Está livre?</td><td class="old">Rodar um relatório antes</td><td class="new">Horários ocupados na grade</td></tr>
+                            <tr><td>Sala aberta das 9 às 17</td><td class="old">Nada impede as 19h</td><td class="new">Horário vem da sala</td></tr>
+                            <tr><td>Treinamento precisa de três salas</td><td class="old">Três reservas</td><td class="new">Marque três salas, reserve uma vez</td></tr>
+                            <tr><td>Fechada para manutenção</td><td class="old">Um aviso perdido em algum lugar</td><td class="new">O dia fica cinza</td></tr>
+<tr><td>Limpeza entre reuniões</td><td class="old">O próximo grupo entra no meio</td><td class="new">Intervalo livre depois de cada reserva</td></tr>
+<tr><td>Reservado com um ano de antecedência</td><td class="old">Reservas que ninguém usa</td><td class="new">Reservas até N dias à frente</td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                    <figure class="gs-fig">
+                        <img src="/images/marketing/salesforce-calendar-booking-grid.png" alt="Calendário de reserva de salas de reunião do MultiDatePick no Salesforce: uma lista Selecionar Recursos com salas e caixas de seleção, cores de status e um mês de dias reservados" title="Calendário de reserva de salas de reunião no Salesforce" width="1004" height="858" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Marque uma sala ou várias. Os dias reservados aparecem nas cores de status.</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ VIEWS ═══════════════ -->
+        <section class="gs-sec alt" id="views">
+            <div class="hm-wrap">
+                <h2>Um calendário de agendamento para todas as salas ao mesmo tempo</h2>
+                <p class="gs-lead">Passando de três ou quatro salas, uma grade mensal deixa de ajudar. Troque de visualização e as mesmas reservas respondem às perguntas de facilities.</p>
+                <div class="bk-views">
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-timeline-view-demo-poster.png" data-gif="/images/views/salesforce-timeline-view-demo.gif" alt="Demo animada da linha do tempo de recursos do MultiDatePick no Salesforce: consultores na lateral, compromissos de vários dias como uma única barra, um cartão ao passar o mouse sobre um deles, depois zoom de Semana para Mês e avanço de página" title="Demo da linha do tempo de recursos no Salesforce" width="880" height="880" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Linha do tempo: cada sala é uma linha. Qual sala está livre, e quando?</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-utilization-view-demo-poster.png" data-gif="/images/views/salesforce-utilization-view-demo.gif" alt="Demo animada do mapa de calor de ocupação do MultiDatePick no Salesforce: consultores na lateral mostrando a capacidade reservada por dia, mouse sobre um dia lotado e, com um clique, a semana daquele consultor se abre" title="Demo do mapa de calor de ocupação no Salesforce" width="880" height="780" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Ocupação: o quanto cada sala está cheia, por dia.</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-week-view-demo-poster.png" data-gif="/images/views/salesforce-week-view-demo.gif" alt="Demo animada da visualização semanal do MultiDatePick no Salesforce: ao escolher um consultor, as reuniões com clientes aparecem como blocos coloridos por status, do tamanho real de cada reunião, com cartões ao passar o mouse mostrando cliente, tipo de reunião e status" title="Demo da visualização semanal no Salesforce" width="880" height="1080" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Semana: o dia de uma sala, hora a hora.</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-timeline-drag-to-reschedule-poster.png" data-gif="/images/views/salesforce-timeline-drag-to-reschedule.gif" alt="Demo animada de reagendamento na linha do tempo do MultiDatePick no Salesforce: arrastar a borda direita de um compromisso o estende por dois dias, depois arrastar outro compromisso o move dois dias para frente; cada um é salvo ao soltar, com as novas datas exibidas na barra" title="Arraste para reagendar em uma linha do tempo do Salesforce" width="880" height="880" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Uma reserva vai se estender? Arraste. É salva ao soltar.</figcaption>
+                    </figure>
+                </div>
+                <p class="gs-note"><b>Oitenta salas?</b> Max View Resources mostra primeiro as salas mais ocupadas, e Timeline Window (Days) define quantos dias cabem na tela (14 por padrão).</p>
+                <p style="margin:14px 0 0;font-size:.93rem;">Para se aprofundar: <a href="/pt-br/blog/linha-do-tempo-salesforce.html">a linha do tempo no Salesforce</a> e <a href="/pt-br/blog/mapa-de-calor-ocupacao-salesforce.html">o mapa de calor de ocupação no Salesforce</a>.</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ ROOMS VS DESKS ═══════════════ -->
+        <section class="gs-sec" id="desk-booking">
+            <div class="hm-wrap">
+                <h2>Reserva de mesas no Salesforce: o mesmo componente</h2>
+                <p class="gs-lead">Uma sala de reunião aceita uma reserva por horário. Uma área de mesas aceita muitas. A diferença é uma única configuração.</p>
+                <div class="gs-two">
+                    <div>
+                        <div class="gs-paths" style="margin-top:0;">
+                            <div class="gs-card bk">
+                                <b>Salas de reunião</b>
+                                <ul class="hm-checks">
+                                    <li>Uma reserva por horário</li>
+                                    <li>Conflict Behavior: Block</li>
+                                    <li>Horários dentro do expediente da sala</li>
+                                    <li>Reserve várias salas de uma vez</li>
+                                </ul>
+                            </div>
+                            <div class="gs-card rs">
+                                <b>Mesas e áreas</b>
+                                <ul class="hm-checks">
+                                    <li>Capacity Field na área</li>
+                                    <li>Selos ao vivo no estilo 3/8</li>
+                                    <li>Modo dia inteiro, sem grade de horários</li>
+                                    <li>Fecha quando a área lota</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <figure class="gs-fig">
+                            <img src="/images/views/salesforce-timeline-capacity-lanes.png" alt="Detalhe da linha do tempo no Salesforce: reservas sobrepostas de vários dias empilhadas em faixas sob cada recurso e uma faixa de capacidade combinada mostrando o quanto cada dia está cheio" title="Linha do tempo do Salesforce com faixas de capacidade" width="1622" height="894" loading="lazy" decoding="async" data-zoomable>
+                            <figcaption>Reservas sobrepostas se empilham em faixas. A faixa no topo mostra a capacidade combinada.</figcaption>
+                        </figure>
+                    </div>
+                    <figure class="gs-fig" style="max-width:380px;justify-self:center;">
+                        <img src="/images/salesforce-booking-capacity-calendar.png" alt="Calendário de reservas do Salesforce no MultiDatePick para um consultor: cada dia colorido pelo status do agendamento, um dia misto dividido na diagonal e uma grade de horários de 30 minutos com indicadores de capacidade reservada" title="Calendário de reservas no Salesforce com indicadores de capacidade" width="1362" height="1938" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Cada horário mostra reservados sobre a capacidade. Horários lotados se fecham.</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ CONFIGS ═══════════════ -->
+        <section class="gs-sec alt" id="configuration">
+            <div class="hm-wrap">
+                <h2>Comece por uma configuração</h2>
+                <p class="gs-lead">A Config Library tem mais de 40 configurações prontas. Importe uma no Assistente de Configuração, associe seus próprios objetos nas listas suspensas e salve.</p>
+                <div class="cf-grid">
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>Reserva de Salas de Reunião</h3>
+                        <p>Salas com capacidade ao vivo e cores de status.</p>
+                        <ul class="cf-set">
+                            <li><span>Comportamento de Conflito</span><em>Bloquear</em></li>
+                            <li><span>Time Slot Interval (Intervalo de Horário)</span><em>30 minutos</em></li>
+                            <li><span>Ignored Statuses (Status ignorados)</span><em>Cancelled</em></li>
+                            <li><span>Available Views (Visualizações Disponíveis)</span><em>Calendário, Linha do tempo, Semana, Ocupação</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html#meeting-room-booking">Config Library &rarr;</a><a href="/downloads/configs/Meeting_Room_Booking.json" download>JSON</a></div>
+                    </div>
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>Reserva de Mesas (Hot Desk)</h3>
+                        <p>Mesas de dia inteiro, com os lugares restantes por área.</p>
+                        <ul class="cf-set">
+                            <li><span>Disable Time Slot Grid (Desativar Grade de Horários)</span><em>Ativado</em></li>
+                            <li><span>Capacity Field (Campo de Capacidade)</span><em>Lugares da área</em></li>
+                            <li><span>Show Availability Count (Mostrar Contagem de Disponibilidade)</span><em>Ativado</em></li>
+                            <li><span>View (Exibição)</span><em>Linha do tempo</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html#desk-hoteling">Config Library &rarr;</a><a href="/downloads/configs/Desk_Hoteling.json" download>JSON</a></div>
+                    </div>
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>Active Conference Rooms</h3>
+                        <p>Só as salas de reunião ativas no seletor.</p>
+                        <ul class="cf-set">
+                            <li><span>Resource Filter Field (Campo de Filtro de Recurso)</span><em>Active, Type</em></li>
+                            <li><span>Resource Filter Value (Valor do Filtro de Recurso)</span><em>true; Conference Room</em></li>
+                            <li><span>Allow Booking Multiple Resources (Permitir Vários Recursos)</span><em>Ativado</em></li>
+                            <li><span>Capacity Aggregation (Agregação de Capacidade)</span><em>Combinado</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html#active-conference-rooms">Config Library &rarr;</a><a href="/downloads/configs/Active_Conference_Rooms.json" download>JSON</a></div>
+                    </div>
+                </div>
+                <p class="gs-note"><b>Fechamentos por hora?</b> Comece pela configuração <b>Fechamentos de Recursos por Horário</b>: fechamentos parciais do dia, para uma sala ou uma região inteira.</p>
+                <p style="margin:14px 0 0;font-size:.93rem;">Depois coloque o componente em uma página ou em um fluxo de tela e defina o Config Name. Em páginas de aplicativo, iniciais e do Experience Cloud, defina também o Static Parent Record Id. Passo a passo: <a href="/pt-br/primeiros-passos.html">Primeiros passos</a>.</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FAQ ═══════════════ -->
+        <section class="gs-sec" id="faq">
+            <div class="hm-wrap gs-faq">
+                <h2>Perguntas sobre reserva de salas no Salesforce</h2>
+                <p class="gs-lead">Respostas curtas para o que as pessoas pesquisam.</p>
+                <details>
+                    <summary>Dá para reservar salas de reunião no Salesforce?</summary>
+                    <p>Não de fábrica. O Salesforce padrão não tem um controle de reserva de salas. O MultiDatePick Booking acrescenta um: mantenha suas salas como registros em qualquer objeto, e as pessoas escolhem uma sala, escolhem uma ou várias datas, clicam nos horários livres e reservam. Cada reserva é salva como um registro no seu próprio objeto de reservas.</p>
+                </details>
+                <details>
+                    <summary>Como evitar que duas pessoas reservem a mesma sala de reunião?</summary>
+                    <p>Defina o Conflict Behavior como Block. Os horários ocupados aparecem como ocupados e não podem ser clicados, e cada salvamento é verificado de novo contra as reservas existentes, então um choque de horários nunca é salvo.</p>
+                </details>
+                <details>
+                    <summary>Posso fazer reserva de mesas ou mesas compartilhadas (desk hoteling) no Salesforce?</summary>
+                    <p>Sim. Transforme cada área de mesas em um recurso com um Capacity Field e ative Show Availability Count, para que as pessoas vejam quantas mesas restam até a área lotar. Disable Time Slot Grid (Full-Day Mode) reserva mesas para o dia inteiro. A configuração Reserva de Mesas (Hot Desk) da Config Library é um ponto de partida pronto.</p>
+                </details>
+                <details>
+                    <summary>Posso ver a agenda de todas as salas em uma tela?</summary>
+                    <p>Sim. A visualização Linha do tempo coloca todas as salas na lateral e as datas no topo, com reservas de vários dias desenhadas como uma única barra. A visualização Ocupação mostra, em um mapa de calor, o quanto cada sala está cheia por dia, e a visualização Semana mostra o dia hora a hora.</p>
+                </details>
+                <details>
+                    <summary>Uma reserva pode ocupar várias salas ao mesmo tempo?</summary>
+                    <p>Sim. Ative Allow Booking Multiple Resources e as pessoas marcam várias salas para o mesmo horário em uma só ação. O Capacity Aggregation define como a capacidade é somada entre as salas.</p>
+                </details>
+                <details>
+                    <summary>Cada sala pode ter os próprios horários e fechamentos?</summary>
+                    <p>Sim. Business Hours Start Field e Business Hours End Field leem o horário de cada sala no registro da sala. As datas bloqueadas vêm dos seus próprios registros de fechamento, de dia inteiro ou parcial, para todas as salas ou só para uma.</p>
+                </details>
+                <details>
+                    <summary>De onde as pessoas podem reservar uma sala?</summary>
+                    <p>De qualquer lugar em que você colocar o componente Booking: uma página de registro, uma página de aplicativo ou inicial, um fluxo de tela (Screen Flow) ou uma página de site do Experience Cloud. Em páginas de aplicativo, iniciais e do Experience Cloud, defina o Config Name e o Static Parent Record Id.</p>
+                </details>
+                <details>
+                    <summary>Quanto custa o MultiDatePick?</summary>
+                    <p>US$ 20 por usuário por mês para todos os componentes e recursos, com teste grátis de 30 dias e sem cartão de crédito. É 100% nativo do Salesforce e chega em breve ao Salesforce AppExchange.</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- ═══════════════ RELATED ═══════════════ -->
+        <section class="gs-sec alt" id="related">
+            <div class="hm-wrap">
+                <h2>Continue explorando</h2>
+                <div class="gs-links" style="margin-top:16px;">
+                    <a href="/pt-br/calendario-de-reservas-salesforce.html"><b>O componente Booking</b><span>Todas as funcionalidades de reserva</span></a> <a href="/pt-br/alternativa-salesforce-lightning-scheduler.html"><b>vs. Salesforce Scheduler</b><span>Salas, licenciamento e modelo de dados comparados</span></a> <a href="/pt-br/blog/evitar-reservas-duplicadas-salesforce.html"><b>Evite reservas duplicadas</b><span>Conflitos e capacidade, explicados</span></a> <a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html"><b>Reservas no Experience Cloud</b><span>Reservas de autoatendimento em um site</span></a> <a href="/pt-br/biblioteca-de-configuracoes-salesforce.html"><b>Config Library</b><span>Mais de 40 configurações prontas para importar</span></a> <a href="/pt-br/precos.html"><b>Preços</b><span>US$ 20/usuário/mês, todos os recursos</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FINAL CTA ═══════════════ -->
+        <section class="hm-final">
+            <div class="hm-wrap">
+                <h2>Reserva de salas e mesas, sem outra ferramenta</h2>
+                <p>Em breve no Salesforce AppExchange. Experimente a demo ao vivo agora ou diga para onde enviar o aviso de lançamento.</p>
+                <div class="hm-ctas">
+                    <a href="/pt-br/avise-me-no-lancamento.html" class="btn btn-cta">Avise-me no lançamento</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-conference-room-booking-calendar" class="btn btn-ghost" target="_blank" rel="noopener">Experimente a demo ao vivo</a> <a href="/pt-br/primeiros-passos.html" class="btn btn-ghost">Primeiros passos</a>
+                </div>
+                <p class="contact">US$ 20/usuário/mês, teste grátis de 30 dias, sem cartão de crédito. Aprovado no Security Review do AppExchange. 100% nativo do Salesforce.</p>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/pt-br/" class="logo">
+                        <img src="/images/logo.png" alt="Logotipo do MultiDatePick: calendário de várias datas e reserva de recursos para Salesforce" width="180" height="45">
+                    </a>
+                    <p>O pacote de componentes de calendário mais personalizável para Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produto</h4>
+                    <ul>
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">Date</a></li>
+                        <li><a href="/pt-br/seletor-de-data-e-hora-salesforce.html">Date Time</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Cinco visualizações de calendário</a></li>
+                        <li><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluções</h4>
+                    <ul>
+                        <li><a href="/pt-br/calendario-salesforce.html">Calendário Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas</a></li>
+                        <li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html">Reserva de salas de reunião</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html">Datas de campanha</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">Governo / Section 508</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentação</h4>
+                    <ul>
+                        <li><a href="/pt-br/primeiros-passos.html">Primeiros passos</a></li>
+                        <li><a href="/pt-br/guia-do-usuario.html">Guia do usuário</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">Guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html">Páginas de aplicativo, iniciais e do Experience Cloud</a></li>
+                        <li><a href="/pt-br/implantar-fluxo-vs-code.html">Implantar um fluxo (VS Code)</a></li>
+                        <li><a href="/pt-br/solucao-de-problemas.html">Solução de problemas</a></li>
+                        <li><a href="/pt-br/perguntas-frequentes.html">Perguntas frequentes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="/pt-br/precos.html">Preços</a></li>
+                        <li><a href="/pt-br/blog/">Blog</a></li>
+                        <li><a href="/pt-br/confianca-e-seguranca.html">Confiança e segurança</a></li>
+                        <li><a href="/pt-br/acessibilidade-vpat.html">Acessibilidade</a></li>
+                        <li><a href="/pt-br/avise-me-no-lancamento.html">Avise-me no lançamento</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Suporte</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Todos os direitos reservados.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Idioma" translate="no"><ul><li><a href="/salesforce-conference-room-booking-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/salesforce-besprechungsraum-buchung.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/reserva-salas-reuniones-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/reservation-salle-reunion-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/prenotazione-sale-riunioni-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html" hreflang="pt-BR" lang="pt-BR" aria-current="page">Português (Brasil)</a></li><li><a href="/ja/salesforce-conference-room-booking-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/salesforce-conference-room-booking-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/salesforce-conference-room-booking-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ampliar imagem</p><p data-k="expand-diagram">Ampliar diagrama</p><p data-k="close">Fechar</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce の予約をカレンダーに追加: Outlook・Google へ</title>
+    <meta name="description" content="Salesforce の予約に「カレンダーに追加」ボタンを。保存後に Outlook、Google、Apple で開ける .ics ファイルを 1 つ提供。ゲストにも対応、コード不要。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/salesforce-add-to-calendar.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Campaign post: same look as the Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce の予約をカレンダーに追加: Outlook・Google へ">
+    <meta property="og:description" content="Salesforce の予約に「カレンダーに追加」ボタンを。保存後に Outlook、Google、Apple で開ける .ics ファイルを 1 つ提供。ゲストにも対応、コード不要。">
+    <meta property="og:image" content="https://multidatepick.com/images/blog/salesforce-add-to-calendar.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/salesforce-add-to-calendar.html">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce の予約をカレンダーに追加: Outlook・Google へ">
+    <meta name="twitter:description" content="Salesforce の予約に「カレンダーに追加」ボタンを。保存後に Outlook、Google、Apple で開ける .ics ファイルを 1 つ提供。ゲストにも対応、コード不要。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/blog/salesforce-add-to-calendar.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-add-to-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-zum-kalender-hinzufuegen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/anadir-al-calendario-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/ajouter-au-calendrier-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/aggiungi-al-calendario-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/adicionar-ao-calendario-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-add-to-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-add-to-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-add-to-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-add-to-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html" class="active">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce の予約をカレンダーに追加: Outlook・Google へ",
+                "description": "Salesforce の予約に「カレンダーに追加」ボタンを。保存後に Outlook、Google、Apple で開ける .ics ファイルを 1 つ提供。ゲストにも対応、コード不要。",
+                "datePublished": "2026-10-26",
+                "dateModified": "2026-10-27",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/salesforce-add-to-calendar.html",
+                "image": "https://multidatepick.com/images/blog/salesforce-add-to-calendar.png",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce には予約を「カレンダーに追加」するボタンがありますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "自社のオブジェクトのレコードにはありません。Salesforce の行動は Einstein 活動キャプチャで Outlook や Google と同期できますが、カスタムレコードとして保存した予約を本人のカレンダーに届ける手段はありません。MultiDatePick は、保存のたびに表示される「カレンダーに追加」ボタンを追加し、予約した内容そのもののカレンダーファイルを本人に渡します。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Outlook、Google カレンダー、Apple カレンダーで使えますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。ボタンからダウンロードされるのは、主要なカレンダーならどれでも開ける標準の .ics カレンダーファイルです。Windows と Mac の Outlook、Google カレンダー、Mac・iPhone・iPad の Apple カレンダーなど、ほとんどのカレンダーで使えます。ブラウザーがファイルを作成できない場合は、予約が 1 件なら代わりに「Google カレンダーに追加」のリンクが表示されます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "公開予約ページの Experience Cloud ゲストにも使えますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。ファイルは訪問者のブラウザー内で作成されるため、公開 Experience Cloud ページから予約したゲストにも、ログインユーザーと同じ「カレンダーに追加」ボタンが表示されます。ゲストのアクセス権は何も変わりません。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "あとで予約が変わったら、カレンダーの予定も更新されますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。「カレンダーに追加」で渡すのは 1 回限りのファイルで、リアルタイムの同期ではありません。あとで予約が移動した場合は、新しいファイルが必要です。各予定には Salesforce のレコード Id が一意の ID として入っているので、ID による更新に対応したカレンダーなら、新しいファイルを別の予定ではなく同じ予約として認識します。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce の外にデータが出ることはありますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "本人がダウンロードを選んだファイルだけです。接続アプリケーションも、外部へのコールアウトも、サードパーティのカレンダーサービスもなく、MultiDatePick は 100% ネイティブのままです。ファイルに含まれるのは、予約の名前、日付、時刻、リソース、(指定した場合は) リソースの場所、状況だけです。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "有効にするのに Apex や開発者は必要ですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。Lightning App Builder、Experience Builder、フロー画面のコンポーネント、またはセットアップウィザードの設定にある Show Add to Calendar After Saving（保存後に「カレンダーに追加」を表示） のチェックボックス 1 つだけです。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/blog/salesforce-add-to-calendar.gif",
+                "caption": "Salesforce での「カレンダーに追加」のアニメーションデモ: 休暇申請のカレンダーで、カスタム日の繰り返しパターンにより 2 月 1 日から 3 月 6 日まで隔週の月・水・土曜を選択し、1 回の保存で休暇レコードを 9 件作成。「カレンダーに追加」で 9 件の予定をまとめた 1 つのカレンダーファイルをダウンロード",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/blog/salesforce-add-to-calendar-month-view.png",
+                "caption": "MultiDatePick の Salesforce 予約カレンダーの月表示。相談の申し込み直後で、11 月のカレンダーの上に「保存しました。カレンダーに追加できます。」というバーと「カレンダーに追加」ボタンが表示されている",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/blog/salesforce-add-to-calendar.png",
+                "caption": "Salesforce の予約をカレンダーに追加: Outlook と Google カレンダーへ (記事のカバー画像)",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce の予約を Outlook、Google、Apple カレンダーにそのまま追加</h1>
+                <p class="subtitle">Salesforce に保存した予約は、本人のカレンダーに入るまでは半分しか終わっていません。「カレンダーに追加」がそれを仕上げます。保存後にワンクリックで、予定が Outlook、Google、Apple カレンダーに入ります。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 10 月 26 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">「Salesforce の予約を Outlook に送れる?」「お客様に Google カレンダーへ予定を入れてもらうには?」「自分で予約した打ち合わせを、なぜみんな忘れるの?」予約は Salesforce に確実に残っています。でも、その人の 1 日は自分のカレンダーで管理されていることも多く、そこへ届ける仕組みがありません。</p>
+
+                <p>MultiDatePick がその溝を埋めます。<strong>Show Add to Calendar After Saving</strong> をオンにすると、保存に成功するたびに<strong>「カレンダーに追加」</strong>ボタンが表示されます。ワンクリックで、保存したレコードごとの予定を含むカレンダーファイルをダウンロード。日時、会議室や担当者、状況も正しく入ります。レコードページ、アプリケーションページ、画面フロー (Screen Flow)、公開 Experience Cloud の予約ページで使えます。</p>
+
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/blog/salesforce-add-to-calendar-poster.png" data-gif="/images/blog/salesforce-add-to-calendar.gif" alt="Salesforce での「カレンダーに追加」のアニメーションデモ: 休暇申請のカレンダーで、カスタム日の繰り返しパターンにより 2 月 1 日から 3 月 6 日まで隔週の月・水・土曜を選択し、1 回の保存で休暇レコードを 9 件作成。「カレンダーに追加」で 9 件の予定をまとめた 1 つのカレンダーファイルをダウンロード" title="9 つの日付をワンクリックでカレンダーに追加" loading="lazy" decoding="async" width="700" height="1000" data-zoomable>
+                    <figcaption>隔週の月・水・土曜を 1 つのパターンで選び、1 回で保存し、1 つのファイルでカレンダーへ。</figcaption>
+                </figure>
+
+                <div class="atc-math" role="img" aria-label="選んだ日付 9 件、保存 1 回、カレンダーファイル 1 つ、予定 9 件">
+                    <div><b>9</b><span>件の日付を選択</span></div><i aria-hidden="true">&rarr;</i>
+                    <div><b>1</b><span>回の保存</span></div><i aria-hidden="true">&rarr;</i>
+                    <div><b>1</b><span>つのカレンダーファイル</span></div><i aria-hidden="true">&rarr;</i>
+                    <div><b>9</b><span>件の予定</span></div>
+                </div>
+                <p>上の録画がその流れです。<a href="/ja/blog/recurring-date-patterns-in-salesforce.html">カスタム日のパターン</a>で 2 月 1 日から 3 月 6 日まで隔週の月・水・土曜を選び、1 回の保存で休暇レコードを 9 件作成。ダウンロードされるファイルには、日付ごとに 1 件、計 9 件の終日の予定が入っています。1 か月の休暇も、1 学期分のセッションも、1 シーズン分のシフトも、<span class="sc-hl-orange">日付ごとではなく 1 回のクリック</span>でカレンダーに入ります。</p>
+
+                <h2 style="margin-top:44px;">「カレンダーに追加」で予約した人が得られるもの</h2>
+                <div class="bp-cards">
+                    <div class="bp-card"><h3>保存した内容を 1 つのファイルに</h3><p>1 回の保存で 5 日分でも 20 枠でも、ファイルにはそれぞれの予定が入るので、ワンクリックですべて追加できます。</p></div>
+                    <div class="bp-card"><h3>正しい時刻</h3><p>時刻付きの予約は開始と終了をそのまま保持。休暇のように日付だけのレコードは終日の予定になります。</p></div>
+                    <div class="bp-card"><h3>誰と、どこで</h3><p>予約したアドバイザー、会議室、車両は予定のタイトルに入ります。会議室なら住所を予定の場所に入れることもできるので、招待に「誰と、どこで」が載ります。</p></div>
+                    <div class="bp-card"><h3>ゲストにも対応</h3><p>ファイルはブラウザー内で作成されるため、公開 Experience Cloud の予約ページでも追加のアクセス権なしで使えます。</p></div>
+                    <div class="bp-card"><h3>インストール不要</h3><p>接続アプリケーションも OAuth もコールアウトも不要。本人が自分のファイルをダウンロードするまで、データは Salesforce の中にとどまります。</p></div>
+                    <div class="bp-card"><h3>どのカレンダーでも</h3><p>標準の .ics ファイルは Outlook、Google カレンダー、Apple カレンダーで開けます。予約 1 件なら Google に直接追加することもできます。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">カレンダー同期ではなく、カレンダーファイルにした理由</h2>
+                <p>Salesforce を Outlook や Google と同期するには、接続アプリケーション、全ユーザーの OAuth 同意、そして組織からサードパーティへのデータの流れが必要です。まさにセキュリティレビューで問われる点です。カレンダーファイルなら、そのどれも要りません。予定は保存したばかりの予約からブラウザー内で作成され、本人がダウンロードするまで何も Salesforce の外に出ません。MultiDatePick は 100% ネイティブのままです。</p>
+                <p>トレードオフは明快です。リアルタイムの連携ではなく、1 回限りのファイルであること。あとで予約が移動したら、新しいファイルをダウンロードします。各予定には Salesforce のレコード Id が一意の ID として入っているので、ID で照合するカレンダーは新しいファイルを重複ではなく同じ予約として扱います。</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/blog/salesforce-add-to-calendar-month-view.png" alt="MultiDatePick の Salesforce 予約カレンダーの月表示。相談の申し込み直後で、11 月のカレンダーの上に「保存しました。カレンダーに追加できます。」というバーと「カレンダーに追加」ボタンが表示されている" title="Salesforce の月表示カレンダーの「カレンダーに追加」" loading="lazy" decoding="async" width="700" height="776" data-zoomable>
+                    <figcaption>月単位のカレンダー表示でも同じボタン。相談を申し込んだその瞬間に表示されます。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">カレンダーの予定に入る内容</h2>
+                <table class="bp-grid">
+                    <tr><th style="width:28%;">カレンダーの項目</th><th>Salesforce から入る内容</th></tr>
+                    <tr><td>予定のタイトル</td><td>レコード名 (レコード名がない場合はカレンダーのタイトル) とリソース: <em>Request a consultation: Priya Nair</em></td></tr>
+                    <tr><td>開始と終了</td><td>保存した日付と時刻。日付だけのレコードは終日の予定に、期間はその期間にわたる 1 件の予定になります</td></tr>
+                    <tr><td>場所</td><td>任意: <strong>Calendar File Location Field</strong>（カレンダーファイルの場所項目） で指定したリソースの項目 (会議室の住所など)。人を予約する場合はタイトルに名前が入るので空のままです</td></tr>
+                    <tr><td>説明</td><td>Requested や Confirmed などの状況</td></tr>
+                    <tr><td>一意の ID</td><td>Salesforce のレコード Id。再ダウンロードしたファイルが同じ予約だとカレンダーが判断できます</td></tr>
+                </table>
+                <p>時刻は予約したとおりの現地時刻で入るので、10:00 の相談は 10:00 に表示されます。</p>
+
+                <h2 style="margin-top:44px;">2 分で有効化</h2>
+                <ol class="cp-steps">
+                    <li><strong>コンポーネントまたは設定を開きます。</strong> Lightning App Builder、Experience Builder、またはフロー画面で MultiDatePick コンポーネントを選択します。または<a href="/ja/blog/salesforce-calendar-setup-wizard.html">セットアップウィザード</a>で設定を編集します。</li>
+                    <li><strong>Show Add to Calendar After Saving にチェックを入れます。</strong> 初期設定ではオフなので、選ぶまで何も変わりません。</li>
+                    <li><strong>会議室を予約する場合は、Calendar File Location Field</strong> に会議室の住所項目を設定すると、すべての予定に行き先が表示されます。アドバイザーなど人を予約する場合は空のままにします。</li>
+                    <li><strong>公開サイトでは Show In-Component Toast にもチェックを入れ</strong>、ゲストに保存の確認とボタンが一緒に表示されるようにします。ゲスト向けページのその他の設定は<a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 予約ガイド</a>で解説しています。</li>
+                    <li><strong>保存して、何か予約してみます。</strong> 確認メッセージの下に「カレンダーに追加」のバーが表示され、閉じるか次に保存するまで残ります。</li>
+                </ol>
+
+                <h2 style="margin-top:44px;">活用シーン</h2>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>顧客・患者の予約</strong><span>顧客が自社サイトで予約し、そのまま自分のカレンダーに予定を入れられるので、無断キャンセルが減ります。</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>面接日程調整</strong><span>候補者は時間枠を選んだその場で面接を追加でき、面接官の名前が場所に入ります。</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>会議室・座席予約</strong><span>予約と一緒に会議室が参加者のカレンダーに入るので、時間と場所がスマートフォンで確認できます。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>休暇・休業</strong><span>承認された休暇は終日の予定として入るので、不在が皆の見ているカレンダーに表示されます。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>研修・イベント</strong><span>4 回のセッションに申し込み、ワンクリックで 4 回分を追加。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>公開予約ページ</strong><span>Experience Cloud のゲストにも、スタッフと同じボタンをログインなしで。</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="bp-faq">
+                    <details><summary>Salesforce には予約を「カレンダーに追加」するボタンがありますか?</summary><p>自社のオブジェクトのレコードにはありません。Salesforce の行動は Einstein 活動キャプチャで Outlook や Google と同期できますが、カスタムレコードとして保存した予約を本人のカレンダーに届ける手段はありません。MultiDatePick は、保存のたびに表示される「カレンダーに追加」ボタンを追加し、予約した内容そのもののカレンダーファイルを本人に渡します。</p></details>
+                    <details><summary>Outlook、Google カレンダー、Apple カレンダーで使えますか?</summary><p>はい。ボタンからダウンロードされるのは、主要なカレンダーならどれでも開ける標準の .ics カレンダーファイルです。Windows と Mac の Outlook、Google カレンダー、Mac・iPhone・iPad の Apple カレンダーなど、ほとんどのカレンダーで使えます。ブラウザーがファイルを作成できない場合は、予約が 1 件なら代わりに「Google カレンダーに追加」のリンクが表示されます。</p></details>
+                    <details><summary>公開予約ページの Experience Cloud ゲストにも使えますか?</summary><p>はい。ファイルは訪問者のブラウザー内で作成されるため、公開 Experience Cloud ページから予約したゲストにも、ログインユーザーと同じ「カレンダーに追加」ボタンが表示されます。ゲストのアクセス権は何も変わりません。</p></details>
+                    <details><summary>あとで予約が変わったら、カレンダーの予定も更新されますか?</summary><p>いいえ。「カレンダーに追加」で渡すのは 1 回限りのファイルで、リアルタイムの同期ではありません。あとで予約が移動した場合は、新しいファイルが必要です。各予定には Salesforce のレコード Id が一意の ID として入っているので、ID による更新に対応したカレンダーなら、新しいファイルを別の予定ではなく同じ予約として認識します。</p></details>
+                    <details><summary>Salesforce の外にデータが出ることはありますか?</summary><p>本人がダウンロードを選んだファイルだけです。接続アプリケーションも、外部へのコールアウトも、サードパーティのカレンダーサービスもなく、MultiDatePick は 100% ネイティブのままです。ファイルに含まれるのは、予約の名前、日付、時刻、リソース、(指定した場合は) リソースの場所、状況だけです。</p></details>
+                    <details><summary>有効にするのに Apex や開発者は必要ですか?</summary><p>いいえ。Lightning App Builder、Experience Builder、フロー画面のコンポーネント、またはセットアップウィザードの設定にある Show Add to Calendar After Saving（保存後に「カレンダーに追加」を表示） のチェックボックス 1 つだけです。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>予約は Salesforce で。予定は本人のカレンダーに。</h2>
+                    <p>ライブデモで相談を申し込んで自分のカレンダーに追加してみるか、<a href="/ja/configlibrary.html">Config Library</a> の既製の予約設定から始めましょう。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-add-to-calendar" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud でのセルフサービス予約</a></li>
+                        <li><a href="/ja/blog/prevent-double-booking-in-salesforce.html">Salesforce でダブルブッキングを防ぐ</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-time-slot-picker.html">Salesforce で時間枠を選べるカレンダーを作る</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">Salesforce での面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking コンポーネント</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/salesforce-add-to-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-zum-kalender-hinzufuegen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/anadir-al-calendario-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/ajouter-au-calendrier-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/aggiungi-al-calendario-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/adicionar-ao-calendario-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-add-to-calendar.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/salesforce-add-to-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-add-to-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

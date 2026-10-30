@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在 Salesforce 屏幕 Flow 中选择多个日期</title>
+    <meta name="description" content="如何在一个 Salesforce Flow 屏幕中采集多个日期，以及之后如何处理这个集合。循环、解析，以及标准组件的局限。">
+    <link rel="canonical" href="https://multidatepick.com/zh/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="在 Salesforce 屏幕 Flow 中选择多个日期">
+    <meta property="og:description" content="如何在一个 Salesforce Flow 屏幕中采集多个日期，以及之后如何处理这个集合。循环、解析，以及标准组件的局限。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="在 Salesforce 屏幕 Flow 中选择多个日期">
+    <meta name="twitter:description" content="如何在一个 Salesforce Flow 屏幕中采集多个日期，以及之后如何处理这个集合。循环、解析，以及标准组件的局限。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/mehrere-termine-salesforce-bildschirm-flow.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/varias-fechas-flujo-de-pantalla-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/plusieurs-dates-flux-ecran-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/date-multiple-flusso-su-schermo-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/varias-datas-fluxo-de-tela-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "如何让用户在 Salesforce 屏幕 Flow（Screen Flow）中选择多个日期",
+                "description": "如何在一个 Salesforce Flow 屏幕中采集多个日期，以及之后如何处理这个集合。循环、解析，以及标准组件的局限。",
+                "datePublished": "2026-05-01",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/zh/blog/multiple-dates-in-a-salesforce-screen-flow.html",
+                "image": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates.gif",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates-poster.png",
+                "caption": "Salesforce 屏幕 Flow（Screen Flow）休假申请的动画演示：用户在 MultiDatePick 日历上单击三天并提交，下一个 Flow 屏幕列出 Flow 收到的三个日期",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-builder-add-booking-component.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-builder-add-booking-component-poster.png",
+                "caption": "Salesforce Flow Builder 中的动画演示：打开一个屏幕，搜索 MultiDatePick，将 Resource Booking 组件拖到屏幕上，把 Config Name 设为设置向导中已保存的配置，单击“完成”并保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-dates-status.png",
+                "caption": "Salesforce 屏幕 Flow 中的多日期日历组件，用户可以一次选择多个日期",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>如何让用户在 Salesforce 屏幕 Flow（Screen Flow）中选择多个日期</h1>
+                <p class="subtitle">Flow 的每个屏幕元素只提供一个日期字段。如果有人需要选九天，这就成了问题。下面是各种方案及其利弊。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">发布于 2026 年 5 月 1 日 &middot; 更新于 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+                <p class="sc-lead">每位管理员迟早都会遇到这个问题。休假申请、空闲时间表、培训报名：用户需要选择几个不一定连续的日期，而 Flow 的标准日期组件只能采集一个。</p>
+
+                <h2 style="margin-top:44px;">各种变通办法，以及它们的痛点</h2>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">方案</th><th style="width:34%;">做法</th><th>代价</th></tr></thead>
+                    <tbody>
+                    <tr><td>一个屏幕上放多个日期字段</td><td>日期 1、日期 2、日期 3、日期 4……</td><td class="bp-no">数量有上限、不美观，而且大多空着</td></tr>
+                    <tr><td>用循环一次问一个</td><td>“还要添加日期吗？”然后回到屏幕</td><td class="bp-no">超过三个日期左右就很痛苦</td></tr>
+                    <tr><td>一个自由文本字段</td><td>用户以文本形式输入日期</td><td class="bp-no">无法解析、无法用于报表、容易出错</td></tr>
+                    <tr><td>只用开始和结束日期</td><td>当作一个连续的范围处理</td><td class="bp-no">只要日期不连续就是错的</td></tr>
+                    <tr><td>日期的多选选项列表</td><td>预先生成日期值</td><td class="bp-no">很快过时，需要不断维护</td></tr>
+                    <tr><td>多日期日历组件</td><td>在一个屏幕上单击需要的每个日期</td><td class="bp-yes">返回一个集合，可直接循环</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>开始加结束日期的变通办法最常见，也最容易在不知不觉中出错。“我 3 号、4 号、11 号和 18 号要请假”变成了 3 号到 18 号，相当于默认缺勤十六天。数据看起来很整齐，但就是错的。</p>
+
+                <h2 style="margin-top:44px;">真正的解决办法：一个返回集合的屏幕组件</h2>
+                <p>Flow 真正需要的，是一个让用户想选多少日期就选多少、然后交回一个集合的屏幕组件。有了它，Flow 的其余部分就很普通了：循环遍历集合，每个日期创建一条记录，完成。</p>
+                <figure class="sc-shot">
+                    <img src="/images/flow-guide/salesforce-screen-flow-select-multiple-dates-poster.png" data-gif="/images/flow-guide/salesforce-screen-flow-select-multiple-dates.gif" alt="Salesforce 屏幕 Flow（Screen Flow）休假申请的动画演示：用户在 MultiDatePick 日历上单击三天并提交，下一个 Flow 屏幕列出 Flow 收到的三个日期" width="900" height="770" loading="lazy" decoding="async" data-zoomable>
+                    <figcaption>一个休假申请 Flow：单击三天并提交，下一个屏幕就已经以集合形式拿到全部三天。</figcaption>
+                </figure>
+                <p>MultiDatePick 会根据您采集的内容返回多个输出：</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">输出</th><th>包含内容</th><th style="width:26%;">API 名称</th></tr></thead>
+                    <tbody>
+                    <tr><td>Selected Dates</td><td>ISO 日期组成的文本集合，可直接循环</td><td><code>selectedDates</code></td></tr>
+                    <tr><td>Date Ranges JSON</td><td>合并后的范围，适用于连续日期应合并为一条记录的情况</td><td><code>selectedDateRangesJson</code></td></tr>
+                    <tr><td>Dates With Times JSON</td><td>每个日期的开始和结束时间</td><td><code>selectedDatesWithTimesJson</code></td></tr>
+                    <tr><td>Successful Bookings Count、Conflict Dates</td><td>哪些已保存，哪些有冲突</td><td><code>bookingSuccessCount</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">把 JSON 变回记录</h2>
+                <p>其中两个输出是 JSON，因为 Flow 没有“由多个含若干字段的对象组成的列表”这种原生类型。您不需要在公式里解析文本。安装包附带一个 Flow 操作 <strong>Parse Date Entries from JSON</strong>，它接收 JSON 并返回一个规范的集合，包含 From Date、To Date、Start Time 和 End Time。像其他集合一样循环遍历即可。</p>
+                <figure class="sc-shot">
+                    <img src="/images/marketing/salesforce-calendar-dates-status.png" alt="Salesforce 屏幕 Flow 中的多日期日历组件，用户可以一次选择多个日期" loading="lazy" data-zoomable width="1004" height="682">
+                    <figcaption>屏幕 Flow 中的多日期日历，返回一个 Flow 其余部分可以循环遍历的集合。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">一个会浪费大家一小时的坑</h2>
+                <div class="sc-note">
+                    <strong>设置 Config Name（配置名称），而不是复选框。</strong>这个组件有一长串开关属性，而在 Flow Builder 中，留空的复选框输入是“空”而不是 false。这些都可以跳过：在设置向导中构建日历，然后把该配置的名称填入 <strong>Config Name</strong> 属性。所有开关设置随即来自配置，少数仅限 Flow 的设置（Required、Show Inline、Output Date Ranges as JSON）保持关闭，除非您主动开启。只有在不用 Config Name、全部手动设置时，才需要在您关心的复选框上使用 <code>$GlobalConstant.True</code> 或 <code>$GlobalConstant.False</code>。</div>
+                <figure class="sc-shot">
+                    <img src="/images/flow-guide/salesforce-flow-builder-add-booking-component-poster.png" data-gif="/images/flow-guide/salesforce-flow-builder-add-booking-component.gif" alt="Salesforce Flow Builder 中的动画演示：打开一个屏幕，搜索 MultiDatePick，将 Resource Booking 组件拖到屏幕上，把 Config Name 设为设置向导中已保存的配置，单击“完成”并保存" width="1200" height="760" loading="lazy" decoding="async" data-zoomable>
+                    <figcaption>把组件拖到屏幕上，设置 Config Name，保存。无需勾选任何复选框。</figcaption>
+                </figure>
+                <p>想让组件自己保存记录？把父记录的 Id 传入 <strong>Parent Record Id</strong>，它就会为每个日期创建一条子记录。留空则可以循环遍历输出，按您自己的方式创建记录。</p>
+
+                <h2 style="margin-top:44px;">构建之前先决定记录形状</h2>
+                <p>同样选中的九个日期，可以变成九条记录；如果连续日期合并成范围，可以变成四条记录；也可以是一条父记录加子块。每种都适合不同的报表。请在构建 Flow 之前就决定，因为事后再改，除了编辑 Flow 还得迁移数据。</p>
+
+                <div class="bp-end">
+                    <h2>在您的下一个 Flow 中放一个真正的多日期选择器</h2>
+                    <p>在在线演示中单击选择日期，然后按照入门指南把组件添加到 Flow 屏幕上。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=multiple-dates-in-a-salesforce-screen-flow" class="btn btn-demo" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-primary">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">入门指南</a>
+                    </div>
+                    <ul class="check-list"><li>$20/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>100% Salesforce 原生</li><li>无需 Apex</li><li>即将登陆 Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>相关阅读</h3>
+                    <ul>
+                        <li><a href="/zh/blog/salesforce-flow-loop-multiple-records.html">Flow 循环：为每个日期或班次创建一条记录</a></li>
+                        <li><a href="/zh/blog/recurring-date-patterns-in-salesforce.html">无需编写逻辑的循环日期模式</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">所有市场活动日期，尽在一个日历</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">采集候选人的空闲时间</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>解决方案</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>文档</h4>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>公司</h4>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/blog/multiple-dates-in-a-salesforce-screen-flow.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/mehrere-termine-salesforce-bildschirm-flow.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/varias-fechas-flujo-de-pantalla-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/plusieurs-dates-flux-ecran-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/date-multiple-flusso-su-schermo-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/varias-datas-fluxo-de-tela-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/multiple-dates-in-a-salesforce-screen-flow.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/blog/multiple-dates-in-a-salesforce-screen-flow.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

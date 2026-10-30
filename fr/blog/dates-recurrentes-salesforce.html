@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dates récurrentes dans Salesforce</title>
+    <meta name="description" content="Tous les lundis et jeudis pendant six semaines : une plage de dates ne suffit pas. Les récurrences dans Salesforce, sans code.">
+    <link rel="canonical" href="https://multidatepick.com/fr/blog/dates-recurrentes-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Dates récurrentes dans Salesforce">
+    <meta property="og:description" content="Tous les lundis et jeudis pendant six semaines : une plage de dates ne suffit pas. Les récurrences dans Salesforce, sans code.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/fr/blog/dates-recurrentes-salesforce.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_FR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Dates récurrentes dans Salesforce">
+    <meta name="twitter:description" content="Tous les lundis et jeudis pendant six semaines : une plage de dates ne suffit pas. Les récurrences dans Salesforce, sans code.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/recurring-date-patterns-in-salesforce.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-wiederkehrende-termine.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/fechas-recurrentes-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/dates-recurrentes-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/date-ricorrenti-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/datas-recorrentes-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/recurring-date-patterns-in-salesforce.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/recurring-date-patterns-in-salesforce.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/recurring-date-patterns-in-salesforce.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/recurring-date-patterns-in-salesforce.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Bientôt disponible sur Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Fermer la bannière" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/fr/" class="logo"><img src="/images/logo.png" alt="Logo MultiDatePick : calendrier multi-dates et composant de réservation de ressources pour Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Afficher ou masquer la navigation"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produit <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/fr/selecteur-multi-dates-salesforce.html">Date</a></li>
+                        <li><a href="/fr/selecteur-date-heure-salesforce.html">Date Time</a></li>
+                        <li><a href="/fr/calendrier-reservation-salesforce.html">Booking</a></li>
+                        <li><a href="/fr/blog/vues-calendrier-salesforce.html">Cinq vues de calendrier</a></li>
+                        <li><a href="/fr/bibliotheque-configurations.html">Config Library</a></li>
+                        <li><a href="/fr/confiance-securite.html">Confiance &amp; sécurité</a></li>
+                        <li><a href="/fr/accessibilite-vpat.html">Accessibilité (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Solutions <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/fr/calendrier-salesforce.html">Calendrier Salesforce</a></li>
+                        <li><a href="/fr/calendrier-salesforce-interim-recrutement.html">Intérim &amp; recrutement</a></li>
+                        <li><a href="/fr/planification-entretiens-salesforce.html">Planification des entretiens</a></li>
+                        <li><a href="/fr/reservation-salle-reunion-salesforce.html">Réservation de salles de réunion</a></li>
+                        <li><a href="/fr/calendrier-reservation-experience-cloud-salesforce.html">Réservation sur Experience Cloud</a></li>
+                        <li><a href="/fr/blog/campagne-salesforce-plusieurs-dates.html">Dates de campagne</a></li>
+                        <li><a href="/fr/blog/calendrier-salesforce-section-508-secteur-public.html">Secteur public / Section 508</a></li>
+                        <li><a href="/fr/calendrier-salesforce-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/fr/tarifs.html">Tarifs</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentation <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/fr/prise-en-main.html">Prise en main</a></li>
+                        <li><a href="/fr/guide-utilisateur.html">Guide de l'utilisateur</a></li>
+                        <li><a href="/fr/guide-flux-ecran-salesforce.html">Guide des flux d'écran</a></li>
+                        <li><a href="/fr/pages-application-accueil-experience.html">Pages d'application, d'accueil &amp; Experience</a></li>
+                        <li><a href="/fr/deployer-flux-vscode.html">Déployer un flux (VS Code)</a></li>
+                        <li><a href="/fr/depannage.html">Dépannage</a></li>
+                        <li><a href="/fr/faq-calendrier-salesforce.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/fr/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Essayer la démo en direct</a></li>
+                <li><a href="/fr/me-prevenir-au-lancement.html" class="nav-cta">Me prévenir au lancement</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Dates récurrentes dans Salesforce : une semaine sur deux, 2e et 4e vendredi, dernier samedi",
+                "description": "Tous les lundis et jeudis pendant six semaines : une plage de dates ne suffit pas. Les récurrences dans Salesforce, sans code.",
+                "datePublished": "2026-06-04",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/fr/blog/dates-recurrentes-salesforce.html",
+                "image": "https://multidatepick.com/images/marketing/salesforce-calendar-recurring-custom-days.png",
+                "inLanguage": "fr"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-recurring-date-pattern-2nd-4th-friday.gif",
+                "caption": "Démo animée d'une récurrence dans le sélecteur de dates MultiDatePick pour Salesforce : Ajouter une récurrence, Jours personnalisés, vendredi, 2e et 4e occurrence, une date de fin à trois mois, un aperçu de six vendredis, puis Ajouter des dates les place sur un calendrier de deux mois",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-recurring-custom-days.png",
+                "caption": "Récurrence dans un calendrier Salesforce : jours de la semaine personnalisés générant des dates sur une plage",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-recurring-custom-days-picker.png",
+                "caption": "Sélecteur de récurrence par jours personnalisés dans un calendrier Salesforce, avec intervalle et plage de dates",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-recurring-weekdays.png",
+                "caption": "Récurrence Jours de semaine dans un calendrier Salesforce : tous les jours du lundi au vendredi sur une plage de dates",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-recurring-weekends.png",
+                "caption": "Récurrence Week-ends dans un calendrier Salesforce : tous les samedis et dimanches sur une plage de dates",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Dates récurrentes dans Salesforce</h1>
+                <p class="subtitle">Un mardi sur deux. Le 2e et le 4e vendredi. Le dernier samedi du mois. Ce sont des règles métier ordinaires, et aucun champ Salesforce ne permet d'en exprimer une seule.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Publié le 4 juin 2026 &middot; Mis à jour le 21 octobre 2026 &middot; MultiDatePick</p>
+                <p class="sc-lead">Salesforce gère la récurrence pour les événements et les tâches, et s'arrête là. Dès que votre planning vit sur un objet personnalisé (une équipe, une session, une inspection, une astreinte), vous êtes seul, et la réponse habituelle est que quelqu'un calcule les dates sur un calendrier papier puis les saisit à la main.</p>
+
+                <h2 style="margin-top:44px;">Deux types de récurrence</h2>
+                <p>On les confond souvent, et elles demandent une logique différente.</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:26%;">Type</th><th style="width:37%;">Exemples</th><th>Ce qu'il faut</th></tr></thead>
+                    <tbody>
+                    <tr><td>Par intervalle</td><td>Chaque semaine, toutes les 2 semaines, toutes les 3 semaines</td><td>Un jour de la semaine et un intervalle de répétition</td></tr>
+                    <tr><td>Par occurrence</td><td>1er lundi, 2e et 4e vendredi, dernier samedi</td><td>Quelle occurrence dans chaque mois</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>La récurrence par intervalle compte à partir d'une date de début et ignore les limites de mois. La récurrence par occurrence repart à zéro chaque mois, et « dernier » est délicat parce qu'il tombe la 4e ou la 5e semaine selon le mois. C'est sur ce seul mot que cassent la plupart des développements maison.</p>
+
+                <h2 style="margin-top:44px;">Pourquoi le coder soi-même tourne mal</h2>
+                <div class="bp-cards">
+                    <div class="bp-card"><h3>La longueur des mois varie</h3><p>« Le 5e lundi » existe certains mois et pas d'autres.</p></div>
+                    <div class="bp-card" style="--c:#0176D3;"><h3>Les années bissextiles</h3><p>Elles faussent discrètement tout calcul qui suppose une année fixe.</p></div>
+                    <div class="bp-card" style="--c:#7C3AED;"><h3>« Une semaine sur deux » a besoin d'un point de départ</h3><p>Une semaine sur deux à partir de quand ? Deux personnes ne seront pas d'accord.</p></div>
+                    <div class="bp-card" style="--c:#E11D48;"><h3>Week-ends et jours fériés</h3><p>Il faut parfois les sauter, et vos jours fériés sont dans les données de votre propre org.</p></div>
+                    <div class="bp-card" style="--c:#0F766E;"><h3>Générer trop loin à l'avance</h3><p>Cela crée des milliers d'enregistrements que personne n'a demandés.</p></div>
+                </div>
+                <p>Aucun de ces points n'est difficile isolément. Ensemble, ils représentent une semaine de travail et une source permanente de bugs dans les cas limites.</p>
+
+                <h2 style="margin-top:44px;">Générer des dates plutôt que stocker une règle</h2>
+                <p>Sous l'algorithme se cache un choix de conception : stockez-vous la <em>règle</em> pour la développer à la lecture, ou la développez-vous une fois pour stocker les <em>dates</em> obtenues ?</p>
+                <p>Dans Salesforce, stocker les dates est presque toujours la meilleure réponse. Des enregistrements de dates concrets se prêtent aux rapports, aux cumuls, aux filtres et à l'automatisation comme n'importe quelle donnée. Une règle stockée doit être interprétée partout où elle sert, et les rapports Salesforce ne savent pas l'interpréter du tout. La contrepartie : modifier la récurrence oblige à régénérer les dates. C'est pourquoi le sélecteur de récurrence doit se trouver au moment de la saisie, pas enfoui dans la configuration.</p>
+
+                <h2 style="margin-top:44px;">Les trois récurrences, à l'écran</h2>
+                <p>Jours personnalisés d'abord, car aucun champ standard ne l'exprime. Choisissez n'importe quelle combinaison de jours, réglez l'intervalle, donnez une plage, et le calendrier affiche chaque date correspondante avant tout enregistrement.</p>
+                <figure class="sc-shot" style="max-width:560px;margin:20px auto;">
+                    <img src="/images/marketing/salesforce-recurring-date-pattern-2nd-4th-friday-poster.png" data-gif="/images/marketing/salesforce-recurring-date-pattern-2nd-4th-friday.gif" alt="Démo animée d'une récurrence dans le sélecteur de dates MultiDatePick pour Salesforce : Ajouter une récurrence, Jours personnalisés, vendredi, 2e et 4e occurrence, une date de fin à trois mois, un aperçu de six vendredis, puis Ajouter des dates les place sur un calendrier de deux mois" title="Les 2e et 4e vendredis de chaque mois, en une seule récurrence" width="700" height="900" loading="lazy" decoding="async" data-zoomable>
+                    <figcaption>Le 2e et le 4e vendredi de chaque mois : choisissez les jours et les occurrences, prévisualisez les dates, ajoutez-les toutes d'un coup.</figcaption>
+                </figure>
+                <div class="bp-pair">
+                    <figure class="sc-shot">
+                        <img src="/images/marketing/salesforce-calendar-recurring-custom-days.png" alt="Récurrence dans un calendrier Salesforce : jours de la semaine personnalisés générant des dates sur une plage" loading="lazy" data-zoomable width="1004" height="700">
+                        <figcaption>Jours personnalisés : chaque date correspondante, générée sur le calendrier.</figcaption>
+                    </figure>
+                    <figure class="sc-shot">
+                        <img src="/images/marketing/salesforce-calendar-recurring-custom-days-picker.png" alt="Sélecteur de récurrence par jours personnalisés dans un calendrier Salesforce, avec intervalle et plage de dates" loading="lazy" data-zoomable width="1004" height="900">
+                        <figcaption>Le sélecteur : les jours à activer, un intervalle toutes les N semaines, un début et une fin.</figcaption>
+                    </figure>
+                </div>
+                <p>Jours de semaine et Week-ends sont les deux raccourcis les plus utilisés, et ils font la même chose en un clic.</p>
+                <div class="bp-pair">
+                    <figure class="sc-shot">
+                        <img src="/images/marketing/salesforce-calendar-recurring-weekdays.png" alt="Récurrence Jours de semaine dans un calendrier Salesforce : tous les jours du lundi au vendredi sur une plage de dates" loading="lazy" data-zoomable width="1004" height="700">
+                        <figcaption>Jours de semaine : tous les jours du lundi au vendredi sur la plage.</figcaption>
+                    </figure>
+                    <figure class="sc-shot">
+                        <img src="/images/marketing/salesforce-calendar-recurring-weekends.png" alt="Récurrence Week-ends dans un calendrier Salesforce : tous les samedis et dimanches sur une plage de dates" loading="lazy" data-zoomable width="1004" height="700">
+                        <figcaption>Week-ends : tous les samedis et dimanches, pour les permanences et les astreintes.</figcaption>
+                    </figure>
+                </div>
+
+                <h2 style="margin-top:44px;">Montrez les dates avant de valider</h2>
+                <p>Le mieux qu'une interface de récurrence puisse faire, c'est montrer son résultat. Quand l'utilisateur choisit « toutes les 2 semaines le mardi » et voit aussitôt les dates surlignées sur un calendrier, les erreurs se repèrent dans la seconde qui précède l'enregistrement, pas la semaine suivante. La question « une semaine sur deux à partir de quand ? » est aussi réglée immédiatement, puisque le point de départ est visible.</p>
+                <p>Même chose pour le regroupement. Si votre récurrence donne du lundi au vendredi pendant six semaines, vous voulez peut-être trente enregistrements, ou peut-être six, un par semaine, avec une date de début et de fin. Le décider au moment de la sélection coûte bien moins cher qu'une migration après coup.</p>
+                <div class="sc-note">
+                    <strong>Les deux types, intégrés.</strong> Le <a href="/fr/selecteur-multi-dates-salesforce.html">composant Dates</a> gère les intervalles hebdomadaires personnalisés (toutes les 1, 2, 3 ou N semaines) et les filtres d'occurrence mensuels (1er lundi, 2e et 4e vendredi, dernier samedi). Les dates générées s'affichent sur le calendrier avant l'enregistrement, et regrouper des jours consécutifs en un seul enregistrement de plage est un simple paramètre.</div>
+
+                <div class="bp-end">
+                    <h2>Un mardi sur deux, en un clic</h2>
+                    <p>Essayez une récurrence dans la démo en direct. Les dates s'affichent sur le calendrier avant l'enregistrement.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=recurring-date-patterns-in-salesforce" class="btn btn-demo" target="_blank" rel="noopener">Essayer la démo en direct</a> <a href="/fr/me-prevenir-au-lancement.html" class="btn btn-primary">Me prévenir au lancement</a> <a href="/fr/prise-en-main.html" class="btn btn-secondary">Prise en main</a>
+                    </div>
+                    <ul class="check-list"><li>$20/utilisateur/mois, toutes les fonctionnalités</li><li>Essai gratuit de 30 jours, sans carte</li><li>100 % natif Salesforce</li><li>Sans Apex</li><li>Bientôt disponible sur Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>À lire aussi</h3>
+                    <ul>
+                        <li><a href="/fr/blog/plusieurs-dates-flux-ecran-salesforce.html">Saisie de plusieurs dates dans un flux d'écran</a></li>
+                        <li><a href="/fr/blog/campagne-salesforce-plusieurs-dates.html">Toutes les dates de campagne sur un seul calendrier</a></li>
+                        <li><a href="/fr/selecteur-multi-dates-salesforce.html">Le composant Dates en détail</a></li>
+                        <li><a href="/fr/bibliotheque-configurations.html">Config Library : astreintes, planning des équipes et plus encore</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/fr/" class="logo">
+                        <img src="/images/logo.png" alt="Logo MultiDatePick : calendrier multi-dates et composant de réservation de ressources pour Salesforce" width="180" height="45">
+                    </a>
+                    <p>La suite de composants calendrier la plus personnalisable pour Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produit</h4>
+                    <ul>
+                        <li><a href="/fr/selecteur-multi-dates-salesforce.html">Date</a></li>
+                        <li><a href="/fr/selecteur-date-heure-salesforce.html">Date Time</a></li>
+                        <li><a href="/fr/calendrier-reservation-salesforce.html">Booking</a></li>
+                        <li><a href="/fr/blog/vues-calendrier-salesforce.html">Cinq vues de calendrier</a></li>
+                        <li><a href="/fr/bibliotheque-configurations.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Solutions</h4>
+                    <ul>
+                        <li><a href="/fr/calendrier-salesforce.html">Calendrier Salesforce</a></li>
+                        <li><a href="/fr/calendrier-salesforce-interim-recrutement.html">Intérim &amp; recrutement</a></li>
+                        <li><a href="/fr/planification-entretiens-salesforce.html">Planification des entretiens</a></li>
+                        <li><a href="/fr/reservation-salle-reunion-salesforce.html">Réservation de salles de réunion</a></li>
+                        <li><a href="/fr/calendrier-reservation-experience-cloud-salesforce.html">Réservation sur Experience Cloud</a></li>
+                        <li><a href="/fr/blog/campagne-salesforce-plusieurs-dates.html">Dates de campagne</a></li>
+                        <li><a href="/fr/blog/calendrier-salesforce-section-508-secteur-public.html">Secteur public / Section 508</a></li>
+                        <li><a href="/fr/calendrier-salesforce-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentation</h4>
+                    <ul>
+                        <li><a href="/fr/prise-en-main.html">Prise en main</a></li>
+                        <li><a href="/fr/guide-utilisateur.html">Guide de l'utilisateur</a></li>
+                        <li><a href="/fr/guide-flux-ecran-salesforce.html">Guide des flux d'écran</a></li>
+                        <li><a href="/fr/pages-application-accueil-experience.html">Pages d'application, d'accueil &amp; Experience</a></li>
+                        <li><a href="/fr/deployer-flux-vscode.html">Déployer un flux (VS Code)</a></li>
+                        <li><a href="/fr/depannage.html">Dépannage</a></li>
+                        <li><a href="/fr/faq-calendrier-salesforce.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Entreprise</h4>
+                    <ul>
+                        <li><a href="/fr/tarifs.html">Tarifs</a></li>
+                        <li><a href="/fr/blog/">Blog</a></li>
+                        <li><a href="/fr/confiance-securite.html">Confiance &amp; sécurité</a></li>
+                        <li><a href="/fr/accessibilite-vpat.html">Accessibilité</a></li>
+                        <li><a href="/fr/me-prevenir-au-lancement.html">Me prévenir au lancement</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Tous droits réservés.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Langue" translate="no"><ul><li><a href="/blog/recurring-date-patterns-in-salesforce.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-wiederkehrende-termine.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/fechas-recurrentes-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/dates-recurrentes-salesforce.html" hreflang="fr" lang="fr" aria-current="page">Français</a></li><li><a href="/it/blog/date-ricorrenti-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/datas-recorrentes-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/recurring-date-patterns-in-salesforce.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/recurring-date-patterns-in-salesforce.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/recurring-date-patterns-in-salesforce.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Agrandir l'image</p><p data-k="expand-diagram">Agrandir le schéma</p><p data-k="close">Fermer</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

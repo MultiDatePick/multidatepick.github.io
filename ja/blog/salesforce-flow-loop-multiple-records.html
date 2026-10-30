@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce フローのループ: 日付やシフトごとにレコードを作成</title>
+    <meta name="description" content="1 つの Salesforce 画面フローで複数のレコードを作成する方法。選んだ日付を解析してループし、ループの後で 1 回だけ保存します。シフト、休暇、期間用の 3 つのスターターフロー付き。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line tables, rail cards, FAQ, end CTA. */
+        .section .container > p { margin: 0 0 14px; }
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code, .section p code, .bp-list code { font-size: 0.85rem; color: #0F2D52; background: #F1F5F9; padding: 1px 5px; border-radius: 4px; }
+        .bp-steps { list-style: none; counter-reset: s; padding: 0; margin: 22px 0; display: grid; gap: 10px; }
+        .bp-steps li { counter-increment: s; position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px 16px 12px 54px; color: #374151; }
+        .bp-steps li::before { content: counter(s); position: absolute; left: 14px; top: 11px; width: 26px; height: 26px; border-radius: 50%; background: #0F2D52; color: #fff; font-weight: 700; font-size: 0.85rem; display: grid; place-items: center; }
+        .bp-steps li strong { color: #0F2D52; }
+        .bp-pair { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 22px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-starter { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px 16px 22px; margin: 22px 0; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-starter::before { content: ""; position: absolute; left: 0; top: 20px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-starter h3 { margin: 0 0 4px; font-size: 1.05rem; color: #0F2D52; }
+        .bp-starter p { margin: 0 0 12px; color: #4B5563; font-size: 0.93rem; line-height: 1.55; }
+        .bp-starter .bp-file { font-family: Consolas, Menlo, monospace; font-size: 0.82rem; color: #64748B; }
+        .bp-starter-ctas { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .bp-copied { color: #16A34A; font-weight: 600; font-size: 0.88rem; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 8px 0 8px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 720px) { .bp-pair { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) { .bp-end { padding: 20px 18px; } .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; } }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce フローのループ: 日付やシフトごとにレコードを作成">
+    <meta property="og:description" content="1 つの Salesforce 画面フローで複数のレコードを作成する方法。選んだ日付を解析してループし、ループの後で 1 回だけ保存します。シフト、休暇、期間用の 3 つのスターターフロー付き。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/salesforce-flow-loop-multiple-records.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce フローのループ: 日付やシフトごとにレコードを作成">
+    <meta name="twitter:description" content="1 つの Salesforce 画面フローで複数のレコードを作成する方法。選んだ日付を解析してループし、ループの後で 1 回だけ保存します。シフト、休暇、期間用の 3 つのスターターフロー付き。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-flow-schleife-mehrere-datensaetze.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/bucle-flow-salesforce-varios-registros.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/boucle-flux-salesforce-plusieurs-enregistrements.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/ciclo-flusso-salesforce-piu-record.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/loop-salesforce-flow-varios-registros.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-flow-loop-multiple-records.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-flow-loop-multiple-records.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce フローのループ: 日付やシフトごとにレコードを作成",
+                "description": "1 つの Salesforce 画面フローで複数のレコードを作成する方法。選んだ日付を解析してループし、ループの後で 1 回だけ保存します。シフト、休暇、期間用の 3 つのスターターフロー付き。",
+                "datePublished": "2026-10-29",
+                "dateModified": "2026-10-29",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/salesforce-flow-loop-multiple-records.html",
+                "image": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "1 つの Salesforce 画面フローで複数のレコードを作成するには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "1 つの画面で選択を受け取り、それをループします。ループの中では「割り当て」でレコード変数に値を入れ、それをレコードコレクション変数に追加します。ループの後、1 つの「レコードを作成」要素でコレクション全体を保存します。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "「レコードを作成」はフローのループの中に置くべきですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。ループの中の「レコードを作成」は項目ごとに 1 回ずつ保存し、1 つのトランザクションで許される保存は 150 回までです。そのため長いリストでは失敗し、どのリストでも処理が遅くなります。ループの中でレコードコレクション変数を組み立て、ループが終わった後に 1 回で保存してください。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce フローで JSON をループするには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "フローは単独では JSON を読めません。まずコレクションに変換します。MultiDatePick には Parse Date Entries from JSON というアクションが含まれており、カレンダーの JSON 出力を fromDate、toDate、startTime、endTime を持つエントリのリストに変換します。これを「ループ」要素で順に処理できます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce で案件に複数のシフトを追加するには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "案件レコードから起動する画面フローに日付と時刻のピッカーを配置し、リクルーターにシフトの日と時間を選んでもらいます。選択をリストに解析し、それをループして、案件に紐付いたシフトレコードを 1 日 1 件ずつ組み立てます。ループの後、1 つの「レコードを作成」でまとめて保存します。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "選んだ日付をループするのに Apex は必要ですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。解析用のアクションは MultiDatePick に付属しており、ループ、割り当て、保存はいずれも標準のフロー要素です。終日単位であればアクションすら不要です。カレンダーは選んだ日の単純なリストも出力するからです。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png",
+                "caption": "Flow Builder でシフトを追加する Salesforce 画面フロー: MultiDatePick の画面、Parse Date Entries アクション、各シフトを組み立てるループ、そしてループの後の 1 つの「レコードを作成」",
+                "width": 940,
+                "height": 1780,
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-shift-picker.png",
+                "caption": "Salesforce 画面フロー内の MultiDatePick の日付・時刻ピッカー: 11 月のシフト日を 3 日選び、すべてに 13:00〜14:00 を選択した状態",
+                "width": 1900,
+                "height": 1917,
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce フローのループ: 日付やシフトごとにレコードを作成</h1>
+                <p class="subtitle">1 つの画面から、たくさんのレコードを。画面フロー (Screen Flow) を作る人なら誰もが必要とするループのパターンと、そのまま使える 3 つのスターターフロー (シフト、休暇、期間) を紹介します。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 10 月 29 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">リクルーターが案件に 12 件のシフトを追加する。マネージャーが 1 週間の休暇を承認する。イベント担当者が 3 日間のワークショップとフォローアップの 1 日を予約する。どれも 1 つの画面での 1 つの判断ですが、それぞれ複数のレコードになるべきものです。</p>
+
+                <p>画面フローには「日付ごとに 1 件のレコードを作成する」という要素はありません。ループ、割り当て、1 回の保存という 3 つの標準部品で組み立てます。この記事ではそのパターンを順に解説し、それを使った 3 つの動くフローを提供します。</p>
+
+                <p>このパターンは、TalentRover 上での採用システム構築から生まれました。リクルーターは案件に一連のシフトを追加する必要がありましたが、1 件ずつレコードを入力する作業は、日程調整そのものより時間がかかっていました。日と時間を一度に選び、シフトの書き込みはループに任せる。それで解決し、どのオブジェクトでも同じように使えます。</p>
+
+                <h2 style="margin-top:44px;">5 つの要素で組むパターン</h2>
+                <div class="bp-pair">
+                    <figure class="sc-shot">
+                        <img src="/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png" alt="Flow Builder でシフトを追加する Salesforce 画面フロー: MultiDatePick の画面、Parse Date Entries アクション、各シフトを組み立てるループ、そしてループの後の 1 つの「レコードを作成」" loading="lazy" decoding="async" width="940" height="1780" data-zoomable>
+                        <figcaption>Add Shifts スターターフロー。保存はループの中ではなく、ループの後にあります。</figcaption>
+                    </figure>
+                    <ol class="bp-steps">
+                        <li><strong>画面。</strong> ユーザーがすべての日付と、必要なら時刻も、一度に選ぶ MultiDatePick のカレンダー。</li>
+                        <li><strong>解析。</strong> <code>Parse Date Entries from JSON</code> アクションが、選択をフローでループできるリストに変換します。</li>
+                        <li><strong>ループ。</strong> 「ループ」要素がリストを 1 件ずつ順に処理します。</li>
+                        <li><strong>割り当て。</strong> ループの中で、エントリの日付と時刻をレコード変数にコピーし、そのレコードをレコードコレクション変数に追加します。</li>
+                        <li><strong>レコードを作成。</strong> ループの後、1 つの「レコードを作成」でコレクション全体を保存します。</li>
+                    </ol>
+                </div>
+
+                <h2 style="margin-top:44px;">保存をループの後に置く理由</h2>
+                <p>ループの中に「レコードを作成」を置きたくなる気持ちはわかります。1 回まわれば 1 件のレコード。日付が 3 つなら動きますが、30 になると壊れます。「レコードを作成」は 1 つずつが別々のデータベース保存で、Salesforce が 1 つのトランザクションで許すのは 150 回まで。しかもその保存が起動するすべてのトリガーやフローと共有です。ループの中の保存は、日付ごとに 1 回ずつ消費します。</p>
+                <p>コレクションを組み立てて 1 回で保存すれば、ユーザーが何を選んでも保存は合計 1 回です。処理も速く、すべて保存されるか何も保存されないかのどちらかなので、失敗してシフトが半分だけ残ることもありません。</p>
+                <table class="bp-grid">
+                    <thead><tr><th></th><th>ループの中で「レコードを作成」</th><th>コレクションをループの後で保存</th></tr></thead>
+                    <tbody>
+                        <tr><td>30 日分の保存回数</td><td>30</td><td>1</td></tr>
+                        <tr><td>制限に達するリスク</td><td>選ぶ日付が増えるほど高まる</td><td>ループによるリスクはなし</td></tr>
+                        <tr><td>エラー時</td><td>保存されるレコードとされないレコードが混在</td><td>すべて保存か、何も保存しないか</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 style="margin-top:44px;">活用例: 案件にシフトを追加する</h2>
+                <p>リクルーターは案件からフローを開き、カレンダーでシフトの日を、タイムグリッドで時間を選んで [次へ] をクリックします。フローは案件に紐付いたシフトを 1 日 1 件ずつ書き込みます。</p>
+                <figure class="sc-shot">
+                    <img src="/images/flow-guide/salesforce-flow-loop-shift-picker.png" alt="Salesforce 画面フロー内の MultiDatePick の日付・時刻ピッカー: 11 月のシフト日を 3 日選び、すべてに 13:00〜14:00 を選択した状態" loading="lazy" decoding="async" width="1900" height="1917" data-zoomable>
+                    <figcaption>3 日のシフト日と 1 つの時間帯を 1 つの画面で選択。フローがそれを 3 件のシフトレコードにします。</figcaption>
+                </figure>
+                <p>カレンダーは選択を <code>selectedDatesWithTimesJson</code> 出力の JSON としてフローに渡します。フローは JSON を読めないので、ここでパーサーの出番です。返される各エントリには次の項目があります:</p>
+                <table class="bp-grid">
+                    <thead><tr><th>項目</th><th>種別</th><th>内容</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>fromDate</code></td><td>Date</td><td>シフトの日</td></tr>
+                        <tr><td><code>toDate</code></td><td>Date</td><td>シフトなら同じ日、期間なら最終日</td></tr>
+                        <tr><td><code>startTime</code></td><td>時刻</td><td>最初に選んだ時間枠</td></tr>
+                        <tr><td><code>endTime</code></td><td>時刻</td><td>最後に選んだ時間枠の終了時刻</td></tr>
+                    </tbody>
+                </table>
+                <p>隣り合う時間枠は 1 つのシフトになるので、13:00 と 13:30 を選ぶと 13:00〜14:00 になります。1 日に離れた 2 つのブロック (たとえば午前と午後) を選ぶと、その日のエントリは 2 つになり、シフトも 2 件になります。</p>
+
+                <div class="bp-starter">
+                    <h3>スターターフロー: Add Shifts</h3>
+                    <p>日と時間を選び、ブロックごとに 1 件のシフトを、フローの起動元レコードに紐付けて保存します。<span class="bp-file">MDP_Starter_Add_Shifts.flow-meta.xml</span></p>
+                    <div class="bp-starter-ctas">
+                        <button type="button" class="btn btn-primary btn-sm bp-copy" data-flow="MDP_Starter_Add_Shifts.flow-meta.xml">フローの XML をコピー</button> <a class="btn btn-secondary btn-sm" href="/downloads/flows/MDP_Starter_Add_Shifts.flow-meta.xml" download>ダウンロード</a> <span class="bp-copied" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
+                <h2 style="margin-top:44px;">活用例: 休暇 1 日ごとに 1 件のレコード</h2>
+                <p>休暇はたいてい 1 日単位で管理されます。給与計算は日数で数えますし、一部だけ承認された申請はどのみち日ごとに分ける必要があります。この場合はパーサーすら不要です。Date コンポーネントは <code>selectedDates</code> も出力します。選んだすべての日を、期間も 1 日ずつ展開して並べた単純なテキストのリストです。</p>
+                <p>このリストをそのままループします。注意点は、各項目が <code>2026-11-09</code> のようなテキストであることだけです。割り当てでレコードにコピーする前に、<code>DATEVALUE({!Loop_Days})</code> という 1 行の数式で日付に変換します。</p>
+
+                <div class="bp-starter">
+                    <h3>スターターフロー: Record per Day</h3>
+                    <p>日と期間を選び、1 日ごとに 1 件のレコードを保存します。パーサーは不要です。<span class="bp-file">MDP_Starter_Record_Per_Day.flow-meta.xml</span></p>
+                    <div class="bp-starter-ctas">
+                        <button type="button" class="btn btn-primary btn-sm bp-copy" data-flow="MDP_Starter_Record_Per_Day.flow-meta.xml">フローの XML をコピー</button> <a class="btn btn-secondary btn-sm" href="/downloads/flows/MDP_Starter_Record_Per_Day.flow-meta.xml" download>ダウンロード</a> <span class="bp-copied" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
+                <h2 style="margin-top:44px;">活用例: 期間ごとに 1 件のレコード</h2>
+                <p>複数日にまたがっていても 1 つのものがあります。3 日間のワークショップ、機材のレンタル、月曜から水曜までの現地訪問。これらは 3 件ではなく、開始日と終了日を持つ 1 件のレコードにしたいものです。</p>
+                <p>そのための出力が <code>selectedDateRangesJson</code> です。カレンダーは隣り合う日を 1 つの期間にまとめるので、9 日、10 日、11 日を選ぶと 9 日から 11 日までの 1 エントリになります。解析してループし、<code>fromDate</code> と <code>toDate</code> を開始日と終了日の項目にコピーします。</p>
+
+                <div class="bp-starter">
+                    <h3>スターターフロー: Record per Range</h3>
+                    <p>日付と期間を選び、期間ごとに開始日と終了日を持つ 1 件のレコードを保存します。<span class="bp-file">MDP_Starter_Record_Per_Range.flow-meta.xml</span></p>
+                    <div class="bp-starter-ctas">
+                        <button type="button" class="btn btn-primary btn-sm bp-copy" data-flow="MDP_Starter_Record_Per_Range.flow-meta.xml">フローの XML をコピー</button> <a class="btn btn-secondary btn-sm" href="/downloads/flows/MDP_Starter_Record_Per_Range.flow-meta.xml" download>ダウンロード</a> <span class="bp-copied" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
+
+                <div class="sc-note">
+                    <strong>リソースの予約ならループは不要です。</strong> <a href="/ja/salesforce-booking-calendar.html">Booking コンポーネント</a>は定員と競合をチェックしながら自分で予約を保存し、保存できた件数を <code>bookingSuccessCount</code> で、競合した日付を <code>bookingConflictDates</code> でフローに返します。</div>
+
+                <h2 style="margin-top:44px;">スターターフローを自社の組織で使う</h2>
+                <p>スターターフローは MultiDatePick に付属する Schedule オブジェクトと Event オブジェクトに保存するので、そのままデプロイでき、インストール直後から動きます。動作を確認したら、自社のオブジェクトに差し替えてください。</p>
+                <ol class="bp-steps">
+                    <li>上のフローの XML を<strong>コピーまたはダウンロード</strong>します。</li>
+                    <li>VS Code から<strong>デプロイ</strong>します。手順は <a href="/ja/deploy-flow-vscode.html">VS Code でフローをデプロイする</a>で 1 ステップずつ解説しています。</li>
+                    <li><strong>Flow Builder で開き</strong>、最初の画面のカレンダーをクリックします。セットアップウィザードで保存した設定、または <a href="/ja/configlibrary.html">Config Library</a> からインポートした設定の <strong>Config Name</strong>（設定名） を入力すると、その設定が反映されます。</li>
+                    <li>Schedule と Event を使わない場合は、<strong>自社のオブジェクトを指定</strong>します。レコード変数のオブジェクトと、割り当ての中の項目を変更してください。</li>
+                    <li><strong>有効化</strong>し、フローコンポーネントまたはアクションとしてレコードページに追加します。フローはレコードの Id を <code>recordId</code> 変数から読み取ります。</li>
+                </ol>
+
+                <h2 style="margin-top:44px;">午後をまるごと失うミス</h2>
+                <ul class="bp-list">
+                    <li><strong>ループの中で保存する。</strong> 日付 3 つのテストでは問題なくても、本番で 40 個になると制限エラーになります。</li>
+                    <li><strong>レコードをコレクションに追加し忘れる。</strong> 割り当てには 2 つの部分が必要です。項目を設定し、レコード変数をコレクションに <em>Add</em> (追加) すること。後者がないと、最後の保存で保存するものが何もありません。</li>
+                    <li><strong>テキストを日付項目に割り当てる。</strong> <code>selectedDates</code> のリストはテキストです。まず各項目を <code>DATEVALUE()</code> で囲んでください。</li>
+                    <li><strong>Output As JSON をオフのままにする。</strong> JSON の出力は、カレンダーの Output As JSON 設定がオンのときにだけ値が入ります。スターターフローではオンにしてあります。</li>
+                    <li><strong>間違った場所から起動する。</strong> フローは各レコードを <code>recordId</code> に紐付けます。レコードが属する案件、イベント、人のレコードから実行しないと、紐付けが空のままになります。</li>
+                </ul>
+
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="bp-faq">
+                    <details><summary>1 つの Salesforce 画面フローで複数のレコードを作成するには?</summary><p>1 つの画面で選択を受け取り、それをループします。ループの中では「割り当て」でレコード変数に値を入れ、それをレコードコレクション変数に追加します。ループの後、1 つの「レコードを作成」要素でコレクション全体を保存します。</p></details>
+                    <details><summary>「レコードを作成」はフローのループの中に置くべきですか?</summary><p>いいえ。ループの中の「レコードを作成」は項目ごとに 1 回ずつ保存し、1 つのトランザクションで許される保存は 150 回までです。そのため長いリストでは失敗し、どのリストでも処理が遅くなります。ループの中でレコードコレクション変数を組み立て、ループが終わった後に 1 回で保存してください。</p></details>
+                    <details><summary>Salesforce フローで JSON をループするには?</summary><p>フローは単独では JSON を読めません。まずコレクションに変換します。MultiDatePick には Parse Date Entries from JSON というアクションが含まれており、カレンダーの JSON 出力を fromDate、toDate、startTime、endTime を持つエントリのリストに変換します。これを「ループ」要素で順に処理できます。</p></details>
+                    <details><summary>Salesforce で案件に複数のシフトを追加するには?</summary><p>案件レコードから起動する画面フローに日付と時刻のピッカーを配置し、リクルーターにシフトの日と時間を選んでもらいます。選択をリストに解析し、それをループして、案件に紐付いたシフトレコードを 1 日 1 件ずつ組み立てます。ループの後、1 つの「レコードを作成」でまとめて保存します。</p></details>
+                    <details><summary>選んだ日付をループするのに Apex は必要ですか?</summary><p>いいえ。解析用のアクションは MultiDatePick に付属しており、ループ、割り当て、保存はいずれも標準のフロー要素です。終日単位であればアクションすら不要です。カレンダーは選んだ日の単純なリストも出力するからです。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>1 つの画面から、必要なレコードをすべて。</h2>
+                    <p>上のスターターフローをコピーするか、まずライブデモでカレンダーを試してください。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-flow-loop-multiple-records" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/flowcheatsheet.html" class="btn btn-secondary">画面フローガイド</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html">Salesforce 画面フローで複数の日付を選択する</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フローガイド</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">VS Code でフローをデプロイする</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用向けの Salesforce カレンダー</a></li>
+                        <li><a href="/ja/blog/recurring-date-patterns-in-salesforce.html">Salesforce で繰り返しの日付パターンを扱う</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/salesforce-flow-loop-multiple-records.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-flow-schleife-mehrere-datensaetze.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/bucle-flow-salesforce-varios-registros.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/boucle-flux-salesforce-plusieurs-enregistrements.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/ciclo-flusso-salesforce-piu-record.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/loop-salesforce-flow-varios-registros.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-flow-loop-multiple-records.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/salesforce-flow-loop-multiple-records.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-flow-loop-multiple-records.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <div class="mdp-strings" hidden><p data-k="flow-copied">コピーしました。プロジェクトの flows フォルダーに保存してください。</p></div>
+    <script src="/js/main.js"></script>
+    <script>
+    // Copy a starter flow's XML. Falls back to opening the file when the clipboard is refused.
+    (function () {
+        document.querySelectorAll('.bp-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var url = '/downloads/flows/' + btn.getAttribute('data-flow');
+                var note = btn.parentNode.querySelector('.bp-copied');
+                fetch(url).then(function (r) { return r.text(); })
+                    .then(function (xml) { return navigator.clipboard.writeText(xml); })
+                    .then(function () { note.innerHTML = window.mdpText('flow-copied', 'Copied. Save it in your project\'s flows folder.'); })
+                    .catch(function () { window.open(url, '_blank'); });
+            });
+        });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinque viste calendario, un solo componente Salesforce</title>
+    <meta name="description" content="Una griglia mensile non risponde a ogni domanda di pianificazione. Cronologia, settimana, utilizzo e agenda accanto, scelte per posizione con un solo campo.">
+    <link rel="canonical" href="https://multidatepick.com/it/blog/viste-calendario-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Views post (restyled 2026-10-12): accent headings, view cards with live GIFs, config pills. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .vb-views { display: flex; flex-direction: column; gap: 26px; margin: 26px 0 10px;
+            /* wider than the 820px text column, so the GIFs read at a useful size */
+            width: min(1120px, calc(100vw - 40px)); margin-left: calc(50% - min(560px, calc(50vw - 20px))); }
+        .vb-view { display: grid; grid-template-columns: 0.75fr 1.25fr; gap: 30px; align-items: center;
+            background: #fff; border: 1px solid #E2E8F0; border-radius: 14px;
+            padding: 22px 24px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .vb-view.vb-flip { grid-template-columns: 1.25fr 0.75fr; } .vb-text h3 { position: relative; } .vb-text h3::before { content:""; position:absolute; left:-24px; top:calc(.625em - 11px); width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--vb-c); } .vb-view.vb-flip .vb-text h3::before { left:-17px; }
+        .vb-view.vb-flip .vb-text { order: 2; }
+        .vb-tag { display: inline-block; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+            color: color-mix(in srgb, var(--vb-c) 75%, #000); }
+        .vb-text h3 { margin: 12px 0 8px; font-size: 1.42rem; line-height: 1.25; color: #0F2D52; }
+        .vb-text p { margin: 0 0 14px; color: #374151; line-height: 1.6; }
+        .vb-mode { font-size: 0.8rem; font-weight: 700; color: #15803D; }
+        .vb-mode::before { content: "\2713  "; }
+        .vb-mode.vb-ro { color: #64748B; }
+        .vb-mode.vb-ro::before { content: "\25CB  "; }
+        .vb-media { margin: 0; }
+        .vb-media img { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid #E2E8F0; }
+        .vb-aside { color: #4B5563; font-style: italic; }
+        .vb-configs { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+        .vb-cfg { display: grid; grid-template-columns: 1.25fr 210px 1fr; gap: 16px; align-items: center;
+            background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px 16px; }
+        .vb-cfg-what { font-weight: 700; color: #0F2D52; }
+        .vb-cfg-why { color: #64748B; font-size: 0.9rem; }
+        .vb-pills { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+        .vb-pills b { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 700; color: color-mix(in srgb, var(--vb-c) 75%, #000); }
+        .vb-pills b::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--vb-c); }
+        @media (max-width: 760px) {
+            .vb-view, .vb-view.vb-flip { grid-template-columns: 1fr; padding: 18px; } .vb-text h3::before, .vb-view.vb-flip .vb-text h3::before { left:-18px; }
+            .vb-view.vb-flip .vb-text { order: 0; }
+            .vb-cfg { grid-template-columns: 1fr; gap: 6px; }
+        }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Cinque viste calendario, un solo componente Salesforce">
+    <meta property="og:description" content="Una griglia mensile non risponde a ogni domanda di pianificazione. Cronologia, settimana, utilizzo e agenda accanto, scelte per posizione con un solo campo.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/it/blog/viste-calendario-salesforce.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="it_IT">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Cinque viste calendario, un solo componente Salesforce">
+    <meta name="twitter:description" content="Una griglia mensile non risponde a ogni domanda di pianificazione. Cronologia, settimana, utilizzo e agenda accanto, scelte per posizione con un solo campo.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-calendar-views.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-kalenderansichten.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/vistas-calendario-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/vues-calendrier-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/viste-calendario-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/visualizacoes-de-calendario-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-calendar-views.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-calendar-views.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-calendar-views.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-calendar-views.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Presto disponibile su Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Chiudi banner" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/it/" class="logo"><img src="/images/logo.png" alt="Logo MultiDatePick: componente calendario a più date e prenotazione risorse per Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Apri/chiudi menu di navigazione"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">Prodotto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Date</a></li>
+                        <li><a href="/it/selettore-data-ora-fasce-orarie-salesforce.html">Date Time</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Booking</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html" class="active">Cinque viste calendario</a></li>
+                        <li><a href="/it/configurazioni-calendario-salesforce.html">Config Library</a></li>
+                        <li><a href="/it/affidabilita-e-sicurezza.html">Affidabilità e sicurezza</a></li>
+                        <li><a href="/it/accessibilita-vpat.html">Accessibilità (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Soluzioni <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/calendario-salesforce.html">Calendario Salesforce</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Staffing e recruiting</a></li>
+                        <li><a href="/it/pianificazione-colloqui-salesforce.html">Pianificazione colloqui</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce-experience-cloud.html">Prenotazioni su Experience Cloud</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Date delle campagne</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">Pubblica amministrazione / Section 508</a></li>
+                        <li><a href="/it/alternativa-salesforce-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/it/prezzi.html">Prezzi</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentazione <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/per-iniziare.html">Per iniziare</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente</a></li>
+                        <li><a href="/it/guida-flussi-su-schermo-salesforce.html">Guida ai flussi su schermo</a></li>
+                        <li><a href="/it/pagine-app-home-experience.html">Pagine app, iniziali ed Experience</a></li>
+                        <li><a href="/it/distribuire-flusso-vs-code.html">Distribuire un flusso (VS Code)</a></li>
+                        <li><a href="/it/risoluzione-problemi.html">Risoluzione dei problemi</a></li>
+                        <li><a href="/it/domande-frequenti.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/it/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Prova la demo live</a></li>
+                <li><a href="/it/avvisami-al-lancio.html" class="nav-cta">Avvisami al lancio</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-five-views.png",
+                "caption": "Prenotazioni Salesforce in tutte e cinque le viste di MultiDatePick: cronologia delle risorse con striscia di capacità, calendario mensile colorato per stato, heatmap di utilizzo, griglia settimanale ed elenco agenda",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule-poster.png",
+                "caption": "Demo animata della riprogrammazione sulla cronologia di MultiDatePick in Salesforce: trascinando il bordo destro di un incarico lo si allunga di due giorni, poi trascinando un altro incarico lo si sposta di due giorni; ognuno si salva al rilascio e la barra mostra le nuove date",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-calendar-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-calendar-view-demo-poster.png",
+                "caption": "Demo animata della vista calendario di MultiDatePick in Salesforce: scegliendo un consulente il mese si riempie di colori di stato, e passando il mouse su un giorno si apre una scheda con gli appuntamenti di quel giorno per nome cliente, ora e stato",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo-poster.png",
+                "caption": "Demo animata della cronologia risorse (timeline) di MultiDatePick in Salesforce: consulenti sul lato, incarichi di più giorni come barre uniche, una scheda al passaggio del mouse su un incarico, poi zoom da Settimana a Mese e avanzamento di pagina",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo-poster.png",
+                "caption": "Demo animata della vista settimanale di MultiDatePick in Salesforce: scegliendo un consulente compaiono i suoi appuntamenti con i clienti come blocchi colorati per stato, lunghi quanto ogni incontro, con schede al passaggio del mouse che mostrano cliente, tipo di incontro e stato",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png",
+                "caption": "Demo animata della heatmap di utilizzo di MultiDatePick in Salesforce: consulenti sul lato con il prenotato sulla capacità di ogni giorno, passaggio del mouse su un giorno pieno, poi clic per aprire la settimana di quel consulente",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-agenda-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-agenda-view-demo-poster.png",
+                "caption": "Demo animata della vista agenda di MultiDatePick in Salesforce: i prossimi appuntamenti elencati per data con ora, cliente, etichetta di stato e consulente, con schede al passaggio del mouse su due di essi",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-resource-timeline-view.png",
+                "caption": "Cronologia delle risorse di MultiDatePick su una prenotazione Salesforce: risorse sul lato, date in alto, zoom Giorno, Settimana e Mese, una striscia di capacità combinata e prenotazioni di più giorni disegnate come barre continue che si impilano in corsie quando si sovrappongono",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Cinque viste calendario, un solo componente Salesforce",
+        "datePublished": "2026-08-21",
+        "dateModified": "2026-10-21",
+        "author": {
+            "@type": "Organization",
+            "name": "MultiDatePick"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "MultiDatePick"
+        },
+        "mainEntityOfPage": "https://multidatepick.com/it/blog/viste-calendario-salesforce.html",
+        "inLanguage": "it"
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Cinque viste calendario, un solo componente Salesforce</h1>
+                <p class="subtitle">Una griglia mensile ha la forma sbagliata per metà delle domande di pianificazione che le persone fanno davvero. Ecco perché abbiamo aggiunto altre quattro viste, e come sceglierle è diventato un campo di configurazione invece di un nuovo sviluppo.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Pubblicato il 21 agosto 2026 &middot; Aggiornato il 21 ottobre 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">Ogni calendario nasce come griglia mensile, perché è quello che la parola fa immaginare. Poi le persone cominciano a fare domande a cui non sa rispondere. "Chi è libero giovedì pomeriggio?" "La Sala 4 è piena tutta la prossima settimana?" "Quale tecnico ha superato la capacità?" La griglia contiene tutti quei dati. Solo che ti costringe a cercarli.</p>
+
+                <p>Ora MultiDatePick mostra gli stessi record in cinque modi. Un componente, una sola mappatura dei campi, un solo percorso di salvataggio, e un'impostazione <strong>View</strong> che cambia il layout.</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/marketing/salesforce-calendar-five-views.png" alt="MultiDatePick mostra le prenotazioni Salesforce in tutte e cinque le viste: cronologia delle risorse, calendario mensile, heatmap di utilizzo, griglia settimanale ed elenco agenda" loading="lazy" style="width:100%;max-width:100%;height:auto;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid #E2E8F0;display:block;" width="2000" height="1160" data-zoomable>
+                    <figcaption>Un componente, cinque layout. Ogni vista legge gli stessi campi e salva allo stesso modo.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Le cinque viste e la domanda a cui risponde ciascuna</h2>
+
+                <p>Ogni vista nasce per una domanda. Sotto ci sono gli stessi record, disegnati come quella domanda richiede.</p>
+
+                <div class="vb-views">
+                <article class="vb-view" style="--vb-c:#0176D3;">
+                    <div class="vb-text">
+                        <span class="vb-tag">Calendario</span>
+                        <h3>Cosa succede il 14?</h3>
+                        <p>Un mese alla volta, ogni giorno riempito con lo stato di ciò che vi è prenotato. I giorni con stati misti li mostrano tutti. È la vista predefinita, e il più delle volte resta la risposta giusta.</p>
+                        <span class="vb-mode">Interattiva</span>
+                    </div>
+                    <figure class="vb-media">
+                        <img src="/images/views/salesforce-calendar-view-demo-poster.png" data-gif="/images/views/salesforce-calendar-view-demo.gif" alt="Demo animata della vista calendario di MultiDatePick in Salesforce: scegliendo un consulente il mese si riempie di colori di stato, e passando il mouse su un giorno si apre una scheda con gli appuntamenti di quel giorno per nome cliente, ora e stato" loading="lazy" decoding="async" width="700" height="780" data-zoomable>
+                    </figure>
+                </article>
+                <article class="vb-view vb-flip" style="--vb-c:#F97316;">
+                    <div class="vb-text">
+                        <span class="vb-tag">Cronologia</span>
+                        <h3>Quale risorsa è libera, e quando?</h3>
+                        <p>Risorse sul lato, date in alto. Una prenotazione di tre giorni è una sola barra, le prenotazioni sovrapposte si impilano in corsie e una striscia di capacità mostra quanto è pieno ogni giorno. Zoom da un solo giorno a un mese intero, e trascina una barra per spostarla o allungarla. <a href="/it/blog/cronologia-timeline-risorse-salesforce.html">Approfondisci la vista Cronologia</a>.</p>
+                        <span class="vb-mode">Interattiva</span>
+                    </div>
+                    <figure class="vb-media">
+                        <img src="/images/views/salesforce-timeline-view-demo-poster.png" data-gif="/images/views/salesforce-timeline-view-demo.gif" alt="Demo animata della cronologia risorse (timeline) di MultiDatePick in Salesforce: consulenti sul lato, incarichi di più giorni come barre uniche, una scheda al passaggio del mouse su un incarico, poi zoom da Settimana a Mese e avanzamento di pagina" loading="lazy" decoding="async" width="880" height="880" data-zoomable>
+                    </figure>
+                </article>
+                <article class="vb-view" style="--vb-c:#16A34A;">
+                    <div class="vb-text">
+                        <span class="vb-tag">Settimana</span>
+                        <h3>Chi è libero giovedì alle 14?</h3>
+                        <p>Sette giorni in orizzontale, l'orario di lavoro in verticale, ogni prenotazione lunga quanto la sua durata reale. Le prenotazioni sovrapposte stanno affiancate nei rispettivi colori di stato, e la striscia accanto resta libera per aggiungerne un'altra.</p>
+                        <span class="vb-mode">Interattiva</span>
+                    </div>
+                    <figure class="vb-media">
+                        <img src="/images/views/salesforce-week-view-demo-poster.png" data-gif="/images/views/salesforce-week-view-demo.gif" alt="Demo animata della vista settimanale di MultiDatePick in Salesforce: scegliendo un consulente compaiono i suoi appuntamenti con i clienti come blocchi colorati per stato, lunghi quanto ogni incontro, con schede al passaggio del mouse che mostrano cliente, tipo di incontro e stato" loading="lazy" decoding="async" width="880" height="1080" data-zoomable>
+                    </figure>
+                </article>
+                <article class="vb-view vb-flip" style="--vb-c:#7C3AED;">
+                    <div class="vb-text">
+                        <span class="vb-tag">Utilizzo</span>
+                        <h3>Chi ha superato la capacità?</h3>
+                        <p>Prenotato sulla capacità, per risorsa e per giorno, su un'unica scala di blu. I giorni in overbooking hanno un anello arancione, e una riga combinata somma il team. Fai clic su una cella per aprire la settimana di quella risorsa. <a href="/it/blog/heatmap-utilizzo-salesforce.html">Approfondisci la heatmap di utilizzo</a>.</p>
+                        <span class="vb-mode vb-ro">Sola lettura</span>
+                    </div>
+                    <figure class="vb-media">
+                        <img src="/images/views/salesforce-utilization-view-demo-poster.png" data-gif="/images/views/salesforce-utilization-view-demo.gif" alt="Demo animata della heatmap di utilizzo di MultiDatePick in Salesforce: consulenti sul lato con il prenotato sulla capacità di ogni giorno, passaggio del mouse su un giorno pieno, poi clic per aprire la settimana di quel consulente" loading="lazy" decoding="async" width="880" height="780" data-zoomable>
+                    </figure>
+                </article>
+                <article class="vb-view" style="--vb-c:#0F766E;">
+                    <div class="vb-text">
+                        <span class="vb-tag">Agenda</span>
+                        <h3>Cosa c'è dopo?</h3>
+                        <p>Un elenco semplice dei prossimi 60 giorni, raggruppato per data, con gli orari, gli stati e i campi che scegli tu. Si legge bene su un telefono e durante un cambio turno.</p>
+                        <span class="vb-mode vb-ro">Sola lettura</span>
+                    </div>
+                    <figure class="vb-media">
+                        <img src="/images/views/salesforce-agenda-view-demo-poster.png" data-gif="/images/views/salesforce-agenda-view-demo.gif" alt="Demo animata della vista agenda di MultiDatePick in Salesforce: i prossimi appuntamenti elencati per data con ora, cliente, etichetta di stato e consulente, con schede al passaggio del mouse su due di essi" loading="lazy" decoding="async" width="700" height="860" data-zoomable>
+                    </figure>
+                </article>
+                </div>
+
+                <p class="vb-aside">Utilizzo e Agenda sono in sola lettura per scelta: rispondono a una domanda invece di registrare una prenotazione. Le altre tre sono completamente interattive.</p>
+
+                <h2 style="margin-top:44px;">Cinque viste, una sola definizione di prenotazione</h2>
+
+                <p>Di solito questa storia finisce con un secondo componente: campi propri, logica di salvataggio propria, bug propri. Qui tutte e cinque le viste leggono gli stessi record con la stessa mappatura dei campi, rispettano le stesse regole sui conflitti e le stesse date bloccate, e salvano dallo stesso percorso. Passare da Calendario a Cronologia non può cambiare il significato di una prenotazione, perché esiste una sola definizione di prenotazione.</p>
+
+                <p>Lo controllano due impostazioni:</p>
+
+                <div class="sc-cards">
+                    <div class="sc-card">
+                        <h3>Vista (View)</h3>
+                        <p>Il layout con cui si apre il componente: Calendario, Cronologia, Settimana, Utilizzo o Agenda.</p>
+                    </div>
+                    <div class="sc-card">
+                        <h3>Viste disponibili (Available Views)</h3>
+                        <p>Le viste offerte dal selettore. Lascialo vuoto per offrirle tutte e cinque, oppure limitalo alle due che hanno senso per quella pagina.</p>
+                    </div>
+                </div>
+
+                <p>Così un solo componente diventa tre strumenti diversi. La pagina Pianificazione colloqui di un recruiter si apre su Settimana, perché i colloqui sono una questione di orari. La pagina Prenotazione sale di un facility manager si apre su Calendario con Cronologia e Utilizzo accanto, perché le sale sono una questione di capacità. Uno schermo a parete si apre su Agenda e non offre nulla di modificabile.</p>
+
+                <div class="sc-note">
+                    <strong>La vista predefinita è sempre nel selettore</strong>, che tu la includa o meno in Available Views (Viste disponibili). Quell'elenco serve solo per le viste in più, e così sparisce un'intera categoria di problemi del tipo "ho limitato le viste e ora la mia vista predefinita non c'è più".</div>
+
+                <h2 style="margin-top:44px;">Scegli la vista per ogni posizione</h2>
+
+                <p>Un'impostazione del calendario valida per tutta l'organizzazione serve a poco, perché un'azienda non fa una sola domanda. Le vendite vogliono la prossima settimana. Le operations vogliono il prossimo trimestre. Un responsabile turni vuole oggi, ora per ora. La finanza vuole un dato di utilizzo.</p>
+
+                <p>View si imposta su ogni posizione del componente. Inserisci MultiDatePick in quattro pagine record, una schermata di flusso, una pagina iniziale e un sito Experience Cloud pubblico, e ognuno può essere una vista diversa degli stessi oggetti. Nessuna seconda installazione, nessuna mappatura dei campi da tenere allineata.</p>
+
+                <p>La Cronologia ha due impostazioni tutte sue:</p>
+
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Impostazione</th><th>Cosa fa</th><th style="width:22%;">Nome API</th></tr></thead>
+                    <tbody>
+                    <tr>
+                        <td>Finestra Cronologia (giorni) / Timeline Window (Days)</td>
+                        <td>Quanti giorni sono visibili insieme. Il valore predefinito è 14. Con un mese intero di colonne ogni prenotazione è larga una ventina di pixel e ogni etichetta viene tagliata, quindi la finestra serve a mantenere la vista leggibile. Imposta 0 se vuoi tutto il mese.</td>
+                        <td><code>timelineWindowDays</code></td>
+                    </tr>
+                    <tr>
+                        <td>Max righe risorse (Max View Resources)</td>
+                        <td>Quante righe di risorse disegnare, partendo dalle più occupate. Evita che un elenco di ottanta sale trasformi la vista in un muro.</td>
+                        <td><code>maxViewResources</code></td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <p>Quando una risorsa ha più prenotazioni sovrapposte, la sua riga si riduce a una sola striscia con un conteggio e, con un clic, si espande in una corsia per prenotazione. La densità diventa una scelta dell'utente invece di qualcosa che i dati gli impongono.</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-timeline-drag-to-reschedule-poster.png" data-gif="/images/views/salesforce-timeline-drag-to-reschedule.gif" alt="Demo animata della riprogrammazione sulla cronologia di MultiDatePick in Salesforce: trascinando il bordo destro di un incarico lo si allunga di due giorni, poi trascinando un altro incarico lo si sposta di due giorni; ognuno si salva al rilascio e la barra mostra le nuove date" loading="lazy" decoding="async" data-zoomable width="880" height="880">
+                    <figcaption>Per riprogrammare basta trascinare. Tira un bordo per allungare una prenotazione, afferra il centro per spostarla. Le nuove date compaiono sulla barra mentre trascini, e il salvataggio avviene al rilascio.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Collega la risorsa a User e diventa pianificazione delle persone</h2>
+
+                <p>Il Lookup della risorsa punta a qualsiasi oggetto. Con le sale ottieni la prenotazione sale. Con le attrezzature, il prestito di attrezzature. Puntalo su <strong>User</strong> e ogni vista qui sopra diventa uno strumento di staffing: la Cronologia è un turnario, la Settimana è una griglia dei turni, l'Utilizzo è una dashboard della capacità del team. I manager chiedono "chi ha superato la capacità" molto più spesso per le persone che per le sale.</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-resource-timeline-view.png" alt="Vista Cronologia di Salesforce in MultiDatePick con le persone come risorsa: consulenti sul lato, giorni in orizzontale, ogni incarico disegnato come una barra" loading="lazy" style="width:100%;max-width:100%;height:auto;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid #E2E8F0;display:block;" width="1722" height="1782" data-zoomable>
+                    <figcaption><strong>Persone come risorse.</strong> Ogni riga qui è una persona. Imposta Resource Object API Name su User e il tuo team riempie le righe allo stesso modo.</figcaption>
+                </figure>
+
+                <div class="sc-note">Due note pratiche se ci provi. User non ha un campo capacità standard, quindi aggiungine uno personalizzato se vuoi che Utilizzo mostri percentuali invece di semplici conteggi. E se punti Business Hours Start Field e Business Hours End Field (Campo inizio e Campo fine orario lavorativo) su campi di User, la griglia Settimana rispetta l'orario di lavoro di ogni persona invece di un'unica fascia per tutta l'organizzazione.</div>
+
+                <p>Nella libreria ci sono due configurazioni pronte proprio per questo: <strong>Pianificazione della capacità del team</strong>, che si apre sulla heatmap di utilizzo, e <strong>Turni del personale</strong>, che si apre sulla Cronologia. Entrambe usano User come risorsa.</p>
+
+                <h2 style="margin-top:44px;">Ogni configurazione della libreria ha già una vista scelta</h2>
+
+                <p>Scegliere una vista predefinita è una valutazione, ed è più facile copiarne una che deciderla da zero. Per questo ogni configurazione della <a href="/it/configurazioni-calendario-salesforce.html">Config Library</a> specifica sia una vista predefinita sia un elenco per il selettore, scelti in base all'uso reale di quella configurazione:</p>
+
+                <div class="vb-configs">
+                    <div class="vb-cfg"><span class="vb-cfg-what">Configurazioni per colloqui e appuntamenti</span><span class="vb-pills"><b style="--vb-c:#16A34A;">Settimana</b></span><span class="vb-cfg-why">si aprono sulle ore del giorno</span></div>
+                    <div class="vb-cfg"><span class="vb-cfg-what">Configurazioni per sale, postazioni, flotte e laboratori</span><span class="vb-pills"><b style="--vb-c:#F97316;">Cronologia</b><b style="--vb-c:#7C3AED;">Utilizzo</b></span><span class="vb-cfg-why">chi ha cosa, e quanto è pieno</span></div>
+                    <div class="vb-cfg"><span class="vb-cfg-what">Ferie, periodi di blocco e altri intervalli di date</span><span class="vb-pills"><b style="--vb-c:#F97316;">Cronologia</b></span><span class="vb-cfg-why">un record di più giorni è una sola barra</span></div>
+                    <div class="vb-cfg"><span class="vb-cfg-what">Configurazioni solo date</span><span class="vb-pills"><b style="--vb-c:#0176D3;">Calendario</b><b style="--vb-c:#0F766E;">Agenda</b></span><span class="vb-cfg-why">Agenda come compagna in sola lettura</span></div>
+                    <div class="vb-cfg"><span class="vb-cfg-what">Tutto ciò che ha un campo capacità</span><span class="vb-pills"><b style="--vb-c:#7C3AED;">Utilizzo</b></span><span class="vb-cfg-why">percentuali della capacità</span></div>
+                </div>
+                <div class="sc-note"><strong>La vista predefinita è sempre modificabile.</strong> Una vista predefinita in sola lettura nasconderebbe il compito principale della configurazione, quindi Utilizzo e Agenda sono sempre offerte solo in aggiunta.</div>
+
+                <p style="margin-top:18px;">Importane una qualsiasi, rimappa i nomi dei campi sul tuo schema, e la scelta della vista arriva insieme.</p>
+
+                <div class="bp-end">
+                    <h2>Un componente. Cinque viste. Nessuna seconda installazione.</h2>
+                    <p>Passa da una vista all'altra nella demo live, oppure guarda su quale vista si apre ogni scenario nella <a href="/it/configurazioni-calendario-salesforce.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-views" class="btn btn-demo" target="_blank" rel="noopener">Prova la demo live</a> <a href="/it/avvisami-al-lancio.html" class="btn btn-primary">Avvisami al lancio</a> <a href="/it/per-iniziare.html" class="btn btn-secondary">Per iniziare</a>
+                    </div>
+                    <ul class="check-list"><li>$20/utente/mese, tutte le funzionalità</li><li>Prova gratuita di 30 giorni, senza carta</li><li>100% nativo Salesforce</li><li>Senza Apex</li><li>Presto disponibile su Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Letture correlate</h3>
+                    <ul>
+                        <li><a href="/it/blog/cronologia-timeline-risorse-salesforce.html">La vista Cronologia di Salesforce nel dettaglio</a></li>
+                        <li><a href="/it/blog/heatmap-utilizzo-salesforce.html">La heatmap di utilizzo di Salesforce nel dettaglio</a></li>
+                        <li><a href="/it/blog/configurazione-guidata-calendario-salesforce.html">Configurare un calendario senza scrivere codice</a></li>
+                        <li><a href="/it/blog/evitare-doppie-prenotazioni-salesforce.html">Evitare le doppie prenotazioni in Salesforce</a></li>
+                        <li><a href="/it/blog/selettore-fasce-orarie-salesforce.html">Creare un selettore di fasce orarie per il calendario</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Il componente Booking</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Pianificazione per staffing e recruiting</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/it/" class="logo">
+                        <img src="/images/logo.png" alt="Logo MultiDatePick: componente calendario a più date e prenotazione risorse per Salesforce" width="180" height="45">
+                    </a>
+                    <p>La suite di componenti calendario più personalizzabile per Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Prodotto</h4>
+                    <ul>
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Date</a></li>
+                        <li><a href="/it/selettore-data-ora-fasce-orarie-salesforce.html">Date Time</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Booking</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Cinque viste calendario</a></li>
+                        <li><a href="/it/configurazioni-calendario-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluzioni</h4>
+                    <ul>
+                        <li><a href="/it/calendario-salesforce.html">Calendario Salesforce</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Staffing e recruiting</a></li>
+                        <li><a href="/it/pianificazione-colloqui-salesforce.html">Pianificazione colloqui</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce-experience-cloud.html">Prenotazioni su Experience Cloud</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Date delle campagne</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">Pubblica amministrazione / Section 508</a></li>
+                        <li><a href="/it/alternativa-salesforce-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentazione</h4>
+                    <ul>
+                        <li><a href="/it/per-iniziare.html">Per iniziare</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente</a></li>
+                        <li><a href="/it/guida-flussi-su-schermo-salesforce.html">Guida ai flussi su schermo</a></li>
+                        <li><a href="/it/pagine-app-home-experience.html">Pagine app, iniziali ed Experience</a></li>
+                        <li><a href="/it/distribuire-flusso-vs-code.html">Distribuire un flusso (VS Code)</a></li>
+                        <li><a href="/it/risoluzione-problemi.html">Risoluzione dei problemi</a></li>
+                        <li><a href="/it/domande-frequenti.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Azienda</h4>
+                    <ul>
+                        <li><a href="/it/prezzi.html">Prezzi</a></li>
+                        <li><a href="/it/blog/">Blog</a></li>
+                        <li><a href="/it/affidabilita-e-sicurezza.html">Affidabilità e sicurezza</a></li>
+                        <li><a href="/it/accessibilita-vpat.html">Accessibilità</a></li>
+                        <li><a href="/it/avvisami-al-lancio.html">Avvisami al lancio</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Supporto</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Tutti i diritti riservati.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Lingua" translate="no"><ul><li><a href="/blog/salesforce-calendar-views.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-kalenderansichten.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/vistas-calendario-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/vues-calendrier-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/viste-calendario-salesforce.html" hreflang="it" lang="it" aria-current="page">Italiano</a></li><li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-calendar-views.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-calendar-views.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-calendar-views.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ingrandisci immagine</p><p data-k="expand-diagram">Ingrandisci diagramma</p><p data-k="close">Chiudi</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

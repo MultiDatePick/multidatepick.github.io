@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce の時間枠選択カレンダー (ノーコード)</title>
+    <meta name="description" content="Salesforce の時間枠選択: 任意の間隔で予約枠を表示し、埋まった時間は選ぶ前から非表示。定員もリアルタイム表示。コード不要。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/salesforce-calendar-time-slot-picker.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce の時間枠選択カレンダー (ノーコード)">
+    <meta property="og:description" content="Salesforce の時間枠選択: 任意の間隔で予約枠を表示し、埋まった時間は選ぶ前から非表示。定員もリアルタイム表示。コード不要。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/salesforce-calendar-time-slot-picker.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce の時間枠選択カレンダー (ノーコード)">
+    <meta name="twitter:description" content="Salesforce の時間枠選択: 任意の間隔で予約枠を表示し、埋まった時間は選ぶ前から非表示。定員もリアルタイム表示。コード不要。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-calendar-time-slot-picker.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-kalender-zeitfenster-auswahl.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/selector-franjas-horarias-calendario-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/selecteur-creneaux-horaires-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/selettore-fasce-orarie-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/seletor-de-horarios-calendario-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-calendar-time-slot-picker.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-calendar-time-slot-picker.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-calendar-time-slot-picker.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-calendar-time-slot-picker.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce で時間枠を選べるカレンダーを作る",
+                "description": "Salesforce の時間枠選択: 任意の間隔で予約枠を表示し、埋まった時間は選ぶ前から非表示。定員もリアルタイム表示。コード不要。",
+                "datePublished": "2026-06-27",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/salesforce-calendar-time-slot-picker.html",
+                "image": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "時間枠選択カレンダーとは?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "日付を選ぶカレンダーの下に、その日を予約可能な間隔に区切ったグリッドが表示されるものです。すでに埋まっている時間枠は予約不可として表示されるため、空いている時間だけを選べます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce に時間枠選択の機能はありますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "自社のオブジェクト向けにはありません。標準の日付/時間項目は日付入力と時刻のドロップダウンで、他のレコードを参照できません。MultiDatePick は、カレンダーの読み込み時に既存の予約を読み取り、空いている時間だけを提示する時間枠選択を追加します。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "時間枠の長さは自由に決められますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。時間枠の間隔は任意の分数で設定できます。15 分、30 分、60 分が一般的ですが、45 分の面接枠も同じように設定できます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "時間枠選択を追加するのに Apex や開発者は必要ですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。セットアップウィザードが設定を作成し、Config Name を指定するだけで、コンポーネントをレコードページ、アプリケーションページ、Experience Cloud サイト、画面フローに配置できます。書くべきコードはありません。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/multidatepick-booking-demo-poster.png",
+                "caption": "Salesforce のリソース予約デモ: アドバイザーを選び、顧客を入力し、日付と空いている 30 分の時間枠を選んで、申請を保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo-poster.png",
+                "caption": "Salesforce の MultiDatePick DateTime コンポーネントのアニメーションデモ: 新入社員オンボーディングの予定に名前を付け、月曜から木曜までをドラッグし、共通のタイムグリッドで 09:00〜12:00 をドラッグして、1 日 1 シフトずつ保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-time-slots.png",
+                "caption": "Salesforce カレンダーの時間枠選択グリッド: 空き枠と予約済みの枠を時間帯ごとにグループ化して表示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce で時間枠を選べるカレンダーを作る</h1>
+                <p class="subtitle">Salesforce にあるのは日付選択と時間項目だけで、選択できる時間枠のグリッドはありません。本格的な Salesforce の時間枠選択に何が必要か、そして自作せずに手に入れる方法を解説します。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 6 月 27 日 &middot; 更新日 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+                <p class="sc-lead">時間枠選択は決まった形の画面です。日付を選ぶカレンダーがあり、その下にその日を予約可能な間隔に区切ったグリッドが表示され、埋まっている枠は一目で予約不可とわかります。ネット上の予約サイトはどこもこの形なので、誰でも見覚えがあるはずです。しかし Salesforce には標準で用意されていません。</p>
+
+                <div class="bp-pair">
+                    <figure class="sc-shot">
+                        <img src="/images/multidatepick-booking-demo-poster.png" data-gif="/images/multidatepick-booking-demo.gif" alt="Salesforce のリソース予約デモ: アドバイザーを選び、顧客を入力し、日付と空いている 30 分の時間枠を選んで、申請を保存" width="700" height="1010" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>アドバイザー、日付、空いている時間枠を選ぶだけ。埋まっている枠は最初から表示されません。</figcaption>
+                    </figure>
+                    <figure class="sc-shot">
+                        <img src="/images/components/salesforce-date-time-scheduling-demo-poster.png" data-gif="/images/components/salesforce-date-time-scheduling-demo.gif" alt="Salesforce の MultiDatePick DateTime コンポーネントのアニメーションデモ: 新入社員オンボーディングの予定に名前を付け、月曜から木曜までをドラッグし、共通のタイムグリッドで 09:00〜12:00 をドラッグして、1 日 1 シフトずつ保存" width="700" height="961" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>4 日間をドラッグし、09:00〜12:00 をドラッグして、1 日 1 件ずつレコードを保存。</figcaption>
+                    </figure>
+                </div>
+
+                <h2 style="margin-top:44px;">Salesforce に標準で用意されているもの</h2>
+                <p>標準の日付/時間項目は、日付入力と時刻のドロップダウンとして表示されます。これはただのフォーム部品で、ほかに何が予約されているかを知りません。項目は他のレコードの存在を知らないので、ユーザーがすでに埋まっている枠を選んでも止められません。チェックが行われるのは、ユーザーが選択を確定した後の入力規則やフローの中です。</p>
+                <p>ここに足りない部分があります。時間枠選択はユーザーが選ぶ<em>前に</em>既存のレコードを検索し、空いている枠だけを提示します。</p>
+
+                <h2 style="margin-top:44px;">本格的な時間枠選択に必要なこと</h2>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">要件</th><th style="width:30%;">標準項目</th><th>MultiDatePick なら</th></tr></thead>
+                    <tbody>
+                    <tr><td>1 日を間隔で区切る</td><td class="bp-no">間隔という概念がない</td><td class="bp-yes">任意の間隔 (15、30、60 分が一般的)</td></tr>
+                    <tr><td>営業時間を把握する</td><td class="bp-no">どの時刻でも有効</td><td class="bp-yes">最も早い時刻と最も遅い時刻、またはリソースごとの営業時間</td></tr>
+                    <tr><td>埋まっている枠を表示する</td><td class="bp-no">何も表示されない</td><td class="bp-yes">既存の予約をグリッド上に表示</td></tr>
+                    <tr><td>1 つの枠に複数人</td><td class="bp-no">表現できない</td><td class="bp-yes">定員を設定し、予約数/定員のバッジをリアルタイム表示</td></tr>
+                    <tr><td>日付ごとに異なる時刻</td><td class="bp-no">1 項目に 1 つの値</td><td class="bp-yes">Allow Different Times Per Date</td></tr>
+                    <tr><td>保存時に重複を防ぐ</td><td class="bp-no">独自のロジックが必要</td><td class="bp-yes">競合の動作: block、skip、allow</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">自作が見た目以上に大変な理由</h2>
+                <p>画面の描画は簡単な部分です。見積もりから漏れがちなのは次の部分です。</p>
+                <div class="bp-cards">
+                    <div class="bp-card"><h3>予約の検索</h3><p>誰かが 2 か月表示を開いてもガバナ制限を超えないよう、効率よく検索する必要があります。</p></div>
+                    <div class="bp-card" style="--c:#0176D3;"><h3>重複の計算</h3><p>予約の長さがまちまちになった途端に面倒になります。</p></div>
+                    <div class="bp-card" style="--c:#7C3AED;"><h3>タイムゾーン</h3><p>実行ユーザーのタイムゾーンとレコードのタイムゾーンが同じとは限りません。</p></div>
+                    <div class="bp-card" style="--c:#E11D48;"><h3>競合状態</h3><p>2 人が同じ瞬間に同じ空き枠を見ている場合です。</p></div>
+                    <div class="bp-card" style="--c:#0F766E;"><h3>項目レベルセキュリティ</h3><p>コンポーネントは、実行ユーザーが参照できる範囲を守る必要があります。</p></div>
+                    <div class="bp-card" style="--c:#16A34A;"><h3>アクセシビリティ</h3><p>クリックできる div を並べたグリッドは、そのままではキーボードで操作できません。</p></div>
+                </div>
+                <p>最も手間がかかるのはアクセシビリティです。時間枠のグリッドには、正しい ARIA グリッドのセマンティクス、矢印キーでの移動、色以外でも伝わる状態表示が必要です。社内開発で最も省かれがちで、調達審査で必ず聞かれる部分です。</p>
+
+                <h2 style="margin-top:44px;">ひと目で探せるように時間枠をグループ化する</h2>
+                <p>9 時から 17 時までを 15 分間隔で区切ると 32 枠になります。単純なリストで並べると、壁のように見えてしまいます。午前、午後、夕方の時間帯ごとにまとめれば、3 つの短いブロックになります。特に、スマートフォンで予約する顧客にとって効果的です。</p>
+                <figure class="sc-shot">
+                    <img src="/images/marketing/salesforce-calendar-time-slots.png" alt="Salesforce カレンダーの時間枠選択グリッド: 空き枠と予約済みの枠を時間帯ごとにグループ化して表示" loading="lazy" data-zoomable width="1004" height="682">
+                    <figcaption>埋まっている枠を示した時間枠グリッド。グループ化しているので一覧でも探しやすい。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">カレンダーそのものが不要な場合</h2>
+                <p>日付がすでに決まっている場合もあります。日付が入っている予定のレコードページでは、月間カレンダーは不要です。Time Grid Only（タイムグリッドのみ） を使うとカレンダーを表示せず、その日付の時間枠グリッドだけを表示します。日付はホストレコードの項目から読み取るか、直接指定できます。</p>
+
+                <h2 style="margin-top:44px;">時間枠選択を形づくる設定</h2>
+                <p>どれもセットアップウィザードの項目です。コードは一切不要です。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">設定</th><th>機能</th><th style="width:24%;">API 参照名</th></tr></thead>
+                    <tbody>
+                    <tr><td>時間間隔（Time Slot Interval (Minutes)）</td><td>各時間枠の長さ。任意の分数を指定できます。</td><td><code>timeInterval</code></td></tr>
+                    <tr><td>最小時刻 / 最大時刻（Earliest Time / Latest Time）</td><td>Dates &amp; Times コンポーネントでグリッドが表示する時間帯。</td><td><code>minTime</code>、<code>maxTime</code></td></tr>
+                    <tr><td>営業時間開始項目 / 営業時間終了項目（Business Hours Start / End Field）</td><td>Booking コンポーネントでのリソースごとの営業時間。</td><td><code>businessHoursStartField</code></td></tr>
+                    <tr><td>定員項目（Capacity Field）</td><td>1 つの時間枠でリソースが受け付ける予約の数。</td><td><code>capacityField</code></td></tr>
+                    <tr><td>時間枠を時間帯でグループ化（Group Time Slots by Period）</td><td>午前、午後、夕方のセクションに分けて表示。</td><td><code>groupTimeSlotsByPeriod</code></td></tr>
+                    <tr><td>競合の動作（Conflict Behavior）</td><td>保存時の重複をブロック、スキップ、または許可。</td><td><code>conflictBehavior</code></td></tr>
+                    <tr><td>タイムグリッドのみ（Time Grid Only）</td><td>決まった 1 日の時間枠グリッドだけを表示。</td><td><code>timeGridOnly</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>設定するだけの時間枠選択。</strong><a href="/ja/multidatepickdatetime.html">Dates &amp; Times コンポーネント</a>と<a href="/ja/salesforce-booking-calendar.html">Resource Booking コンポーネント</a>のどちらにも搭載されています。レコードページ、アプリケーションページ、Experience Cloud サイト、画面フローの中で動作します。</div>
+
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="bp-faq">
+                    <details><summary>時間枠選択カレンダーとは?</summary><p>日付を選ぶカレンダーの下に、その日を予約可能な間隔に区切ったグリッドが表示されるものです。すでに埋まっている時間枠は予約不可として表示されるため、空いている時間だけを選べます。</p></details>
+                    <details><summary>Salesforce に時間枠選択の機能はありますか?</summary><p>自社のオブジェクト向けにはありません。標準の日付/時間項目は日付入力と時刻のドロップダウンで、他のレコードを参照できません。MultiDatePick は、カレンダーの読み込み時に既存の予約を読み取り、空いている時間だけを提示する時間枠選択を追加します。</p></details>
+                    <details><summary>時間枠の長さは自由に決められますか?</summary><p>はい。時間枠の間隔は任意の分数で設定できます。15 分、30 分、60 分が一般的ですが、45 分の面接枠も同じように設定できます。</p></details>
+                    <details><summary>時間枠選択を追加するのに Apex や開発者は必要ですか?</summary><p>いいえ。セットアップウィザードが設定を作成し、Config Name を指定するだけで、コンポーネントをレコードページ、アプリケーションページ、Experience Cloud サイト、画面フローに配置できます。書くべきコードはありません。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Salesforce の時間枠選択を、設定するだけで</h2>
+                    <p>ライブデモで空いている時間枠を選んでから、「はじめに」の手順で自分の組織に追加しましょう。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-time-slot-picker" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/salesforce-add-to-calendar.html">カレンダーに追加: 予約を Outlook と Google に</a></li>
+                        <li><a href="/ja/blog/prevent-double-booking-in-salesforce.html">Salesforce でダブルブッキングを防ぐ</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">週グリッドを含む 5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">Salesforce カレンダーで面接日程を調整する</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Resource Booking コンポーネント</a></li>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダーのすべて</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/salesforce-calendar-time-slot-picker.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-kalender-zeitfenster-auswahl.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/selector-franjas-horarias-calendario-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/selecteur-creneaux-horaires-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/selettore-fasce-orarie-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/seletor-de-horarios-calendario-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-calendar-time-slot-picker.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/salesforce-calendar-time-slot-picker.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-calendar-time-slot-picker.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

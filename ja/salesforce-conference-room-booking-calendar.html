@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 会議室予約・座席予約カレンダー</title>
+    <meta name="description" content="Salesforce で会議室と座席を予約。全会議室を 1 つのタイムラインで確認、ダブルブッキング防止、部屋ごとの営業時間と休業日、利用状況ヒートマップ。コード不要。">
+    <link rel="canonical" href="https://multidatepick.com/ja/salesforce-conference-room-booking-calendar.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="preload" as="image" href="/images/multidatepick-booking-demo-poster.png" fetchpriority="high">
+    <meta property="og:title" content="Salesforce 会議室予約・座席予約カレンダー">
+    <meta property="og:description" content="Salesforce で会議室と座席を予約。全会議室を 1 つのタイムラインで確認、ダブルブッキング防止、部屋ごとの営業時間と休業日、利用状況ヒートマップ。コード不要。">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/salesforce-conference-room-booking-calendar.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 会議室予約・座席予約カレンダー">
+    <meta name="twitter:description" content="Salesforce で会議室と座席を予約。全会議室を 1 つのタイムラインで確認、ダブルブッキング防止、部屋ごとの営業時間と休業日、利用状況ヒートマップ。コード不要。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "name": "Salesforce 会議室予約・座席予約",
+                "url": "https://multidatepick.com/ja/salesforce-conference-room-booking-calendar.html",
+                "description": "MultiDatePick Booking による Salesforce の会議室・座席予約: 任意のオブジェクトの会議室、会議室スケジュールのタイムライン、競合の検出、部屋ごとの営業時間と休業日、座席の定員、稼働率ヒートマップ。コード不要。",
+                "isPartOf": {
+                    "@id": "https://multidatepick.com/ja/#website"
+                },
+                "about": {
+                    "@id": "https://multidatepick.com/ja/#software"
+                },
+                "primaryImageOfPage": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce で会議室を予約できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "標準機能ではできません。標準の Salesforce には会議室予約のコントロールがありません。MultiDatePick Booking がそれを追加します。会議室を任意のオブジェクトのレコードとして管理すれば、ユーザーは会議室を選び、1 日または複数の日付を選び、空いている時間枠をクリックして予約できます。各予約は自社の予約オブジェクトのレコードとして保存されます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "同じ会議室を 2 人が予約するのを防ぐには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Conflict Behavior（競合の動作） を Block に設定します。予約済みの時間枠は予約済みとして表示されてクリックできず、保存のたびに既存の予約と照合されるため、重複した予約が保存されることはありません。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce で座席予約やフリーアドレスの管理はできますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。各座席エリアを Capacity Field（定員項目） 付きのリソースにして Show Availability Count（空き状況数を表示） をオンにすれば、エリアが満席になるまで残りの座席数が表示されます。Disable Time Slot Grid (Full-Day Mode)（時間枠グリッドを無効化） を使えば座席を終日単位で予約できます。Config Library の「フリーアドレスの座席予約」設定がそのまま出発点として使えます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "すべての会議室のスケジュールを 1 画面で見られますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。タイムライン表示では全会議室を縦に、日付を横に並べ、複数日の予約は 1 本のバーで表示します。稼働率表示では各会議室の日ごとの埋まり具合をヒートマップで、週表示では 1 日を時間単位で確認できます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "1 回の予約で複数の会議室を押さえられますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。Allow Booking Multiple Resources をオンにすると、同じ時間枠で複数の会議室にチェックを入れ、1 回の操作で予約できます。会議室をまたいだ定員の合算方法は Capacity Aggregation で決めます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "会議室ごとに営業時間や休業日を設定できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。Business Hours Start Field（営業時間開始項目） と Business Hours End Field（営業時間終了項目） で、各会議室の営業時間を会議室のレコードから読み込みます。ブロック日付は自社の休業日レコードから取得し、終日でも時間単位でも、全会議室にも特定の 1 室にも設定できます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "どこから会議室を予約できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Booking コンポーネントを配置した場所ならどこでも。レコードページ、アプリケーションページ、ホームページ、画面フロー (Screen Flow)、Experience Cloud サイトのページで使えます。アプリケーションページ、ホームページ、Experience ページでは Config Name（設定名） と Static Parent Record Id を設定します。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick の料金はいくらですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "すべてのコンポーネントと機能が 1 ユーザーあたり月額 $20。30 日間の無料トライアル付きで、クレジットカードは不要です。100% Salesforce ネイティブで、Salesforce AppExchange で近日公開予定です。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/multidatepick-booking-demo-poster.png",
+                "caption": "MultiDatePick による Salesforce 予約カレンダーのアニメーションデモ: アドバイザーを選び、顧客を入力し、日付と空いている 30 分の時間枠を選んで、申請を保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-booking-grid.png",
+                "caption": "MultiDatePick の Salesforce 会議室予約カレンダー: チェックボックス付きの会議室リスト「リソースを選択」、状況の色、予約のある日を表示した 1 か月",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo-poster.png",
+                "caption": "MultiDatePick の Salesforce リソースタイムラインのアニメーションデモ: 縦にアドバイザー、複数日の案件は 1 本のバーで表示。案件にカーソルを合わせてカードを表示し、週から月にズームしてページ送り",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png",
+                "caption": "MultiDatePick の Salesforce 稼働率ヒートマップのアニメーションデモ: 縦にアドバイザー、日ごとに予約数/定員を表示。満員の日にカーソルを合わせ、クリックするとそのアドバイザーの週を表示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-week-view-demo-poster.png",
+                "caption": "MultiDatePick の Salesforce 週表示のアニメーションデモ: アドバイザーを選ぶと顧客との面談が状況の色のブロックで実際の長さどおりに表示され、ホバーカードで顧客、面談の種類、状況を確認",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-drag-to-reschedule-poster.png",
+                "caption": "MultiDatePick の Salesforce タイムラインでの日程変更のアニメーションデモ: 案件の右端をドラッグして 2 日延長し、別の案件をドラッグして 2 日後にずらす。いずれもドロップ時に保存され、新しい日付がバーに表示される",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-capacity-lanes.png",
+                "caption": "Salesforce タイムラインの拡大図: 重なる複数日の予約が各リソースの下で段に分かれて積み重なり、全体の定員バーで各日の埋まり具合を表示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/salesforce-booking-capacity-calendar.png",
+                "caption": "MultiDatePick の Salesforce 予約カレンダー (アドバイザー 1 名分): 各日を予定の状況で色分けし、混在する日は斜めに分割。30 分単位の時間枠グリッドに予約数/定員のバッジを表示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+    <style>
+        .hm-wrap{max-width:1040px;margin:0 auto;padding:0 16px;}
+        .hm-hero{background:linear-gradient(170deg,var(--blue-50,#F0F9FF) 0%,#E0F2FE 60%,#fff 100%);padding:44px 0 40px;}
+        .bk-hero{display:grid;grid-template-columns:1.15fr 1fr;gap:32px;align-items:center;}
+        .hm-hero h1{font-size:2.35rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1.12;margin:0;}
+        .hm-hero h1 .pre{display:block;font-size:1rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#C2410C;margin-bottom:8px;}
+        .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+        .hm-hero .subtitle{font-size:1.08rem;color:var(--gray-600,#4b5563);margin:14px 0 0;max-width:560px;}
+        .hm-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}
+        .hm-ctas .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .hm-ctas .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .hm-demo-link{display:inline-block;margin-top:12px;font-size:.92rem;font-weight:600;}
+        .bk-hero .gs-fig{margin:0;max-width:400px;justify-self:center;width:100%;}
+        .hm-live{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;padding:26px 0;scroll-margin-top:80px;}
+        .hm-live .hm-wrap{display:flex;gap:18px 28px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+        .hm-live h2{color:#fff;font-size:1.3rem;margin:0 0 4px;}
+        .hm-live p{color:#cdd9e8;margin:0;font-size:.95rem;max-width:680px;}
+        .hm-live .tag{display:block;color:#FDBA74;font-size:.75rem;font-weight:800;letter-spacing:.12em;margin-bottom:8px;}
+        .hm-live .btn{background:#F97316;color:#fff;white-space:nowrap;}
+        .hm-live .btn:hover{background:#EA580C;color:#fff;}
+        .gs-sec{padding:56px 0;scroll-margin-top:80px;}
+        .gs-sec.alt{background:var(--blue-50,#F0F9FF);}
+        .gs-sec h2{font-size:1.6rem;color:var(--blue-900,#0C4A6E);margin:0 0 6px;padding-left:17px;position:relative;line-height:1.25;} .gs-sec h2::before{content:"";position:absolute;left:0;top:calc(.625em - 11px);width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-sec h3{font-size:1.15rem;color:var(--blue-900,#0C4A6E);margin:32px 0 6px;scroll-margin-top:80px;}
+        .gs-lead{color:var(--gray-600,#4b5563);margin:0 0 20px;font-size:1rem;max-width:760px;}
+        .gs-sec code{background:#f3f4f6;padding:1px 5px;border-radius:3px;color:#c2410c;font-size:.88em;word-break:break-word;}
+        .gs-fig{margin:18px 0 8px;}
+        .gs-fig img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #E5E7EB;box-shadow:0 4px 20px rgba(15,45,82,.08);background:#fff;}
+        .gs-fig figcaption{text-align:center;font-size:.88rem;color:var(--gray-500,#6b7280);margin-top:8px;}
+        .gs-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE3EC;border-radius:10px;overflow:hidden;font-size:.93rem;}
+        .gs-table th,.gs-table td{padding:11px 14px;border-bottom:1px solid #E8EDF3;border-right:1px solid #E8EDF3;text-align:left;vertical-align:top;}
+        .gs-table th:last-child,.gs-table td:last-child{border-right:none;}
+        .gs-table thead th{background:#0F2D52;color:#fff;font-weight:600;font-size:.85rem;}
+        .gs-table thead th.mdp{background:#C2410C;}
+        .gs-table tbody tr:last-child td{border-bottom:none;}
+        .gs-table td:first-child{font-weight:600;color:var(--blue-900,#0C4A6E);}
+        .gs-table .old{color:var(--gray-500,#6b7280);}
+        .gs-table .new{color:#065F46;font-weight:600;}
+        .gs-table small{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);font-weight:400;}
+        .hm-scroll{overflow-x:auto;}
+        .gs-chain{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-wrap:wrap;gap:8px 4px;align-items:center;font-size:.9rem;}
+        .gs-chain li{background:#fff;border:1px solid #BFDBFE;color:#1E3A8A;border-radius:999px;padding:5px 14px;font-weight:600;}
+        .gs-chain li b{color:#F97316;margin-right:4px;}
+        .gs-chain li.arr{background:none;border:none;color:#94A3B8;padding:0 2px;}
+        .gs-two{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+        .gs-two .gs-fig{margin-top:0;}
+        .bk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 0;}
+        .bk-tile{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:12px 14px 12px 18px;position:relative;} .bk-tile::before{content:"";position:absolute;left:0;top:13px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#10b981;}
+        .bk-tile b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;margin-bottom:3px;}
+        .bk-tile span{display:block;font-size:.85rem;color:var(--gray-600,#4b5563);}
+        .bk-tile .comp{display:inline-block;margin-top:8px;font-size:.72rem;font-weight:700;letter-spacing:.04em;color:#1E3A8A;background:#EFF6FF;border-radius:999px;padding:1px 9px;}
+        .gs-paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0;}
+        .gs-paths.three{grid-template-columns:repeat(3,1fr);}
+        .gs-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;font-size:.92rem;color:var(--gray-600,#4b5563);}
+        .gs-card b{display:block;color:var(--blue-900,#0C4A6E);font-size:1rem;margin-bottom:6px;}
+        .gs-card.bk,.gs-card.rs,.gs-card.sf{position:relative;padding-left:18px;} .gs-card.bk{--rail:#F97316;}
+        .gs-card.rs{--rail:#10b981;}
+        .gs-card.sf{--rail:#0176D3;} .gs-card.bk::before,.gs-card.rs::before,.gs-card.sf::before{content:"";position:absolute;left:0;top:15px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .hm-checks{list-style:none;padding:0;margin:0;}
+        .hm-checks li{padding:5px 0 5px 24px;position:relative;border-bottom:1px solid #F1F5F9;}
+        .hm-checks li:last-child{border-bottom:none;}
+        .hm-checks li::before{content:"\2713";position:absolute;left:2px;color:#10b981;font-weight:700;}
+        .gs-note{margin:16px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 18px 14px 22px;font-size:.92rem;color:#7C2D12;position:relative;} .gs-note::before{content:"";position:absolute;left:0;top:14px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-note b{color:#9A3412;}
+        .bk-views{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:8px;}
+        .bk-views .gs-fig{margin:0;}
+        .cf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 0;}
+        .cf-grid.two{grid-template-columns:1fr 1fr;}
+        .cf-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px 12px 18px;position:relative;display:flex;flex-direction:column;} .cf-card::before{content:"";position:absolute;left:0;top:16px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .cf-card .cf-type{font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#C2410C;}
+        .cf-card h3{margin:2px 0 4px;font-size:1.05rem;}
+        .cf-card p{margin:0 0 10px;font-size:.86rem;color:var(--gray-600,#4b5563);}
+        .cf-set{list-style:none;padding:0;margin:0 0 12px;font-size:.85rem;}
+        .cf-set li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #F1F5F9;}
+        .cf-set li:last-child{border-bottom:none;}
+        .cf-set li span{color:var(--blue-900,#0C4A6E);font-weight:600;}
+        .cf-set li em{font-style:normal;color:#334155;text-align:right;}
+        .cf-links{margin-top:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:.86rem;font-weight:600;}
+        .gs-faq details{background:#fff;border:1px solid #DCE3EC;border-radius:10px;margin:0 0 10px;padding:0 18px;}
+        .gs-faq summary{cursor:pointer;font-weight:600;color:var(--blue-900,#0C4A6E);padding:14px 0;list-style-position:outside;}
+        .gs-faq details p{margin:0 0 14px;color:var(--gray-600,#4b5563);font-size:.93rem;}
+        .gs-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .gs-links a{display:block;background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;text-decoration:none;transition:border-color .15s ease;}
+        .gs-links a:hover{border-color:#F97316;}
+        .gs-links b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;}
+        .gs-links span{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);}
+        .hm-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .hm-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .hm-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .hm-final .hm-ctas{justify-content:center;}
+        .hm-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .hm-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .hm-final .contact{margin:20px 0 0;font-size:.9rem;color:#cdd9e8;}
+        @media (max-width:900px){
+            .bk-hero,.gs-two{grid-template-columns:1fr;}
+            .bk-grid{grid-template-columns:1fr 1fr;}
+            .gs-links,.gs-paths.three,.cf-grid{grid-template-columns:1fr 1fr;}
+        }
+        @media (max-width:600px){
+            .hm-hero{padding:30px 0 28px;}
+            .hm-hero h1{font-size:1.75rem;}
+            .bk-views,.gs-paths,.gs-paths.three,.gs-links,.cf-grid,.cf-grid.two{grid-template-columns:1fr;}
+            .gs-sec{padding:40px 0;}
+            .gs-sec h2{font-size:1.35rem;}
+            .gs-table{font-size:.86rem;}
+            .gs-table th,.gs-table td{padding:9px 8px;}
+            .hm-final h2{font-size:1.45rem;}
+        }
+    </style>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/salesforce-conference-room-booking-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/salesforce-besprechungsraum-buchung.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/reserva-salas-reuniones-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/reservation-salle-reunion-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/prenotazione-sale-riunioni-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/reserva-de-salas-de-reuniao-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/salesforce-conference-room-booking-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/salesforce-conference-room-booking-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/salesforce-conference-room-booking-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/salesforce-conference-room-booking-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html" class="active">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <section class="hm-hero">
+            <div class="hm-wrap bk-hero">
+                <div>
+                    <h1><span class="pre">会議室予約<span class="vh">:</span></span> Salesforce 会議室予約カレンダー</h1>
+                    <p class="subtitle">会議室と座席を Salesforce の中で予約。全会議室を一度に見て、日付と空いている時間枠を選んで保存するだけ。ダブルブッキングは起きません。</p>
+                    <div class="hm-ctas">
+                        <a href="/ja/notify-me-at-launch.html" class="btn btn-cta">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <a class="hm-demo-link" href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-conference-room-booking-calendar" target="_blank" rel="noopener">または今すぐライブデモを試す (ログイン不要) &rarr;</a>
+                </div>
+                <figure class="gs-fig">
+                    <img src="/images/multidatepick-booking-demo-poster.png" data-gif="/images/multidatepick-booking-demo.gif" alt="MultiDatePick による Salesforce 予約カレンダーのアニメーションデモ: アドバイザーを選び、顧客を入力し、日付と空いている 30 分の時間枠を選んで、申請を保存" title="Salesforce 予約カレンダーのデモ" width="700" height="1010" fetchpriority="high" decoding="async" data-zoomable>
+                    <figcaption>リソース、日付、空いている時間枠を選ぶだけで予約完了。</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ═══════════════ LIVE DEMO ═══════════════ -->
+        <section class="hm-live" id="live-demo">
+            <div class="hm-wrap">
+                <div>
+                    <span class="tag">今すぐ試せる: インストール不要、ログイン不要</span>
+                    <h2>ライブデモで時間枠を予約する</h2>
+                    <p>デモでは公開 Salesforce サイトでアドバイザーを予約します。会議室も同じ Booking コンポーネントで、会議室をリソースにして予約できます。</p>
+                </div>
+                <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-conference-room-booking-calendar" target="_blank" rel="noopener" class="btn">ライブデモを開く &rarr;</a>
+            </div>
+        </section>
+
+        <!-- ═══════════════ OVERVIEW ═══════════════ -->
+        <section class="gs-sec" id="overview">
+            <div class="hm-wrap">
+                <h2>Salesforce の会議室予約を 4 クリックで</h2>
+                <p class="gs-lead">会議室はすでにレコードとして存在しています。MultiDatePick はそれを予約カレンダーに変え、予約はすべて自社のオブジェクトに保存されます。</p>
+                <ul class="gs-chain" aria-label="会議室の予約方法">
+                    <li><b>1</b>会議室を選ぶ</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li><b>2</b>1 日または複数の日付を選ぶ</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li><b>3</b>空いている時間枠をクリック</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li><b>4</b>予約: レコードを保存</li>
+                </ul>
+                <div class="bk-grid">
+                    <div class="bk-tile"><b>任意のオブジェクトの会議室</b><span>建物、フロア、広さで絞り込み。</span></div>
+                    <div class="bk-tile"><b>予約済みの時間枠を表示</b><span>クリックする前に、状況別の色で。</span></div>
+                    <div class="bk-tile"><b>会議室ごとの営業時間</b><span>ラボは 24 時間、役員会議室は 9 時から 17 時。</span></div>
+                    <div class="bk-tile"><b>休業日</b><span>終日でも一部の時間でも、1 室でも全室でも。</span></div>
+                    <div class="bk-tile"><b>複数の会議室を同時に</b><span>1 回の操作で、各室の同じ時間枠を予約。</span></div>
+                    <div class="bk-tile"><b>時間枠の長さは自由</b><span>15 分、30 分、60 分が一般的。</span></div>
+                    <div class="bk-tile"><b>インライン編集</b><span>削除せずに移動、時間変更、キャンセル。</span></div>
+                    <div class="bk-tile"><b>5 つの表示</b><span>カレンダー、タイムライン、週、稼働率、予定一覧。</span></div>
+                </div>
+                <div class="gs-two" style="margin-top:26px;">
+                    <div class="hm-scroll">
+                    <table class="gs-table">
+                        <thead><tr><th>会議室の作業</th><th>標準の Salesforce</th><th class="mdp">MultiDatePick なら</th></tr></thead>
+                        <tbody>
+                            <tr><td>1 つの会議室を 4 日の午後に</td><td class="old">4 件のレコードを手入力</td><td class="new">4 クリックで 1 回保存</td></tr>
+                            <tr><td>空いている?</td><td class="old">まずレポートを実行</td><td class="new">予約済みの時間枠がグリッドに表示</td></tr>
+                            <tr><td>会議室の利用は 9 時から 17 時</td><td class="old">19 時の予約も止められない</td><td class="new">会議室の営業時間を反映</td></tr>
+                            <tr><td>研修に会議室が 3 つ必要</td><td class="old">予約を 3 回</td><td class="new">3 室にチェックして 1 回で予約</td></tr>
+                            <tr><td>メンテナンスで使用不可</td><td class="old">どこかにメモがあるだけ</td><td class="new">その日がグレー表示に</td></tr>
+<tr><td>会議の合間の片付け</td><td class="old">次のグループが入ってきてしまう</td><td class="new">各予約の後にバッファーを確保</td></tr>
+<tr><td>1 年先まで予約される</td><td class="old">誰も使わない仮押さえ</td><td class="new">N 日先まで予約可能</td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                    <figure class="gs-fig">
+                        <img src="/images/marketing/salesforce-calendar-booking-grid.png" alt="MultiDatePick の Salesforce 会議室予約カレンダー: チェックボックス付きの会議室リスト「リソースを選択」、状況の色、予約のある日を表示した 1 か月" title="Salesforce 会議室予約カレンダー" width="1004" height="858" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>1 室でも複数でもチェック。予約のある日は状況の色で表示されます。</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ VIEWS ═══════════════ -->
+        <section class="gs-sec alt" id="views">
+            <div class="hm-wrap">
+                <h2>全会議室を一度に見られる会議室スケジュールカレンダー</h2>
+                <p class="gs-lead">会議室が 3、4 室を超えると、月表示のグリッドでは役に立たなくなります。表示を切り替えれば、同じ予約から施設管理の疑問に答えられます。</p>
+                <div class="bk-views">
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-timeline-view-demo-poster.png" data-gif="/images/views/salesforce-timeline-view-demo.gif" alt="MultiDatePick の Salesforce リソースタイムラインのアニメーションデモ: 縦にアドバイザー、複数日の案件は 1 本のバーで表示。案件にカーソルを合わせてカードを表示し、週から月にズームしてページ送り" title="Salesforce リソースタイムラインのデモ" width="880" height="880" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>タイムライン: 会議室ごとに 1 行。どの部屋がいつ空いている?</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-utilization-view-demo-poster.png" data-gif="/images/views/salesforce-utilization-view-demo.gif" alt="MultiDatePick の Salesforce 稼働率ヒートマップのアニメーションデモ: 縦にアドバイザー、日ごとに予約数/定員を表示。満員の日にカーソルを合わせ、クリックするとそのアドバイザーの週を表示" title="Salesforce 稼働率ヒートマップのデモ" width="880" height="780" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>稼働率: 各会議室の日ごとの埋まり具合。</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-week-view-demo-poster.png" data-gif="/images/views/salesforce-week-view-demo.gif" alt="MultiDatePick の Salesforce 週表示のアニメーションデモ: アドバイザーを選ぶと顧客との面談が状況の色のブロックで実際の長さどおりに表示され、ホバーカードで顧客、面談の種類、状況を確認" title="Salesforce 週表示のデモ" width="880" height="1080" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>週: 1 つの会議室の 1 日を時間単位で。</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-timeline-drag-to-reschedule-poster.png" data-gif="/images/views/salesforce-timeline-drag-to-reschedule.gif" alt="MultiDatePick の Salesforce タイムラインでの日程変更のアニメーションデモ: 案件の右端をドラッグして 2 日延長し、別の案件をドラッグして 2 日後にずらす。いずれもドロップ時に保存され、新しい日付がバーに表示される" title="Salesforce のタイムライン上でドラッグして予定を変更" width="880" height="880" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>予約が長引いた? ドラッグするだけ。離せば保存されます。</figcaption>
+                    </figure>
+                </div>
+                <p class="gs-note"><b>会議室が 80 室?</b>Max View Resources で予約の多い会議室から順に表示し、Timeline Window (Days) で画面に収める日数を設定します (既定は 14 日)。</p>
+                <p style="margin:14px 0 0;font-size:.93rem;">詳しくはこちら: <a href="/ja/blog/salesforce-timeline-view.html">Salesforce のタイムライン表示</a>と<a href="/ja/blog/salesforce-utilization-heatmap.html">稼働率ヒートマップ</a>。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ ROOMS VS DESKS ═══════════════ -->
+        <section class="gs-sec" id="desk-booking">
+            <div class="hm-wrap">
+                <h2>Salesforce の座席予約も同じコンポーネントで</h2>
+                <p class="gs-lead">会議室は 1 つの時間枠に 1 件の予約。座席エリアは複数件。違いは設定 1 つだけです。</p>
+                <div class="gs-two">
+                    <div>
+                        <div class="gs-paths" style="margin-top:0;">
+                            <div class="gs-card bk">
+                                <b>会議室</b>
+                                <ul class="hm-checks">
+                                    <li>時間枠ごとに 1 件の予約</li>
+                                    <li>Conflict Behavior: Block</li>
+                                    <li>会議室の営業時間内の時間枠</li>
+                                    <li>複数の会議室を同時に予約</li>
+                                </ul>
+                            </div>
+                            <div class="gs-card rs">
+                                <b>座席とエリア</b>
+                                <ul class="hm-checks">
+                                    <li>エリアに Capacity Field を設定</li>
+                                    <li>3/8 のようなバッジをリアルタイム表示</li>
+                                    <li>終日モード、タイムグリッドなし</li>
+                                    <li>エリアが満席になると受付終了</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <figure class="gs-fig">
+                            <img src="/images/views/salesforce-timeline-capacity-lanes.png" alt="Salesforce タイムラインの拡大図: 重なる複数日の予約が各リソースの下で段に分かれて積み重なり、全体の定員バーで各日の埋まり具合を表示" title="定員レーン付きの Salesforce タイムライン" width="1622" height="894" loading="lazy" decoding="async" data-zoomable>
+                            <figcaption>重なる予約は段に分かれて積み重なります。上部の帯は全体の定員を示します。</figcaption>
+                        </figure>
+                    </div>
+                    <figure class="gs-fig" style="max-width:380px;justify-self:center;">
+                        <img src="/images/salesforce-booking-capacity-calendar.png" alt="MultiDatePick の Salesforce 予約カレンダー (アドバイザー 1 名分): 各日を予定の状況で色分けし、混在する日は斜めに分割。30 分単位の時間枠グリッドに予約数/定員のバッジを表示" title="定員バッジ付きの Salesforce 予約カレンダー" width="1362" height="1938" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>各時間枠に予約数と定員を表示。満員の時間枠は受付終了。</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ CONFIGS ═══════════════ -->
+        <section class="gs-sec alt" id="configuration">
+            <div class="hm-wrap">
+                <h2>設定から始める</h2>
+                <p class="gs-lead">Config Library には 40 以上の設定が用意されています。1 つをセットアップウィザードにインポートし、ドロップダウンから自社のオブジェクトを割り当てて保存するだけです。</p>
+                <div class="cf-grid">
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>会議室予約</h3>
+                        <p>リアルタイムの定員と状況の色付きの会議室。</p>
+                        <ul class="cf-set">
+                            <li><span>Conflict Behavior（競合の動作）</span><em>ブロック</em></li>
+                            <li><span>Time Slot Interval</span><em>30 分</em></li>
+                            <li><span>Ignored Statuses</span><em>Cancelled</em></li>
+                            <li><span>Available Views</span><em>Calendar, Timeline, Week, Utilization</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/ja/configlibrary.html#meeting-room-booking">Config Library &rarr;</a><a href="/downloads/configs/Meeting_Room_Booking.json" download>JSON</a></div>
+                    </div>
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>フリーアドレスの座席予約</h3>
+                        <p>エリアごとの残席数を表示する終日単位の座席予約。</p>
+                        <ul class="cf-set">
+                            <li><span>Disable Time Slot Grid</span><em>オン</em></li>
+                            <li><span>Capacity Field</span><em>エリアの座席数</em></li>
+                            <li><span>Show Availability Count</span><em>オン</em></li>
+                            <li><span>View</span><em>タイムライン</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/ja/configlibrary.html#desk-hoteling">Config Library &rarr;</a><a href="/downloads/configs/Desk_Hoteling.json" download>JSON</a></div>
+                    </div>
+                    <div class="cf-card">
+                        <span class="cf-type">Booking</span>
+                        <h3>有効な会議室</h3>
+                        <p>選択リストには有効な会議室だけを表示。</p>
+                        <ul class="cf-set">
+                            <li><span>Resource Filter Field</span><em>Active, Type</em></li>
+                            <li><span>Resource Filter Value</span><em>true; Conference Room</em></li>
+                            <li><span>Allow Booking Multiple Resources</span><em>オン</em></li>
+                            <li><span>Capacity Aggregation</span><em>Combined</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/ja/configlibrary.html#active-conference-rooms">Config Library &rarr;</a><a href="/downloads/configs/Active_Conference_Rooms.json" download>JSON</a></div>
+                    </div>
+                </div>
+                <p class="gs-note"><b>時間単位の休業?</b><b>時間単位のリソース休業</b> から始めましょう。1 室にも地域全体にも、時間単位の休業を設定できます。</p>
+                <p style="margin:14px 0 0;font-size:.93rem;">あとはページか画面フローに配置して Config Name を設定します。アプリケーションページ、ホームページ、Experience ページでは Static Parent Record Id も設定します。詳しい手順は<a href="/ja/gettingstarted.html">はじめに</a>をご覧ください。</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FAQ ═══════════════ -->
+        <section class="gs-sec" id="faq">
+            <div class="hm-wrap gs-faq">
+                <h2>Salesforce の会議室予約に関するよくある質問</h2>
+                <p class="gs-lead">よく検索される疑問に簡潔にお答えします。</p>
+                <details>
+                    <summary>Salesforce で会議室を予約できますか?</summary>
+                    <p>標準機能ではできません。標準の Salesforce には会議室予約のコントロールがありません。MultiDatePick Booking がそれを追加します。会議室を任意のオブジェクトのレコードとして管理すれば、ユーザーは会議室を選び、1 日または複数の日付を選び、空いている時間枠をクリックして予約できます。各予約は自社の予約オブジェクトのレコードとして保存されます。</p>
+                </details>
+                <details>
+                    <summary>同じ会議室を 2 人が予約するのを防ぐには?</summary>
+                    <p>Conflict Behavior（競合の動作） を Block に設定します。予約済みの時間枠は予約済みとして表示されてクリックできず、保存のたびに既存の予約と照合されるため、重複した予約が保存されることはありません。</p>
+                </details>
+                <details>
+                    <summary>Salesforce で座席予約やフリーアドレスの管理はできますか?</summary>
+                    <p>はい。各座席エリアを Capacity Field（定員項目） 付きのリソースにして Show Availability Count（空き状況数を表示） をオンにすれば、エリアが満席になるまで残りの座席数が表示されます。Disable Time Slot Grid (Full-Day Mode)（時間枠グリッドを無効化） を使えば座席を終日単位で予約できます。Config Library の「フリーアドレスの座席予約」設定がそのまま出発点として使えます。</p>
+                </details>
+                <details>
+                    <summary>すべての会議室のスケジュールを 1 画面で見られますか?</summary>
+                    <p>はい。タイムライン表示では全会議室を縦に、日付を横に並べ、複数日の予約は 1 本のバーで表示します。稼働率表示では各会議室の日ごとの埋まり具合をヒートマップで、週表示では 1 日を時間単位で確認できます。</p>
+                </details>
+                <details>
+                    <summary>1 回の予約で複数の会議室を押さえられますか?</summary>
+                    <p>はい。Allow Booking Multiple Resources をオンにすると、同じ時間枠で複数の会議室にチェックを入れ、1 回の操作で予約できます。会議室をまたいだ定員の合算方法は Capacity Aggregation で決めます。</p>
+                </details>
+                <details>
+                    <summary>会議室ごとに営業時間や休業日を設定できますか?</summary>
+                    <p>はい。Business Hours Start Field（営業時間開始項目） と Business Hours End Field（営業時間終了項目） で、各会議室の営業時間を会議室のレコードから読み込みます。ブロック日付は自社の休業日レコードから取得し、終日でも時間単位でも、全会議室にも特定の 1 室にも設定できます。</p>
+                </details>
+                <details>
+                    <summary>どこから会議室を予約できますか?</summary>
+                    <p>Booking コンポーネントを配置した場所ならどこでも。レコードページ、アプリケーションページ、ホームページ、画面フロー (Screen Flow)、Experience Cloud サイトのページで使えます。アプリケーションページ、ホームページ、Experience ページでは Config Name（設定名） と Static Parent Record Id を設定します。</p>
+                </details>
+                <details>
+                    <summary>MultiDatePick の料金はいくらですか?</summary>
+                    <p>すべてのコンポーネントと機能が 1 ユーザーあたり月額 $20。30 日間の無料トライアル付きで、クレジットカードは不要です。100% Salesforce ネイティブで、Salesforce AppExchange で近日公開予定です。</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- ═══════════════ RELATED ═══════════════ -->
+        <section class="gs-sec alt" id="related">
+            <div class="hm-wrap">
+                <h2>さらに詳しく</h2>
+                <div class="gs-links" style="margin-top:16px;">
+                    <a href="/ja/salesforce-booking-calendar.html"><b>Booking コンポーネント</b><span>リソース予約の全機能</span></a> <a href="/ja/salesforce-calendar-vs-lightning-scheduler.html"><b>Salesforce Scheduler との比較</b><span>会議室、ライセンス、データモデルを比較</span></a> <a href="/ja/blog/prevent-double-booking-in-salesforce.html"><b>ダブルブッキングの防止</b><span>競合と定員の仕組み</span></a> <a href="/ja/salesforce-calendar-experience-cloud-booking.html"><b>Experience Cloud での予約</b><span>サイトでのセルフサービス予約</span></a> <a href="/ja/configlibrary.html"><b>Config Library</b><span>インポートできる 40 以上の設定</span></a> <a href="/ja/pricing.html"><b>料金</b><span>$20/ユーザー/月、全機能込み</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FINAL CTA ═══════════════ -->
+        <section class="hm-final">
+            <div class="hm-wrap">
+                <h2>別のツールなしで会議室と座席を予約</h2>
+                <p>Salesforce AppExchange で近日公開。今すぐライブデモを試すか、公開のお知らせの送り先を教えてください。</p>
+                <div class="hm-ctas">
+                    <a href="/ja/notify-me-at-launch.html" class="btn btn-cta">公開時に通知を受け取る</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-conference-room-booking-calendar" class="btn btn-ghost" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/gettingstarted.html" class="btn btn-ghost">はじめに</a>
+                </div>
+                <p class="contact">$20/ユーザー/月、30 日間の無料トライアル、クレジットカード不要。AppExchange セキュリティレビュー合格。100% Salesforce ネイティブ。</p>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/salesforce-conference-room-booking-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/salesforce-besprechungsraum-buchung.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/reserva-salas-reuniones-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/reservation-salle-reunion-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/prenotazione-sale-riunioni-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/salesforce-conference-room-booking-calendar.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/salesforce-conference-room-booking-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/salesforce-conference-room-booking-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

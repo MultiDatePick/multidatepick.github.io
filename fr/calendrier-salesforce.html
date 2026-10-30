@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendrier Salesforce : ce qu'il fait et ses limites</title>
+    <meta name="description" content="Ce que fait le calendrier Salesforce standard, où il s'arrête, et comment MultiDatePick ajoute plusieurs dates par enregistrement, créneaux, capacité et cinq vues.">
+    <link rel="canonical" href="https://multidatepick.com/fr/calendrier-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Calendrier Salesforce : ce qu'il fait et ses limites">
+    <meta property="og:description" content="Ce que fait le calendrier Salesforce standard, où il s'arrête, et comment MultiDatePick ajoute plusieurs dates par enregistrement, créneaux, capacité et cinq vues.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/fr/calendrier-salesforce.html">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="fr_FR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Calendrier Salesforce : ce qu'il fait et ses limites">
+    <meta name="twitter:description" content="Ce que fait le calendrier Salesforce standard, où il s'arrête, et comment MultiDatePick ajoute plusieurs dates par enregistrement, créneaux, capacité et cinq vues.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Calendrier Salesforce : ce qu'il fait, et ce qui lui manque",
+                "description": "Ce que fait le calendrier Salesforce standard, où il s'arrête, et comment MultiDatePick ajoute plusieurs dates par enregistrement, créneaux, capacité et cinq vues.",
+                "datePublished": "2026-07-29",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/fr/calendrier-salesforce.html",
+                "about": [
+                    {
+                        "@type": "SoftwareApplication",
+                        "name": "Calendrier Salesforce"
+                    },
+                    {
+                        "@type": "SoftwareApplication",
+                        "name": "MultiDatePick"
+                    }
+                ],
+                "image": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo.gif",
+                "inLanguage": "fr"
+            },
+            {
+                "@type": "SoftwareApplication",
+                "name": "MultiDatePick",
+                "applicationCategory": "BusinessApplication",
+                "operatingSystem": "Salesforce",
+                "description": "Une suite de composants calendrier pour Salesforce qui permet de sélectionner plusieurs dates, des plages de dates, des plannings récurrents, des créneaux horaires par date et des réservations de ressources à capacité limitée, affichés dans cinq vues. Configuration dans un assistant, sans code.",
+                "offers": {
+                    "@type": "Offer",
+                    "price": "20.00",
+                    "priceCurrency": "USD"
+                }
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Que fait le calendrier Salesforce standard ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Dans Lightning Experience, le Calendrier affiche vos événements, ainsi que les calendriers de collègues, publics ou de ressources que vous ajoutez, en vues Jour, Semaine et Mois, avec une vue Tableau qui liste les événements. Vous pouvez aussi ajouter des calendriers créés à partir de n'importe quel objet doté d'un champ date ou date/heure, et créer des événements récurrents sous forme de série d'événements."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Peut-on créer une vue calendrier d'un objet personnalisé dans Salesforce ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Oui. Depuis la page Calendrier, vous pouvez créer un calendrier à partir de n'importe quel objet doté d'un champ date ou date/heure, filtré par une vue de liste. Chaque enregistrement apparaît comme un élément à sa date de début, ou comme une période du début à la fin. MultiDatePick lit aussi n'importe quel objet standard ou personnalisé, et l'affiche sous cinq formes sur les pages d'enregistrement, dans les flux d'écran (Screen Flows) et sur les sites Experience Cloud."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Peut-on sélectionner plusieurs dates dans un calendrier Salesforce ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Pas avec le calendrier standard. Cliquer sur une plage horaire crée un seul événement, et un champ Date contient une seule date. MultiDatePick permet de cliquer ou de faire glisser sur autant de jours que nécessaire dans un même calendrier, d'ajouter des récurrences et de tout enregistrer en une fois."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Le calendrier Salesforce Lightning gère-t-il les événements récurrents ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Oui. Lightning Experience gère les événements récurrents sous forme de série d'événements. MultiDatePick ajoute des récurrences pour n'importe quel enregistrement : jours de semaine, week-ends ou jours au choix, occurrences dans le mois, et répétition toutes les N semaines."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Combien d'éléments le calendrier Salesforce peut-il afficher ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Selon l'aide Salesforce, les vues jour, semaine et mois affichent jusqu'à 150 ou jusqu'à 500 éléments de calendrier au total, selon vos options de personnalisation. Les éléments de tous les calendriers sélectionnés comptent dans ce total."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Existe-t-il une application de calendrier Salesforce pour réserver des ressources avec capacité ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "MultiDatePick Booking. Il réserve n'importe quel enregistrement comme ressource, par exemple une salle, un véhicule, un équipement ou un User, avec des créneaux horaires, des badges places réservées sur capacité sur chaque créneau et un contrôle des conflits à l'enregistrement."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick remplace-t-il le calendrier Salesforce ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Les deux fonctionnent côte à côte. Gardez le calendrier Salesforce pour vos propres réunions et la synchronisation avec votre messagerie. Utilisez MultiDatePick partout où un enregistrement a besoin de plusieurs dates, heures ou réservations."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Combien coûte MultiDatePick ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "$20 par utilisateur et par mois, toutes fonctionnalités incluses, avec un essai gratuit de 30 jours sans carte bancaire. Il a réussi la Security Review d'AppExchange et sera bientôt disponible sur Salesforce AppExchange."
+                        }
+                    }
+                ],
+                "inLanguage": "fr"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo-poster.png",
+                "caption": "Démo animée de la sélection de plusieurs dates dans un calendrier Salesforce avec MultiDatePick : faire glisser sur trois jours de la semaine de Thanksgiving, ajouter le vendredi d'un clic et enregistrer les quatre jours en une fois",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/components/salesforce-date-time-scheduling-demo-poster.png",
+                "caption": "Démo animée du composant MultiDatePick Date Time dans Salesforce : faire glisser du lundi au jeudi, puis de 09:00 à 12:00 dans la grille horaire, et enregistrer un poste par jour",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/multidatepick-booking-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/multidatepick-booking-demo-poster.png",
+                "caption": "Démo animée de la réservation de ressources Salesforce dans MultiDatePick : choisir un conseiller, saisir le client, sélectionner une date et un créneau libre de 30 minutes, puis enregistrer la demande",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-timeline-view-demo-poster.png",
+                "caption": "Démo animée de la chronologie des ressources Salesforce de MultiDatePick : les conseillers sur le côté, les missions de plusieurs jours en une seule barre, puis un zoom de Semaine à Mois",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png",
+                "caption": "Démo animée de la heatmap d'occupation Salesforce de MultiDatePick : les conseillers sur le côté avec la capacité réservée par jour, puis un clic sur une journée complète qui ouvre la semaine de ce conseiller",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+    <style>
+        .hm-wrap{max-width:1040px;margin:0 auto;padding:0 16px;}
+        .hm-hero{background:linear-gradient(170deg,var(--blue-50,#F0F9FF) 0%,#E0F2FE 60%,#fff 100%);padding:48px 0 40px;text-align:center;}
+        .hm-hero h1{font-size:2.5rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1.12;margin:0 auto;max-width:860px;}
+        .hm-hero .subtitle{font-size:1.08rem;color:var(--gray-600,#4b5563);margin:14px auto 0;max-width:700px;}
+        .hm-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px;}
+        .hm-ctas .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .hm-ctas .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .hm-demo-link{display:block;margin-top:12px;font-size:.92rem;font-weight:600;}
+        .vs-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:28px auto 0;max-width:900px;text-align:left;}
+        .vs-card{position:relative;--rail:#0176D3;background:#fff;border:1px solid #DCE3EC;border-radius:12px;padding:16px 18px;box-shadow:0 4px 20px rgba(15,45,82,.06);}
+        .vs-card.mdp{--rail:#F97316;} .vs-card::before{content:"";position:absolute;left:0;top:18px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .vs-card h2{font-size:1.1rem;color:var(--blue-900,#0C4A6E);margin:0 0 2px;border:0;padding:0;}
+        .vs-card .tag{font-size:.85rem;color:var(--gray-500,#6b7280);margin:0 0 10px;}
+        .gs-sec{padding:56px 0;scroll-margin-top:80px;}
+        .gs-sec.alt{background:var(--blue-50,#F0F9FF);}
+        .gs-sec h2{font-size:1.6rem;color:var(--blue-900,#0C4A6E);margin:0 0 6px;padding-left:17px;position:relative;line-height:1.25;} .gs-sec h2::before{content:"";position:absolute;left:0;top:calc(.625em - 11px);width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-lead{color:var(--gray-600,#4b5563);margin:0 0 20px;font-size:1rem;max-width:760px;}
+        .gs-fig{margin:18px 0 8px;}
+        .gs-fig img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #E5E7EB;box-shadow:0 4px 20px rgba(15,45,82,.08);background:#fff;}
+        .gs-fig figcaption{text-align:center;font-size:.88rem;color:var(--gray-500,#6b7280);margin-top:8px;}
+        .gs-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE3EC;border-radius:10px;overflow:hidden;font-size:.93rem;}
+        .gs-table th,.gs-table td{padding:11px 14px;border-bottom:1px solid #E8EDF3;border-right:1px solid #E8EDF3;text-align:left;vertical-align:top;}
+        .gs-table th:last-child,.gs-table td:last-child{border-right:none;}
+        .gs-table thead th{background:#0F2D52;color:#fff;font-weight:600;font-size:.85rem;}
+        .gs-table thead th.mdp{background:#C2410C;}
+        .gs-table tbody tr:last-child td{border-bottom:none;}
+        .gs-table td:first-child{font-weight:600;color:var(--blue-900,#0C4A6E);}
+        .gs-table .x{color:#B91C1C;font-weight:700;margin-right:6px;}
+        .gs-table .ok{color:#047857;font-weight:700;margin-right:6px;}
+        .gs-table td.new{background:#FFF7ED;color:#7C2D12;}
+        .gs-table td.old{color:var(--gray-600,#4b5563);}
+        .hm-scroll{overflow-x:auto;}
+        .gs-paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0;}
+        .gs-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;font-size:.92rem;color:var(--gray-600,#4b5563);}
+        .gs-card b{display:block;color:var(--blue-900,#0C4A6E);font-size:1rem;margin-bottom:6px;}
+        .gs-card.sf{position:relative;padding-left:18px;--rail:#0176D3;}
+        .gs-card.mdp{position:relative;padding-left:18px;--rail:#F97316;} .gs-card.sf::before,.gs-card.mdp::before{content:"";position:absolute;left:0;top:15px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .hm-checks{list-style:none;padding:0;margin:0;}
+        .hm-checks li{padding:5px 0 5px 24px;position:relative;border-bottom:1px solid #F1F5F9;}
+        .hm-checks li:last-child{border-bottom:none;}
+        .hm-checks li::before{content:"\2713";position:absolute;left:2px;color:#10b981;font-weight:700;}
+        .sc-stops{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0;}
+        .sc-stops .gs-card{position:relative;padding-left:18px;}
+        .sc-stops .gs-card::before{content:"";position:absolute;left:0;top:15px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#0176D3;}
+        .gs-note{margin:16px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 18px 14px 22px;font-size:.92rem;color:#7C2D12;position:relative;} .gs-note::before{content:"";position:absolute;left:0;top:14px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-note b{color:#9A3412;}
+        .gs-two{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+        .gs-two .gs-fig{margin-top:0;}
+        .sc-hero-fig{max-width:620px;margin:30px auto 0;}
+        .gs-faq details{background:#fff;border:1px solid #DCE3EC;border-radius:10px;margin:0 0 10px;padding:0 18px;}
+        .gs-faq summary{cursor:pointer;font-weight:600;color:var(--blue-900,#0C4A6E);padding:14px 0;list-style-position:outside;}
+        .gs-faq details p{margin:0 0 14px;color:var(--gray-600,#4b5563);font-size:.93rem;}
+        .gs-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .gs-links a{display:block;background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;text-decoration:none;transition:border-color .15s ease;}
+        .gs-links a:hover{border-color:#F97316;}
+        .gs-links b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;}
+        .gs-links span{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);}
+        .vs-src{font-size:.82rem;color:var(--gray-500,#6b7280);margin:12px 0 0;}
+        .hm-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .hm-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .hm-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .hm-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .hm-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .hm-final .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;}
+        .hm-final .btn-cta:hover{background:#EA580C;color:#fff;}
+        .hm-final .contact{margin:20px 0 0;font-size:.9rem;color:#cdd9e8;}
+        @media (max-width:900px){
+            .gs-two{grid-template-columns:1fr;}
+            .gs-links,.sc-stops{grid-template-columns:1fr 1fr;}
+        }
+        @media (max-width:600px){
+            .hm-hero{padding:32px 0 28px;}
+            .hm-hero h1{font-size:1.8rem;}
+            .vs-pair,.gs-paths,.gs-links,.sc-stops{grid-template-columns:1fr;}
+            .gs-sec{padding:40px 0;}
+            .gs-sec h2{font-size:1.35rem;}
+            .gs-table{font-size:.86rem;}
+            .gs-table th,.gs-table td{padding:9px 8px;}
+            .hm-final h2{font-size:1.45rem;}
+        }
+    </style>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/salesforce-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/salesforce-kalender.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/calendario-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/calendrier-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/calendario-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/calendario-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/salesforce-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/salesforce-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/salesforce-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/salesforce-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Bientôt disponible sur Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Fermer la bannière" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/fr/" class="logo"><img src="/images/logo.png" alt="Logo MultiDatePick : calendrier multi-dates et composant de réservation de ressources pour Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Afficher ou masquer la navigation"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produit <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/fr/selecteur-multi-dates-salesforce.html">Date</a></li>
+                        <li><a href="/fr/selecteur-date-heure-salesforce.html">Date Time</a></li>
+                        <li><a href="/fr/calendrier-reservation-salesforce.html">Booking</a></li>
+                        <li><a href="/fr/blog/vues-calendrier-salesforce.html">Cinq vues de calendrier</a></li>
+                        <li><a href="/fr/bibliotheque-configurations.html">Config Library</a></li>
+                        <li><a href="/fr/confiance-securite.html">Confiance &amp; sécurité</a></li>
+                        <li><a href="/fr/accessibilite-vpat.html">Accessibilité (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">Solutions <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/fr/calendrier-salesforce.html" class="active">Calendrier Salesforce</a></li>
+                        <li><a href="/fr/calendrier-salesforce-interim-recrutement.html">Intérim &amp; recrutement</a></li>
+                        <li><a href="/fr/planification-entretiens-salesforce.html">Planification des entretiens</a></li>
+                        <li><a href="/fr/reservation-salle-reunion-salesforce.html">Réservation de salles de réunion</a></li>
+                        <li><a href="/fr/calendrier-reservation-experience-cloud-salesforce.html">Réservation sur Experience Cloud</a></li>
+                        <li><a href="/fr/blog/campagne-salesforce-plusieurs-dates.html">Dates de campagne</a></li>
+                        <li><a href="/fr/blog/calendrier-salesforce-section-508-secteur-public.html">Secteur public / Section 508</a></li>
+                        <li><a href="/fr/calendrier-salesforce-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/fr/tarifs.html">Tarifs</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentation <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/fr/prise-en-main.html">Prise en main</a></li>
+                        <li><a href="/fr/guide-utilisateur.html">Guide de l'utilisateur</a></li>
+                        <li><a href="/fr/guide-flux-ecran-salesforce.html">Guide des flux d'écran</a></li>
+                        <li><a href="/fr/pages-application-accueil-experience.html">Pages d'application, d'accueil &amp; Experience</a></li>
+                        <li><a href="/fr/deployer-flux-vscode.html">Déployer un flux (VS Code)</a></li>
+                        <li><a href="/fr/depannage.html">Dépannage</a></li>
+                        <li><a href="/fr/faq-calendrier-salesforce.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/fr/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Essayer la démo en direct</a></li>
+                <li><a href="/fr/me-prevenir-au-lancement.html" class="nav-cta">Me prévenir au lancement</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- HERO -->
+        <section class="hm-hero">
+            <div class="hm-wrap">
+                <h1>Calendrier Salesforce : ce qu'il fait, et ce qui lui manque</h1>
+                <p class="subtitle">Le calendrier Salesforce standard est parfait pour consulter des événements. MultiDatePick place un vrai calendrier de planification sur vos propres enregistrements : plusieurs dates, créneaux horaires, réservation avec capacité et cinq vues.</p>
+                <div class="hm-ctas">
+                    <a href="/fr/me-prevenir-au-lancement.html" class="btn btn-cta">Me prévenir au lancement</a> <a href="/fr/prise-en-main.html" class="btn btn-secondary">Voir comment se passe la configuration</a>
+                </div>
+                <a class="hm-demo-link" href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar" target="_blank" rel="noopener">Ou essayez la démo en direct maintenant, sans connexion &rarr;</a>
+                <div class="vs-pair">
+                    <div class="vs-card">
+                        <h2>Calendrier Salesforce</h2>
+                        <p class="tag">Intégré. Affiche les événements et les champs date sur sa propre page Calendrier.</p>
+                        <ul class="check-list check-list--plain"><li>Jour</li><li>Semaine</li><li>Mois</li><li>Tableau</li><li>Événements</li><li>Calendriers d'objet</li></ul>
+                    </div>
+                    <div class="vs-card mdp">
+                        <h2>MultiDatePick</h2>
+                        <p class="tag">Un calendrier où les utilisateurs cliquent pour choisir, réserver et enregistrer, sur n'importe quel objet.</p>
+                        <ul class="check-list"><li>Plusieurs dates</li><li>Créneaux horaires</li><li>Capacité</li><li>Cinq vues</li><li>Flux d'écran</li><li>Experience Cloud</li><li>Sans code</li></ul>
+                    </div>
+                </div>
+                <figure class="gs-fig sc-hero-fig">
+                    <img src="/images/components/salesforce-multi-date-picker-demo-poster.png" data-gif="/images/components/salesforce-multi-date-picker-demo.gif" alt="Démo animée de la sélection de plusieurs dates dans un calendrier Salesforce avec MultiDatePick : faire glisser sur trois jours de la semaine de Thanksgiving, ajouter le vendredi d'un clic et enregistrer les quatre jours en une fois" title="Sélectionner plusieurs dates dans un calendrier Salesforce" width="700" height="640" fetchpriority="high" decoding="async" data-zoomable>
+                    <figcaption>Quatre jours choisis dans un seul calendrier, un seul enregistrement. Le calendrier standard ne sait pas le faire.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- WHAT IT DOES -->
+        <section class="gs-sec alt" id="built-in">
+            <div class="hm-wrap">
+                <h2>Ce que fait le calendrier Salesforce standard</h2>
+                <p class="gs-lead">Dans Lightning Experience, Calendrier est une page du menu de navigation. Elle remplit très bien ces tâches.</p>
+                <div class="gs-paths">
+                    <div class="gs-card sf">
+                        <b>Les vues du calendrier Salesforce</b>
+                        <ul class="hm-checks">
+                            <li>Grilles Jour, Semaine et Mois de vos événements</li>
+                            <li>Une vue Tableau qui liste les événements, comme une vue de liste</li>
+                            <li>Calendriers de collègues, publics et de ressources côte à côte</li>
+                            <li>Réunions récurrentes sous forme de série d'événements</li>
+                            <li>Faire glisser un événement vers une autre heure</li>
+                        </ul>
+                    </div>
+                    <div class="gs-card sf">
+                        <b>Des calendriers à partir de vos objets</b>
+                        <ul class="hm-checks">
+                            <li>Créer un calendrier à partir de n'importe quel objet doté d'un champ date ou date/heure</li>
+                            <li>Le filtrer avec une vue de liste, comme Mes opportunités ouvertes</li>
+                            <li>Chaque enregistrement apparaît à sa date, ou comme une période du début à la fin</li>
+                            <li>Synchronisation des événements avec Outlook ou Google via Einstein Activity Capture</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="vs-src">Sources : aide Salesforce <a href="https://help.salesforce.com/s/articleView?id=sf.activities_using_calendar_icons_lex.htm&amp;language=fr&amp;type=5" target="_blank" rel="noopener">Vues du calendrier dans Lightning Experience</a>, <a href="https://help.salesforce.com/s/articleView?id=calendar_create.htm&amp;language=fr&amp;type=5" target="_blank" rel="noopener">Création d'un calendrier d'objet dans Lightning Experience</a> et <a href="https://help.salesforce.com/s/articleView?id=calendar_create_limitations.htm&amp;language=fr&amp;type=5" target="_blank" rel="noopener">Considérations relatives aux calendriers créés à partir d'un objet Salesforce</a>.</p>
+            </div>
+        </section>
+
+        <!-- WHERE IT STOPS -->
+        <section class="gs-sec" id="where-it-stops">
+            <div class="hm-wrap">
+                <h2>Où s'arrête le calendrier Salesforce</h2>
+                <p class="gs-lead">Il affiche des dates qui existent déjà. Pour planifier, il faut un calendrier dans lequel on choisit.</p>
+                <div class="sc-stops">
+                    <div class="gs-card"><b>Une date par enregistrement</b>Un enregistrement apparaît à une date, ou sur une période. Neuf jours distincts, ce sont neuf enregistrements saisis un par un.</div>
+                    <div class="gs-card"><b>Conçu pour consulter</b>Cliquer sur une plage crée un seul événement. Impossible de sélectionner un ensemble de jours et de les enregistrer sur un enregistrement.</div>
+                    <div class="gs-card"><b>Pas de capacité</b>Un calendrier de ressources montre ce qui est réservé. Il ne compte pas 3 places sur 10 et ne ferme pas un créneau complet.</div>
+                    <div class="gs-card"><b>Sa propre page</b>Le calendrier vit sur la page Calendrier. Un champ Date dans un flux d'écran ne contient qu'une date.</div>
+                    <div class="gs-card"><b>Jour, semaine, mois</b>Pas de chronologie des ressources avec les personnes sur le côté, pas de heatmap de capacité.</div>
+                    <div class="gs-card"><b>Un plafond d'éléments</b>Les vues jour, semaine et mois affichent jusqu'à 150 ou 500 éléments au total, selon la configuration.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMPARISON GRID -->
+        <section class="gs-sec alt" id="compare">
+            <div class="hm-wrap">
+                <h2>Calendrier Salesforce vs MultiDatePick, fonction par fonction</h2>
+                <p class="gs-lead">Une coche signifie que c'est intégré.</p>
+                <div class="hm-scroll">
+                <table class="gs-table">
+                    <thead><tr><th>Fonction</th><th>Calendrier Salesforce</th><th class="mdp">MultiDatePick</th></tr></thead>
+                    <tbody>
+                        <tr><td>Afficher les enregistrements de n'importe quel objet</td><td class="old"><span class="ok">&#10003;</span>Calendriers d'objet</td><td class="new"><span class="ok">&#10003;</span>N'importe quel objet standard ou personnalisé</td></tr>
+                        <tr><td>Vues mois et semaine</td><td class="old"><span class="ok">&#10003;</span>Jour, Semaine, Mois</td><td class="new"><span class="ok">&#10003;</span>Vues Calendrier et Semaine</td></tr>
+                        <tr><td>Liste à venir</td><td class="old"><span class="ok">&#10003;</span>Vue Tableau des événements</td><td class="new"><span class="ok">&#10003;</span>Vue Agenda</td></tr>
+                        <tr><td>Dates récurrentes</td><td class="old"><span class="ok">&#10003;</span>Série d'événements</td><td class="new"><span class="ok">&#10003;</span>Jours de semaine, week-ends, jours au choix, toutes les N semaines</td></tr>
+                        <tr><td>Choisir plusieurs dates sur un enregistrement</td><td class="old"><span class="x">&#10007;</span>Une date ou une période</td><td class="new"><span class="ok">&#10003;</span>Cliquer ou faire glisser sur autant de jours que voulu</td></tr>
+                        <tr><td>Une heure pour chaque date</td><td class="old"><span class="x">&#10007;</span>Un début et une fin par événement</td><td class="new"><span class="ok">&#10003;</span>Créneaux horaires à n'importe quel intervalle</td></tr>
+                        <tr><td>Capacité par créneau</td><td class="old"><span class="x">&#10007;</span>Non intégré</td><td class="new"><span class="ok">&#10003;</span>Badges réservé sur capacité, contrôle des conflits à l'enregistrement</td></tr>
+                        <tr><td>Les ressources en lignes, les dates en colonnes</td><td class="old"><span class="x">&#10007;</span>Non intégré</td><td class="new"><span class="ok">&#10003;</span>Vue Chronologie, replanification par glisser-déposer</td></tr>
+                        <tr><td>Heatmap de capacité</td><td class="old"><span class="x">&#10007;</span>Non intégré</td><td class="new"><span class="ok">&#10003;</span>Vue Occupation</td></tr>
+                        <tr><td>Sur une page d'enregistrement ou dans un flux d'écran</td><td class="old"><span class="x">&#10007;</span>Page Calendrier uniquement</td><td class="new"><span class="ok">&#10003;</span>Pages d'enregistrement, d'application et d'accueil, flux d'écran</td></tr>
+                        <tr><td>Sites Experience Cloud</td><td class="old"><span class="x">&#10007;</span>Non intégré</td><td class="new"><span class="ok">&#10003;</span>Le même composant sur n'importe quelle page du site</td></tr>
+                        <tr><td>Enregistre dans vos enregistrements</td><td class="old"><span class="x">&#10007;</span>Crée des événements</td><td class="new"><span class="ok">&#10003;</span>Crée vos enregistrements enfants à votre place</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <div class="hm-ctas" style="justify-content:flex-start;">
+                    <a href="/fr/me-prevenir-au-lancement.html" class="btn btn-cta">Me prévenir au lancement</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar" class="btn btn-secondary" target="_blank" rel="noopener">Essayer la démo en direct</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- MULTIPLE DATES, TIMES, BOOKING -->
+        <section class="gs-sec" id="multiple-dates">
+            <div class="hm-wrap">
+                <h2>Plusieurs dates, heures et réservations dans un seul calendrier Salesforce</h2>
+                <p class="gs-lead">Trois composants, un seul package. Chacun commence là où le calendrier standard s'arrête.</p>
+                <div class="gs-two">
+                    <figure class="gs-fig">
+                        <img src="/images/components/salesforce-date-time-scheduling-demo-poster.png" data-gif="/images/components/salesforce-date-time-scheduling-demo.gif" alt="Démo animée du composant MultiDatePick Date Time dans Salesforce : faire glisser du lundi au jeudi, puis de 09:00 à 12:00 dans la grille horaire, et enregistrer un poste par jour" title="Démo de planification de dates et de créneaux horaires dans Salesforce" width="700" height="961" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption><a href="/fr/selecteur-date-heure-salesforce.html">Date Time</a> : quatre jours et un poste de 09:00 à 12:00, un seul enregistrement.</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/multidatepick-booking-demo-poster.png" data-gif="/images/multidatepick-booking-demo.gif" alt="Démo animée de la réservation de ressources Salesforce dans MultiDatePick : choisir un conseiller, saisir le client, sélectionner une date et un créneau libre de 30 minutes, puis enregistrer la demande" title="Démo de réservation de ressources Salesforce" width="700" height="1010" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption><a href="/fr/calendrier-reservation-salesforce.html">Booking</a> : une ressource, un jour et un créneau libre, capacité contrôlée.</figcaption>
+                    </figure>
+                </div>
+                <div class="gs-paths">
+                    <div class="gs-card mdp"><b><a href="/fr/selecteur-multi-dates-salesforce.html">Date</a></b>Plusieurs jours, plages par glisser, récurrences, dates bloquées. Plus de 60 propriétés.</div>
+                    <div class="gs-card mdp"><b><a href="/fr/selecteur-date-heure-salesforce.html">Date Time</a></b>Tout ce que fait Date, plus une heure pour chaque jour à n'importe quel intervalle. Plus de 90 propriétés.</div>
+                    <div class="gs-card mdp"><b><a href="/fr/calendrier-reservation-salesforce.html">Booking</a></b>Tout ce que fait Date Time, plus les ressources, la capacité et le contrôle des conflits. Plus de 100 propriétés.</div>
+                    <div class="gs-card mdp"><b>Configuration dans un assistant</b>Choisissez l'objet et les champs dans des listes déroulantes, ou importez l'une des plus de 40 configurations prêtes à l'emploi. Sans code.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEWS -->
+        <section class="gs-sec alt" id="views">
+            <div class="hm-wrap">
+                <h2>Les vues du calendrier Salesforce, et les deux qui lui manquent</h2>
+                <p class="gs-lead">MultiDatePick affiche les mêmes enregistrements de cinq façons. Les utilisateurs changent de vue en un clic.</p>
+                <div class="gs-two">
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-timeline-view-demo-poster.png" data-gif="/images/views/salesforce-timeline-view-demo.gif" alt="Démo animée de la chronologie des ressources Salesforce de MultiDatePick : les conseillers sur le côté, les missions de plusieurs jours en une seule barre, puis un zoom de Semaine à Mois" title="Vue chronologie des ressources Salesforce" width="880" height="880" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Chronologie : les ressources sur le côté, les dates en haut.</figcaption>
+                    </figure>
+                    <figure class="gs-fig">
+                        <img src="/images/views/salesforce-utilization-view-demo-poster.png" data-gif="/images/views/salesforce-utilization-view-demo.gif" alt="Démo animée de la heatmap d'occupation Salesforce de MultiDatePick : les conseillers sur le côté avec la capacité réservée par jour, puis un clic sur une journée complète qui ouvre la semaine de ce conseiller" title="Vue heatmap d'occupation Salesforce" width="880" height="780" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Occupation : réservé sur capacité pour chaque ressource et chaque jour.</figcaption>
+                    </figure>
+                </div>
+                <div class="hm-scroll" style="margin-top:18px;">
+                <table class="gs-table">
+                    <thead><tr><th>Calendrier Salesforce</th><th class="mdp">Vue MultiDatePick</th></tr></thead>
+                    <tbody>
+                        <tr><td>Mois</td><td class="new"><span class="ok">&#10003;</span>Calendrier, avec couleurs de statut et cartes au survol</td></tr>
+                        <tr><td>Jour et Semaine</td><td class="new"><span class="ok">&#10003;</span>Semaine, une grille jour par heure</td></tr>
+                        <tr><td>Tableau</td><td class="new"><span class="ok">&#10003;</span>Agenda, une liste par date</td></tr>
+                        <tr><td><span class="x">&#10007;</span>Aucune</td><td class="new"><span class="ok">&#10003;</span>Chronologie, les ressources face aux dates</td></tr>
+                        <tr><td><span class="x">&#10007;</span>Aucune</td><td class="new"><span class="ok">&#10003;</span>Occupation, une heatmap de capacité</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p class="gs-note"><b>Choisissez les vues page par page.</b> Définissez la vue par défaut avec <b>View</b> et le sélecteur avec <b>Available Views</b> (Vues disponibles). <a href="/fr/blog/vues-calendrier-salesforce.html">Découvrez les cinq vues du calendrier Salesforce</a>.</p>
+            </div>
+        </section>
+
+        <!-- USE BOTH -->
+        <section class="gs-sec" id="use-both">
+            <div class="hm-wrap">
+                <h2>Utilisez les deux, chacun pour son rôle</h2>
+                <p class="gs-lead">MultiDatePick fonctionne à côté du calendrier Salesforce. Rien à désactiver.</p>
+                <div class="gs-paths">
+                    <div class="gs-card sf">
+                        <b>Gardez le calendrier Salesforce pour</b>
+                        <ul class="hm-checks">
+                            <li>Vos propres réunions et appels</li>
+                            <li>La synchronisation avec votre messagerie</li>
+                            <li>Un coup d'œil rapide à un champ date sur plusieurs enregistrements</li>
+                        </ul>
+                    </div>
+                    <div class="gs-card mdp">
+                        <b>Ajoutez MultiDatePick pour</b>
+                        <ul class="hm-checks">
+                            <li>Congés, postes, formations et dates de campagne</li>
+                            <li>Rendez-vous, salles, véhicules et matériel</li>
+                            <li>Plannings d'équipe et planification de la capacité</li>
+                            <li>Réservation en libre-service sur Experience Cloud</li>
+                            <li>Tout enregistrement qui a besoin de plus d'une date</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="gs-note"><b>Vous réservez des clients avec du personnel qualifié par territoire ?</b> Comparez <a href="/fr/calendrier-salesforce-vs-lightning-scheduler.html">Salesforce Lightning Scheduler et MultiDatePick</a>.</p>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="gs-sec alt" id="faq">
+            <div class="hm-wrap gs-faq">
+                <h2>Questions sur le calendrier Salesforce</h2>
+                <p class="gs-lead">Des réponses courtes aux questions que l'on se pose.</p>
+                <details>
+                    <summary>Que fait le calendrier Salesforce standard ?</summary>
+                    <p>Dans Lightning Experience, le Calendrier affiche vos événements, ainsi que les calendriers de collègues, publics ou de ressources que vous ajoutez, en vues Jour, Semaine et Mois, avec une vue Tableau qui liste les événements. Vous pouvez aussi ajouter des calendriers créés à partir de n'importe quel objet doté d'un champ date ou date/heure, et créer des événements récurrents sous forme de série d'événements.</p>
+                </details>
+                <details>
+                    <summary>Peut-on créer une vue calendrier d'un objet personnalisé dans Salesforce ?</summary>
+                    <p>Oui. Depuis la page Calendrier, vous pouvez créer un calendrier à partir de n'importe quel objet doté d'un champ date ou date/heure, filtré par une vue de liste. Chaque enregistrement apparaît comme un élément à sa date de début, ou comme une période du début à la fin. MultiDatePick lit aussi n'importe quel objet standard ou personnalisé, et l'affiche sous cinq formes sur les pages d'enregistrement, dans les flux d'écran (Screen Flows) et sur les sites Experience Cloud.</p>
+                </details>
+                <details>
+                    <summary>Peut-on sélectionner plusieurs dates dans un calendrier Salesforce ?</summary>
+                    <p>Pas avec le calendrier standard. Cliquer sur une plage horaire crée un seul événement, et un champ Date contient une seule date. MultiDatePick permet de cliquer ou de faire glisser sur autant de jours que nécessaire dans un même calendrier, d'ajouter des récurrences et de tout enregistrer en une fois.</p>
+                </details>
+                <details>
+                    <summary>Le calendrier Salesforce Lightning gère-t-il les événements récurrents ?</summary>
+                    <p>Oui. Lightning Experience gère les événements récurrents sous forme de série d'événements. MultiDatePick ajoute des récurrences pour n'importe quel enregistrement : jours de semaine, week-ends ou jours au choix, occurrences dans le mois, et répétition toutes les N semaines.</p>
+                </details>
+                <details>
+                    <summary>Combien d'éléments le calendrier Salesforce peut-il afficher ?</summary>
+                    <p>Selon l'aide Salesforce, les vues jour, semaine et mois affichent jusqu'à 150 ou jusqu'à 500 éléments de calendrier au total, selon vos options de personnalisation. Les éléments de tous les calendriers sélectionnés comptent dans ce total.</p>
+                </details>
+                <details>
+                    <summary>Existe-t-il une application de calendrier Salesforce pour réserver des ressources avec capacité ?</summary>
+                    <p>MultiDatePick Booking. Il réserve n'importe quel enregistrement comme ressource, par exemple une salle, un véhicule, un équipement ou un User, avec des créneaux horaires, des badges places réservées sur capacité sur chaque créneau et un contrôle des conflits à l'enregistrement.</p>
+                </details>
+                <details>
+                    <summary>MultiDatePick remplace-t-il le calendrier Salesforce ?</summary>
+                    <p>Les deux fonctionnent côte à côte. Gardez le calendrier Salesforce pour vos propres réunions et la synchronisation avec votre messagerie. Utilisez MultiDatePick partout où un enregistrement a besoin de plusieurs dates, heures ou réservations.</p>
+                </details>
+                <details>
+                    <summary>Combien coûte MultiDatePick ?</summary>
+                    <p>$20 par utilisateur et par mois, toutes fonctionnalités incluses, avec un essai gratuit de 30 jours sans carte bancaire. Il a réussi la Security Review d'AppExchange et sera bientôt disponible sur Salesforce AppExchange.</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- RELATED -->
+        <section class="gs-sec" id="related">
+            <div class="hm-wrap">
+                <h2>Pour aller plus loin</h2>
+                <p class="gs-lead">Les pages derrière chaque ligne du comparatif.</p>
+                <div class="gs-links">
+                    <a href="/fr/selecteur-multi-dates-salesforce.html"><b>Date</b><span>Plusieurs dates sur un enregistrement</span></a> <a href="/fr/selecteur-date-heure-salesforce.html"><b>Date Time</b><span>Un créneau horaire pour chaque date</span></a> <a href="/fr/calendrier-reservation-salesforce.html"><b>Booking</b><span>Ressources, créneaux, capacité</span></a> <a href="/fr/blog/vues-calendrier-salesforce.html"><b>Cinq vues de calendrier</b><span>Calendrier, Chronologie, Semaine, Occupation, Agenda</span></a> <a href="/fr/calendrier-salesforce-vs-lightning-scheduler.html"><b>vs Lightning Scheduler</b><span>Quand choisir l'un ou l'autre</span></a> <a href="/fr/prise-en-main.html"><b>Prise en main</b><span>De l'installation au premier calendrier</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- FINAL CTA -->
+        <section class="hm-final">
+            <div class="hm-wrap">
+                <h2>Donnez à vos enregistrements le calendrier qui manque à Salesforce</h2>
+                <p>$20 par utilisateur et par mois, toutes les fonctionnalités, essai gratuit de 30 jours. Bientôt disponible sur Salesforce AppExchange.</p>
+                <div class="hm-ctas">
+                    <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar" class="btn btn-cta" target="_blank" rel="noopener">Essayer la démo en direct</a> <a href="/fr/me-prevenir-au-lancement.html" class="btn btn-ghost">Me prévenir au lancement</a> <a href="/fr/prise-en-main.html" class="btn btn-ghost">Prise en main</a>
+                </div>
+                <p class="contact">100 % natif Salesforce. Security Review d'AppExchange réussie. Vos données ne quittent jamais votre org.</p>
+            </div>
+        </section>
+    </main>
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/fr/" class="logo">
+                        <img src="/images/logo.png" alt="Logo MultiDatePick : calendrier multi-dates et composant de réservation de ressources pour Salesforce" width="180" height="45">
+                    </a>
+                    <p>La suite de composants calendrier la plus personnalisable pour Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produit</h4>
+                    <ul>
+                        <li><a href="/fr/selecteur-multi-dates-salesforce.html">Date</a></li>
+                        <li><a href="/fr/selecteur-date-heure-salesforce.html">Date Time</a></li>
+                        <li><a href="/fr/calendrier-reservation-salesforce.html">Booking</a></li>
+                        <li><a href="/fr/blog/vues-calendrier-salesforce.html">Cinq vues de calendrier</a></li>
+                        <li><a href="/fr/bibliotheque-configurations.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Solutions</h4>
+                    <ul>
+                        <li><a href="/fr/calendrier-salesforce.html">Calendrier Salesforce</a></li>
+                        <li><a href="/fr/calendrier-salesforce-interim-recrutement.html">Intérim &amp; recrutement</a></li>
+                        <li><a href="/fr/planification-entretiens-salesforce.html">Planification des entretiens</a></li>
+                        <li><a href="/fr/reservation-salle-reunion-salesforce.html">Réservation de salles de réunion</a></li>
+                        <li><a href="/fr/calendrier-reservation-experience-cloud-salesforce.html">Réservation sur Experience Cloud</a></li>
+                        <li><a href="/fr/blog/campagne-salesforce-plusieurs-dates.html">Dates de campagne</a></li>
+                        <li><a href="/fr/blog/calendrier-salesforce-section-508-secteur-public.html">Secteur public / Section 508</a></li>
+                        <li><a href="/fr/calendrier-salesforce-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentation</h4>
+                    <ul>
+                        <li><a href="/fr/prise-en-main.html">Prise en main</a></li>
+                        <li><a href="/fr/guide-utilisateur.html">Guide de l'utilisateur</a></li>
+                        <li><a href="/fr/guide-flux-ecran-salesforce.html">Guide des flux d'écran</a></li>
+                        <li><a href="/fr/pages-application-accueil-experience.html">Pages d'application, d'accueil &amp; Experience</a></li>
+                        <li><a href="/fr/deployer-flux-vscode.html">Déployer un flux (VS Code)</a></li>
+                        <li><a href="/fr/depannage.html">Dépannage</a></li>
+                        <li><a href="/fr/faq-calendrier-salesforce.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Entreprise</h4>
+                    <ul>
+                        <li><a href="/fr/tarifs.html">Tarifs</a></li>
+                        <li><a href="/fr/blog/">Blog</a></li>
+                        <li><a href="/fr/confiance-securite.html">Confiance &amp; sécurité</a></li>
+                        <li><a href="/fr/accessibilite-vpat.html">Accessibilité</a></li>
+                        <li><a href="/fr/me-prevenir-au-lancement.html">Me prévenir au lancement</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Tous droits réservés.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Langue" translate="no"><ul><li><a href="/salesforce-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/salesforce-kalender.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/calendario-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/calendrier-salesforce.html" hreflang="fr" lang="fr" aria-current="page">Français</a></li><li><a href="/it/calendario-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/calendario-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/salesforce-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/salesforce-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/salesforce-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Agrandir l'image</p><p data-k="expand-diagram">Agrandir le schéma</p><p data-k="close">Fermer</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

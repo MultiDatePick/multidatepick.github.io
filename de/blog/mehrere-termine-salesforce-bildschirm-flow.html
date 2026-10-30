@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mehrere Termine in einem Salesforce-Bildschirm-Flow</title>
+    <meta name="description" content="So erfassen Sie viele Termine auf einem Salesforce-Flow-Bildschirm und verarbeiten die Sammlung: Schleifen, Parsen und die Grenzen der Standardkomponenten.">
+    <link rel="canonical" href="https://multidatepick.com/de/blog/mehrere-termine-salesforce-bildschirm-flow.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Mehrere Termine in einem Salesforce-Bildschirm-Flow">
+    <meta property="og:description" content="So erfassen Sie viele Termine auf einem Salesforce-Flow-Bildschirm und verarbeiten die Sammlung: Schleifen, Parsen und die Grenzen der Standardkomponenten.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/de/blog/mehrere-termine-salesforce-bildschirm-flow.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="de_DE">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Mehrere Termine in einem Salesforce-Bildschirm-Flow">
+    <meta name="twitter:description" content="So erfassen Sie viele Termine auf einem Salesforce-Flow-Bildschirm und verarbeiten die Sammlung: Schleifen, Parsen und die Grenzen der Standardkomponenten.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/mehrere-termine-salesforce-bildschirm-flow.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/varias-fechas-flujo-de-pantalla-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/plusieurs-dates-flux-ecran-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/date-multiple-flusso-su-schermo-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/varias-datas-fluxo-de-tela-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/multiple-dates-in-a-salesforce-screen-flow.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Demnächst auf der Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Banner schließen" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/de/" class="logo"><img src="/images/logo.png" alt="MultiDatePick-Logo: Salesforce-Kalender für mehrere Termine und Ressourcenbuchung" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Navigation ein-/ausblenden"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produkt <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/salesforce-mehrfach-datumsauswahl.html">Date</a></li>
+                        <li><a href="/de/salesforce-datum-zeitfenster-auswahl.html">Date Time</a></li>
+                        <li><a href="/de/salesforce-buchungskalender.html">Booking</a></li>
+                        <li><a href="/de/blog/salesforce-kalenderansichten.html">Fünf Kalenderansichten</a></li>
+                        <li><a href="/de/salesforce-kalender-konfigurationen.html">Config Library</a></li>
+                        <li><a href="/de/vertrauen-sicherheit.html">Vertrauen &amp; Sicherheit</a></li>
+                        <li><a href="/de/barrierefreiheit-vpat.html">Barrierefreiheit (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Lösungen <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/salesforce-kalender.html">Salesforce-Kalender</a></li>
+                        <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Personaldienstleistung &amp; Recruiting</a></li>
+                        <li><a href="/de/salesforce-interviewplanung.html">Interviewplanung</a></li>
+                        <li><a href="/de/salesforce-besprechungsraum-buchung.html">Besprechungsraum-Buchung</a></li>
+                        <li><a href="/de/salesforce-experience-cloud-buchungskalender.html">Buchung in Experience Cloud</a></li>
+                        <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Kampagnentermine</a></li>
+                        <li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html">Behörden / Section 508</a></li>
+                        <li><a href="/de/salesforce-lightning-scheduler-alternative.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/de/preise.html">Preise</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Doku <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/erste-schritte.html">Erste Schritte</a></li>
+                        <li><a href="/de/benutzerhandbuch.html">Benutzerhandbuch</a></li>
+                        <li><a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a></li>
+                        <li><a href="/de/app-start-experience-seiten.html">App-, Start- &amp; Experience-Seiten</a></li>
+                        <li><a href="/de/flow-mit-vs-code-bereitstellen.html">Flow bereitstellen (VS Code)</a></li>
+                        <li><a href="/de/fehlerbehebung.html">Fehlerbehebung</a></li>
+                        <li><a href="/de/haeufige-fragen.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/de/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Live-Demo testen</a></li>
+                <li><a href="/de/zum-start-benachrichtigen.html" class="nav-cta">Zum Start benachrichtigen</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "So wählen Benutzer mehrere Termine in einem Salesforce-Bildschirm-Flow (Screen Flow)",
+                "description": "So erfassen Sie viele Termine auf einem Salesforce-Flow-Bildschirm und verarbeiten die Sammlung: Schleifen, Parsen und die Grenzen der Standardkomponenten.",
+                "datePublished": "2026-05-01",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/de/blog/mehrere-termine-salesforce-bildschirm-flow.html",
+                "image": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates.gif",
+                "inLanguage": "de"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates-poster.png",
+                "caption": "Animierte Demo eines Urlaubsantrags als Bildschirm-Flow in Salesforce: Der Benutzer klickt drei Tage im MultiDatePick-Kalender an, sendet ab, und der nächste Flow-Bildschirm listet die drei übergebenen Daten auf",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-builder-add-booking-component.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-builder-add-booking-component-poster.png",
+                "caption": "Animierte Demo im Salesforce Flow Builder: Bildschirm öffnen, nach MultiDatePick suchen, die Komponente Resource Booking auf den Bildschirm ziehen, Config Name auf eine gespeicherte Konfiguration aus dem Einrichtungsassistenten setzen, Fertig klicken und speichern",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-dates-status.png",
+                "caption": "Salesforce-Bildschirm-Flow mit einer Kalenderkomponente für mehrere Termine, in der ein Benutzer mehrere Tage auf einmal auswählt",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>So wählen Benutzer mehrere Termine in einem Salesforce-Bildschirm-Flow (Screen Flow)</h1>
+                <p class="subtitle">Flow bietet ein Datumsfeld pro Bildschirmelement. Wer neun Tage wählen muss, hat ein Problem. Hier sind die Möglichkeiten und was jede kostet.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Veröffentlicht am 1. Mai 2026 &middot; Aktualisiert am 21. Oktober 2026 &middot; MultiDatePick</p>
+                <p class="sc-lead">Früher oder später stößt jeder Admin darauf. Ein Urlaubsantrag, ein Verfügbarkeitsformular, eine Schulungsanmeldung: Der Benutzer muss mehrere Tage auswählen, die nicht unbedingt aufeinanderfolgen, und die Standard-Datumskomponente von Flow erfasst genau einen.</p>
+
+                <h2 style="margin-top:44px;">Die Notlösungen, und warum sie wehtun</h2>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">Ansatz</th><th style="width:34%;">So läuft es</th><th>Der Preis</th></tr></thead>
+                    <tbody>
+                    <tr><td>Mehrere Datumsfelder auf einem Bildschirm</td><td>Datum 1, Datum 2, Datum 3, Datum 4...</td><td class="bp-no">Feste Obergrenze, unschön und meist leer</td></tr>
+                    <tr><td>Eine Schleife, die einzeln nachfragt</td><td>"Weiteres Datum hinzufügen?" und zurück zum Bildschirm</td><td class="bp-no">Ab etwa drei Tagen eine Qual</td></tr>
+                    <tr><td>Ein Freitextfeld</td><td>Der Benutzer tippt die Tage als Text ein</td><td class="bp-no">Nicht auswertbar, nicht berichtsfähig, fehleranfällig</td></tr>
+                    <tr><td>Nur Start- und Enddatum</td><td>Als einen durchgehenden Zeitraum behandeln</td><td class="bp-no">Falsch, sobald die Tage nicht zusammenhängen</td></tr>
+                    <tr><td>Eine Mehrfachauswahlliste mit Datumswerten</td><td>Datumswerte vorab erzeugen</td><td class="bp-no">Veraltet schnell, braucht ständige Pflege</td></tr>
+                    <tr><td>Eine Kalenderkomponente für mehrere Termine</td><td>Jeden benötigten Tag auf einem Bildschirm anklicken</td><td class="bp-yes">Liefert eine Sammlung, bereit für die Schleife</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>Die Notlösung mit Start und Ende ist die häufigste und die am unauffälligsten falsche. Aus "Ich brauche den 3., 4., 11. und 18. frei" wird der 3. bis 18., also sechzehn Tage unterstellte Abwesenheit. Die Daten sehen sauber aus und sind schlicht falsch.</p>
+
+                <h2 style="margin-top:44px;">Die echte Lösung: eine Bildschirmkomponente, die eine Sammlung zurückgibt</h2>
+                <p>Was Flow eigentlich braucht, ist eine Bildschirmkomponente, in der der Benutzer so viele Tage anklicken kann, wie er will, und die eine Sammlung zurückgibt. Sobald es die gibt, ist der Rest des Flows Routine: Sammlung per Schleife durchlaufen, pro Tag einen Datensatz anlegen, fertig.</p>
+                <figure class="sc-shot">
+                    <img src="/images/flow-guide/salesforce-screen-flow-select-multiple-dates-poster.png" data-gif="/images/flow-guide/salesforce-screen-flow-select-multiple-dates.gif" alt="Animierte Demo eines Urlaubsantrags als Bildschirm-Flow in Salesforce: Der Benutzer klickt drei Tage im MultiDatePick-Kalender an, sendet ab, und der nächste Flow-Bildschirm listet die drei übergebenen Daten auf" width="900" height="770" loading="lazy" decoding="async" data-zoomable>
+                    <figcaption>Ein Flow für Urlaubsanträge: drei Tage anklicken, absenden, und der nächste Bildschirm hat alle drei bereits als Sammlung.</figcaption>
+                </figure>
+                <p>MultiDatePick liefert je nach dem, was Sie erfassen, mehrere Ausgaben:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">Ausgabe</th><th>Inhalt</th><th style="width:26%;">API-Name</th></tr></thead>
+                    <tbody>
+                    <tr><td>Selected Dates</td><td>Eine Textsammlung mit ISO-Datumsangaben, bereit für die Schleife</td><td><code>selectedDates</code></td></tr>
+                    <tr><td>Date Ranges JSON</td><td>Zusammengefasste Zeiträume, wenn aufeinanderfolgende Tage zu einem Datensatz werden sollen</td><td><code>selectedDateRangesJson</code></td></tr>
+                    <tr><td>Dates With Times JSON</td><td>Start- und Endzeiten pro Tag</td><td><code>selectedDatesWithTimesJson</code></td></tr>
+                    <tr><td>Successful Bookings Count, Conflict Dates</td><td>Was gespeichert wurde und was kollidiert ist</td><td><code>bookingSuccessCount</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">Aus JSON wieder Datensätze machen</h2>
+                <p>Zwei dieser Ausgaben sind JSON, weil Flow keinen eigenen Typ für "eine Liste von Objekten mit jeweils mehreren Feldern" hat. Text in einer Formel zu parsen ist keine Option. Das Paket bringt eine Flow-Aktion mit, <strong>Parse Date Entries from JSON</strong>, die das JSON entgegennimmt und eine richtige Sammlung mit From Date, To Date, Start Time und End Time zurückgibt. Diese Sammlung durchlaufen Sie per Schleife wie jede andere.</p>
+                <figure class="sc-shot">
+                    <img src="/images/marketing/salesforce-calendar-dates-status.png" alt="Salesforce-Bildschirm-Flow mit einer Kalenderkomponente für mehrere Termine, in der ein Benutzer mehrere Tage auf einmal auswählt" loading="lazy" data-zoomable width="1004" height="682">
+                    <figcaption>Ein Kalender für mehrere Termine im Bildschirm-Flow, der eine Sammlung zurückgibt, die der Rest des Flows durchlaufen kann.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Ein Stolperstein, der regelmäßig eine Stunde kostet</h2>
+                <div class="sc-note">
+                    <strong>Config Name setzen, nicht die Kontrollkästchen.</strong> Die Komponente hat eine lange Liste von Ein/Aus-Eigenschaften, und im Flow Builder ist ein leer gelassenes Kontrollkästchen leer statt false. All das können Sie überspringen: Bauen Sie den Kalender im Einrichtungsassistenten und tragen Sie dann den Namen dieser Konfiguration in die Eigenschaft <strong>Config Name</strong> ein. Jede Ein/Aus-Einstellung kommt dann aus der Konfiguration, und die wenigen reinen Flow-Einstellungen (Required, Show Inline, Output Date Ranges as JSON) bleiben aus, bis Sie sie einschalten. Nur wenn Sie auf Config Name verzichten und alles von Hand setzen, brauchen Sie <code>$GlobalConstant.True</code> oder <code>$GlobalConstant.False</code> bei den Kontrollkästchen, auf die es Ihnen ankommt.</div>
+                <figure class="sc-shot">
+                    <img src="/images/flow-guide/salesforce-flow-builder-add-booking-component-poster.png" data-gif="/images/flow-guide/salesforce-flow-builder-add-booking-component.gif" alt="Animierte Demo im Salesforce Flow Builder: Bildschirm öffnen, nach MultiDatePick suchen, die Komponente Resource Booking auf den Bildschirm ziehen, Config Name auf eine gespeicherte Konfiguration aus dem Einrichtungsassistenten setzen, Fertig klicken und speichern" width="1200" height="760" loading="lazy" decoding="async" data-zoomable>
+                    <figcaption>Die Komponente auf den Bildschirm ziehen, Config Name setzen, speichern. Keine Kontrollkästchen.</figcaption>
+                </figure>
+                <p>Soll die Komponente die Datensätze selbst speichern? Übergeben Sie die Id des übergeordneten Datensatzes an <strong>Parent Record Id</strong>, dann legt sie pro Tag einen untergeordneten Datensatz an. Lassen Sie das Feld leer, um die Ausgabe per Schleife zu durchlaufen und die Datensätze auf Ihre eigene Weise anzulegen.</p>
+
+                <h2 style="margin-top:44px;">Die Datensatzform festlegen, bevor Sie bauen</h2>
+                <p>Dieselben neun gewählten Tage können neun Datensätze werden, vier Datensätze, wenn aufeinanderfolgende Tage zu Zeiträumen zusammengefasst werden, oder ein übergeordneter Datensatz mit Unterblöcken. Jede Variante ist für einen anderen Bericht die richtige. Entscheiden Sie das, bevor Sie den Flow bauen, denn eine spätere Änderung bedeutet Datenmigration zusätzlich zur Überarbeitung des Flows.</p>
+
+                <div class="bp-end">
+                    <h2>Bauen Sie in Ihren nächsten Flow eine echte Mehrfach-Datumsauswahl ein</h2>
+                    <p>Klicken Sie die Tage in der Live-Demo an, und fügen Sie die Komponente dann mit Erste Schritte einem Flow-Bildschirm hinzu.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=multiple-dates-in-a-salesforce-screen-flow" class="btn btn-demo" target="_blank" rel="noopener">Live-Demo testen</a> <a href="/de/zum-start-benachrichtigen.html" class="btn btn-primary">Zum Start benachrichtigen</a> <a href="/de/erste-schritte.html" class="btn btn-secondary">Erste Schritte</a>
+                    </div>
+                    <ul class="check-list"><li>$20/Benutzer/Monat, alle Funktionen</li><li>30 Tage kostenlos, ohne Kreditkarte</li><li>100 % nativ in Salesforce</li><li>Ohne Apex</li><li>Demnächst auf der Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Weiterführende Artikel</h3>
+                    <ul>
+                        <li><a href="/de/blog/salesforce-flow-schleife-mehrere-datensaetze.html">Flow-Schleifen: ein Datensatz pro Tag oder Schicht</a></li>
+                        <li><a href="/de/blog/salesforce-wiederkehrende-termine.html">Wiederholungsmuster für Termine, ohne die Logik selbst zu schreiben</a></li>
+                        <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Alle Kampagnentermine in einem Kalender</a></li>
+                        <li><a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a></li>
+                        <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Die Verfügbarkeit von Kandidaten erfassen</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/de/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick-Logo: Salesforce-Kalender für mehrere Termine und Ressourcenbuchung" width="180" height="45">
+                    </a>
+                    <p>Die am umfassendsten anpassbare Kalenderkomponenten-Suite für Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produkt</h4>
+                    <ul>
+                        <li><a href="/de/salesforce-mehrfach-datumsauswahl.html">Date</a></li>
+                        <li><a href="/de/salesforce-datum-zeitfenster-auswahl.html">Date Time</a></li>
+                        <li><a href="/de/salesforce-buchungskalender.html">Booking</a></li>
+                        <li><a href="/de/blog/salesforce-kalenderansichten.html">Fünf Kalenderansichten</a></li>
+                        <li><a href="/de/salesforce-kalender-konfigurationen.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Lösungen</h4>
+                    <ul>
+                        <li><a href="/de/salesforce-kalender.html">Salesforce-Kalender</a></li>
+                        <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Personaldienstleistung &amp; Recruiting</a></li>
+                        <li><a href="/de/salesforce-interviewplanung.html">Interviewplanung</a></li>
+                        <li><a href="/de/salesforce-besprechungsraum-buchung.html">Besprechungsraum-Buchung</a></li>
+                        <li><a href="/de/salesforce-experience-cloud-buchungskalender.html">Buchung in Experience Cloud</a></li>
+                        <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Kampagnentermine</a></li>
+                        <li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html">Behörden / Section 508</a></li>
+                        <li><a href="/de/salesforce-lightning-scheduler-alternative.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Doku</h4>
+                    <ul>
+                        <li><a href="/de/erste-schritte.html">Erste Schritte</a></li>
+                        <li><a href="/de/benutzerhandbuch.html">Benutzerhandbuch</a></li>
+                        <li><a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a></li>
+                        <li><a href="/de/app-start-experience-seiten.html">App-, Start- &amp; Experience-Seiten</a></li>
+                        <li><a href="/de/flow-mit-vs-code-bereitstellen.html">Flow bereitstellen (VS Code)</a></li>
+                        <li><a href="/de/fehlerbehebung.html">Fehlerbehebung</a></li>
+                        <li><a href="/de/haeufige-fragen.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Unternehmen</h4>
+                    <ul>
+                        <li><a href="/de/preise.html">Preise</a></li>
+                        <li><a href="/de/blog/">Blog</a></li>
+                        <li><a href="/de/vertrauen-sicherheit.html">Vertrauen &amp; Sicherheit</a></li>
+                        <li><a href="/de/barrierefreiheit-vpat.html">Barrierefreiheit</a></li>
+                        <li><a href="/de/zum-start-benachrichtigen.html">Zum Start benachrichtigen</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Alle Rechte vorbehalten.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Sprache" translate="no"><ul><li><a href="/blog/multiple-dates-in-a-salesforce-screen-flow.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/mehrere-termine-salesforce-bildschirm-flow.html" hreflang="de" lang="de" aria-current="page">Deutsch</a></li><li><a href="/es/blog/varias-fechas-flujo-de-pantalla-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/plusieurs-dates-flux-ecran-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/date-multiple-flusso-su-schermo-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/varias-datas-fluxo-de-tela-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/multiple-dates-in-a-salesforce-screen-flow.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/multiple-dates-in-a-salesforce-screen-flow.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Bild vergrößern</p><p data-k="expand-diagram">Diagramm vergrößern</p><p data-k="close">Schließen</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

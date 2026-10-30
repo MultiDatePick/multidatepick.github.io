@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de calor de ocupación en Salesforce: quién está saturado</title>
+    <meta name="description" content="Un mapa de calor de ocupación en Salesforce: cada recurso en una fila, cada día con lo reservado frente a la capacidad, exceso marcado y un clic a la agenda.">
+    <link rel="canonical" href="https://multidatepick.com/es/blog/mapa-de-calor-ocupacion-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Utilization post: same look as the Timeline and views posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Mapa de calor de ocupación en Salesforce: quién está saturado">
+    <meta property="og:description" content="Un mapa de calor de ocupación en Salesforce: cada recurso en una fila, cada día con lo reservado frente a la capacidad, exceso marcado y un clic a la agenda.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/es/blog/mapa-de-calor-ocupacion-salesforce.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_ES">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Mapa de calor de ocupación en Salesforce: quién está saturado">
+    <meta name="twitter:description" content="Un mapa de calor de ocupación en Salesforce: cada recurso en una fila, cada día con lo reservado frente a la capacidad, exceso marcado y un clic a la agenda.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-utilization-heatmap.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-auslastungs-heatmap.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/mapa-de-calor-ocupacion-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/heatmap-occupation-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/heatmap-utilizzo-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/mapa-de-calor-ocupacao-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-utilization-heatmap.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-utilization-heatmap.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-utilization-heatmap.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-utilization-heatmap.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Próximamente en Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Cerrar aviso" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/es/" class="logo"><img src="/images/logo.png" alt="Logotipo de MultiDatePick: componente de calendario de varias fechas y reserva de recursos para Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Mostrar u ocultar navegación"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Producto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/selector-varias-fechas-salesforce.html">Date</a></li>
+                        <li><a href="/es/selector-franjas-horarias-salesforce.html">Date Time</a></li>
+                        <li><a href="/es/calendario-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Cinco vistas de calendario</a></li>
+                        <li><a href="/es/biblioteca-configuraciones-calendario-salesforce.html">Config Library</a></li>
+                        <li><a href="/es/confianza-y-seguridad.html">Confianza y seguridad</a></li>
+                        <li><a href="/es/accesibilidad-vpat.html">Accesibilidad (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Soluciones <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/calendario-salesforce.html">Calendario de Salesforce</a></li>
+                        <li><a href="/es/calendario-salesforce-reclutamiento-seleccion-personal.html">Reclutamiento y selección</a></li>
+                        <li><a href="/es/calendario-salesforce-programar-entrevistas.html">Programación de entrevistas</a></li>
+                        <li><a href="/es/reserva-salas-reuniones-salesforce.html">Reserva de salas de reuniones</a></li>
+                        <li><a href="/es/calendario-reservas-experience-cloud-salesforce.html">Reservas en Experience Cloud</a></li>
+                        <li><a href="/es/blog/fechas-de-campana-salesforce.html">Fechas de campaña</a></li>
+                        <li><a href="/es/blog/calendario-salesforce-accesible-sector-publico-section-508.html">Sector público / Section 508</a></li>
+                        <li><a href="/es/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/es/precios.html">Precios</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentación <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/primeros-pasos.html">Primeros pasos</a></li>
+                        <li><a href="/es/guia-del-usuario.html">Guía del usuario</a></li>
+                        <li><a href="/es/guia-flujos-de-pantalla-salesforce.html">Guía de flujos de pantalla</a></li>
+                        <li><a href="/es/paginas-aplicacion-inicio-experience-cloud.html">Páginas de aplicación, inicio y Experience</a></li>
+                        <li><a href="/es/implementar-flujo-vs-code.html">Implementar un flujo (VS Code)</a></li>
+                        <li><a href="/es/solucion-de-problemas.html">Solución de problemas</a></li>
+                        <li><a href="/es/preguntas-frecuentes.html">Preguntas frecuentes</a></li>
+                    </ul>
+                </li>
+                <li><a href="/es/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Prueba la demo en vivo</a></li>
+                <li><a href="/es/avisame-en-el-lanzamiento.html" class="nav-cta">Avísame en el lanzamiento</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Mapa de calor de ocupación en Salesforce: quién está saturado",
+                "description": "Un mapa de calor de ocupación en Salesforce: cada recurso en una fila, cada día con lo reservado frente a la capacidad, exceso marcado y un clic a la agenda.",
+                "datePublished": "2026-10-13",
+                "dateModified": "2026-10-21",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/es/blog/mapa-de-calor-ocupacion-salesforce.html",
+                "image": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "inLanguage": "es"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "¿Cómo veo la ocupación de los recursos en Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Salesforce estándar no tiene una vista de ocupación para tus propios objetos de reservas; tendrías que crear un informe por cada pregunta. MultiDatePick añade una vista Ocupación al componente de calendario: cada recurso es una fila y cada día una celda con lo reservado frente a la capacidad de ese recurso, con una fila combinada para todo el grupo y, a la derecha, el promedio y las plazas libres."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Qué significa una celda como 2/2 o 3/4?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Las reservas de ese día frente a la capacidad del recurso. 3/4 significa que están ocupadas tres de cuatro plazas. Cuanto más oscuro el azul, más lleno está el día, y un día reservado por encima de su capacidad lleva un anillo naranja para que destaque."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Y si mi objeto de recurso no tiene campo de capacidad?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "El mapa de calor sigue funcionando. Las celdas muestran simplemente el número de reservas en la misma escala de azules, y una nota bajo la cuadrícula lo indica. Cuando quieras porcentajes y plazas libres, añade un campo numérico para la capacidad."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Puedo reservar o editar desde la vista Ocupación?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Ocupación es de solo lectura a propósito: responde a lo llena que está cada cosa. Haz clic en cualquier celda con reservas y el componente abre la semana de ese recurso en ese día, donde puedes reservar, mover o editar."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Las filas pueden ser personas en lugar de salas?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sí. El recurso puede ser cualquier objeto, incluido User. Añade un número de capacidad a User y el mapa de calor se convierte en un panel de capacidad del equipo: quién está lleno, quién tiene hueco y qué semanas van sobrecargadas."
+                        }
+                    }
+                ],
+                "inLanguage": "es"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png",
+                "caption": "Demo animada del mapa de calor de ocupación de MultiDatePick en Salesforce: asesores en filas con lo reservado frente a la capacidad de cada día, el cursor sobre un día completo y un clic que abre la semana de ese asesor",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-heatmap.png",
+                "caption": "Mapa de calor de ocupación en Salesforce para citas de asesores: las reservas diarias de cada asesor frente a su capacidad, una fila de disponibilidad combinada arriba y columnas de promedio y plazas libres a la derecha",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-project-capacity.png",
+                "caption": "Mapa de calor de ocupación en Salesforce con encargos de clientes de varios días: tres asesores con capacidad para dos encargos cada uno, un mes completo, y los días en que cada asesor está totalmente ocupado",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>El mapa de calor de ocupación de Salesforce: quién está saturado</h1>
+                <p class="subtitle">Cada sala, persona o equipo en una fila, cada día en una columna y cada celda con cuánta de su capacidad está reservada. Un panel de capacidad para tus propios objetos de Salesforce, configurado sin código.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Publicado el 13 de octubre de 2026 &middot; Actualizado el 21 de octubre de 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">«¿Va el equipo saturado la semana que viene?» «¿Qué sala se queda vacía casi todo el mes?» «¿Podemos aceptar un encargo más?» Son preguntas de capacidad. Un calendario muestra lo que está reservado; no muestra lo lleno que está nada. Un mapa de calor de ocupación, sí.</p>
+
+                <p>La vista Ocupación de MultiDatePick lee las mismas reservas que su calendario y su línea de tiempo, y las convierte en una cuadrícula de niveles de llenado: una fila por recurso, una celda por día y, en cada celda, cuántas plazas de ese recurso están ocupadas. Basta un campo de configuración para tenerla en cualquier ubicación, y solo necesita un número en el recurso para la capacidad.</p>
+
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-utilization-view-demo-poster.png" data-gif="/images/views/salesforce-utilization-view-demo.gif" alt="Demo animada del mapa de calor de ocupación de MultiDatePick en Salesforce: asesores en filas con lo reservado frente a la capacidad de cada día, el cursor sobre un día completo y un clic que abre la semana de ese asesor" loading="lazy" decoding="async" width="880" height="780" data-zoomable>
+                    <figcaption>Asesores en filas y lo reservado frente a la capacidad en cada celda. Pasa el cursor sobre un día para ver sus reservas; haz clic para abrir esa semana.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Qué muestra el mapa de calor</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>Reservado de la capacidad</h3><p>Cada celda dice algo como 3/4: tres de cuatro plazas ocupadas. Cuanto más lleno el día, más oscuro el azul.</p></div>
+                    <div class="tl-feat"><h3>Exceso de reservas marcado</h3><p>Un día reservado por encima de su capacidad lleva un anillo naranja. Nunca se queda discretamente en «lleno».</p></div>
+                    <div class="tl-feat"><h3>Disponibilidad combinada</h3><p>Una fila en la parte superior muestra en porcentaje lo lleno que está todo el grupo cada día, para que destaquen los días críticos.</p></div>
+                    <div class="tl-feat"><h3>Promedio y plazas libres</h3><p>La columna de la derecha da el promedio de cada recurso en el mes y cuántas plazas le quedan libres a partir de hoy.</p></div>
+                    <div class="tl-feat"><h3>Haz clic para ver el detalle</h3><p>Haz clic en una celda con reservas y el componente abre la semana de ese recurso en ese día, lista para reservar o editar.</p></div>
+                    <div class="tl-feat"><h3>Funciona sin capacidad</h3><p>¿Aún no tienes campo de capacidad? Las celdas muestran el número de reservas en la misma escala, y la cuadrícula lo indica.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Un mes de capacidad de un vistazo</h2>
+                <p>Los informes pueden darte la ocupación, una pregunta cada vez. El mapa de calor muestra el mes entero a la vez, así que saltan a la vista patrones que un informe nunca sacaría: el asesor que está lleno todos los martes, la sala que nadie reserva los viernes, la semana en que todos llegan a su capacidad al mismo tiempo. La cuadrícula se abre en el día de hoy, mantiene fijos los nombres de los recursos al desplazarte y cuenta las plazas libres solo desde hoy, porque la capacidad que no se usó la semana pasada ya no se puede reservar.</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-utilization-heatmap.png" alt="Mapa de calor de ocupación en Salesforce para citas de asesores: las reservas diarias de cada asesor frente a su capacidad, una fila de disponibilidad combinada arriba y columnas de promedio y plazas libres a la derecha" loading="lazy" width="2000" height="1247" data-zoomable>
+                    <figcaption>Un mes de citas de asesores. Las celdas más oscuras son días llenos; la columna de la derecha indica cuánto hueco queda.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">El trabajo de varios días cuenta en cada día que dura</h2>
+                <p>La capacidad no se limita a las reuniones. Un consultor puede llevar dos encargos de clientes a la vez; una cuadrilla puede trabajar en una obra cada vez; un aula de formación acoge un curso durante toda una semana. El mapa de calor cuenta una reserva de varios días en cada día que abarca, así que un encargo de lunes a viernes llena las cinco celdas. Ajusta la capacidad al número de cosas que un recurso puede llevar a la vez y la cuadrícula muestra exactamente cuándo está cada persona totalmente ocupada.</p>
+                <figure class="sc-shot">
+                    <img src="/images/views/salesforce-utilization-project-capacity.png" alt="Mapa de calor de ocupación en Salesforce con encargos de clientes de varios días: tres asesores con capacidad para dos encargos cada uno, un mes completo, y los días en que cada asesor está totalmente ocupado" loading="lazy" width="2000" height="761" data-zoomable>
+                    <figcaption>Encargos de clientes frente a una capacidad de dos por asesor. 2/2 significa totalmente ocupado ese día.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Quién usa un mapa de calor de ocupación en Salesforce</h2>
+                <p>El recurso puede ser cualquier objeto, así que la misma vista responde a preguntas de capacidad de equipos muy distintos:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Planificación de la capacidad del equipo</strong><span>Usa User como recurso con un número de capacidad y verás quién está lleno y quién puede asumir más trabajo.</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>Salas de reuniones y de formación</strong><span>Descubre las salas que se quedan vacías y los días en que todas están ocupadas, antes de firmar otro alquiler.</span></div></div>
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Consultores y asesores</strong><span>Encargos o citas frente a cuántos puede llevar cada persona a la vez.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Clínicas y profesionales sanitarios</strong><span>Citas diarias por profesional, con los días con exceso de reservas rodeados en naranja.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>Equipos y flota</strong><span>Con qué frecuencia sale cada vehículo, instrumento o kit, y de cuáles podrías prescindir.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Eventos y clases</strong><span>Plazas reservadas frente a plazas disponibles en cada sesión del mes.</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Los ajustes que lo definen</h2>
+                <p>Cada uno de estos ajustes es una propiedad del componente y un campo del asistente de configuración, así que nada de esto necesita código:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Ajuste</th><th>Función</th><th style="width:22%;">Nombre de API</th></tr></thead>
+                    <tbody>
+                    <tr><td>Vista (View)</td><td>Ponlo en <code>utilization</code> para que se abra en esa vista, o inclúyela en Available Views (Vistas disponibles) para ofrecerla en el selector.</td><td><code>view</code></td></tr>
+                    <tr><td>Campo de capacidad (Capacity Field)</td><td>Un campo numérico en el recurso: cuántas reservas admite a la vez. Las celdas muestran lo reservado frente a ese número. Si lo dejas vacío, las celdas muestran recuentos.</td><td><code>capacityField</code></td></tr>
+                    <tr><td>Máx. de filas de recursos (Max View Resources)</td><td>Dibuja solo este número de filas, las más ocupadas primero. Todos los recursos siguen contando en la fila combinada.</td><td><code>maxViewResources</code></td></tr>
+                    <tr><td>Filas de recursos (Resource Rows)</td><td>Mostrar todos los recursos o solo los que tienen reservas en el mes.</td><td><code>resourceViewFilter</code></td></tr>
+                    <tr><td>Campo de estado (Status Field)</td><td>Con los colores de estado activados, los filtros de estado sobre la cuadrícula deciden qué se cuenta. Desactiva Cancelled y esas reservas desaparecen de todas las celdas.</td><td><code>statusField</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Un componente, cinco vistas.</strong> Ocupación está junto a Calendario, Línea de tiempo, Semana y Agenda en el mismo componente, y lee los mismos registros. Ofrécela junto a una vista en la que la gente reserva, y el selector hace el resto. <a href="/es/blog/vistas-calendario-salesforce.html">Ver las cinco vistas</a>.</div>
+
+                <h2 style="margin-top:44px;">Preguntas frecuentes</h2>
+                <div class="tl-faq">
+                    <details><summary>¿Cómo veo la ocupación de los recursos en Salesforce?</summary><p>Salesforce estándar no tiene una vista de ocupación para tus propios objetos de reservas; tendrías que crear un informe por cada pregunta. MultiDatePick añade una vista Ocupación al componente de calendario: cada recurso es una fila y cada día una celda con lo reservado frente a la capacidad de ese recurso, con una fila combinada para todo el grupo y, a la derecha, el promedio y las plazas libres.</p></details>
+                    <details><summary>¿Qué significa una celda como 2/2 o 3/4?</summary><p>Las reservas de ese día frente a la capacidad del recurso. 3/4 significa que están ocupadas tres de cuatro plazas. Cuanto más oscuro el azul, más lleno está el día, y un día reservado por encima de su capacidad lleva un anillo naranja para que destaque.</p></details>
+                    <details><summary>¿Y si mi objeto de recurso no tiene campo de capacidad?</summary><p>El mapa de calor sigue funcionando. Las celdas muestran simplemente el número de reservas en la misma escala de azules, y una nota bajo la cuadrícula lo indica. Cuando quieras porcentajes y plazas libres, añade un campo numérico para la capacidad.</p></details>
+                    <details><summary>¿Puedo reservar o editar desde la vista Ocupación?</summary><p>Ocupación es de solo lectura a propósito: responde a lo llena que está cada cosa. Haz clic en cualquier celda con reservas y el componente abre la semana de ese recurso en ese día, donde puedes reservar, mover o editar.</p></details>
+                    <details><summary>¿Las filas pueden ser personas en lugar de salas?</summary><p>Sí. El recurso puede ser cualquier objeto, incluido User. Añade un número de capacidad a User y el mapa de calor se convierte en un panel de capacidad del equipo: quién está lleno, quién tiene hueco y qué semanas van sobrecargadas.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Capacidad a la vista, en los objetos que ya tienes.</h2>
+                    <p>Abre la vista Ocupación en la demo en vivo, o empieza con la configuración Planificación de la capacidad del equipo de la <a href="/es/biblioteca-configuraciones-calendario-salesforce.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-utilization-heatmap" class="btn btn-demo" target="_blank" rel="noopener">Prueba la demo en vivo</a> <a href="/es/avisame-en-el-lanzamiento.html" class="btn btn-primary">Avísame en el lanzamiento</a> <a href="/es/primeros-pasos.html" class="btn btn-secondary">Primeros pasos</a>
+                    </div>
+                    <ul class="check-list"><li>US$20/usuario/mes, todas las funciones</li><li>Prueba gratis de 30 días, sin tarjeta</li><li>100 % nativo de Salesforce</li><li>Sin Apex</li><li>Próximamente en Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Lecturas relacionadas</h3>
+                    <ul>
+                        <li><a href="/es/blog/linea-de-tiempo-salesforce.html">La vista de línea de tiempo de Salesforce</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Vistas de calendario en Salesforce: cinco en un componente</a></li>
+                        <li><a href="/es/blog/evitar-reservas-duplicadas-salesforce.html">Cómo evitar las reservas duplicadas en Salesforce</a></li>
+                        <li><a href="/es/reserva-salas-reuniones-salesforce.html">Reserva de salas de reuniones en Salesforce</a></li>
+                        <li><a href="/es/calendario-reservas-salesforce.html">El componente Booking</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/es/" class="logo">
+                        <img src="/images/logo.png" alt="Logotipo de MultiDatePick: componente de calendario de varias fechas y reserva de recursos para Salesforce" width="180" height="45">
+                    </a>
+                    <p>La suite de componentes de calendario más personalizable para Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Producto</h4>
+                    <ul>
+                        <li><a href="/es/selector-varias-fechas-salesforce.html">Date</a></li>
+                        <li><a href="/es/selector-franjas-horarias-salesforce.html">Date Time</a></li>
+                        <li><a href="/es/calendario-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Cinco vistas de calendario</a></li>
+                        <li><a href="/es/biblioteca-configuraciones-calendario-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluciones</h4>
+                    <ul>
+                        <li><a href="/es/calendario-salesforce.html">Calendario de Salesforce</a></li>
+                        <li><a href="/es/calendario-salesforce-reclutamiento-seleccion-personal.html">Reclutamiento y selección</a></li>
+                        <li><a href="/es/calendario-salesforce-programar-entrevistas.html">Programación de entrevistas</a></li>
+                        <li><a href="/es/reserva-salas-reuniones-salesforce.html">Reserva de salas de reuniones</a></li>
+                        <li><a href="/es/calendario-reservas-experience-cloud-salesforce.html">Reservas en Experience Cloud</a></li>
+                        <li><a href="/es/blog/fechas-de-campana-salesforce.html">Fechas de campaña</a></li>
+                        <li><a href="/es/blog/calendario-salesforce-accesible-sector-publico-section-508.html">Sector público / Section 508</a></li>
+                        <li><a href="/es/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentación</h4>
+                    <ul>
+                        <li><a href="/es/primeros-pasos.html">Primeros pasos</a></li>
+                        <li><a href="/es/guia-del-usuario.html">Guía del usuario</a></li>
+                        <li><a href="/es/guia-flujos-de-pantalla-salesforce.html">Guía de flujos de pantalla</a></li>
+                        <li><a href="/es/paginas-aplicacion-inicio-experience-cloud.html">Páginas de aplicación, inicio y Experience</a></li>
+                        <li><a href="/es/implementar-flujo-vs-code.html">Implementar un flujo (VS Code)</a></li>
+                        <li><a href="/es/solucion-de-problemas.html">Solución de problemas</a></li>
+                        <li><a href="/es/preguntas-frecuentes.html">Preguntas frecuentes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="/es/precios.html">Precios</a></li>
+                        <li><a href="/es/blog/">Blog</a></li>
+                        <li><a href="/es/confianza-y-seguridad.html">Confianza y seguridad</a></li>
+                        <li><a href="/es/accesibilidad-vpat.html">Accesibilidad</a></li>
+                        <li><a href="/es/avisame-en-el-lanzamiento.html">Avísame en el lanzamiento</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Soporte</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Todos los derechos reservados.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Idioma" translate="no"><ul><li><a href="/blog/salesforce-utilization-heatmap.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-auslastungs-heatmap.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/mapa-de-calor-ocupacion-salesforce.html" hreflang="es" lang="es" aria-current="page">Español</a></li><li><a href="/fr/blog/heatmap-occupation-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/heatmap-utilizzo-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/mapa-de-calor-ocupacao-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-utilization-heatmap.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-utilization-heatmap.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-utilization-heatmap.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ampliar imagen</p><p data-k="expand-diagram">Ampliar diagrama</p><p data-k="close">Cerrar</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>
