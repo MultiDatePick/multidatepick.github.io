@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce のカレンダーに関連レコードを表示 (孫レコードも)</title>
+    <meta name="description" content="取引先責任者、商談、カスタムオブジェクトの ToDo やレコードを、Salesforce の取引先カレンダー 1 つに表示。積み上げ項目を 1 つ設定するだけで、参照関係を 5 階層までたどれます。Apex 不要。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/salesforce-calendar-related-records.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Related records post: same look as the Timeline, Utilization and Campaign posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce の取引先カレンダーに関連レコードを表示する">
+    <meta property="og:description" content="取引先責任者、商談、カスタムオブジェクトの ToDo やレコードを、Salesforce の取引先カレンダー 1 つに表示。積み上げ項目を 1 つ設定するだけで、参照関係を 5 階層までたどれます。Apex 不要。">
+    <meta property="og:image" content="https://multidatepick.com/images/ja/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/salesforce-calendar-related-records.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce の取引先カレンダーに関連レコードを表示する">
+    <meta name="twitter:description" content="取引先責任者、商談、カスタムオブジェクトの ToDo やレコードを、Salesforce の取引先カレンダー 1 つに表示。積み上げ項目を 1 つ設定するだけで、参照関係を 5 階層までたどれます。Apex 不要。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/ja/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-account-kalender-verknuepfte-datensaetze.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/calendario-cuenta-salesforce-registros-relacionados.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/calendrier-compte-salesforce-enregistrements-associes.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/calendario-account-salesforce-record-correlati.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/calendario-conta-salesforce-registros-relacionados.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-calendar-related-records.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce の取引先カレンダー: 関連レコードをすべて 1 つの画面に",
+                "description": "取引先責任者、商談、カスタムオブジェクトの ToDo やレコードを、Salesforce の取引先カレンダー 1 つに表示。積み上げ項目を 1 つ設定するだけで、参照関係を 5 階層までたどれます。Apex 不要。",
+                "datePublished": "2026-10-31",
+                "dateModified": "2026-10-31",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/salesforce-calendar-related-records.html",
+                "image": "https://multidatepick.com/images/ja/blog/salesforce-account-calendar-related-records.png",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce の取引先カレンダーに、取引先責任者や商談の ToDo を表示するには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "取引先のレコードページに MultiDatePick の Dates コンポーネントを配置し、関連オブジェクトに ToDo、リレーション項目に WhatId を指定して、積み上げ項目 (Rollup Field) に AccountId と入力します。取引先の取引先責任者や商談に登録された ToDo にも Salesforce が取引先を保存しているため、それらの ToDo が取引先自身の ToDo と並んで取引先カレンダーに表示されます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce のカレンダーに孫レコードを表示できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。積み上げ項目には Project__r.Account__c のような参照関係をたどるパスを指定できるため、取引先ページのカレンダーに、その取引先に属するすべてのプロジェクトのレコードを表示できます。パスは 5 階層まで指定でき、これは Salesforce のクエリが参照関係をたどれる上限と同じです。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "積み上げ項目を設定すると、新しいレコードはどこに保存されますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "これまでどおりリレーション項目を通じて保存されます。積み上げ項目は、カレンダーに表示するレコードを増やすだけです。取引先ページで選んだ日はその取引先に紐づくレコードとして保存され、関連レコードはそれぞれの親のままです。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "積み上げ表示は共有設定と項目レベルセキュリティに従いますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。カレンダーはページを表示しているユーザーとしてレコードを読み込むため、レコードの共有設定と項目レベルセキュリティが適用されます。ユーザーに表示されるのは、Salesforce ですでにアクセス権を持つ関連レコードだけです。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "積み上げ項目に対応している MultiDatePick のコンポーネントは?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Dates と Date Time の各コンポーネントで、保存先が標準オブジェクトでもカスタムオブジェクトでも使えます。Booking コンポーネントも This Record Only と組み合わせて同じ積み上げ項目を使えるため、タイムライン、週、稼働率、予定一覧の各表示に、参照関係のパスを通じてページのレコードに紐づく予約を表示できます。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-account-calendar-direct-tasks-only.png",
+                "caption": "積み上げ項目なしの Salesforce 取引先カレンダー: 取引先に直接登録された ToDo がある 11 月の 4 日だけに印が付いた状態",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-account-calendar-related-records.png",
+                "caption": "積み上げ項目に AccountId を設定した Salesforce 取引先カレンダー: 取引先責任者や商談の ToDo を含め、11 月の 11 日に状況の色で印が付いた状態",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-calendar-rollup-field-setup.png",
+                "caption": "Salesforce カレンダーのセットアップウィザードの「項目」画面: 取引先ページで ToDo を関連先 (WhatId) で保存し、積み上げ項目に AccountId を入力",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce の取引先カレンダー: 関連レコードをすべて 1 つの画面に</h1>
+                <p class="subtitle">取引先責任者の ToDo。商談のマイルストーン。プロジェクトの訪問予定。そのすべてを、設定 1 つで取引先のカレンダーに。階層の深さを問わず、Apex は書きません。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 10 月 31 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">「取引先責任者に登録したものも含めて、この取引先の ToDo をすべて見るには?」「商談のマイルストーンも取引先ページに表示できる?」「レコードページに孫レコードを表示するには?」1 社の顧客に関する業務は、たくさんのレコードに分散しています。取引先ページには、そのすべてを 1 か所に表示するべきです。</p>
+
+                <p>MultiDatePick は、それを<strong>積み上げ項目</strong>で実現します。取引先ページのカレンダーは、取引先に直接紐づくレコードに加えて、取引先責任者、商談、プロジェクト、または最大 5 階層の参照関係を通じて離れた場所から取引先を指すすべてのレコードを読み込みます。セットアップウィザードの項目 1 つだけ。<strong>Apex は不要です。</strong></p>
+
+                <div class="bp-pair">
+                    <figure class="sc-shot">
+                        <img src="/images/ja/blog/salesforce-account-calendar-direct-tasks-only.png" alt="積み上げ項目なしの Salesforce 取引先カレンダー: 取引先に直接登録された ToDo がある 11 月の 4 日だけに印が付いた状態" loading="lazy" width="1414" height="1584" data-zoomable>
+                        <figcaption>設定前: 取引先自身の ToDo だけ。11 月は 4 日。</figcaption>
+                    </figure>
+                    <figure class="sc-shot">
+                        <img src="/images/ja/blog/salesforce-account-calendar-related-records.png" alt="積み上げ項目に AccountId を設定した Salesforce 取引先カレンダー: 取引先責任者や商談の ToDo を含め、11 月の 11 日に状況の色で印が付いた状態" loading="lazy" width="1414" height="1584" data-zoomable>
+                        <figcaption>設定後: 積み上げ項目に AccountId を設定。取引先責任者への電話や商談のマイルストーンも加わり、11 日に。</figcaption>
+                    </figure>
+                </div>
+
+                <h2 style="margin-top:44px;">取引先ページでできること</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>取引関係の全体像</h3><p>取引先、その取引先責任者、商談の ToDo とレコードが、ページを開くと 1 つのカレンダーに表示されます。</p></div>
+                    <div class="tl-feat"><h3>どのオブジェクトも、どの階層も</h3><p>標準オブジェクトもカスタムオブジェクトも、直接の紐付けでも最大 5 階層の参照関係のパスでも表示できます。</p></div>
+                    <div class="tl-feat"><h3>保存はシンプルなまま</h3><p>新しい日は、いつものリレーション項目でページのレコードに保存されます。関連レコードはそれぞれの親のままです。</p></div>
+                    <div class="tl-feat"><h3>状況の色分け</h3><p>直接のレコードも積み上げたレコードも、すべて状況の色で表示され、カレンダー上部のボタンで状況ごとに絞り込めます。</p></div>
+                    <div class="tl-feat"><h3>ホバーで詳細を表示</h3><p>日にカーソルを合わせると、どの電話、マイルストーン、訪問なのかが表示され、そのレコードを開けます。</p></div>
+                    <div class="tl-feat"><h3>ユーザーごとのアクセス権</h3><p>レコードはページを表示しているユーザーとして読み込まれるため、共有設定と項目レベルセキュリティがいつもどおり適用されます。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">取引先ページに予定の一部しか表示されない理由</h2>
+                <p>レコードページのカレンダーは通常、そのレコードを参照するレコードを読み込みます。取引先ページの ToDo カレンダーなら、関連先が取引先になっている ToDo です。しかし、業務の大半は別の場所に登録されています。取引先責任者への定期連絡の電話、商談のパイロット開始、プロジェクトの現地訪問。どれも 1 階層以上離れた場所で取引先に属するレコードですが、1 階層だけのカレンダーでは表示されません。</p>
+                <p>積み上げ項目が、その抜けを埋めます。ページのレコードにつながる 2 つ目の項目、または参照関係のパスを指定すると、カレンダーにはどちらかに一致するすべてのレコードが表示されます。上の Northwind Logistics の例では、取引先自身の訪問予定は 11 月の 4 日分ですが、積み上げ項目に <code>AccountId</code> を設定すると、取引先責任者への電話や商談のマイルストーンが加わり、月全体で 11 日になります。</p>
+
+                <h2 style="margin-top:44px;">積み上げ項目のしくみ</h2>
+                <p>2 つの項目が、それぞれ別の役割を担います。<strong>リレーション項目</strong>は新しいレコードの保存先です。取引先ページで日を選べば、そのレコードは取引先に紐づきます。<strong>積み上げ項目</strong>は 2 つ目の一致条件です。積み上げ項目の値がページのレコードと一致するレコードも、カレンダーに表示されます。この方法で動く設定例をいくつか紹介します。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:18%;">ページ</th><th style="width:24%;">カレンダーのレコード</th><th style="width:22%;">リレーション項目</th><th style="width:36%;">積み上げ項目と追加されるもの</th></tr></thead>
+                    <tbody>
+                    <tr><td>取引先</td><td>ToDo</td><td><code>WhatId</code></td><td><code>AccountId</code>: 取引先の取引先責任者と商談の ToDo</td></tr>
+                    <tr><td>取引先</td><td>行動</td><td><code>WhatId</code></td><td><code>AccountId</code>: 取引先の取引先責任者との打ち合わせや商談の打ち合わせ</td></tr>
+                    <tr><td>取引先</td><td>プロジェクトタスク (カスタム)</td><td><code>Account__c</code></td><td><code>Project__r.Account__c</code>: 取引先が持つすべてのプロジェクトのタスク</td></tr>
+                    <tr><td>取引先</td><td>現地訪問 (カスタム)</td><td><code>Account__c</code></td><td><code>Location__r.Region__r.Account__c</code>: 取引先のすべての地域にある、すべての拠点への訪問</td></tr>
+                    <tr><td>商談</td><td>マイルストーン (カスタム)</td><td><code>Opportunity__c</code></td><td><code>Quote__r.OpportunityId</code>: 商談の見積に登録されたマイルストーン</td></tr>
+                </tbody>
+                </table>
+                </div>
+                <p>パスは Salesforce がリレーションを書くのと同じ形で書きます。各参照関係のリレーション名、ドット、そして最後に項目名です。カスタムの参照関係は途中で <code>__r</code> で終わり (<code>Project__r</code>)、標準の参照関係は <code>Id</code> を取ります (<code>Contact.AccountId</code>)。最大 5 階層で、Salesforce のクエリで使える深さと同じです。</p>
+
+                <h2 style="margin-top:44px;">セットアップウィザードで設定する</h2>
+                <p>積み上げ項目は、ウィザードの「項目」画面で、すでに選んでいる項目の隣の<strong>その他</strong>ボックスにあります。</p>
+                <ol class="cp-steps">
+                    <li><strong>カレンダーの配置場所を選びます。</strong> MultiDatePick セットアップウィザードのタブを開き、取引先のレコードページと、カレンダーの保存方法 (Dates カレンダーなら日付ごとに 1 件のレコード) を選びます。</li>
+                    <li><strong>各日の保存先を選びます。</strong> 「項目」画面で ToDo を選び、リレーション項目に<strong>関連先 ID (WhatId)</strong>、日付項目に<strong>期日 (ActivityDate)</strong>を指定します。</li>
+                    <li><strong>積み上げ項目を入力します。</strong> <code>AccountId</code> と入力するか、カスタムオブジェクトなら <code>Project__r.Account__c</code> のような参照関係のパスを入力します。<code>Account_Visits</code> のような名前で設定を保存します。</li>
+                    <li><strong>取引先ページにコンポーネントを配置します。</strong> Lightning App Builder で MultiDatePick の Dates コンポーネントを追加し、<strong>Config Name</strong> に設定名を入力します。これで、すべての取引先にその取引先の予定全体が表示されます。</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/ja/blog/salesforce-calendar-rollup-field-setup.png" alt="Salesforce カレンダーのセットアップウィザードの「項目」画面: 取引先ページで ToDo を関連先 (WhatId) で保存し、積み上げ項目に AccountId を入力" loading="lazy" width="2000" height="528" data-zoomable>
+                    <figcaption>取引先ページの ToDo: 関連先で保存し、AccountId で積み上げ。</figcaption>
+                </figure>
+                <p>すでにページにカレンダーがある場合は、ウィザードでその設定を開き、積み上げ項目を追加して保存するだけです。その設定を使うすべてのページに、次回の読み込みから反映されます。同じ<strong>積み上げ項目</strong>のプロパティは、Lightning App Builder のコンポーネントにもあります。</p>
+
+                <h2 style="margin-top:44px;">親レコードへの積み上げを活用しているチーム</h2>
+                <p>1 件のレコードに関する業務が、周囲のレコードに登録されている場面なら、どこでも使えます。</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>アカウントマネージャー</strong><span>取引先の取引先責任者と商談にまたがる、すべての電話、打ち合わせ、フォローアップを取引先に。</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>フィールドサービス</strong><span>各拠点の現地訪問を、拠点を所有する顧客に積み上げて表示。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>プロジェクト推進</strong><span>すべてのプロジェクトとフェーズのタスク期日を、顧客の取引先ページに。</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>カスタマーサクセス</strong><span>取引先責任者と商談のオンボーディング、定例レビュー、更新手続きを 1 つの月表示で。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>非営利団体</strong><span>世帯のメンバーに登録されたボランティアのシフトや寄付者との面談を、世帯に表示。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>不動産管理</strong><span>各部屋の点検を、建物を通じてオーナーの取引先に積み上げて表示。</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">動作を決める設定</h2>
+                <p>いずれもセットアップウィザードの項目とコンポーネントのプロパティなので、コードは一切不要です。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">設定</th><th>機能</th><th style="width:22%;">API 参照名</th></tr></thead>
+                    <tbody>
+                    <tr><td>関連オブジェクト</td><td>カレンダーで表示・保存するオブジェクト (ToDo や、カスタムの現地訪問オブジェクトなど)。</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>リレーション項目</td><td>ページのレコードへの参照関係。新しいレコードはこの項目で保存されます。</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>積み上げ項目（Rollup Field）</td><td>ページのレコードにつながる 2 つ目の項目または参照関係のパス。一致するレコードもカレンダーに表示されます。</td><td><code>rollupField</code></td></tr>
+                    <tr><td>日付項目</td><td>各レコードをカレンダーに配置する日付項目 (ActivityDate など)。</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>状況項目と状況の色（Status Field and Status Colors）</td><td>状況の選択リストと値ごとの色 (例: Completed:#22C55E)。</td><td><code>statusField</code>、<code>statusColors</code></td></tr>
+                    <tr><td>ホバー項目（Hover Popover Fields）</td><td>日にカーソルを合わせたときに表示する項目 (件名、状況など)。</td><td><code>hoverFields</code></td></tr>
+                    <tr><td>設定名（Config Name）</td><td>セットアップウィザードで保存した設定。これを設定すれば、ほかは空欄のままで構いません。</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>月表示のグリッドだけではありません。</strong> MultiDatePick は同じレコードを、カレンダー、タイムライン、週、予定一覧、稼働率のグリッドで表示でき、1 つのコンポーネントで切り替えられます。<a href="/ja/blog/salesforce-calendar-views.html">5 つの表示をすべて見る</a>。</div>
+
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="tl-faq">
+                    <details><summary>Salesforce の取引先カレンダーに、取引先責任者や商談の ToDo を表示するには?</summary><p>取引先のレコードページに MultiDatePick の Dates コンポーネントを配置し、関連オブジェクトに ToDo、リレーション項目に WhatId を指定して、積み上げ項目 (Rollup Field) に AccountId と入力します。取引先の取引先責任者や商談に登録された ToDo にも Salesforce が取引先を保存しているため、それらの ToDo が取引先自身の ToDo と並んで取引先カレンダーに表示されます。</p></details>
+                    <details><summary>Salesforce のカレンダーに孫レコードを表示できますか?</summary><p>はい。積み上げ項目には Project__r.Account__c のような参照関係をたどるパスを指定できるため、取引先ページのカレンダーに、その取引先に属するすべてのプロジェクトのレコードを表示できます。パスは 5 階層まで指定でき、これは Salesforce のクエリが参照関係をたどれる上限と同じです。</p></details>
+                    <details><summary>積み上げ項目を設定すると、新しいレコードはどこに保存されますか?</summary><p>これまでどおりリレーション項目を通じて保存されます。積み上げ項目は、カレンダーに表示するレコードを増やすだけです。取引先ページで選んだ日はその取引先に紐づくレコードとして保存され、関連レコードはそれぞれの親のままです。</p></details>
+                    <details><summary>積み上げ表示は共有設定と項目レベルセキュリティに従いますか?</summary><p>はい。カレンダーはページを表示しているユーザーとしてレコードを読み込むため、レコードの共有設定と項目レベルセキュリティが適用されます。ユーザーに表示されるのは、Salesforce ですでにアクセス権を持つ関連レコードだけです。</p></details>
+                    <details><summary>積み上げ項目に対応している MultiDatePick のコンポーネントは?</summary><p>Dates と Date Time の各コンポーネントで、保存先が標準オブジェクトでもカスタムオブジェクトでも使えます。Booking コンポーネントも This Record Only と組み合わせて同じ積み上げ項目を使えるため、タイムライン、週、稼働率、予定一覧の各表示に、参照関係のパスを通じてページのレコードに紐づく予約を表示できます。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>取引先のすべてを、取引先ページに。</h2>
+                    <p>ライブデモを操作してみるか、<a href="/ja/configlibrary.html">Config Library</a> の既製の設定から始めましょう。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-related-records" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/salesforce-calendar-setup-wizard.html">セットアップウィザードで Salesforce カレンダーを設定する</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">Salesforce のレコードページでキャンペーンの日程を管理する</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">Salesforce カレンダー表示 5 種類を 1 つのコンポーネントで</a></li>
+                        <li><a href="/ja/user-guide.html">MultiDatePick ユーザーガイド</a></li>
+                        <li><a href="/ja/multidatepickdates.html">MultiDatePick の Dates カレンダー</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/salesforce-calendar-related-records.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-account-kalender-verknuepfte-datensaetze.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/calendario-cuenta-salesforce-registros-relacionados.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/calendrier-compte-salesforce-enregistrements-associes.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/calendario-account-salesforce-record-correlati.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/calendario-conta-salesforce-registros-relacionados.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-calendar-related-records.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/salesforce-calendar-related-records.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-calendar-related-records.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在 Salesforce 日历上显示相关记录（任意对象）</title>
+    <meta name="description" content="把联系人、业务机会和自定义对象上的任务和记录显示在同一个 Salesforce 客户日历上。只需一个 Rollup Field，最多五层查找，无需 Apex。">
+    <link rel="canonical" href="https://multidatepick.com/zh/blog/salesforce-calendar-related-records.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Related records post: same look as the Timeline, Utilization and Campaign posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="在 Salesforce 客户日历上显示相关记录">
+    <meta property="og:description" content="把联系人、业务机会和自定义对象上的任务和记录显示在同一个 Salesforce 客户日历上。只需一个 Rollup Field，最多五层查找，无需 Apex。">
+    <meta property="og:image" content="https://multidatepick.com/images/zh/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/blog/salesforce-calendar-related-records.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="在 Salesforce 客户日历上显示相关记录">
+    <meta name="twitter:description" content="把联系人、业务机会和自定义对象上的任务和记录显示在同一个 Salesforce 客户日历上。只需一个 Rollup Field，最多五层查找，无需 Apex。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/zh/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-account-kalender-verknuepfte-datensaetze.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/calendario-cuenta-salesforce-registros-relacionados.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/calendrier-compte-salesforce-enregistrements-associes.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/calendario-account-salesforce-record-correlati.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/calendario-conta-salesforce-registros-relacionados.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-calendar-related-records.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce 客户日历：所有相关记录尽在一个视图",
+                "description": "把联系人、业务机会和自定义对象上的任务和记录显示在同一个 Salesforce 客户日历上。只需一个 Rollup Field，最多五层查找，无需 Apex。",
+                "datePublished": "2026-10-31",
+                "dateModified": "2026-10-31",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/zh/blog/salesforce-calendar-related-records.html",
+                "image": "https://multidatepick.com/images/zh/blog/salesforce-account-calendar-related-records.png",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "如何在 Salesforce 客户日历上显示联系人和业务机会的任务？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "把 MultiDatePick Dates 组件放到客户记录页面上，相关对象选任务，关系字段选 WhatId，然后在 Rollup Field 中输入 AccountId。Salesforce 会在记录到客户的联系人和业务机会上的任务里自动存储所属客户，因此这些任务会和客户自己的任务一起显示在客户日历上。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce 日历能显示孙记录吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "能。Rollup Field 接受一条经过查找关系的路径，例如 Project__r.Account__c，因此客户页面上的日历会显示该客户名下每个项目的记录。路径最多可以有五层，这正是 Salesforce 查询沿查找关系所能达到的最大深度。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "设置了 Rollup Field 后，新记录保存到哪里？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "和以前完全一样，通过关系字段保存。Rollup Field 只会增加日历显示的记录。在客户页面上选择的日期会保存为一条关联到该客户的记录，相关记录则保留各自的父记录。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "汇总显示会遵守共享规则和字段级安全性吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "会。日历以查看页面的用户身份加载记录，因此记录共享和字段级安全性都照常生效。用户看到的是自己在 Salesforce 中本就有权访问的相关记录，仅此而已。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "哪些 MultiDatePick 组件支持 Rollup Field？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Dates 和 Date Time 组件都支持，无论保存到标准对象还是自定义对象。Booking 组件在 This Record Only 模式下使用同一个 Rollup Field，因此它的时间轴、周、使用率和日程视图会显示通过查找路径关联到页面记录的预订。"
+                        }
+                    }
+                ],
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-account-calendar-direct-tasks-only.png",
+                "caption": "未设置 Rollup Field 的 Salesforce 客户日历：只标出了 11 月里直接记录在客户上的任务所在的四天",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-account-calendar-related-records.png",
+                "caption": "Rollup Field 设为 AccountId 的 Salesforce 客户日历：11 月标出了十一天，包括客户的联系人和业务机会上的任务，并按状态着色",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-calendar-rollup-field-setup.png",
+                "caption": "Salesforce 日历设置向导的“字段”屏幕：客户页面上的任务通过相关项（WhatId）保存，Rollup Field 中填入了 AccountId",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce 客户日历：所有相关记录尽在一个视图</h1>
+                <p class="subtitle">客户的联系人上的任务，业务机会上的里程碑，项目上的拜访。只需一项设置，就能把它们全部放到客户的日历上，层级再深也没问题，无需编写 Apex。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">发布于 2026 年 10 月 31 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">“怎样查看这个客户的所有任务，包括记录在其联系人上的那些？”“客户页面能不能也显示业务机会的里程碑？”“怎样在记录页面上显示孙记录？”同一个客户的工作分散在许多条记录上，而客户页面应该把它们集中显示在一处。</p>
+
+                <p>MultiDatePick 用 <strong>Rollup Field</strong>（汇总字段）做到这一点。客户页面上的日历会加载直接关联到该客户的记录，以及从更远处指向该客户的每一条记录：经由联系人、业务机会、项目，或一条最多五层的查找链。只需在设置向导中填一个字段。<strong>无需 Apex。</strong></p>
+
+                <div class="bp-pair">
+                    <figure class="sc-shot">
+                        <img src="/images/zh/blog/salesforce-account-calendar-direct-tasks-only.png" alt="未设置 Rollup Field 的 Salesforce 客户日历：只标出了 11 月里直接记录在客户上的任务所在的四天" loading="lazy" width="1414" height="1584" data-zoomable>
+                        <figcaption>之前：只有客户自己的任务。11 月只有四天。</figcaption>
+                    </figure>
+                    <figure class="sc-shot">
+                        <img src="/images/zh/blog/salesforce-account-calendar-related-records.png" alt="Rollup Field 设为 AccountId 的 Salesforce 客户日历：11 月标出了十一天，包括客户的联系人和业务机会上的任务，并按状态着色" loading="lazy" width="1414" height="1584" data-zoomable>
+                        <figcaption>之后：Rollup Field 设为 AccountId。十一天，联系人的通话和业务机会的里程碑都在。</figcaption>
+                    </figure>
+                </div>
+
+                <h2 style="margin-top:44px;">客户页面上能得到什么</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>完整的客户关系</h3><p>客户、其联系人和业务机会上的任务和记录，打开页面就显示在同一个日历上。</p></div>
+                    <div class="tl-feat"><h3>任意对象，任意层级</h3><p>标准对象或自定义对象，可直接关联，也可通过最多五层的查找路径关联。</p></div>
+                    <div class="tl-feat"><h3>保存依然简单</h3><p>新日期通过常用的关系字段保存到页面记录上。相关记录保留各自的父记录。</p></div>
+                    <div class="tl-feat"><h3>状态颜色</h3><p>每条记录，无论直接关联还是汇总而来，都会显示其状态颜色，日历上方的状态标签可按状态筛选。</p></div>
+                    <div class="tl-feat"><h3>悬停查看详情</h3><p>指向某一天，就能看到是哪次通话、哪个里程碑或哪次拜访，并打开背后的记录。</p></div>
+                    <div class="tl-feat"><h3>按每个用户自己的权限</h3><p>记录以查看页面的用户身份加载，因此共享和字段级安全性照常生效。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">为什么客户页面只显示了一部分日程</h2>
+                <p>记录页面上的日历通常只加载查找到该记录的记录。在带有任务日历的客户页面上，就是相关项为该客户的任务。但大部分工作记录在别处：联系人上的一次回访电话，业务机会上的一次试点启动会，项目上的一次现场拜访。这些记录都属于该客户，只是相隔一层或多层，而只看一层的日历会把它们漏掉。</p>
+                <p>Rollup Field 正好补上这一块。它指定第二个字段，或一条经过查找关系的路径，同样指回页面记录。日历会显示与其中任意一个匹配的所有记录。在上面的 Northwind Logistics 示例中，客户自己的拜访占了 11 月的四天；把 Rollup Field 设为 <code>AccountId</code> 后，联系人的通话和业务机会的里程碑也加入进来，这个月显示了十一天。</p>
+
+                <h2 style="margin-top:44px;">Rollup Field 的工作原理</h2>
+                <p>两个字段，各司其职。<strong>关系字段</strong>决定新记录保存到哪里：在客户页面上选择一天，记录就会关联到该客户。<strong>Rollup Field</strong> 是第二种匹配方式：汇总值等于页面记录的任何记录也会显示在日历上。以下几种设置都是这样运作的：</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:18%;">页面</th><th style="width:24%;">日历记录</th><th style="width:22%;">关系字段（Relationship Field）</th><th style="width:36%;">Rollup Field 及其新增的内容</th></tr></thead>
+                    <tbody>
+                    <tr><td>客户</td><td>任务</td><td><code>WhatId</code></td><td><code>AccountId</code>：客户的联系人和业务机会上的任务</td></tr>
+                    <tr><td>客户</td><td>事件</td><td><code>WhatId</code></td><td><code>AccountId</code>：与客户的联系人举行的会议，以及业务机会上的会议</td></tr>
+                    <tr><td>客户</td><td>项目任务（自定义）</td><td><code>Account__c</code></td><td><code>Project__r.Account__c</code>：该客户名下每个项目的任务</td></tr>
+                    <tr><td>客户</td><td>现场拜访（自定义）</td><td><code>Account__c</code></td><td><code>Location__r.Region__r.Account__c</code>：对该客户每个区域中每个地点的拜访</td></tr>
+                    <tr><td>业务机会</td><td>里程碑（自定义）</td><td><code>Opportunity__c</code></td><td><code>Quote__r.OpportunityId</code>：记录在该业务机会的报价上的里程碑</td></tr>
+                </tbody>
+                </table>
+                </div>
+                <p>路径的写法与 Salesforce 写关系的方式相同：每个查找的关系名称加一个点，最后是字段。自定义查找在中间以 <code>__r</code> 结尾（<code>Project__r</code>），标准查找则去掉 <code>Id</code>（<code>Contact.AccountId</code>）。最多五层，与 Salesforce 查询允许的深度相同。</p>
+
+                <h2 style="margin-top:44px;">在设置向导中完成设置</h2>
+                <p>Rollup Field 位于向导的“字段”屏幕上，就在您已选字段旁边的<strong>另外</strong>框中：</p>
+                <ol class="cp-steps">
+                    <li><strong>选择日历放在哪里。</strong>打开 MultiDatePick 设置向导选项卡，选择客户记录页面和保存方式（Dates 日历选每个日期一条记录）。</li>
+                    <li><strong>选择每天保存为什么。</strong>在“字段”屏幕上选择任务，然后选择 <strong>相关项 ID（WhatId）</strong> 作为关系字段，<strong>仅到期日期（ActivityDate）</strong> 作为日期字段。</li>
+                    <li><strong>填写 Rollup Field。</strong>输入 <code>AccountId</code>，自定义对象则输入 <code>Project__r.Account__c</code> 这样的查找路径。用 <code>Account_Visits</code> 这样的名称保存配置。</li>
+                    <li><strong>把组件放到客户页面上。</strong>在 Lightning App Builder 中添加 MultiDatePick Dates 组件，并在 <strong>Config Name</strong> 中输入配置名称。现在每个客户都会显示完整的日程。</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/zh/blog/salesforce-calendar-rollup-field-setup.png" alt="Salesforce 日历设置向导的“字段”屏幕：客户页面上的任务通过相关项（WhatId）保存，Rollup Field 中填入了 AccountId" loading="lazy" width="2000" height="528" data-zoomable>
+                    <figcaption>客户页面上的任务：通过相关项保存，通过 AccountId 汇总。</figcaption>
+                </figure>
+                <p>页面上已经有日历了？在向导中打开它的配置，加上 Rollup Field 并保存。所有使用该配置的页面在下次加载时都会生效。Lightning App Builder 中的组件上也有同一个 <strong>Rollup Field</strong> 属性。</p>
+
+                <h2 style="margin-top:44px;">谁需要把记录汇总到父记录上</h2>
+                <p>凡是一条记录的工作分散记录在周围记录上的场景都适用：</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>客户经理</strong><span>客户的所有联系人和交易上的每一次通话、会议和跟进，都显示在客户上。</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>现场服务</strong><span>每个地点的现场拜访，汇总到拥有这些地点的客户上。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>项目交付</strong><span>每个项目和阶段的任务到期日，都显示在客户的客户页面上。</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>客户成功</strong><span>来自联系人和业务机会的上线培训、业务回顾和续约步骤，集中在一个月视图中。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>非营利组织</strong><span>记录在家庭成员上的志愿者班次和捐赠人会面，显示在家庭上。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>物业管理</strong><span>每个单元的检查，经由楼宇汇总到业主的客户上。</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">决定其行为的设置</h2>
+                <p>以下每一项都是设置向导中的一个字段，也是组件上的一个属性，因此这里没有任何内容需要代码：</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">设置项</th><th>作用</th><th style="width:22%;">API 名称</th></tr></thead>
+                    <tbody>
+                    <tr><td>相关对象（Related Object）</td><td>日历显示和保存的对象，例如任务或自定义的现场拜访对象。</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>关系字段（Relationship Field）</td><td>指向页面记录的查找字段。新记录通过它保存。</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>汇总字段（Rollup Field）</td><td>同样指向页面记录的第二个字段或查找路径。匹配的记录也会显示在日历上。</td><td><code>rollupField</code></td></tr>
+                    <tr><td>日期字段（Date Field）</td><td>把每条记录放到日历上的日期字段，例如 ActivityDate。</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>状态字段和状态颜色（Status Field and Status Colors）</td><td>状态选项列表以及每个值对应的颜色，例如 Completed:#22C55E。</td><td><code>statusField</code>、<code>statusColors</code></td></tr>
+                    <tr><td>悬停字段</td><td>指向某一天时显示的字段，例如主题和状态。</td><td><code>hoverFields</code></td></tr>
+                    <tr><td>配置名称（Config Name）</td><td>设置向导保存的配置。设置这一项，其余留空即可。</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>不只是月视图。</strong>MultiDatePick 可以用日历、时间轴、周、日程列表或使用率网格来显示同一批记录，在一个组件里即可切换。<a href="/zh/blog/salesforce-calendar-views.html">查看全部五种视图</a>。</div>
+
+                <h2 style="margin-top:44px;">常见问题</h2>
+                <div class="tl-faq">
+                    <details><summary>如何在 Salesforce 客户日历上显示联系人和业务机会的任务？</summary><p>把 MultiDatePick Dates 组件放到客户记录页面上，相关对象选任务，关系字段选 WhatId，然后在 Rollup Field 中输入 AccountId。Salesforce 会在记录到客户的联系人和业务机会上的任务里自动存储所属客户，因此这些任务会和客户自己的任务一起显示在客户日历上。</p></details>
+                    <details><summary>Salesforce 日历能显示孙记录吗？</summary><p>能。Rollup Field 接受一条经过查找关系的路径，例如 Project__r.Account__c，因此客户页面上的日历会显示该客户名下每个项目的记录。路径最多可以有五层，这正是 Salesforce 查询沿查找关系所能达到的最大深度。</p></details>
+                    <details><summary>设置了 Rollup Field 后，新记录保存到哪里？</summary><p>和以前完全一样，通过关系字段保存。Rollup Field 只会增加日历显示的记录。在客户页面上选择的日期会保存为一条关联到该客户的记录，相关记录则保留各自的父记录。</p></details>
+                    <details><summary>汇总显示会遵守共享规则和字段级安全性吗？</summary><p>会。日历以查看页面的用户身份加载记录，因此记录共享和字段级安全性都照常生效。用户看到的是自己在 Salesforce 中本就有权访问的相关记录，仅此而已。</p></details>
+                    <details><summary>哪些 MultiDatePick 组件支持 Rollup Field？</summary><p>Dates 和 Date Time 组件都支持，无论保存到标准对象还是自定义对象。Booking 组件在 This Record Only 模式下使用同一个 Rollup Field，因此它的时间轴、周、使用率和日程视图会显示通过查找路径关联到页面记录的预订。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>客户的全部工作，都在客户上。</h2>
+                    <p>在在线演示中随意点点看，或从 <a href="/zh/configlibrary.html">Config Library</a> 中的现成配置开始。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-related-records" class="btn btn-demo" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-primary">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">入门指南</a>
+                    </div>
+                    <ul class="check-list"><li>$20/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>100% Salesforce 原生</li><li>无需 Apex</li><li>即将登陆 Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>相关阅读</h3>
+                    <ul>
+                        <li><a href="/zh/blog/salesforce-calendar-setup-wizard.html">在设置向导中配置 Salesforce 日历</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">Salesforce 记录页面上的市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图，一个 Salesforce 组件</a></li>
+                        <li><a href="/zh/user-guide.html">MultiDatePick 用户指南</a></li>
+                        <li><a href="/zh/multidatepickdates.html">MultiDatePick Dates 日历</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>解决方案</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>文档</h4>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>公司</h4>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/blog/salesforce-calendar-related-records.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-account-kalender-verknuepfte-datensaetze.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/calendario-cuenta-salesforce-registros-relacionados.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/calendrier-compte-salesforce-enregistrements-associes.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/calendario-account-salesforce-record-correlati.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/calendario-conta-salesforce-registros-relacionados.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-calendar-related-records.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-calendar-related-records.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/blog/salesforce-calendar-related-records.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record correlati in un calendario Salesforce (qualsiasi oggetto)</title>
+    <meta name="description" content="Mostra attività e record di referenti, opportunità e oggetti personalizzati in un unico calendario dell'account Salesforce. Un solo Campo di aggregazione, fino a cinque lookup di profondità, senza Apex.">
+    <link rel="canonical" href="https://multidatepick.com/it/blog/calendario-account-salesforce-record-correlati.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Related records post: same look as the Timeline, Utilization and Campaign posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Mostrare i record correlati nel calendario di un account Salesforce">
+    <meta property="og:description" content="Mostra attività e record di referenti, opportunità e oggetti personalizzati in un unico calendario dell'account Salesforce. Un solo Campo di aggregazione, fino a cinque lookup di profondità, senza Apex.">
+    <meta property="og:image" content="https://multidatepick.com/images/it/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/it/blog/calendario-account-salesforce-record-correlati.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="it_IT">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Mostrare i record correlati nel calendario di un account Salesforce">
+    <meta name="twitter:description" content="Mostra attività e record di referenti, opportunità e oggetti personalizzati in un unico calendario dell'account Salesforce. Un solo Campo di aggregazione, fino a cinque lookup di profondità, senza Apex.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/it/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-account-kalender-verknuepfte-datensaetze.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/calendario-cuenta-salesforce-registros-relacionados.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/calendrier-compte-salesforce-enregistrements-associes.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/calendario-account-salesforce-record-correlati.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/calendario-conta-salesforce-registros-relacionados.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-calendar-related-records.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Presto disponibile su Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Chiudi banner" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/it/" class="logo"><img src="/images/logo.png" alt="Logo MultiDatePick: componente calendario a più date e prenotazione risorse per Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Apri/chiudi menu di navigazione"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Prodotto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Date</a></li>
+                        <li><a href="/it/selettore-data-ora-fasce-orarie-salesforce.html">Date Time</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Booking</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Cinque viste calendario</a></li>
+                        <li><a href="/it/configurazioni-calendario-salesforce.html">Config Library</a></li>
+                        <li><a href="/it/affidabilita-e-sicurezza.html">Affidabilità e sicurezza</a></li>
+                        <li><a href="/it/accessibilita-vpat.html">Accessibilità (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Soluzioni <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/calendario-salesforce.html">Calendario Salesforce</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Staffing e recruiting</a></li>
+                        <li><a href="/it/pianificazione-colloqui-salesforce.html">Pianificazione colloqui</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce-experience-cloud.html">Prenotazioni su Experience Cloud</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Date delle campagne</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">Pubblica amministrazione / Section 508</a></li>
+                        <li><a href="/it/alternativa-salesforce-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/it/prezzi.html">Prezzi</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentazione <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/per-iniziare.html">Per iniziare</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente</a></li>
+                        <li><a href="/it/guida-flussi-su-schermo-salesforce.html">Guida ai flussi su schermo</a></li>
+                        <li><a href="/it/pagine-app-home-experience.html">Pagine app, iniziali ed Experience</a></li>
+                        <li><a href="/it/distribuire-flusso-vs-code.html">Distribuire un flusso (VS Code)</a></li>
+                        <li><a href="/it/risoluzione-problemi.html">Risoluzione dei problemi</a></li>
+                        <li><a href="/it/domande-frequenti.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/it/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/it/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Prova la demo live</a></li>
+                <li><a href="/it/avvisami-al-lancio.html" class="nav-cta">Avvisami al lancio</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Il calendario dell'account Salesforce: tutti i record correlati in un'unica vista",
+                "description": "Mostra attività e record di referenti, opportunità e oggetti personalizzati in un unico calendario dell'account Salesforce. Un solo Campo di aggregazione, fino a cinque lookup di profondità, senza Apex.",
+                "datePublished": "2026-10-31",
+                "dateModified": "2026-10-31",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/it/blog/calendario-account-salesforce-record-correlati.html",
+                "image": "https://multidatepick.com/images/it/blog/salesforce-calendario-account-record-correlati.png",
+                "inLanguage": "it"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Come mostro le attività di referenti e opportunità nel calendario di un account Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Inserisci il componente MultiDatePick Dates nella pagina record Account con Attività come oggetto correlato e WhatId come Campo relazione, poi scrivi AccountId nel Campo di aggregazione. Salesforce registra l'account sulle attività legate ai referenti e alle opportunità dell'account, quindi quelle attività compaiono nel calendario dell'account accanto alle sue."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Un calendario Salesforce può mostrare i record nipoti?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sì. Il Campo di aggregazione accetta un percorso attraverso i lookup, come Project__r.Account__c, quindi un calendario nella pagina Account mostra i record di ogni progetto che appartiene all'account. Un percorso arriva fino a cinque livelli, il massimo che Salesforce consente a una query per seguire i lookup."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Dove si salvano i nuovi record quando il Campo di aggregazione è impostato?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Tramite il Campo relazione, esattamente come prima. Il Campo di aggregazione aggiunge record solo a ciò che il calendario mostra. Un giorno che scegli nella pagina Account salva un record collegato a quell'account, e i record correlati mantengono i propri record padre."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "L'aggregazione rispetta la condivisione e la protezione a livello di campo?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sì. Il calendario carica i record come l'utente che visualizza la pagina, quindi si applicano la condivisione dei record e la protezione a livello di campo. Ogni utente vede i record correlati a cui ha già accesso in Salesforce, e niente di più."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Quali componenti MultiDatePick supportano il Campo di aggregazione?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "I componenti Dates e Date Time, per qualsiasi oggetto in cui salvano, standard o personalizzato. Il componente Booking usa lo stesso Campo di aggregazione con This Record Only, così le sue viste Timeline, Settimana, Utilizzo e Agenda mostrano le prenotazioni legate al record della pagina tramite il percorso di lookup."
+                        }
+                    }
+                ],
+                "inLanguage": "it"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/it/blog/salesforce-calendario-account-solo-attivita-dirette.png",
+                "caption": "Calendario dell'account Salesforce senza Campo di aggregazione: sono evidenziati solo i quattro giorni di novembre con attività registrate direttamente sull'account",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/it/blog/salesforce-calendario-account-record-correlati.png",
+                "caption": "Calendario dell'account Salesforce con Campo di aggregazione AccountId: undici giorni di novembre evidenziati, comprese le attività di referenti e opportunità dell'account, nei colori di stato",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/it/blog/salesforce-calendario-campo-rollup-configurazione.png",
+                "caption": "Schermata Campi della configurazione guidata del calendario Salesforce: Attività salvata tramite Correlato a (WhatId) in una pagina Account, con AccountId nel Campo di aggregazione",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Il calendario dell'account Salesforce: tutti i record correlati in un'unica vista</h1>
+                <p class="subtitle">Attività sui referenti dell'account. Milestone sulle sue opportunità. Visite sui suoi progetti. Mettile tutte nel calendario dell'account con una sola impostazione, a qualsiasi profondità, senza scrivere Apex.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Pubblicato il 31 ottobre 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"Come vedo tutte le attività di questo account, comprese quelle registrate sui suoi referenti?" "La pagina dell'account può mostrare anche le milestone dell'opportunità?" "Come mostro i record nipoti in una pagina record?" Il lavoro per un cliente è sparso su tanti record. La pagina dell'account dovrebbe mostrarlo tutto in un unico posto.</p>
+
+                <p>MultiDatePick lo fa con un <strong>Campo di aggregazione</strong>. Un calendario nella pagina Account carica i record collegati direttamente all'account, più ogni record che punta all'account da più lontano: tramite un referente, un'opportunità, un progetto o una catena di lookup fino a cinque livelli. Un solo campo nella configurazione guidata. <strong>Nessun Apex necessario.</strong></p>
+
+                <div class="bp-pair">
+                    <figure class="sc-shot">
+                        <img src="/images/it/blog/salesforce-calendario-account-solo-attivita-dirette.png" alt="Calendario dell'account Salesforce senza Campo di aggregazione: sono evidenziati solo i quattro giorni di novembre con attività registrate direttamente sull'account" loading="lazy" width="1414" height="1584" data-zoomable>
+                        <figcaption>Prima: solo le attività dell'account. Quattro giorni a novembre.</figcaption>
+                    </figure>
+                    <figure class="sc-shot">
+                        <img src="/images/it/blog/salesforce-calendario-account-record-correlati.png" alt="Calendario dell'account Salesforce con Campo di aggregazione AccountId: undici giorni di novembre evidenziati, comprese le attività di referenti e opportunità dell'account, nei colori di stato" loading="lazy" width="1414" height="1584" data-zoomable>
+                        <figcaption>Dopo: Campo di aggregazione impostato su AccountId. Undici giorni, con le chiamate del referente e le milestone dell'opportunità.</figcaption>
+                    </figure>
+                </div>
+
+                <h2 style="margin-top:44px;">Cosa ottieni nella pagina dell'account</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>Tutta la relazione con il cliente</h3><p>Attività e record dell'account, dei suoi referenti e delle sue opportunità, in un solo calendario appena apri la pagina.</p></div>
+                    <div class="tl-feat"><h3>Qualsiasi oggetto, qualsiasi profondità</h3><p>Oggetti standard o personalizzati, collegati direttamente o tramite un percorso fino a cinque lookup.</p></div>
+                    <div class="tl-feat"><h3>Il salvataggio resta semplice</h3><p>I nuovi giorni si salvano sul record della pagina tramite il solito Campo relazione. I record correlati mantengono i propri record padre.</p></div>
+                    <div class="tl-feat"><h3>Colori di stato</h3><p>Ogni record, diretto o aggregato, prende il colore del suo stato, e i pulsanti sopra il calendario filtrano per stato.</p></div>
+                    <div class="tl-feat"><h3>Dettagli al passaggio del mouse</h3><p>Punta un giorno per vedere di quale chiamata, milestone o visita si tratta, e apri il record che c'è dietro.</p></div>
+                    <div class="tl-feat"><h3>Ogni utente con i propri accessi</h3><p>I record si caricano come l'utente che visualizza la pagina, quindi condivisione e protezione a livello di campo si applicano come sempre.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Perché la pagina dell'account mostra solo una parte del programma</h2>
+                <p>Un calendario in una pagina record di solito carica i record che puntano a quel record con un lookup. In una pagina Account con un calendario di attività, sono le attività il cui Correlato a è l'account. Ma gran parte del lavoro viene registrata altrove: una chiamata di aggiornamento sul referente, l'avvio di un progetto pilota sull'opportunità, una visita in sede su un progetto. Ognuno di questi record appartiene all'account, a uno o più livelli di distanza, e un calendario a un solo livello li lascia fuori.</p>
+                <p>Il Campo di aggregazione colma questa lacuna. Indica un secondo campo, o un percorso attraverso i lookup, che riporta anch'esso al record della pagina. Il calendario mostra ogni record che corrisponde all'uno o all'altro. Nell'esempio Northwind Logistics qui sopra, le visite dell'account occupano quattro giorni di novembre; con il Campo di aggregazione impostato su <code>AccountId</code>, si aggiungono le chiamate del referente e le milestone dell'opportunità e il mese ne mostra undici.</p>
+
+                <h2 style="margin-top:44px;">Come funziona il Campo di aggregazione</h2>
+                <p>Due campi, due compiti. Il <strong>Campo relazione</strong> è dove si salva un nuovo record: scegli un giorno nella pagina dell'account e il record si collega a quell'account. Il <strong>Campo di aggregazione</strong> è un secondo criterio di corrispondenza: anche ogni record il cui valore di aggregazione è uguale al record della pagina compare nel calendario. Alcune configurazioni che funzionano così:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:18%;">Pagina</th><th style="width:24%;">Record del calendario</th><th style="width:22%;">Campo relazione</th><th style="width:36%;">Campo di aggregazione e cosa aggiunge</th></tr></thead>
+                    <tbody>
+                    <tr><td>Account</td><td>Attività</td><td><code>WhatId</code></td><td><code>AccountId</code>: attività sui referenti e sulle opportunità dell'account</td></tr>
+                    <tr><td>Account</td><td>Evento</td><td><code>WhatId</code></td><td><code>AccountId</code>: riunioni con i referenti dell'account e sulle sue opportunità</td></tr>
+                    <tr><td>Account</td><td>Attività di progetto (personalizzato)</td><td><code>Account__c</code></td><td><code>Project__r.Account__c</code>: le attività di ogni progetto dell'account</td></tr>
+                    <tr><td>Account</td><td>Visita in sede (personalizzato)</td><td><code>Account__c</code></td><td><code>Location__r.Region__r.Account__c</code>: le visite a ogni sede in ogni regione dell'account</td></tr>
+                    <tr><td>Opportunità</td><td>Milestone (personalizzato)</td><td><code>Opportunity__c</code></td><td><code>Quote__r.OpportunityId</code>: milestone registrate sui preventivi dell'opportunità</td></tr>
+                </tbody>
+                </table>
+                </div>
+                <p>Un percorso si scrive come Salesforce scrive le relazioni: il nome della relazione di ogni lookup, un punto e il campo finale. I lookup personalizzati lungo il percorso finiscono in <code>__r</code> (<code>Project__r</code>), quelli standard perdono il suffisso <code>Id</code> (<code>Contact.AccountId</code>). Fino a cinque livelli, la stessa profondità consentita da una query Salesforce.</p>
+
+                <h2 style="margin-top:44px;">Configuralo con la configurazione guidata</h2>
+                <p>Il Campo di aggregazione si trova nella schermata Campi della configurazione guidata, nel riquadro <strong>Inoltre</strong>, accanto ai campi che scegli già:</p>
+                <ol class="cp-steps">
+                    <li><strong>Scegli dove va il calendario.</strong> Apri la scheda della configurazione guidata di MultiDatePick, scegli la pagina record Account e, nel passaggio Salvataggio, come si salva ogni selezione (un record per data per un calendario Dates).</li>
+                    <li><strong>Scegli in cosa si salva ogni giorno.</strong> Nella schermata Campi scegli Attività, poi <strong>Correlato a (WhatId)</strong> come Campo relazione e <strong>Data di scadenza (ActivityDate)</strong> come Campo data.</li>
+                    <li><strong>Inserisci il Campo di aggregazione.</strong> Scrivi <code>AccountId</code>, oppure un percorso di lookup come <code>Project__r.Account__c</code> per un oggetto personalizzato. Salva la configurazione con un nome come <code>Account_Visits</code>.</li>
+                    <li><strong>Inserisci il componente nella pagina Account.</strong> In Lightning App Builder aggiungi il componente MultiDatePick Dates e scrivi il nome in <strong>Config Name</strong>. Ora ogni account mostra il suo programma completo.</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/it/blog/salesforce-calendario-campo-rollup-configurazione.png" alt="Schermata Campi della configurazione guidata del calendario Salesforce: Attività salvata tramite Correlato a (WhatId) in una pagina Account, con AccountId nel Campo di aggregazione" loading="lazy" width="2000" height="528" data-zoomable>
+                    <figcaption>Attività in una pagina Account: salvata tramite Correlato a, aggregata tramite AccountId.</figcaption>
+                </figure>
+                <p>Hai già un calendario nella pagina? Apri la sua configurazione nella configurazione guidata, aggiungi il Campo di aggregazione e salva. Ogni pagina che usa quella configurazione lo applica al caricamento successivo. La stessa proprietà <strong>Rollup Field</strong> si trova anche sul componente in Lightning App Builder.</p>
+
+                <h2 style="margin-top:44px;">Chi aggrega i record sul record padre</h2>
+                <p>Ovunque il lavoro per un record venga registrato sui record che lo circondano:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Account manager</strong><span>Ogni chiamata, riunione e follow-up sui referenti e sulle trattative dell'account, direttamente sull'account.</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>Assistenza sul campo</strong><span>Visite in sede su ogni ubicazione, aggregate sul cliente che le possiede.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Gestione progetti</strong><span>Le scadenze delle attività di ogni progetto e fase, nella pagina account del cliente.</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Customer success</strong><span>Sessioni di onboarding, revisioni e passaggi di rinnovo da referenti e opportunità in un'unica vista mensile.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>Non profit</strong><span>Turni di volontariato e incontri con i donatori registrati sui membri del nucleo familiare, mostrati sul nucleo familiare.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Gestione immobiliare</strong><span>Ispezioni su ogni unità, aggregate tramite l'edificio sull'account del proprietario.</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Le impostazioni che lo definiscono</h2>
+                <p>Ognuna è un campo della configurazione guidata e una proprietà del componente, quindi qui non serve codice:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Impostazione</th><th>Cosa fa</th><th style="width:22%;">Nome API</th></tr></thead>
+                    <tbody>
+                    <tr><td>Oggetto correlato</td><td>L'oggetto che il calendario mostra e salva, come Attività o un oggetto personalizzato Visita in sede.</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>Campo relazione</td><td>Il lookup al record della pagina. I nuovi record si salvano tramite questo campo.</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>Campo di aggregazione</td><td>Un secondo campo o percorso di lookup che porta anch'esso al record della pagina. Anche i record corrispondenti compaiono nel calendario.</td><td><code>rollupField</code></td></tr>
+                    <tr><td>Campo data</td><td>Il campo Data che colloca ogni record nel calendario, come ActivityDate.</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>Campo stato e Colori stato (Status Field e Status Colors)</td><td>L'elenco di selezione dello stato e un colore per valore, come Completed:#22C55E.</td><td><code>statusField</code>, <code>statusColors</code></td></tr>
+                    <tr><td>Campi al passaggio del mouse (Hover Popover Fields)</td><td>I campi mostrati quando punti un giorno, come Oggetto e Stato.</td><td><code>hoverFields</code></td></tr>
+                    <tr><td>Nome configurazione (Config Name)</td><td>La configurazione salvata con la configurazione guidata. Imposta questa e lascia vuoto il resto.</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Non solo una griglia mensile.</strong> MultiDatePick può mostrare gli stessi record come calendario, cronologia, settimana, elenco agenda o griglia di utilizzo, da un unico componente. <a href="/it/blog/viste-calendario-salesforce.html">Scopri tutte e cinque le viste</a>.</div>
+
+                <h2 style="margin-top:44px;">Domande frequenti</h2>
+                <div class="tl-faq">
+                    <details><summary>Come mostro le attività di referenti e opportunità nel calendario di un account Salesforce?</summary><p>Inserisci il componente MultiDatePick Dates nella pagina record Account con Attività come oggetto correlato e WhatId come Campo relazione, poi scrivi AccountId nel Campo di aggregazione. Salesforce registra l'account sulle attività legate ai referenti e alle opportunità dell'account, quindi quelle attività compaiono nel calendario dell'account accanto alle sue.</p></details>
+                    <details><summary>Un calendario Salesforce può mostrare i record nipoti?</summary><p>Sì. Il Campo di aggregazione accetta un percorso attraverso i lookup, come Project__r.Account__c, quindi un calendario nella pagina Account mostra i record di ogni progetto che appartiene all'account. Un percorso arriva fino a cinque livelli, il massimo che Salesforce consente a una query per seguire i lookup.</p></details>
+                    <details><summary>Dove si salvano i nuovi record quando il Campo di aggregazione è impostato?</summary><p>Tramite il Campo relazione, esattamente come prima. Il Campo di aggregazione aggiunge record solo a ciò che il calendario mostra. Un giorno che scegli nella pagina Account salva un record collegato a quell'account, e i record correlati mantengono i propri record padre.</p></details>
+                    <details><summary>L'aggregazione rispetta la condivisione e la protezione a livello di campo?</summary><p>Sì. Il calendario carica i record come l'utente che visualizza la pagina, quindi si applicano la condivisione dei record e la protezione a livello di campo. Ogni utente vede i record correlati a cui ha già accesso in Salesforce, e niente di più.</p></details>
+                    <details><summary>Quali componenti MultiDatePick supportano il Campo di aggregazione?</summary><p>I componenti Dates e Date Time, per qualsiasi oggetto in cui salvano, standard o personalizzato. Il componente Booking usa lo stesso Campo di aggregazione con This Record Only, così le sue viste Timeline, Settimana, Utilizzo e Agenda mostrano le prenotazioni legate al record della pagina tramite il percorso di lookup.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Tutto l'account, sull'account.</h2>
+                    <p>Esplora la demo live, oppure parti da una configurazione pronta nella <a href="/it/configurazioni-calendario-salesforce.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/it/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-related-records" class="btn btn-demo" target="_blank" rel="noopener">Prova la demo live</a> <a href="/it/avvisami-al-lancio.html" class="btn btn-primary">Avvisami al lancio</a> <a href="/it/per-iniziare.html" class="btn btn-secondary">Per iniziare</a>
+                    </div>
+                    <ul class="check-list"><li>$20/utente/mese, tutte le funzionalità</li><li>Prova gratuita di 30 giorni, senza carta</li><li>100% nativo Salesforce</li><li>Senza Apex</li><li>Presto disponibile su Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Letture correlate</h3>
+                    <ul>
+                        <li><a href="/it/blog/configurazione-guidata-calendario-salesforce.html">Configurare un calendario Salesforce con la configurazione guidata</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Date delle campagne in una pagina record Salesforce</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Cinque viste calendario, un solo componente Salesforce</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente di MultiDatePick</a></li>
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Il calendario MultiDatePick Dates</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/it/" class="logo">
+                        <img src="/images/logo.png" alt="Logo MultiDatePick: componente calendario a più date e prenotazione risorse per Salesforce" width="180" height="45">
+                    </a>
+                    <p>La suite di componenti calendario più personalizzabile per Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Prodotto</h4>
+                    <ul>
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Date</a></li>
+                        <li><a href="/it/selettore-data-ora-fasce-orarie-salesforce.html">Date Time</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Booking</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Cinque viste calendario</a></li>
+                        <li><a href="/it/configurazioni-calendario-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluzioni</h4>
+                    <ul>
+                        <li><a href="/it/calendario-salesforce.html">Calendario Salesforce</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Staffing e recruiting</a></li>
+                        <li><a href="/it/pianificazione-colloqui-salesforce.html">Pianificazione colloqui</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce-experience-cloud.html">Prenotazioni su Experience Cloud</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Date delle campagne</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">Pubblica amministrazione / Section 508</a></li>
+                        <li><a href="/it/alternativa-salesforce-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentazione</h4>
+                    <ul>
+                        <li><a href="/it/per-iniziare.html">Per iniziare</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente</a></li>
+                        <li><a href="/it/guida-flussi-su-schermo-salesforce.html">Guida ai flussi su schermo</a></li>
+                        <li><a href="/it/pagine-app-home-experience.html">Pagine app, iniziali ed Experience</a></li>
+                        <li><a href="/it/distribuire-flusso-vs-code.html">Distribuire un flusso (VS Code)</a></li>
+                        <li><a href="/it/risoluzione-problemi.html">Risoluzione dei problemi</a></li>
+                        <li><a href="/it/domande-frequenti.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Azienda</h4>
+                    <ul>
+                        <li><a href="/it/prezzi.html">Prezzi</a></li>
+                        <li><a href="/it/blog/">Blog</a></li>
+                        <li><a href="/it/affidabilita-e-sicurezza.html">Affidabilità e sicurezza</a></li>
+                        <li><a href="/it/accessibilita-vpat.html">Accessibilità</a></li>
+                        <li><a href="/it/avvisami-al-lancio.html">Avvisami al lancio</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Supporto</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Tutti i diritti riservati.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Lingua" translate="no"><ul><li><a href="/blog/salesforce-calendar-related-records.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-account-kalender-verknuepfte-datensaetze.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/calendario-cuenta-salesforce-registros-relacionados.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/calendrier-compte-salesforce-enregistrements-associes.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/calendario-account-salesforce-record-correlati.html" hreflang="it" lang="it" aria-current="page">Italiano</a></li><li><a href="/pt-br/blog/calendario-conta-salesforce-registros-relacionados.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-calendar-related-records.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-calendar-related-records.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-calendar-related-records.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ingrandisci immagine</p><p data-k="expand-diagram">Ingrandisci diagramma</p><p data-k="close">Chiudi</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

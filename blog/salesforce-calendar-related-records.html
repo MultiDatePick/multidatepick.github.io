@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Related Records on a Salesforce Calendar (Any Object)</title>
+    <meta name="description" content="Show tasks and records from contacts, opportunities and custom objects on one Salesforce account calendar. One Rollup Field, up to five lookups deep, no Apex.">
+    <link rel="canonical" href="https://multidatepick.com/blog/salesforce-calendar-related-records.html">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/solutions.css">
+    <style>
+        /* Related records post: same look as the Timeline, Utilization and Campaign posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Show Related Records on a Salesforce Account Calendar">
+    <meta property="og:description" content="Show tasks and records from contacts, opportunities and custom objects on one Salesforce account calendar. One Rollup Field, up to five lookups deep, no Apex.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/blog/salesforce-calendar-related-records.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Show Related Records on a Salesforce Account Calendar">
+    <meta name="twitter:description" content="Show tasks and records from contacts, opportunities and custom objects on one Salesforce account calendar. One Rollup Field, up to five lookups deep, no Apex.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-account-kalender-verknuepfte-datensaetze.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/calendario-cuenta-salesforce-registros-relacionados.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/calendrier-compte-salesforce-enregistrements-associes.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/calendario-account-salesforce-record-correlati.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/calendario-conta-salesforce-registros-relacionados.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-calendar-related-records.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-calendar-related-records.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">
+        Coming soon to the Salesforce AppExchange
+        <button class="banner-close" id="bannerClose" aria-label="Dismiss banner" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="../images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Product <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/multidatepickdates.html">Date</a></li>
+                        <li><a href="/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Five Calendar Views</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                        <li><a href="/trust.html">Trust &amp; Security</a></li>
+                        <li><a href="/accessibility.html">Accessibility (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Solutions <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
+                        <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Dates</a></li>
+                        <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pricing.html">Pricing</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Docs <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/gettingstarted.html">Getting Started</a></li>
+                        <li><a href="/user-guide.html">User Guide</a></li>
+                        <li><a href="/flowcheatsheet.html">Screen Flow Guide</a></li>
+                        <li><a href="/home-app-experience.html">App, Home &amp; Experience Pages</a></li>
+                        <li><a href="/deploy-flow-vscode.html">Deploy a Flow (VS Code)</a></li>
+                        <li><a href="/troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Try the Live Demo</a></li>
+                <li><a href="/notify-me-at-launch.html" class="nav-cta">Notify Me at Launch</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {"@type": "Article", "headline": "The Salesforce Account Calendar: Every Related Record in One View", "description": "Show tasks and records from contacts, opportunities and custom objects on one Salesforce account calendar. One Rollup Field, up to five lookups deep, no Apex.", "datePublished": "2026-10-31", "dateModified": "2026-10-31", "author": {"@type": "Organization", "name": "MultiDatePick"}, "publisher": {"@type": "Organization", "name": "MultiDatePick"}, "mainEntityOfPage": "https://multidatepick.com/blog/salesforce-calendar-related-records.html", "image": "https://multidatepick.com/images/blog/salesforce-account-calendar-related-records.png"},
+                {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I show contact and opportunity tasks on a Salesforce account calendar?", "acceptedAnswer": {"@type": "Answer", "text": "Put the MultiDatePick Dates component on the Account record page with Task as the related object and WhatId as the Relationship Field, then enter AccountId in Rollup Field. Salesforce stores the account on tasks logged against the account's contacts and opportunities, so those tasks show on the account calendar next to the account's own."}}, {"@type": "Question", "name": "Can a Salesforce calendar show grandchild records?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Rollup Field accepts a path through lookups, such as Project__r.Account__c, so a calendar on the Account page shows the records of every project that belongs to the account. A path can be up to five levels deep, which is as far as Salesforce lets a query follow lookups."}}, {"@type": "Question", "name": "Where are new records saved when Rollup Field is set?", "acceptedAnswer": {"@type": "Answer", "text": "Through the Relationship Field, exactly as before. Rollup Field only adds records to what the calendar shows. A day you pick on the Account page saves a record linked to that account, and the related records keep their own parents."}}, {"@type": "Question", "name": "Does the rollup respect sharing and field-level security?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The calendar loads its records as the person viewing the page, so record sharing and field-level security apply. A user sees the related records they already have access to in Salesforce, and nothing more."}}, {"@type": "Question", "name": "Which MultiDatePick components support Rollup Field?", "acceptedAnswer": {"@type": "Answer", "text": "The Dates and Date Time components, for any object they save to, standard or custom. The Booking component uses the same Rollup Field with This Record Only, so its Timeline, Week, Utilization and Agenda views show the bookings tied to the page record through the lookup path."}}]},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/blog/salesforce-account-calendar-direct-tasks-only.png", "caption": "Salesforce account calendar without a Rollup Field: only the four November days with tasks logged directly on the account are marked", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/blog/salesforce-account-calendar-related-records.png", "caption": "Salesforce account calendar with Rollup Field AccountId: eleven November days marked, including tasks on the account's contacts and opportunities, in status colors", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/blog/salesforce-calendar-rollup-field-setup.png", "caption": "Salesforce calendar Setup Wizard Fields screen: Task saved through Related To (WhatId) on an Account page, with AccountId entered in Rollup Field", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}}
+            ]
+        }
+        </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>The Salesforce Account Calendar: Every Related Record in One View</h1>
+                <p class="subtitle">Tasks on the account's contacts. Milestones on its opportunities. Visits on its projects. Put all of them on the account's calendar with one setting, at any depth, without writing Apex.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Published October 31, 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"How do I see every task for this account, including the ones logged on its contacts?" "Can the account page show the opportunity's milestones too?" "How do I show grandchild records on a record page?" The work for one customer is spread across many records. The account page should show all of it in one place.</p>
+
+                <p>MultiDatePick does that with a <strong>Rollup Field</strong>. A calendar on the Account page loads the records linked straight to the account, plus every record that points to the account from further away: through a contact, an opportunity, a project, or a chain of lookups up to five levels deep. One field in the Setup Wizard. <strong>No Apex required.</strong></p>
+
+                <div class="bp-pair">
+                    <figure class="sc-shot">
+                        <img src="/images/blog/salesforce-account-calendar-direct-tasks-only.png" alt="Salesforce account calendar without a Rollup Field: only the four November days with tasks logged directly on the account are marked" loading="lazy" width="1414" height="1584" data-zoomable>
+                        <figcaption>Before: the account's own tasks only. Four days in November.</figcaption>
+                    </figure>
+                    <figure class="sc-shot">
+                        <img src="/images/blog/salesforce-account-calendar-related-records.png" alt="Salesforce account calendar with Rollup Field AccountId: eleven November days marked, including tasks on the account's contacts and opportunities, in status colors" loading="lazy" width="1414" height="1584" data-zoomable>
+                        <figcaption>After: Rollup Field set to AccountId. Eleven days, with the contact's calls and the opportunity's milestones.</figcaption>
+                    </figure>
+                </div>
+
+                <h2 style="margin-top:44px;">What you get on the account page</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>The whole relationship</h3><p>Tasks and records on the account, its contacts and its opportunities, on one calendar when the page opens.</p></div>
+                    <div class="tl-feat"><h3>Any object, any depth</h3><p>Standard or custom objects, linked directly or through a path of up to five lookups.</p></div>
+                    <div class="tl-feat"><h3>Saving stays simple</h3><p>New days save to the page record through the usual Relationship Field. Related records keep their own parents.</p></div>
+                    <div class="tl-feat"><h3>Status colors</h3><p>Every record, direct or rolled up, takes its status color, and the pills above the calendar filter by status.</p></div>
+                    <div class="tl-feat"><h3>Hover for details</h3><p>Point at a day to see which call, milestone or visit it is, and open the record behind it.</p></div>
+                    <div class="tl-feat"><h3>Each user's own access</h3><p>Records load as the person viewing the page, so sharing and field-level security apply as usual.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Why the account page shows only part of the schedule</h2>
+                <p>A calendar on a record page normally loads the records that look up to that record. On an Account page with a Task calendar, that is the tasks whose Related To is the account. But most of the work is logged somewhere else: a check-in call on the contact, a pilot kickoff on the opportunity, a site visit on a project. Each of those records belongs to the account, one level or more away, and a one-level calendar leaves them out.</p>
+                <p>The Rollup Field closes that gap. It names a second field, or a path through lookups, that also leads back to the page record. The calendar shows every record that matches either one. In the Northwind Logistics example above, the account's own visits fill four days in November; with Rollup Field set to <code>AccountId</code>, the contact's calls and the opportunity's milestones join them and the month shows eleven.</p>
+
+                <h2 style="margin-top:44px;">How the Rollup Field works</h2>
+                <p>Two fields do two jobs. The <strong>Relationship Field</strong> is where a new record is saved: pick a day on the account page and the record links to that account. The <strong>Rollup Field</strong> is a second way to match: any record whose rollup value equals the page record shows on the calendar too. A few setups that work this way:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:18%;">Page</th><th style="width:24%;">Calendar records</th><th style="width:22%;">Relationship Field</th><th style="width:36%;">Rollup Field and what it adds</th></tr></thead>
+                    <tbody>
+                    <tr><td>Account</td><td>Task</td><td><code>WhatId</code></td><td><code>AccountId</code>: tasks on the account's contacts and opportunities</td></tr>
+                    <tr><td>Account</td><td>Event</td><td><code>WhatId</code></td><td><code>AccountId</code>: meetings with the account's contacts and on its opportunities</td></tr>
+                    <tr><td>Account</td><td>Project Task (custom)</td><td><code>Account__c</code></td><td><code>Project__r.Account__c</code>: the tasks of every project the account owns</td></tr>
+                    <tr><td>Account</td><td>Site Visit (custom)</td><td><code>Account__c</code></td><td><code>Location__r.Region__r.Account__c</code>: visits to every location in every region of the account</td></tr>
+                    <tr><td>Opportunity</td><td>Milestone (custom)</td><td><code>Opportunity__c</code></td><td><code>Quote__r.OpportunityId</code>: milestones logged against the opportunity's quotes</td></tr>
+                </tbody>
+                </table>
+                </div>
+                <p>A path is written the way Salesforce writes relationships: the relationship name of each lookup, a dot, and the field at the end. Custom lookups end in <code>__r</code> along the way (<code>Project__r</code>), standard ones drop the <code>Id</code> (<code>Contact.AccountId</code>). Up to five levels, the same depth a Salesforce query allows.</p>
+
+                <h2 style="margin-top:44px;">Set it up in the Setup Wizard</h2>
+                <p>Rollup Field sits on the wizard's Fields screen, in the <strong>Also</strong> box next to the fields you already pick:</p>
+                <ol class="cp-steps">
+                    <li><strong>Choose where the calendar goes.</strong> Open the MultiDatePick Setup Wizard tab, pick the Account record page and the shape of the calendar (one record per date for a Dates calendar).</li>
+                    <li><strong>Pick what each day saves as.</strong> On the Fields screen choose Task, then <strong>Related To ID (WhatId)</strong> as the Relationship Field and <strong>Due Date Only (ActivityDate)</strong> as the Date Field.</li>
+                    <li><strong>Enter the Rollup Field.</strong> Type <code>AccountId</code>, or a lookup path such as <code>Project__r.Account__c</code> for a custom object. Save the config under a name like <code>Account_Visits</code>.</li>
+                    <li><strong>Drop the component on the Account page.</strong> In Lightning App Builder, add the MultiDatePick Dates component and enter the name in <strong>Config Name</strong>. Every account now shows its whole schedule.</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/blog/salesforce-calendar-rollup-field-setup.png" alt="Salesforce calendar Setup Wizard Fields screen: Task saved through Related To (WhatId) on an Account page, with AccountId entered in Rollup Field" loading="lazy" width="2000" height="528" data-zoomable>
+                    <figcaption>Task on an Account page: saved through Related To, rolled up through AccountId.</figcaption>
+                </figure>
+                <p>Already have a calendar on the page? Open its config in the wizard, add the Rollup Field and save. Every page that uses the config picks it up on the next load. The same <strong>Rollup Field</strong> property is also on the component in Lightning App Builder.</p>
+
+                <h2 style="margin-top:44px;">Who rolls records up to the parent</h2>
+                <p>Anywhere the work for one record is logged on the records around it:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Account managers</strong><span>Every call, meeting and follow-up across the account's contacts and deals, on the account.</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>Field service</strong><span>Site visits on each location, rolled up to the customer that owns them.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Project delivery</strong><span>Task due dates from every project and phase, on the client's account page.</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Customer success</strong><span>Onboarding sessions, reviews and renewal steps from contacts and opportunities in one month view.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>Nonprofits</strong><span>Volunteer shifts and donor meetings logged on household members, shown on the household.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Property management</strong><span>Inspections on each unit, rolled up through the building to the owner's account.</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">The settings that shape it</h2>
+                <p>Each one is a field in the Setup Wizard and a property on the component, so nothing here needs code:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Setting</th><th>What it does</th><th style="width:22%;">API name</th></tr></thead>
+                    <tbody>
+                    <tr><td>Related Object</td><td>The object the calendar shows and saves, such as Task or a custom Site Visit object.</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>Relationship Field</td><td>The lookup to the page record. New records save through it.</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>Rollup Field</td><td>A second field or lookup path that also leads to the page record. Matching records show on the calendar too.</td><td><code>rollupField</code></td></tr>
+                    <tr><td>Date Field</td><td>The Date field that places each record on the calendar, such as ActivityDate.</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>Status Field and Status Colors</td><td>The status picklist and a color per value, such as Completed:#22C55E.</td><td><code>statusField</code>, <code>statusColors</code></td></tr>
+                    <tr><td>Hover Popover Fields</td><td>The fields shown when you point at a day, such as Subject and Status.</td><td><code>hoverFields</code></td></tr>
+                    <tr><td>Config Name</td><td>The config saved by the Setup Wizard. Set this and leave the rest blank.</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>More than a month grid.</strong> MultiDatePick can show the same records as a calendar, a timeline, a week, an agenda list or a utilization grid, switched from one component. <a href="/blog/salesforce-calendar-views.html">See all five views</a>.
+                </div>
+
+                <h2 style="margin-top:44px;">Questions people ask</h2>
+                <div class="tl-faq">
+                    <details><summary>How do I show contact and opportunity tasks on a Salesforce account calendar?</summary><p>Put the MultiDatePick Dates component on the Account record page with Task as the related object and WhatId as the Relationship Field, then enter AccountId in Rollup Field. Salesforce stores the account on tasks logged against the account's contacts and opportunities, so those tasks show on the account calendar next to the account's own.</p></details>
+                    <details><summary>Can a Salesforce calendar show grandchild records?</summary><p>Yes. Rollup Field accepts a path through lookups, such as Project__r.Account__c, so a calendar on the Account page shows the records of every project that belongs to the account. A path can be up to five levels deep, which is as far as Salesforce lets a query follow lookups.</p></details>
+                    <details><summary>Where are new records saved when Rollup Field is set?</summary><p>Through the Relationship Field, exactly as before. Rollup Field only adds records to what the calendar shows. A day you pick on the Account page saves a record linked to that account, and the related records keep their own parents.</p></details>
+                    <details><summary>Does the rollup respect sharing and field-level security?</summary><p>Yes. The calendar loads its records as the person viewing the page, so record sharing and field-level security apply. A user sees the related records they already have access to in Salesforce, and nothing more.</p></details>
+                    <details><summary>Which MultiDatePick components support Rollup Field?</summary><p>The Dates and Date Time components, for any object they save to, standard or custom. The Booking component uses the same Rollup Field with This Record Only, so its Timeline, Week, Utilization and Agenda views show the bookings tied to the page record through the lookup path.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>The whole account, on the account.</h2>
+                    <p>Click around the live demo, or start from a ready-made config in the <a href="/configlibrary.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-calendar-related-records" class="btn btn-demo" target="_blank" rel="noopener">Try the Live Demo</a>
+                        <a href="/notify-me-at-launch.html" class="btn btn-primary">Notify Me at Launch</a>
+                        <a href="/gettingstarted.html" class="btn btn-secondary">Getting Started</a>
+                    </div>
+                    <ul class="check-list"><li>$20/user/month, every feature</li><li>30-day free trial, no card</li><li>100% native Salesforce</li><li>No Apex</li><li>Coming soon to the Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Related reading</h3>
+                    <ul>
+                        <li><a href="/blog/salesforce-calendar-setup-wizard.html">Configure a Salesforce calendar in the Setup Wizard</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign dates on a Salesforce record page</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Five calendar views, one Salesforce component</a></li>
+                        <li><a href="/user-guide.html">MultiDatePick User Guide</a></li>
+                        <li><a href="/multidatepickdates.html">The MultiDatePick Dates calendar</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/" class="logo">
+                        <img src="../images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45">
+                    </a>
+                    <p>The most customizable calendar component suite for Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="/multidatepickdates.html">Date</a></li>
+                        <li><a href="/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Five Calendar Views</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Solutions</h4>
+                    <ul>
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
+                        <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Dates</a></li>
+                        <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Docs</h4>
+                    <ul>
+                        <li><a href="/gettingstarted.html">Getting Started</a></li>
+                        <li><a href="/user-guide.html">User Guide</a></li>
+                        <li><a href="/flowcheatsheet.html">Screen Flow Guide</a></li>
+                        <li><a href="/home-app-experience.html">App, Home &amp; Experience Pages</a></li>
+                        <li><a href="/deploy-flow-vscode.html">Deploy a Flow (VS Code)</a></li>
+                        <li><a href="/troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="/pricing.html">Pricing</a></li>
+                        <li><a href="/blog/">Blog</a></li>
+                        <li><a href="/trust.html">Trust &amp; Security</a></li>
+                        <li><a href="/accessibility.html">Accessibility</a></li>
+                        <li><a href="/notify-me-at-launch.html">Notify Me at Launch</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. All rights reserved.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a>
+                    <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Language" translate="no"><ul><li><a href="/blog/salesforce-calendar-related-records.html" hreflang="en" lang="en" aria-current="page">English</a></li><li><a href="/de/blog/salesforce-account-kalender-verknuepfte-datensaetze.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/calendario-cuenta-salesforce-registros-relacionados.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/calendrier-compte-salesforce-enregistrements-associes.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/calendario-account-salesforce-record-correlati.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/calendario-conta-salesforce-registros-relacionados.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-calendar-related-records.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-calendar-related-records.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-calendar-related-records.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="../js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Expand image</p><p data-k="expand-diagram">Expand diagram</p><p data-k="close">Close</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>
