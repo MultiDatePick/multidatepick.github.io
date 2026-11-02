@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullCalendar LWC と MultiDatePick: Salesforce カレンダー比較</title>
+    <meta name="description" content="Salesforce で使う FullCalendar と MultiDatePick を、表示、ドラッグ&amp;ドロップ、項目の色、カスタムオブジェクト、フィルター、予約ルールで比較。FullCalendar が向くケースも紹介します。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* FullCalendar comparison post: same look as the other posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce の FullCalendar と MultiDatePick">
+    <meta property="og:description" content="Salesforce で使う FullCalendar と MultiDatePick を、表示、ドラッグ&amp;ドロップ、項目の色、カスタムオブジェクト、フィルター、予約ルールで比較。FullCalendar が向くケースも紹介します。">
+    <meta property="og:image" content="https://multidatepick.com/images/ja/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce の FullCalendar と MultiDatePick">
+    <meta name="twitter:description" content="Salesforce で使う FullCalendar と MultiDatePick を、表示、ドラッグ&amp;ドロップ、項目の色、カスタムオブジェクト、フィルター、予約ルールで比較。FullCalendar が向くケースも紹介します。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/ja/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/fullcalendar-salesforce-lwc-kalender-vergleich.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/fullcalendar-salesforce-lwc-comparativa-multidatepick.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/fullcalendar-salesforce-vs-multidatepick-comparatif.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/fullcalendar-salesforce-lwc-vs-multidatepick-calendario-personalizzabile.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/fullcalendar-salesforce-vs-multidatepick-calendario-lwc.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce の FullCalendar と MultiDatePick: カスタマイズ性の高い LWC カレンダーはどちら?",
+                "description": "Salesforce で使う FullCalendar と MultiDatePick を、表示、ドラッグ&ドロップ、項目の色、カスタムオブジェクト、フィルター、予約ルールで比較。FullCalendar が向くケースも紹介します。",
+                "datePublished": "2026-11-01",
+                "dateModified": "2026-11-01",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html",
+                "image": "https://multidatepick.com/images/ja/views/salesforce-resource-timeline-view.png",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce で最もカスタマイズできる LWC カレンダーは?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "誰がカスタマイズするかで答えが変わります。FullCalendar の LWC ラッパーはすべてがコードなので、開発者にとって最も自由度が高い選択肢です。MultiDatePick は管理者向けの組み込みオプションが最も豊富で、3 つのコンポーネントに 130 以上の設定、5 つの表示、6 通りのレコード保存方法を備え、Apex は一切不要です。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce で FullCalendar は無料で使えますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "コアライブラリはオープンソースです。ただしタイムライン表示とリソース表示は商用ライセンスが必要な Premium 機能で、Salesforce 側の処理 (レコードの読み込み、保存、セキュリティ、テスト) は自社で書いて保守するコードになります。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick に Apex や開発者は必要ですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。セットアップウィザードか Lightning App Builder で、標準オブジェクトにもカスタムオブジェクトにも設定できます。レコードは表示中のユーザーとして読み込み、保存されるため、共有設定と項目レベルセキュリティが適用されます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick で ToDo、行動、商談を表示できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。日付項目または日付/時間項目があるオブジェクトなら、標準でもカスタムでも使えます。積み上げ項目を使うと、取引先の取引先責任者に登録された ToDo のように、離れた場所からページのレコードを指すレコードも表示できます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick にリソースタイムラインはありますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。タイムライン、週、稼働率ヒートマップ、予定一覧の各表示がカレンダーに含まれ、追加ライセンスは不要です。プランは 1 つで、すべての機能を使えます。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce の FullCalendar と MultiDatePick: カスタマイズ性の高い LWC カレンダーはどちら?</h1>
+                <p class="subtitle">一方は、その上に自分で構築する JavaScript のカレンダーエンジン。もう一方は、設定するだけで使える Salesforce カレンダー。「カスタマイズできるカレンダー」でよく挙がる要件を、FullCalendar の方が適しているケースも含めて 1 つずつ並べて比較します。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 11 月 1 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">「Salesforce で自由にカスタマイズできる LWC カレンダー」を探すと、必ず 2 つの名前が挙がります。公式の Lightning Web Component ラッパーを提供するようになったオープンソースの JavaScript カレンダー FullCalendar と、ネイティブのカレンダー兼予約スイート MultiDatePick です。どちらも「カスタマイズできる」と言われますが、その意味はまったく違います。</p>
+
+                <p><strong>FullCalendar</strong> はコードでカスタマイズします。オプションオブジェクトを渡し、コールバックを書き、Salesforce 側 (レコードを読み込む Apex、保存処理、権限) は自分で構築します。<strong>MultiDatePick</strong> は設定でカスタマイズします。3 つのコンポーネントに 130 以上の設定があり、セットアップウィザードか Lightning App Builder で、標準オブジェクトにもカスタムオブジェクトにも設定できます。<strong>Apex は不要です。</strong></p>
+
+                <figure class="sc-shot">
+                    <img src="/images/ja/views/salesforce-resource-timeline-view.png" alt="Salesforce の MultiDatePick リソースタイムライン: 縦に会議室、横に日付が並び、予約が状況の色のバーで表示される" loading="lazy" width="1722" height="1694" data-zoomable>
+                    <figcaption>MultiDatePick の 5 つの表示の 1 つ、リソースタイムライン。コードなしで設定できます。FullCalendar ではタイムラインは有料の Premium プラグインに含まれます。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">要件を並べて比較</h2>
+                <p>カスタマイズできる Salesforce カレンダーを探すときによく挙がる機能です。「組み込み」は管理者がクリックで有効にできること、「自分で構築」は開発者がコードを書く必要があることを意味します。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:26%;">機能</th><th style="width:40%;">MultiDatePick</th><th style="width:34%;">FullCalendar LWC</th></tr></thead>
+                    <tbody>
+                    <tr><td>表示</td><td class="bp-yes">5 つを組み込み: 月カレンダー、リソースタイムライン、時間単位の週表示、稼働率ヒートマップ、予定一覧。配置ごとに選択</td><td class="bp-yes">月、週、日、リスト。タイムラインとリソース表示には Premium ライセンスが必要</td></tr>
+                    <tr><td>ドラッグ&ドロップ</td><td class="bp-yes">タイムライン上の予約をドラッグして移動、端をドラッグして時間を変更。複数の日にまたがってドラッグすると期間を選択</td><td class="bp-yes">ドラッグ、ドロップ、リサイズに対応。コールバックは自分で記述</td></tr>
+                    <tr><td>Salesforce の項目に基づく色分け</td><td class="bp-yes">任意の選択リストの値ごとに色を設定。塗りつぶし、バー、またはその両方で表示し、フィルターピルも付属</td><td>項目の値と色の対応を JavaScript で記述</td></tr>
+                    <tr><td>カスタムオブジェクトをデータソースに</td><td class="bp-yes">日付項目または日付/時間項目があれば、ToDo や行動を含む標準・カスタムのどのオブジェクトでも利用可能</td><td>Apex とデータ層を自分で記述</td></tr>
+                    <tr><td>フィルター</td><td class="bp-yes">状況のフィルターピル、<code>OwnerId=ME; Status__c=Confirmed</code> のようなレコードフィルター、リソースフィルター、非表示の状況</td><td>フィルターを自分で構築</td></tr>
+                    <tr><td>予定の詳細とレコードへのリンク</td><td class="bp-yes">任意の項目 (参照項目も可) を表示するホバーカード、月表示の日付に名前を表示、予定一覧に列を追加、ワンクリックでレコードへ</td><td class="bp-yes">予定の描画をコードで完全に制御</td></tr>
+                    <tr><td>ラベルとボタン</td><td class="bp-yes">ボタン、タイトル、保存、レコードの各ラベル、切替に表示する表示の種類、最小から全幅までのサイズ</td><td class="bp-yes">ツールバーをコードで設定</td></tr>
+                    <tr><td>レコードの保存</td><td class="bp-yes">保存時にレコードを作成。日付ごと、期間ごと、時間ブロックごと、リソースごとに 1 件。または日付を画面フロー (Screen Flow) に返す</td><td>保存処理を自分で構築</td></tr>
+                    <tr><td>予約ルール</td><td class="bp-yes">定員、競合チェック、最低事前通知、自動で進む予約期間、バッファー、営業時間、リソースごとのブロック日</td><td>自分で構築</td></tr>
+                    <tr><td>言語とタイムゾーン</td><td class="bp-yes">9 言語に対応。日付と時刻は各ユーザーの Salesforce のロケールとタイムゾーンで表示</td><td class="bp-yes">豊富なロケールとタイムゾーンのオプションをコードで設定</td></tr>
+                    <tr><td>セキュリティ</td><td class="bp-yes">すべてのクエリと保存を表示中のユーザーとして実行するため、共有設定と項目レベルセキュリティが適用されます。Salesforce のセキュリティレビューに合格済み</td><td>自分で書く Apex 次第</td></tr>
+                    <tr><td>保守</td><td class="bp-yes">ベンダーがパッケージで更新を提供</td><td>自社コードを最新に保つ必要あり</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">FullCalendar の用語と、MultiDatePick での対応箇所</h2>
+                <p>FullCalendar を知っていれば、その用語のほとんどに直接対応するものがあります。違いは、どれも自分で書く関数ではなく設定項目だという点です。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">FullCalendar</th><th>MultiDatePick の設定</th></tr></thead>
+                    <tbody>
+                    <tr><td><code>eventSources</code></td><td>関連オブジェクトと日付項目。さらに積み上げ項目で、最大 5 階層先の参照関係にあるレコードも読み込み</td></tr>
+                    <tr><td>背景イベント</td><td>ブロック日付: 任意のオブジェクトから休業日、祝日、休暇を読み込み。終日でも一部の時間でも指定でき、理由も表示</td></tr>
+                    <tr><td><code>businessHours</code></td><td>リソースごとの営業時間。リソースレコードの 2 つの項目から読み込み</td></tr>
+                    <tr><td><code>eventOverlap</code>、<code>selectOverlap</code></td><td>競合の動作 (ブロック、スキップ、許可) とリソースごとの定員</td></tr>
+                    <tr><td><code>validRange</code>、<code>selectConstraint</code></td><td>最小日付と最大日付、何日先まで予約可能か、最低事前通知、予約間のバッファー</td></tr>
+                    <tr><td><code>select</code>、<code>dateClick</code></td><td>複数の日付を選択、ドラッグで期間を選択、繰り返しパターンを追加、時間枠を選択</td></tr>
+                    <tr><td><code>eventDrop</code>、<code>eventResize</code></td><td>タイムラインでドラッグして移動や時間変更。ドロップした時点で保存し、その前に休業日と競合をチェック</td></tr>
+                    <tr><td><code>eventClick</code></td><td>レコードを開く、または編集モードで複数レコードの状況、日付、時刻、リソースをまとめて変更</td></tr>
+                    <tr><td><code>eventContent</code>、ポップオーバー</td><td>ホバー項目、月表示の日付に表示する名前、予定一覧の列</td></tr>
+                    <tr><td><code>resources</code></td><td>リソースオブジェクト: 会議室、機器、車両、人 (ユーザーを含む任意のオブジェクト)</td></tr>
+                    <tr><td><code>slotDuration</code>、<code>slotMinTime</code></td><td>時間間隔と、最小時刻・最大時刻</td></tr>
+                    <tr><td><code>locale</code>、<code>timeZone</code></td><td>自動: 各ユーザーの Salesforce の言語、ロケール、タイムゾーン</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <figure class="sc-shot">
+                    <img src="/images/ja/views/salesforce-calendar-status-display-styles.png" alt="Salesforce の MultiDatePick で選択リスト項目に基づく状況の色を 3 通りで表示: 塗りつぶし、バー、その両方" loading="lazy" width="2000" height="1199" data-zoomable>
+                    <figcaption>選択リストに基づく色を 3 通りで表示。FullCalendar では自分で書いて保守するコードになります。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">FullCalendar の方が適しているケース</h2>
+                <p>FullCalendar の評価は伊達ではなく、プロジェクトによっては最適なツールです。</p>
+                <ul class="bp-list">
+                    <li>四半期の計画ボードや独自の配車レイアウトなど、どの製品にもない表示形式が必要な場合。</li>
+                    <li>独自の HTML やアイコンをバーの中に入れるなど、予定を 1 ピクセル単位で描画したい場合。</li>
+                    <li>予定のデータが Salesforce の外にあり、複数の API から同時に取得する場合。</li>
+                    <li>Apex、保存処理、テスト、権限を構築し、保守し続けられる開発者がいる場合。</li>
+                    <li>予定を表示するだけでよく、無料のコアライブラリを使いたい場合。</li>
+                </ul>
+                <p>このようなプロジェクトなら、FullCalendar は優れた土台になります。一方、今週中に Salesforce のレコードで動くカレンダーが必要なら、完成までの道のりはかなり長くなります。</p>
+
+                <h2 style="margin-top:44px;">MultiDatePick で省ける開発作業</h2>
+                <p>FullCalendar で自分で作る必要がある部分は、MultiDatePick にすでに備わっています。</p>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>複数の日付を選択</h3><p>飛び飛びの日、期間、繰り返しパターンを選び、子レコードとして保存するか画面フローに渡します。</p></div>
+                    <div class="tl-feat"><h3>定員付きの予約</h3><p>リアルタイムの空き数バッジ、保存時の競合チェック、1 回の予約で複数リソースを確保。</p></div>
+                    <div class="tl-feat"><h3>守られるルール</h3><p>事前通知、予約期間、バッファー、営業時間、休業日を、選択時にもドラッグ時にも適用。</p></div>
+                    <div class="tl-feat"><h3>セットアップウィザード</h3><p>レコードについての 3 つの質問に答えたら、実際のカレンダーをライブプレビューで見ながらすべての設定を調整。</p></div>
+                    <div class="tl-feat"><h3>画面フロー</h3><p>選択した日付、期間、時刻を Flow 変数として受け取り、次の処理に使えます。</p></div>
+                    <div class="tl-feat"><h3>公開予約ページ</h3><p>ゲストユーザー向けの Experience Cloud サイトでも、同じカレンダーと同じルールで。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">予約だけではありません</h2>
+                <p>MultiDatePick は予約で知られていますが、既存のレコードを表示するカレンダーとしても使えます。取引先ページに配置すれば、取引先責任者や商談に登録されたものも含めて取引先の ToDo を表示できます。商談の完了予定日、キャンペーンのイベント日、プロジェクトのマイルストーンも、どのオブジェクトでも表示可能です。<code>OwnerId=ME</code> のようなレコードフィルターと一緒に <strong>Show All Records</strong> を有効にすれば個人用カレンダーに。読み取り専用の予定一覧や稼働率の表示を使えば、編集せずにスケジュールを確認できます。</p>
+                <figure class="sc-shot">
+                    <img src="/images/ja/views/salesforce-timeline-drag-to-reschedule-poster.png" data-gif="/images/ja/views/salesforce-timeline-drag-to-reschedule.gif" alt="Salesforce の MultiDatePick タイムラインで日程を変更するアニメーションデモ: 予約を別の日にドラッグ" loading="lazy" width="880" height="880" data-zoomable>
+                    <figcaption>タイムラインでドラッグして日程を変更。保存前に休業日と競合をチェックします。</figcaption>
+                </figure>
+
+                <div class="sc-note">
+                    <strong>すべての表示を確認。</strong>同じレコードをカレンダー、タイムライン、週、予定一覧、稼働率グリッドで表示し、1 つのコンポーネントで切り替えられます。<a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a>。</div>
+
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="tl-faq">
+                    <details><summary>Salesforce で最もカスタマイズできる LWC カレンダーは?</summary><p>誰がカスタマイズするかで答えが変わります。FullCalendar の LWC ラッパーはすべてがコードなので、開発者にとって最も自由度が高い選択肢です。MultiDatePick は管理者向けの組み込みオプションが最も豊富で、3 つのコンポーネントに 130 以上の設定、5 つの表示、6 通りのレコード保存方法を備え、Apex は一切不要です。</p></details>
+                    <details><summary>Salesforce で FullCalendar は無料で使えますか?</summary><p>コアライブラリはオープンソースです。ただしタイムライン表示とリソース表示は商用ライセンスが必要な Premium 機能で、Salesforce 側の処理 (レコードの読み込み、保存、セキュリティ、テスト) は自社で書いて保守するコードになります。</p></details>
+                    <details><summary>MultiDatePick に Apex や開発者は必要ですか?</summary><p>いいえ。セットアップウィザードか Lightning App Builder で、標準オブジェクトにもカスタムオブジェクトにも設定できます。レコードは表示中のユーザーとして読み込み、保存されるため、共有設定と項目レベルセキュリティが適用されます。</p></details>
+                    <details><summary>MultiDatePick で ToDo、行動、商談を表示できますか?</summary><p>はい。日付項目または日付/時間項目があるオブジェクトなら、標準でもカスタムでも使えます。積み上げ項目を使うと、取引先の取引先責任者に登録された ToDo のように、離れた場所からページのレコードを指すレコードも表示できます。</p></details>
+                    <details><summary>MultiDatePick にリソースタイムラインはありますか?</summary><p>はい。タイムライン、週、稼働率ヒートマップ、予定一覧の各表示がカレンダーに含まれ、追加ライセンスは不要です。プランは 1 つで、すべての機能を使えます。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>開発不要で、カスタマイズできるカレンダーを。</h2>
+                    <p>ライブデモを操作してみるか、<a href="/ja/configlibrary.html">Config Library</a> の既製の設定から始めましょう。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=fullcalendar-salesforce-lwc-vs-multidatepick" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/most-customizable-salesforce-calendar.html">最もカスタマイズできる Salesforce カレンダーアプリ</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">Salesforce カレンダー表示 5 種類を 1 つのコンポーネントで</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-related-records.html">Salesforce の取引先カレンダーに関連レコードを表示</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">MultiDatePick と Salesforce Lightning Scheduler の比較</a></li>
+                        <li><a href="/ja/user-guide.html">MultiDatePick ユーザーガイド</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/fullcalendar-salesforce-lwc-kalender-vergleich.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/fullcalendar-salesforce-lwc-comparativa-multidatepick.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/fullcalendar-salesforce-vs-multidatepick-comparatif.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/fullcalendar-salesforce-lwc-vs-multidatepick-calendario-personalizzabile.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/fullcalendar-salesforce-vs-multidatepick-calendario-lwc.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>
