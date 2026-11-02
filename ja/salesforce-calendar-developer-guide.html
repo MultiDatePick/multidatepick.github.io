@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 開発者とアーキテクトのための MultiDatePick</title>
+    <meta name="description" content="開発者向け MultiDatePick: 設定の保存場所 (カスタムメタデータ)、画面フローの出力、ループ用の Apex 定義型、ユーザーモードのセキュリティ、Sandbox から本番への移行。">
+    <link rel="canonical" href="https://multidatepick.com/ja/salesforce-calendar-developer-guide.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Same look as the other posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce 開発者のための MultiDatePick">
+    <meta property="og:description" content="開発者向け MultiDatePick: 設定の保存場所 (カスタムメタデータ)、画面フローの出力、ループ用の Apex 定義型、ユーザーモードのセキュリティ、Sandbox から本番への移行。">
+    <meta property="og:image" content="https://multidatepick.com/images/ja/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/salesforce-calendar-developer-guide.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 開発者のための MultiDatePick">
+    <meta name="twitter:description" content="開発者向け MultiDatePick: 設定の保存場所 (カスタムメタデータ)、画面フローの出力、ループ用の Apex 定義型、ユーザーモードのセキュリティ、Sandbox から本番への移行。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/ja/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/salesforce-calendar-developer-guide.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/salesforce-kalender-entwickler-leitfaden.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/guia-desarrolladores-calendario-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/guide-developpeur-calendrier-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/guida-sviluppatori-calendario-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/guia-do-desenvolvedor-calendario-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/salesforce-calendar-developer-guide.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/salesforce-calendar-developer-guide.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/salesforce-calendar-developer-guide.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/salesforce-calendar-developer-guide.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "TechArticle",
+                "headline": "Salesforce 開発者とアーキテクトのための MultiDatePick",
+                "description": "開発者向け MultiDatePick: 設定の保存場所 (カスタムメタデータ)、画面フローの出力、ループ用の Apex 定義型、ユーザーモードのセキュリティ、Sandbox から本番への移行。",
+                "datePublished": "2026-11-02",
+                "dateModified": "2026-11-02",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/salesforce-calendar-developer-guide.html",
+                "image": "https://multidatepick.com/images/ja/multidatepick-og-image.png",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick を使うのに Apex を書く必要はありますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。コンポーネントが自らレコードを読み込み、保存します。フロー側で保存する場合も、カスタム Apex の代わりにパッケージ付属の Parse Date Entries from JSON アクションを使います。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "設定を CI/CD で扱えますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。各設定はカスタムメタデータレコード (Config__mdt と、新しい設定用の Config_Extension__mdt) なので、ほかのメタデータと同じようにデプロイできます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick はデータ用のオブジェクトを追加しますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。指定したオブジェクトに保存するので、レコード、自動化、レポートはそのまま使えます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "タイムゾーンと言語はどう扱われますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "日付と時刻は各ユーザーの Salesforce のタイムゾーンとロケールに従い、画面は 9 言語に翻訳されています。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce 開発者とアーキテクトのための MultiDatePick</h1>
+                <p class="subtitle">カレンダーが組織にどう組み込まれるか。設定の保存場所、画面フローが受け取る値、フローでループできる Apex 型、セキュリティの仕組み、組織間で設定を移行する方法を解説します。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-lead">MultiDatePick は、管理者が開発者に頼らずに済むように作られています。このページは、それでも開発者やアーキテクトが関わる場面のためのものです。パッケージのレビュー、MultiDatePick を組み込んだフローの構築、Sandbox を経由した設定の移行などです。</p>
+
+                <h2 style="margin-top:44px;">パッケージの内容</h2>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">構成要素</th><th>機能</th></tr></thead>
+                    <tbody>
+                    <tr><td>Date コンポーネント</td><td>複数の日付を選択、期間をドラッグ、繰り返しパターンを追加。日付ごとまたは期間ごとに 1 レコードを保存するか、日付を画面フローに返します。</td></tr>
+                    <tr><td>Date Time コンポーネント</td><td>日付と時間枠 (全日付共通または日付ごと) を競合チェック付きで選択。日付ごと、時間ブロックごとに 1 レコード、または親レコードとサブブロックを保存します。</td></tr>
+                    <tr><td>Booking コンポーネント</td><td>会議室、機器、車両、人 (User を含む任意のオブジェクト) を、定員、営業時間、ブロックする日付、予約ルールに沿って予約します。</td></tr>
+                    <tr><td>セットアップウィザード</td><td>設定を作成する Lightning タブ。ライブプレビューと JSON のインポート、エクスポートに対応。</td></tr>
+                    <tr><td>フローアクション</td><td><strong>Parse Date Entries from JSON</strong> と <strong>Format MultiDatePick Time Range</strong>。フロー側でレコードを保存する場合に使います。</td></tr>
+                    <tr><td>権限セット</td><td>MultiDatePick - Setup、MultiDatePick - User、MultiDatePick - All Access、公開サイト用の MultiDatePick - Guest。</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">設定の保存場所</h2>
+                <p>保存した設定はすべて<strong>カスタムメタデータ</strong>レコードです。<code>Config__mdt</code> が設定を保持し、新しい設定は <code>Config_Extension__mdt</code> の <code>Settings__c</code> に JSON として保持されます。ページやフロー画面に配置したコンポーネントは、<strong>Config Name</strong> で設定を指定します。配置側で設定したプロパティは、設定のテキスト値と数値を上書きします。</p>
+                <ul class="bp-list">
+                    <li><strong>デプロイ可能:</strong> 設定はメタデータなので、変更セット、Salesforce CLI、CI/CD パイプラインで、ほかのメタデータと同じように移行できます。</li>
+                    <li><strong>移植可能:</strong> ウィザードで設定を JSON としてエクスポートし、別の組織にインポートできます。移行先にないオブジェクトや項目はその場でマッピングします。</li>
+                    <li><strong>レビュー可能:</strong> 設定ごとに 1 レコードで、[設定] から読めるため、変更は差分にそのまま現れます。</li>
+                </ul>
+
+                <h2 style="margin-top:44px;">データはお客様のもの</h2>
+                <p>カレンダーはお客様自身のオブジェクトを読み書きします。同期すべき MultiDatePick 独自のデータモデルも、外部サービスも、コールアウトもありません。選んだ内容は、指定したオブジェクトの通常のレコードとなり、マッピングした項目 (日付、終了日、開始時刻と終了時刻、状況、名前、リソース) に保存されます。そのオブジェクトのトリガー、フロー、入力規則、レポートはこれまでどおり動作します。</p>
+
+                <h2 style="margin-top:44px;">画面フローの出力</h2>
+                <p>フロー画面にコンポーネントを配置して Config Name を設定すると、画面のあとで次の値を参照できます:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">出力</th><th style="width:18%;">種別</th><th>内容</th></tr></thead>
+                    <tbody>
+                    <tr><td>Selected Dates</td><td>テキストのコレクション</td><td>選んだ各日付を <code>YYYY-MM-DD</code> 形式で出力。ループして日付ごとに 1 レコードを作成できます。</td></tr>
+                    <tr><td>Date Ranges JSON</td><td>テキスト</td><td>Output Date Ranges as JSON がオンのとき、選んだ期間をそれぞれ開始日と終了日付きで出力します。</td></tr>
+                    <tr><td>Dates With Times JSON</td><td>テキスト</td><td>Date Time コンポーネント: 各日付とその開始時刻、終了時刻。</td></tr>
+                    <tr><td>Successful Bookings Count</td><td>数値</td><td>Booking コンポーネント: 保存で作成された予約の件数。</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p><strong>Parent Record Id</strong> にレコードを渡すと、カレンダーはそのレコードの既存の日付を表示し、新しい日付も自ら保存できます。フロー側で保存したい場合は、ウィザードで<strong>フローで保存する</strong>を選びます。カレンダーは自分の保存ボタンを隠し、選択内容をフローに渡すだけになります。</p>
+
+                <h2 style="margin-top:44px;">フローで選択内容をループする</h2>
+                <p>JSON の出力は、<strong>Parse Date Entries from JSON</strong> アクションでフローがループできるコレクションに変換できます。Apex を書く必要はありません:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">Apex 定義型</th><th>項目</th></tr></thead>
+                    <tbody>
+                    <tr><td><code>MultiDatePickEntryCollection</code></td><td><code>data</code> (エントリ)、<code>totalCount</code>、<code>success</code>、<code>errorMessage</code></td></tr>
+                    <tr><td><code>MultiDatePickEntry</code></td><td><code>fromDate</code>、<code>toDate</code>、<code>startTime</code>、<code>endTime</code>、<code>resourceId</code>、<code>resourceName</code>、<code>bookingStatus</code>、<code>relatedRecordId</code>、<code>label</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p><a href="/ja/flowcheatsheet.html">画面フローガイド</a>ではループの手順を順を追って説明しています。<a href="/ja/blog/salesforce-flow-loop-multiple-records.html">フローのループに関する記事</a>には、<a href="/ja/deploy-flow-vscode.html">VS Code でデプロイ</a>できるスターターフローが 3 つあります。</p>
+
+                <h2 style="margin-top:44px;">セキュリティモデル</h2>
+                <ul class="bp-list">
+                    <li>クエリと保存はすべて<strong>ユーザーモード</strong>で実行されます。オブジェクト権限、項目レベルセキュリティ、共有設定が、公開サイトのゲストユーザーを含め、カレンダーを使う本人に適用されます。</li>
+                    <li>データが組織の外に出ることはありません。コールアウトも、外部サーバーも、サブプロセッサーもありません。</li>
+                    <li><strong>Salesforce セキュリティレビュー</strong>に合格しています。詳しくは<a href="/ja/trust.html">信頼性とセキュリティ</a>のページをご覧ください。</li>
+                    <li>アクセシビリティ: WCAG 2.1 A および AA に対する VPAT 2.5 レポートを<a href="/ja/accessibility.html">アクセシビリティ</a>のページで公開しています。</li>
+                </ul>
+
+                <h2 style="margin-top:44px;">Sandbox から本番環境へ設定を移行する</h2>
+                <ol class="cp-steps">
+                    <li>セットアップウィザードを使って<strong>Sandbox で構築してテストします</strong>。</li>
+                    <li><strong>設定を移行します</strong>。<code>Config__mdt</code> と <code>Config_Extension__mdt</code> のレコードを普段のツールでデプロイするか、ウィザードから JSON としてエクスポートして本番環境でインポートします。</li>
+                    <li>設定を使っている<strong>ページやフローを移行します</strong>。配置したコンポーネントは設定を名前で参照するので、ほかに変更は不要です。</li>
+                    <li>利用するユーザーに<strong>権限セットを割り当てます</strong>。公開サイトでは MultiDatePick - Guest も割り当てます。</li>
+                </ol>
+
+                <h2 style="margin-top:44px;">開発者からよくある質問</h2>
+                <div class="tl-faq">
+                    <details><summary>MultiDatePick を使うのに Apex を書く必要はありますか?</summary><p>いいえ。コンポーネントが自らレコードを読み込み、保存します。フロー側で保存する場合も、カスタム Apex の代わりにパッケージ付属の Parse Date Entries from JSON アクションを使います。</p></details>
+                    <details><summary>設定を CI/CD で扱えますか?</summary><p>はい。各設定はカスタムメタデータレコード (Config__mdt と、新しい設定用の Config_Extension__mdt) なので、ほかのメタデータと同じようにデプロイできます。</p></details>
+                    <details><summary>MultiDatePick はデータ用のオブジェクトを追加しますか?</summary><p>いいえ。指定したオブジェクトに保存するので、レコード、自動化、レポートはそのまま使えます。</p></details>
+                    <details><summary>タイムゾーンと言語はどう扱われますか?</summary><p>日付と時刻は各ユーザーの Salesforce のタイムゾーンとロケールに従い、画面は 9 言語に翻訳されています。</p></details>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/user-guide.html">MultiDatePick ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html">Salesforce の FullCalendar と MultiDatePick の比較</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/salesforce-calendar-developer-guide.html" hreflang="en" lang="en">English</a></li><li><a href="/de/salesforce-kalender-entwickler-leitfaden.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/guia-desarrolladores-calendario-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/guide-developpeur-calendrier-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/guida-sviluppatori-calendario-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/guia-do-desenvolvedor-calendario-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/salesforce-calendar-developer-guide.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/salesforce-calendar-developer-guide.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/salesforce-calendar-developer-guide.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

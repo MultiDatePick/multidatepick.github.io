@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalendarAnything と MultiDatePick: Salesforce カレンダー比較</title>
+    <meta name="description" content="Salesforce の CalendarAnything と MultiDatePick を、表示、予約ルール、複数日付の選択、公開予約、同期、価格で比較。それぞれが向くケースも紹介します。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/calendaranything-vs-multidatepick.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Same look as the other posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="CalendarAnything と MultiDatePick の比較">
+    <meta property="og:description" content="Salesforce の CalendarAnything と MultiDatePick を、表示、予約ルール、複数日付の選択、公開予約、同期、価格で比較。それぞれが向くケースも紹介します。">
+    <meta property="og:image" content="https://multidatepick.com/images/ja/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/calendaranything-vs-multidatepick.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CalendarAnything と MultiDatePick の比較">
+    <meta name="twitter:description" content="Salesforce の CalendarAnything と MultiDatePick を、表示、予約ルール、複数日付の選択、公開予約、同期、価格で比較。それぞれが向くケースも紹介します。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/ja/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/calendaranything-vs-multidatepick.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/calendaranything-alternative-salesforce-kalender.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/calendaranything-comparativa-multidatepick.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/calendaranything-vs-multidatepick-comparatif.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/calendaranything-vs-multidatepick-alternativa-calendario-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/calendaranything-vs-multidatepick-calendario-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/calendaranything-vs-multidatepick.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/calendaranything-vs-multidatepick.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/calendaranything-vs-multidatepick.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/calendaranything-vs-multidatepick.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "CalendarAnything と MultiDatePick: チームに合う Salesforce カレンダーはどちら?",
+                "description": "Salesforce の CalendarAnything と MultiDatePick を、表示、予約ルール、複数日付の選択、公開予約、同期、価格で比較。それぞれが向くケースも紹介します。",
+                "datePublished": "2026-11-02",
+                "dateModified": "2026-11-02",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/calendaranything-vs-multidatepick.html",
+                "image": "https://multidatepick.com/images/ja/views/salesforce-week-view.png",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick は CalendarAnything の代わりになりますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "予約、複数日付の選択、公開予約ページが目的なら、なります。多数のオブジェクトの多数のカレンダーをガントやかんばんのレイアウトで閲覧し、Google や Outlook と同期したいなら、CalendarAnything の方が対応範囲が広いです。両方を併用しているチームもあります。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "CalendarAnything と MultiDatePick の価格はどう違いますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Silverline の FAQ によると、CalendarAnything は 1 ユーザーあたり年額 $199、最低 10 ライセンスからです。MultiDatePick は 1 ユーザーあたり月額 $20 で、すべての機能が含まれ、30 日間の無料トライアルがあります。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick は Outlook や Google カレンダーと同期できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "保存のたびに「カレンダーに追加」ファイルを提供し、Outlook、Google カレンダー、Apple カレンダーで開けます。双方向の同期は行いません。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick はどのオブジェクトのレコードでも表示できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。ToDo や行動を含め、日付項目または日付/時間項目を持つ標準オブジェクトとカスタムオブジェクトに対応します。積み上げ項目 (Rollup Field) を使えば、参照関係を最大 5 階層たどった先のレコードも表示できます。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>CalendarAnything と MultiDatePick: チームに合う Salesforce カレンダーはどちら?</h1>
+                <p class="subtitle">CalendarAnything は、Salesforce レコードをカレンダーで閲覧するための定番アプリです。MultiDatePick は日付を選び、時間を予約し、レコードを保存するためのカレンダーです。それぞれの強みを比較します。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 11 月 2 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">Salesforce のカレンダーアプリを検索すると、CalendarAnything はすぐに見つかります。長年 AppExchange で提供されており、本来の目的である、さまざまな種類の Salesforce レコードを共有カレンダーに表示し、チームで閲覧、絞り込み、印刷するという用途に優れています。MultiDatePick は反対側から出発しています。誰かが日付を選び、時間を予約するその瞬間と、そこから生まれるレコードです。</p>
+
+                <p>どちらもネイティブで、標準オブジェクトにもカスタムオブジェクトにも対応し、コードなしで設定できます。違いは役割です。<strong>機能の比較と、CalendarAnything の方が適しているケースを正直にまとめました。</strong></p>
+
+                <h2 style="margin-top:44px;">機能比較</h2>
+                <p>CalendarAnything の情報は 2026 年 11 月時点の Silverline の製品ページと FAQ に基づいています。最新情報は同社のサイトでご確認ください。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:26%;"></th><th style="width:37%;">MultiDatePick</th><th style="width:37%;">CalendarAnything</th></tr></thead>
+                    <tbody>
+                    <tr><td>主な用途</td><td>日付と時間の選択、リソースの予約、レコードの保存</td><td>多数のオブジェクトのレコードを共有カレンダーで閲覧</td></tr>
+                    <tr><td>表示</td><td class="bp-yes">月カレンダー、リソースタイムライン、時間単位の週表示、稼働率ヒートマップ、予定一覧</td><td class="bp-yes">日、週、ガント、スイムレーン、かんばんなど</td></tr>
+                    <tr><td>複数の日付を一度に選択</td><td class="bp-yes">飛び飛びの日、期間、繰り返しパターンを選んでレコードとして保存</td><td>主な用途ではない</td></tr>
+                    <tr><td>予約ルール</td><td class="bp-yes">リソースごとの定員、保存時の競合チェック、最低事前通知、予約可能期間、バッファー、営業時間、ブロックする日付</td><td class="bp-yes">ユーザーが管理する空き状況に基づくスケジュール調整</td></tr>
+                    <tr><td>色</td><td class="bp-yes">選択リスト値ごとの色: 塗りつぶし、バー、またはその両方</td><td class="bp-yes">条件付きの色分け、1 レコードあたり最大 3 色を追加</td></tr>
+                    <tr><td>フィルター</td><td class="bp-yes">状況のピル、レコードフィルター、リソースフィルター</td><td class="bp-yes">フィルターパネル、フィルターセット、凡例による絞り込み、検索</td></tr>
+                    <tr><td>画面フロー</td><td class="bp-yes">画面フロー用コンポーネント: 選択内容を Flow 変数として出力</td><td class="bp-yes">ポップアップからフローを実行</td></tr>
+                    <tr><td>公開予約ページ</td><td class="bp-yes">ゲストユーザーによる Experience Cloud サイト</td><td>サイトのカレンダーにはサイトユーザー用のライセンスが必要</td></tr>
+                    <tr><td>Outlook と Google</td><td>保存のたびに「カレンダーに追加」ファイル (.ics)</td><td class="bp-yes">Google、Outlook、Teams、Slack、Zoom との連携を掲載</td></tr>
+                    <tr><td>セットアップ</td><td class="bp-yes">ライブプレビュー付きのセットアップウィザード、すぐに使える設定が 41 種類</td><td class="bp-yes">アプリ内のカレンダービルダー</td></tr>
+                    <tr><td>価格</td><td>1 ユーザーあたり月額 $20、全機能込み、30 日間トライアル</td><td>1 ユーザーあたり年額 $199、最低 10 ライセンス、15 日間トライアル (Silverline FAQ)</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">CalendarAnything が向いているケース</h2>
+                <ul class="bp-list">
+                    <li>チームの共有カレンダーのように、多数のオブジェクトの多数のカレンダーを重ねて絞り込み、1 か所で閲覧したい。</li>
+                    <li>ガント、スイムレーン、かんばんのレイアウトが必要。</li>
+                    <li>予約ルールよりも、Google や Outlook のカレンダーとの同期が重要。</li>
+                    <li>カレンダーを印刷する、またはモバイルアプリのオフラインモードが必要。</li>
+                    <li>長年の導入実績がある製品のベンダーを選びたい。</li>
+                </ul>
+
+                <h2 style="margin-top:44px;">MultiDatePick が向いているケース</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>複数の日付を一度に</h3><p>飛び飛びの日をクリック、期間をドラッグ、繰り返しパターンを追加して、まとめて子レコードとして保存。</p></div>
+                    <div class="tl-feat"><h3>確実な予約</h3><p>リアルタイムの定員バッジ、保存時の競合チェック、1 回の予約で複数のリソース。</p></div>
+                    <div class="tl-feat"><h3>選ぶたびにルールを適用</h3><p>事前通知、予約可能期間、バッファー、営業時間、休業日を、選択時にもドラッグ時にも適用。</p></div>
+                    <div class="tl-feat"><h3>画面フローの中で</h3><p>選択内容が Flow 変数になるので、フローで振り分け、承認、保存を自由に処理できます。</p></div>
+                    <div class="tl-feat"><h3>公開予約</h3><p>ゲストも Experience Cloud サイトから、社内スタッフと同じルールで予約できます。</p></div>
+                    <div class="tl-feat"><h3>6 通りのレコード保存方法</h3><p>日付ごと、期間ごと、時間ブロックごと、リソースごとに 1 レコード、または親レコードとサブブロック。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">両方を使うことはできますか?</h2>
+                <p>はい。全体像の把握には閲覧用カレンダーを、実際の予約には予約用カレンダーを使い分けるチームは多くあります。MultiDatePick は自社のオブジェクトに通常の Salesforce レコードを保存するため、CalendarAnything を含め、そのオブジェクトを読み込むツールなら予約内容を表示できます。</p>
+
+                <div class="sc-note">
+                    <strong>予約の流れをライブで確認しましょう。</strong><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=calendaranything-vs-multidatepick" target="_blank" rel="noopener">ライブデモ</a>は、アドバイザー、定員、ブロックされた時間を備えた公開予約サイトです。</div>
+
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="tl-faq">
+                    <details><summary>MultiDatePick は CalendarAnything の代わりになりますか?</summary><p>予約、複数日付の選択、公開予約ページが目的なら、なります。多数のオブジェクトの多数のカレンダーをガントやかんばんのレイアウトで閲覧し、Google や Outlook と同期したいなら、CalendarAnything の方が対応範囲が広いです。両方を併用しているチームもあります。</p></details>
+                    <details><summary>CalendarAnything と MultiDatePick の価格はどう違いますか?</summary><p>Silverline の FAQ によると、CalendarAnything は 1 ユーザーあたり年額 $199、最低 10 ライセンスからです。MultiDatePick は 1 ユーザーあたり月額 $20 で、すべての機能が含まれ、30 日間の無料トライアルがあります。</p></details>
+                    <details><summary>MultiDatePick は Outlook や Google カレンダーと同期できますか?</summary><p>保存のたびに「カレンダーに追加」ファイルを提供し、Outlook、Google カレンダー、Apple カレンダーで開けます。双方向の同期は行いません。</p></details>
+                    <details><summary>MultiDatePick はどのオブジェクトのレコードでも表示できますか?</summary><p>はい。ToDo や行動を含め、日付項目または日付/時間項目を持つ標準オブジェクトとカスタムオブジェクトに対応します。積み上げ項目 (Rollup Field) を使えば、参照関係を最大 5 階層たどった先のレコードも表示できます。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>予約して、すぐに確認。</h2>
+                    <p>ライブデモを操作してみるか、<a href="/ja/configlibrary.html">Config Library</a> のすぐに使える設定から始めましょう。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=calendaranything-vs-multidatepick" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html">Salesforce の FullCalendar と MultiDatePick の比較</a></li>
+                        <li><a href="/ja/blog/avonni-calendar-vs-multidatepick.html">Avonni Calendar と MultiDatePick の比較</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">MultiDatePick と Salesforce Lightning Scheduler の比較</a></li>
+                        <li><a href="/ja/blog/prevent-double-booking-in-salesforce.html">Salesforce でダブルブッキングを防ぐ</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Date</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/calendaranything-vs-multidatepick.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/calendaranything-alternative-salesforce-kalender.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/calendaranything-comparativa-multidatepick.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/calendaranything-vs-multidatepick-comparatif.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/calendaranything-vs-multidatepick-alternativa-calendario-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/calendaranything-vs-multidatepick-calendario-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/calendaranything-vs-multidatepick.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/calendaranything-vs-multidatepick.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/calendaranything-vs-multidatepick.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

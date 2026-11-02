@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalendarAnything vs MultiDatePick: calendarios Salesforce</title>
+    <meta name="description" content="CalendarAnything vs MultiDatePick en Salesforce: vistas, reglas de reserva, varias fechas, reservas públicas, sincronización y precio, y cuándo elegir cada uno.">
+    <link rel="canonical" href="https://multidatepick.com/es/blog/calendaranything-comparativa-multidatepick.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Same look as the other posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="CalendarAnything vs MultiDatePick">
+    <meta property="og:description" content="CalendarAnything vs MultiDatePick en Salesforce: vistas, reglas de reserva, varias fechas, reservas públicas, sincronización y precio, y cuándo elegir cada uno.">
+    <meta property="og:image" content="https://multidatepick.com/images/es/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/es/blog/calendaranything-comparativa-multidatepick.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_ES">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CalendarAnything vs MultiDatePick">
+    <meta name="twitter:description" content="CalendarAnything vs MultiDatePick en Salesforce: vistas, reglas de reserva, varias fechas, reservas públicas, sincronización y precio, y cuándo elegir cada uno.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/es/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/calendaranything-vs-multidatepick.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/calendaranything-alternative-salesforce-kalender.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/calendaranything-comparativa-multidatepick.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/calendaranything-vs-multidatepick-comparatif.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/calendaranything-vs-multidatepick-alternativa-calendario-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/calendaranything-vs-multidatepick-calendario-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/calendaranything-vs-multidatepick.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/calendaranything-vs-multidatepick.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/calendaranything-vs-multidatepick.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/calendaranything-vs-multidatepick.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Próximamente en Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Cerrar aviso" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/es/" class="logo"><img src="/images/logo.png" alt="Logotipo de MultiDatePick: componente de calendario de varias fechas y reserva de recursos para Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Mostrar u ocultar navegación"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Producto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/selector-varias-fechas-salesforce.html">Date</a></li>
+                        <li><a href="/es/selector-franjas-horarias-salesforce.html">Date Time</a></li>
+                        <li><a href="/es/calendario-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Cinco vistas de calendario</a></li>
+                        <li><a href="/es/biblioteca-configuraciones-calendario-salesforce.html">Config Library</a></li>
+                        <li><a href="/es/confianza-y-seguridad.html">Confianza y seguridad</a></li>
+                        <li><a href="/es/accesibilidad-vpat.html">Accesibilidad (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Soluciones <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/calendario-salesforce.html">Calendario de Salesforce</a></li>
+                        <li><a href="/es/calendario-salesforce-reclutamiento-seleccion-personal.html">Reclutamiento y selección</a></li>
+                        <li><a href="/es/calendario-salesforce-programar-entrevistas.html">Programación de entrevistas</a></li>
+                        <li><a href="/es/reserva-salas-reuniones-salesforce.html">Reserva de salas de reuniones</a></li>
+                        <li><a href="/es/calendario-reservas-experience-cloud-salesforce.html">Reservas en Experience Cloud</a></li>
+                        <li><a href="/es/blog/fechas-de-campana-salesforce.html">Fechas de campaña</a></li>
+                        <li><a href="/es/blog/calendario-salesforce-accesible-sector-publico-section-508.html">Sector público / Section 508</a></li>
+                        <li><a href="/es/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/es/precios.html">Precios</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentación <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/primeros-pasos.html">Primeros pasos</a></li>
+                        <li><a href="/es/guia-del-usuario.html">Guía del usuario</a></li>
+                        <li><a href="/es/guia-flujos-de-pantalla-salesforce.html">Guía de flujos de pantalla</a></li>
+                        <li><a href="/es/paginas-aplicacion-inicio-experience-cloud.html">Páginas de aplicación, inicio y Experience</a></li>
+                        <li><a href="/es/implementar-flujo-vs-code.html">Implementar un flujo (VS Code)</a></li>
+                        <li><a href="/es/solucion-de-problemas.html">Solución de problemas</a></li>
+                        <li><a href="/es/preguntas-frecuentes.html">Preguntas frecuentes</a></li>
+                    </ul>
+                </li>
+                <li><a href="/es/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/es/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Prueba la demo en vivo</a></li>
+                <li><a href="/es/avisame-en-el-lanzamiento.html" class="nav-cta">Avísame en el lanzamiento</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "CalendarAnything vs MultiDatePick: ¿qué calendario de Salesforce encaja con tu equipo?",
+                "description": "CalendarAnything vs MultiDatePick en Salesforce: vistas, reglas de reserva, varias fechas, reservas públicas, sincronización y precio, y cuándo elegir cada uno.",
+                "datePublished": "2026-11-02",
+                "dateModified": "2026-11-02",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/es/blog/calendaranything-comparativa-multidatepick.html",
+                "image": "https://multidatepick.com/images/es/views/salesforce-calendario-vista-semanal.png",
+                "inLanguage": "es"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "¿MultiDatePick es una alternativa a CalendarAnything?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sí, para reservas, selección de varias fechas y páginas públicas de programación. Para consultar muchos calendarios de muchos objetos con vistas Gantt o Kanban y sincronizar con Google u Outlook, CalendarAnything ofrece más. Algunos equipos usan los dos."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Cuánto cuesta CalendarAnything en comparación con MultiDatePick?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Las preguntas frecuentes de Silverline indican que CalendarAnything cuesta $199 por usuario al año, con un mínimo de 10 licencias. MultiDatePick cuesta $20 por usuario al mes, con todas las funciones incluidas y una prueba gratuita de 30 días."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿MultiDatePick se sincroniza con Outlook o Google Calendar?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Ofrece un archivo «Añadir al calendario» después de cada guardado, que se abre en Outlook, Google Calendar y Apple Calendar. No mantiene una sincronización bidireccional."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿MultiDatePick puede mostrar registros de cualquier objeto?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sí. Cualquier objeto estándar o personalizado con un campo Date o Date/Time, incluidos Tarea y Evento, y registros alcanzados a través de hasta cinco búsquedas con el campo de acumulación."
+                        }
+                    }
+                ],
+                "inLanguage": "es"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>CalendarAnything vs MultiDatePick: ¿qué calendario de Salesforce encaja con tu equipo?</h1>
+                <p class="subtitle">CalendarAnything es una app veterana para ver registros de Salesforce en calendarios. MultiDatePick es un calendario para elegir fechas, reservar tiempo y guardar registros. Aquí verás en qué destaca cada uno.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Publicado el 2 de noviembre de 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">Si buscas una app de calendario para Salesforce, CalendarAnything aparece enseguida. Lleva años en AppExchange y hace bien aquello para lo que se creó: poner muchos tipos de registros de Salesforce en calendarios compartidos que los equipos consultan, filtran e imprimen. MultiDatePick parte del otro extremo: el momento en que alguien elige fechas o reserva una hora, y los registros que salen de ahí.</p>
+
+                <p>Los dos son nativos, los dos funcionan con objetos estándar y personalizados, y los dos se configuran sin código. La diferencia está en el trabajo que hacen. <strong>Sigue leyendo para ver la comparativa lado a lado y una lista honesta de los casos en que CalendarAnything es la mejor opción.</strong></p>
+
+                <h2 style="margin-top:44px;">Comparativa lado a lado</h2>
+                <p>Los datos de CalendarAnything proceden de las páginas de producto y de preguntas frecuentes de Silverline a noviembre de 2026. Consulta su web para ver la información más reciente.</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:26%;"></th><th style="width:37%;">MultiDatePick</th><th style="width:37%;">CalendarAnything</th></tr></thead>
+                    <tbody>
+                    <tr><td>Pensado para</td><td>Elegir fechas y horas, reservar recursos y guardar registros</td><td>Ver registros de muchos objetos en calendarios compartidos</td></tr>
+                    <tr><td>Vistas</td><td class="bp-yes">Calendario mensual, línea de tiempo de recursos, semana por horas, mapa de calor de ocupación y agenda</td><td class="bp-yes">Día y semana, Gantt, carriles y Kanban, entre otras vistas</td></tr>
+                    <tr><td>Elige muchas fechas a la vez</td><td class="bp-yes">Días sueltos, rangos y patrones recurrentes, guardados como registros</td><td>No es su objetivo</td></tr>
+                    <tr><td>Reglas de reserva</td><td class="bp-yes">Capacidad por recurso, control de conflictos al guardar, antelación mínima, ventana de reserva, márgenes, horario comercial y días bloqueados</td><td class="bp-yes">Programación según la disponibilidad que mantienen los propios usuarios</td></tr>
+                    <tr><td>Colores</td><td class="bp-yes">Un color por valor de lista de selección: relleno, barras o ambos</td><td class="bp-yes">Colores condicionales, hasta tres colores adicionales por registro</td></tr>
+                    <tr><td>Filtros</td><td class="bp-yes">Botones de estado, filtro de registros y filtro de recursos</td><td class="bp-yes">Paneles de filtros, conjuntos de filtros, filtro por leyenda de colores y búsqueda</td></tr>
+                    <tr><td>Flujos de pantalla</td><td class="bp-yes">Un componente para flujos de pantalla: lo elegido sale como variables del flujo</td><td class="bp-yes">Ejecuta flujos desde sus ventanas emergentes</td></tr>
+                    <tr><td>Páginas públicas de reserva</td><td class="bp-yes">Sitios de Experience Cloud con usuarios invitados</td><td>Los calendarios en sitios necesitan una licencia para el usuario del sitio</td></tr>
+                    <tr><td>Outlook y Google</td><td>Un archivo «Añadir al calendario» (.ics) después de cada guardado</td><td class="bp-yes">Integraciones indicadas para Google, Outlook, Teams, Slack y Zoom</td></tr>
+                    <tr><td>Configuración</td><td class="bp-yes">Asistente de configuración con vista previa en directo y 41 configuraciones listas para usar</td><td class="bp-yes">Editor de calendarios dentro de la app</td></tr>
+                    <tr><td>Precio</td><td>$20 por usuario al mes, todas las funciones, prueba de 30 días</td><td>$199 por usuario al año, mínimo 10 licencias, prueba de 15 días (preguntas frecuentes de Silverline)</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">Cuándo CalendarAnything es la mejor opción</h2>
+                <ul class="bp-list">
+                    <li>Quieres un único lugar para consultar muchos calendarios de muchos objetos, superpuestos y filtrados, como un calendario compartido del equipo.</li>
+                    <li>Necesitas vistas Gantt, de carriles o Kanban.</li>
+                    <li>Sincronizar con los calendarios de Google u Outlook te importa más que las reglas de reserva.</li>
+                    <li>Imprimes calendarios o necesitas el modo sin conexión de la app móvil.</li>
+                    <li>Quieres un proveedor con muchos años de instalaciones detrás del producto.</li>
+                </ul>
+
+                <h2 style="margin-top:44px;">Cuándo MultiDatePick es la mejor opción</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>Muchas fechas, una sola acción</h3><p>Haz clic en días sueltos, arrastra rangos o añade un patrón recurrente, y guárdalos como registros secundarios de una sola vez.</p></div>
+                    <div class="tl-feat"><h3>Reservas que se respetan</h3><p>Indicadores de capacidad en directo, control de conflictos al guardar y varios recursos en una sola reserva.</p></div>
+                    <div class="tl-feat"><h3>Reglas en cada selección</h3><p>Antelación, ventana de reserva, márgenes, horario comercial y cierres, aplicados al elegir y al arrastrar.</p></div>
+                    <div class="tl-feat"><h3>Dentro de los flujos de pantalla</h3><p>Lo elegido se convierte en variables del flujo, para que el flujo lo dirija, lo apruebe o lo guarde a su manera.</p></div>
+                    <div class="tl-feat"><h3>Reservas públicas</h3><p>Los invitados reservan en un sitio de Experience Cloud con las mismas reglas que tu equipo.</p></div>
+                    <div class="tl-feat"><h3>Seis formas de guardar registros</h3><p>Un registro por fecha, por rango, por bloque horario o por recurso, o un registro principal con sub-bloques.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">¿Se pueden usar los dos?</h2>
+                <p>Sí. Muchos equipos usan un calendario de consulta para la visión general y un calendario de reservas donde la gente programa de verdad. MultiDatePick guarda registros normales de Salesforce en tus propios objetos, así que cualquier herramienta que lea esos objetos, CalendarAnything incluido, muestra lo reservado.</p>
+
+                <div class="sc-note">
+                    <strong>Mira la parte de reservas en directo.</strong> La <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/es/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=calendaranything-vs-multidatepick" target="_blank" rel="noopener">demo en directo</a> es un sitio público de reservas con asesores, capacidad y tiempo bloqueado.</div>
+
+                <h2 style="margin-top:44px;">Preguntas frecuentes</h2>
+                <div class="tl-faq">
+                    <details><summary>¿MultiDatePick es una alternativa a CalendarAnything?</summary><p>Sí, para reservas, selección de varias fechas y páginas públicas de programación. Para consultar muchos calendarios de muchos objetos con vistas Gantt o Kanban y sincronizar con Google u Outlook, CalendarAnything ofrece más. Algunos equipos usan los dos.</p></details>
+                    <details><summary>¿Cuánto cuesta CalendarAnything en comparación con MultiDatePick?</summary><p>Las preguntas frecuentes de Silverline indican que CalendarAnything cuesta $199 por usuario al año, con un mínimo de 10 licencias. MultiDatePick cuesta $20 por usuario al mes, con todas las funciones incluidas y una prueba gratuita de 30 días.</p></details>
+                    <details><summary>¿MultiDatePick se sincroniza con Outlook o Google Calendar?</summary><p>Ofrece un archivo «Añadir al calendario» después de cada guardado, que se abre en Outlook, Google Calendar y Apple Calendar. No mantiene una sincronización bidireccional.</p></details>
+                    <details><summary>¿MultiDatePick puede mostrar registros de cualquier objeto?</summary><p>Sí. Cualquier objeto estándar o personalizado con un campo Date o Date/Time, incluidos Tarea y Evento, y registros alcanzados a través de hasta cinco búsquedas con el campo de acumulación.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Resérvalo y luego míralo.</h2>
+                    <p>Explora la demo en directo, o parte de una configuración lista para usar en la <a href="/es/biblioteca-configuraciones-calendario-salesforce.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/es/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=calendaranything-vs-multidatepick" class="btn btn-demo" target="_blank" rel="noopener">Prueba la demo en vivo</a> <a href="/es/avisame-en-el-lanzamiento.html" class="btn btn-primary">Avísame en el lanzamiento</a> <a href="/es/primeros-pasos.html" class="btn btn-secondary">Primeros pasos</a>
+                    </div>
+                    <ul class="check-list"><li>US$20/usuario/mes, todas las funciones</li><li>Prueba gratis de 30 días, sin tarjeta</li><li>100 % nativo de Salesforce</li><li>Sin Apex</li><li>Próximamente en Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Lecturas relacionadas</h3>
+                    <ul>
+                        <li><a href="/es/blog/fullcalendar-salesforce-lwc-comparativa-multidatepick.html">FullCalendar en Salesforce vs MultiDatePick</a></li>
+                        <li><a href="/es/blog/avonni-calendar-comparativa-multidatepick.html">Avonni Calendar vs MultiDatePick</a></li>
+                        <li><a href="/es/alternativa-salesforce-lightning-scheduler.html">MultiDatePick vs Salesforce Lightning Scheduler</a></li>
+                        <li><a href="/es/blog/evitar-reservas-duplicadas-salesforce.html">Evitar reservas duplicadas en Salesforce</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/es/" class="logo">
+                        <img src="/images/logo.png" alt="Logotipo de MultiDatePick: componente de calendario de varias fechas y reserva de recursos para Salesforce" width="180" height="45">
+                    </a>
+                    <p>La suite de componentes de calendario más personalizable para Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Producto</h4>
+                    <ul>
+                        <li><a href="/es/selector-varias-fechas-salesforce.html">Date</a></li>
+                        <li><a href="/es/selector-franjas-horarias-salesforce.html">Date Time</a></li>
+                        <li><a href="/es/calendario-reservas-salesforce.html">Booking</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Cinco vistas de calendario</a></li>
+                        <li><a href="/es/biblioteca-configuraciones-calendario-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluciones</h4>
+                    <ul>
+                        <li><a href="/es/calendario-salesforce.html">Calendario de Salesforce</a></li>
+                        <li><a href="/es/calendario-salesforce-reclutamiento-seleccion-personal.html">Reclutamiento y selección</a></li>
+                        <li><a href="/es/calendario-salesforce-programar-entrevistas.html">Programación de entrevistas</a></li>
+                        <li><a href="/es/reserva-salas-reuniones-salesforce.html">Reserva de salas de reuniones</a></li>
+                        <li><a href="/es/calendario-reservas-experience-cloud-salesforce.html">Reservas en Experience Cloud</a></li>
+                        <li><a href="/es/blog/fechas-de-campana-salesforce.html">Fechas de campaña</a></li>
+                        <li><a href="/es/blog/calendario-salesforce-accesible-sector-publico-section-508.html">Sector público / Section 508</a></li>
+                        <li><a href="/es/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentación</h4>
+                    <ul>
+                        <li><a href="/es/primeros-pasos.html">Primeros pasos</a></li>
+                        <li><a href="/es/guia-del-usuario.html">Guía del usuario</a></li>
+                        <li><a href="/es/guia-flujos-de-pantalla-salesforce.html">Guía de flujos de pantalla</a></li>
+                        <li><a href="/es/paginas-aplicacion-inicio-experience-cloud.html">Páginas de aplicación, inicio y Experience</a></li>
+                        <li><a href="/es/implementar-flujo-vs-code.html">Implementar un flujo (VS Code)</a></li>
+                        <li><a href="/es/solucion-de-problemas.html">Solución de problemas</a></li>
+                        <li><a href="/es/preguntas-frecuentes.html">Preguntas frecuentes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="/es/precios.html">Precios</a></li>
+                        <li><a href="/es/blog/">Blog</a></li>
+                        <li><a href="/es/confianza-y-seguridad.html">Confianza y seguridad</a></li>
+                        <li><a href="/es/accesibilidad-vpat.html">Accesibilidad</a></li>
+                        <li><a href="/es/avisame-en-el-lanzamiento.html">Avísame en el lanzamiento</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Soporte</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Todos los derechos reservados.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Idioma" translate="no"><ul><li><a href="/blog/calendaranything-vs-multidatepick.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/calendaranything-alternative-salesforce-kalender.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/calendaranything-comparativa-multidatepick.html" hreflang="es" lang="es" aria-current="page">Español</a></li><li><a href="/fr/blog/calendaranything-vs-multidatepick-comparatif.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/calendaranything-vs-multidatepick-alternativa-calendario-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/calendaranything-vs-multidatepick-calendario-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/calendaranything-vs-multidatepick.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/calendaranything-vs-multidatepick.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/calendaranything-vs-multidatepick.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ampliar imagen</p><p data-k="expand-diagram">Ampliar diagrama</p><p data-k="close">Cerrar</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

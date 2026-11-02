@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avonni Calendar 与 MultiDatePick：Salesforce 日历对比</title>
+    <meta name="description" content="Salesforce 中 Avonni Calendar 与 MultiDatePick 对比：视图、数据、拖放、预订规则、多日期选择和设置，以及各自适合的场景。">
+    <link rel="canonical" href="https://multidatepick.com/zh/blog/avonni-calendar-vs-multidatepick.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Same look as the other posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Avonni Calendar 与 MultiDatePick">
+    <meta property="og:description" content="Salesforce 中 Avonni Calendar 与 MultiDatePick 对比：视图、数据、拖放、预订规则、多日期选择和设置，以及各自适合的场景。">
+    <meta property="og:image" content="https://multidatepick.com/images/zh/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/blog/avonni-calendar-vs-multidatepick.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Avonni Calendar 与 MultiDatePick">
+    <meta name="twitter:description" content="Salesforce 中 Avonni Calendar 与 MultiDatePick 对比：视图、数据、拖放、预订规则、多日期选择和设置，以及各自适合的场景。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/zh/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/avonni-calendar-vs-multidatepick.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/avonni-kalender-alternative-salesforce.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/avonni-calendar-comparativa-multidatepick.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/avonni-calendar-vs-multidatepick-comparatif.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/avonni-calendar-vs-multidatepick-calendario-prenotazioni-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/avonni-calendar-vs-multidatepick-calendario-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/avonni-calendar-vs-multidatepick.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/avonni-calendar-vs-multidatepick.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/avonni-calendar-vs-multidatepick.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/avonni-calendar-vs-multidatepick.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Avonni Calendar 与 MultiDatePick：组件库还是预订日历？",
+                "description": "Salesforce 中 Avonni Calendar 与 MultiDatePick 对比：视图、数据、拖放、预订规则、多日期选择和设置，以及各自适合的场景。",
+                "datePublished": "2026-11-02",
+                "dateModified": "2026-11-02",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/zh/blog/avonni-calendar-vs-multidatepick.html",
+                "image": "https://multidatepick.com/images/zh/views/salesforce-utilization-heatmap.png",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick 能替代 Avonni Calendar 吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "如果您需要带容量和冲突检查的预订、多日期选择以及公开预订页面，可以。如果您想从一家供应商获得一整套组件库，Avonni 覆盖的范围远不止日历。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick 需要 Apex 吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "不需要。您可以在设置向导或 Lightning App Builder 中完成设置，适用于任意标准对象或自定义对象，每次查询和保存都以查看页面的用户身份运行。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick 能显示资源时间轴吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "能。时间轴纵向列出会议室、人员或设备，横向展开日期，可拖动来移动预订或调整时长，每个许可证都包含此功能。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "可以在屏幕 Flow（Screen Flow）中使用 MultiDatePick 吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "可以。把组件添加到屏幕上并设置 Config Name。所选的日期、范围和时间会作为 Flow 变量输出，也可以由日历自行保存记录。"
+                        }
+                    }
+                ],
+                "inLanguage": "zh-Hans"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Avonni Calendar 与 MultiDatePick：组件库还是预订日历？</h1>
+                <p class="subtitle">Avonni 提供丰富的 Salesforce 组件库，其中包括日历和排程器。MultiDatePick 则是一套专注于选择日期和预订时间的日历套件。本文对比两者，并说明各自适合的场景。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">发布于 2026 年 11 月 2 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">对于用组件搭建页面的 Salesforce 管理员来说，Avonni 并不陌生：数据表、看板、图表，以及兼作排程器的日历。它是一套工具包，日历只是其中一部分。MultiDatePick 范围更窄，但钻得更深：这套日历套件只做一件事，就是把日期、时间段和预订保存为 Salesforce 记录。</p>
+
+                <p>两者都是原生应用，都无需代码即可配置。选哪一个，取决于您需要的是一套广泛的工具包，还是开箱即用的预订规则。</p>
+
+                <h2 style="margin-top:44px;">并排对比</h2>
+                <p>Avonni 的信息来自 2026 年 11 月的 Avonni Calendar 文档，最新情况请以其官网为准。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:26%;"></th><th style="width:37%;">MultiDatePick</th><th style="width:37%;">Avonni Calendar</th></tr></thead>
+                    <tbody>
+                    <tr><td>定位</td><td>专为日期、时间段和预订打造的日历套件</td><td>大型组件库中的一个组件</td></tr>
+                    <tr><td>视图</td><td class="bp-yes">月历、资源时间轴、按小时的周视图、使用率热力图、日程</td><td class="bp-yes">日历、时间轴（横向或纵向）和日程</td></tr>
+                    <tr><td>数据</td><td class="bp-yes">任何带有日期或日期/时间字段的对象，以及最多相隔五层查找关系的记录</td><td class="bp-yes">对 Salesforce 记录的查询，或手动输入的数据</td></tr>
+                    <tr><td>拖放</td><td class="bp-yes">在时间轴上移动预订或调整时长，经过停业日和冲突检查后保存</td><td class="bp-yes">把事件拖到新的时间或资源；在空白处拖动即可创建</td></tr>
+                    <tr><td>颜色与筛选</td><td class="bp-yes">为每个选项列表值设置颜色，状态筛选标签，记录和资源筛选</td><td class="bp-yes">按资源设置配色和主题，筛选栏，弹出框或面板，搜索</td></tr>
+                    <tr><td>一次选择多个日期</td><td class="bp-yes">零散日期、日期范围和循环模式，保存为记录</td><td>Calendar 文档页面未提及</td></tr>
+                    <tr><td>预订规则</td><td class="bp-yes">按资源设置容量、冲突检查、最短提前通知、预订时间窗、缓冲时间、营业时间、屏蔽日期</td><td>Calendar 文档页面仅提及限制显示的日期和时间</td></tr>
+                    <tr><td>外部日历</td><td>每次保存后提供“添加到日历”文件（.ics）</td><td class="bp-yes">在 Salesforce 事件旁显示 ICS 日历订阅</td></tr>
+                    <tr><td>设置</td><td class="bp-yes">设置向导：先回答关于记录的三个问题，再通过实时预览调整每项设置；提供 41 个现成配置</td><td class="bp-yes">在 Avonni 构建器中通过属性、交互和样式面板配置</td></tr>
+                    <tr><td>日历之外</td><td>仅日历套件</td><td class="bp-yes">数据表、看板、图表等众多组件</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">Avonni 更合适的场景</h2>
+                <ul class="bp-list">
+                    <li>您希望由一家供应商提供多种组件，而不只是日历。</li>
+                    <li>您需要纵向时间轴，或在 Salesforce 事件旁显示 ICS 日历订阅。</li>
+                    <li>您的日历主要用于展示记录，排程逻辑已经在别处实现。</li>
+                    <li>您的团队已经在用 Avonni 搭建页面，熟悉它的构建器。</li>
+                </ul>
+
+                <h2 style="margin-top:44px;">MultiDatePick 更合适的场景</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>内置预订规则</h3><p>容量、冲突、提前通知、预订时间窗、缓冲时间和停业日，无需任何额外搭建。</p></div>
+                    <div class="tl-feat"><h3>多个日期，一次完成</h3><p>点击零散日期、拖选日期范围或添加循环模式，然后保存为记录。</p></div>
+                    <div class="tl-feat"><h3>六种保存方式</h3><p>每个日期、每个范围、每个时间块或每个资源各一条记录，或一条父记录加子块。</p></div>
+                    <div class="tl-feat"><h3>容量一目了然</h3><p>使用率热力图显示每个资源每天的已预订量与容量对比。</p></div>
+                    <div class="tl-feat"><h3>公开预订</h3><p>访客在 Experience Cloud 站点上预订，遵循与员工相同的规则。</p></div>
+                    <div class="tl-feat"><h3>Flow 输出</h3><p>在屏幕 Flow 中，所选的日期、范围和时间会作为变量输出，供后续步骤使用。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">工具包还是成品功能</h2>
+                <p>组件库提供的是积木：您决定日历显示什么，再自己搭建拖动或点击之后发生的事情。如果您的流程很特殊，又有时间慢慢打磨，这再理想不过。MultiDatePick 交付的是完整的排程功能：选择、检查、保存。如果您需要的是“让大家预订会议室且不会重复预订”或“让主管为一个培训系列选出十二个日期”，这只需要配置，无需开发。</p>
+
+                <div class="sc-note">
+                    <strong>亲眼看看预订规则如何运作。</strong><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=avonni-calendar-vs-multidatepick" target="_blank" rel="noopener">在线演示</a>在一个公开站点上展示容量、屏蔽时间和使用率热力图。</div>
+
+                <h2 style="margin-top:44px;">常见问题</h2>
+                <div class="tl-faq">
+                    <details><summary>MultiDatePick 能替代 Avonni Calendar 吗？</summary><p>如果您需要带容量和冲突检查的预订、多日期选择以及公开预订页面，可以。如果您想从一家供应商获得一整套组件库，Avonni 覆盖的范围远不止日历。</p></details>
+                    <details><summary>MultiDatePick 需要 Apex 吗？</summary><p>不需要。您可以在设置向导或 Lightning App Builder 中完成设置，适用于任意标准对象或自定义对象，每次查询和保存都以查看页面的用户身份运行。</p></details>
+                    <details><summary>MultiDatePick 能显示资源时间轴吗？</summary><p>能。时间轴纵向列出会议室、人员或设备，横向展开日期，可拖动来移动预订或调整时长，每个许可证都包含此功能。</p></details>
+                    <details><summary>可以在屏幕 Flow（Screen Flow）中使用 MultiDatePick 吗？</summary><p>可以。把组件添加到屏幕上并设置 Config Name。所选的日期、范围和时间会作为 Flow 变量输出，也可以由日历自行保存记录。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>排程，开箱即用。</h2>
+                    <p>在在线演示中随意体验，或从 <a href="/zh/configlibrary.html">Config Library</a> 中的现成配置开始。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=avonni-calendar-vs-multidatepick" class="btn btn-demo" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-primary">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">入门指南</a>
+                    </div>
+                    <ul class="check-list"><li>$20/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>100% Salesforce 原生</li><li>无需 Apex</li><li>即将登陆 Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>相关阅读</h3>
+                    <ul>
+                        <li><a href="/zh/blog/fullcalendar-salesforce-lwc-vs-multidatepick.html">Salesforce 中的 FullCalendar 与 MultiDatePick 对比</a></li>
+                        <li><a href="/zh/blog/calendaranything-vs-multidatepick.html">CalendarAnything 与 MultiDatePick 对比</a></li>
+                        <li><a href="/zh/blog/salesforce-utilization-heatmap.html">Salesforce 使用率热力图</a></li>
+                        <li><a href="/zh/blog/salesforce-timeline-view.html">Salesforce 时间轴视图</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Date</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Date Time</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>解决方案</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>文档</h4>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>公司</h4>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/blog/avonni-calendar-vs-multidatepick.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/avonni-kalender-alternative-salesforce.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/avonni-calendar-comparativa-multidatepick.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/avonni-calendar-vs-multidatepick-comparatif.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/avonni-calendar-vs-multidatepick-calendario-prenotazioni-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/avonni-calendar-vs-multidatepick-calendario-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/avonni-calendar-vs-multidatepick.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/avonni-calendar-vs-multidatepick.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/blog/avonni-calendar-vs-multidatepick.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>
