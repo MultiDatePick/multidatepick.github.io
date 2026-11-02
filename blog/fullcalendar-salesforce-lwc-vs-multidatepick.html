@@ -54,6 +54,22 @@
         .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
         .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
         .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        /* Who wins: scorecard over the comparison table, winning cell per row. */
+        .bp-score { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 12px; margin: 18px 0 4px; }
+        .bp-score-tile { border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 16px; background: #fff; display: flex; flex-direction: column; gap: 2px; }
+        .bp-score-tile.is-win { background: #0F2D52; border-color: #0F2D52; box-shadow: 0 10px 26px -12px rgba(15, 45, 82, 0.55); }
+        .bp-score-name { font-weight: 700; color: #0F2D52; font-size: 0.95rem; }
+        .bp-score-n { font-size: 2.2rem; font-weight: 800; line-height: 1.1; color: #94A3B8; }
+        .bp-score-l { font-size: 0.82rem; color: #64748B; }
+        .is-win .bp-score-name, .is-win .bp-score-n { color: #fff; }
+        .is-win .bp-score-l { color: #CBD5E1; }
+        .bp-pill { align-self: flex-start; background: #F97316; color: #fff; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 999px; padding: 3px 9px; margin-bottom: 4px; white-space: nowrap; }
+        .bp-grid th.bp-best { background: #0F2D52; color: #fff; border-bottom-color: #F97316; }
+        .bp-grid th.bp-best .bp-pill { margin: 0 0 0 8px; vertical-align: 2px; }
+        .bp-grid td.bp-win, .bp-grid tr:hover td.bp-win { background: #F0FDF4; color: #0F2D52; font-weight: 600; }
+        .bp-grid td.bp-win::before { content: "\2713"; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #16A34A; color: #fff; font-size: 0.7rem; font-weight: 800; margin-right: 8px; vertical-align: 1px; }
+        .bp-grid td.bp-lose { color: #94A3B8; }
+        @media (max-width: 600px) { .bp-score { grid-template-columns: 1fr; } }
         .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
         .bp-pair .sc-shot { margin: 0; }
         .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
@@ -186,22 +202,27 @@
 
                 <h2 style="margin-top:44px;">The checklist, side by side</h2>
                 <p>These are the features people list when they ask for a customizable Salesforce calendar. "Built in" means an admin turns it on with clicks. "You build it" means a developer writes the code.</p>
+                <div class="bp-score">
+                    <div class="bp-score-tile is-win"><span class="bp-pill">Best pick</span><span class="bp-score-name">MultiDatePick</span><span class="bp-score-n">8</span><span class="bp-score-l">rows won</span></div>
+                    <div class="bp-score-tile"><span class="bp-score-name">FullCalendar LWC</span><span class="bp-score-n">0</span><span class="bp-score-l">rows won</span></div>
+                    <div class="bp-score-tile"><span class="bp-score-name">Even</span><span class="bp-score-n">4</span><span class="bp-score-l">rows</span></div>
+                </div>
                 <div style="overflow-x:auto;">
                 <table class="property-table bp-grid">
-                    <thead><tr><th style="width:26%;">Feature</th><th style="width:40%;">MultiDatePick</th><th style="width:34%;">FullCalendar LWC</th></tr></thead>
+                    <thead><tr><th style="width:26%;">Feature</th><th class="bp-best" style="width:40%;">MultiDatePick<span class="bp-pill">Best pick</span></th><th style="width:34%;">FullCalendar LWC</th></tr></thead>
                     <tbody>
-                    <tr><td>Views</td><td class="bp-yes">Five built in: month calendar, resource timeline, week by hour, utilization heatmap and agenda list, chosen per placement</td><td class="bp-yes">Month, week, day and list; timeline and resource views need a Premium license</td></tr>
+                    <tr><td>Views</td><td class="bp-win">Five built in: month calendar, resource timeline, week by hour, utilization heatmap and agenda list, chosen per placement</td><td class="bp-lose">Month, week, day and list; timeline and resource views need a Premium license</td></tr>
                     <tr><td>Drag and drop</td><td class="bp-yes">Drag a booking on the timeline to move it, drag its edge to resize; drag across days to pick a range</td><td class="bp-yes">Drag, drop and resize, with callbacks you write</td></tr>
-                    <tr><td>Colors from Salesforce fields</td><td class="bp-yes">A color for each value of any picklist, shown as a fill, bars or both, with filter pills</td><td>You map field values to colors in JavaScript</td></tr>
-                    <tr><td>Custom objects as the source</td><td class="bp-yes">Any object with a Date or Date/Time field, standard or custom, including Task and Event</td><td>You write the Apex and the data layer</td></tr>
-                    <tr><td>Filtering</td><td class="bp-yes">Status filter pills, a record filter such as <code>OwnerId=ME; Status__c=Confirmed</code>, resource filters and hidden statuses</td><td>You build the filters</td></tr>
+                    <tr><td>Colors from Salesforce fields</td><td class="bp-win">A color for each value of any picklist, shown as a fill, bars or both, with filter pills</td><td class="bp-lose">You map field values to colors in JavaScript</td></tr>
+                    <tr><td>Custom objects as the source</td><td class="bp-win">Any object with a Date or Date/Time field, standard or custom, including Task and Event</td><td class="bp-lose">You write the Apex and the data layer</td></tr>
+                    <tr><td>Filtering</td><td class="bp-win">Status filter pills, a record filter such as <code>OwnerId=ME; Status__c=Confirmed</code>, resource filters and hidden statuses</td><td class="bp-lose">You build the filters</td></tr>
                     <tr><td>Event details and record links</td><td class="bp-yes">Hover card with any fields (lookups too), names on month days, extra Agenda columns, one click to the record</td><td class="bp-yes">Full control of event rendering in code</td></tr>
                     <tr><td>Labels and buttons</td><td class="bp-yes">Button, title, save and record labels, which views appear in the switcher, sizes from tiny to full width</td><td class="bp-yes">Configurable toolbar in code</td></tr>
-                    <tr><td>Saving records</td><td class="bp-yes">Writes your records on Save, one per date, per range, per time block or per resource; or returns the dates to a Screen Flow</td><td>You build the save</td></tr>
-                    <tr><td>Booking rules</td><td class="bp-yes">Capacity, conflict checks, minimum notice, a rolling booking window, buffers, business hours and blocked days per resource</td><td>You build them</td></tr>
+                    <tr><td>Saving records</td><td class="bp-win">Writes your records on Save, one per date, per range, per time block or per resource; or returns the dates to a Screen Flow</td><td class="bp-lose">You build the save</td></tr>
+                    <tr><td>Booking rules</td><td class="bp-win">Capacity, conflict checks, minimum notice, a rolling booking window, buffers, business hours and blocked days per resource</td><td class="bp-lose">You build them</td></tr>
                     <tr><td>Languages and time zones</td><td class="bp-yes">Nine languages, dates and times in each user's Salesforce locale and time zone</td><td class="bp-yes">Extensive locale and time-zone options in code</td></tr>
-                    <tr><td>Security</td><td class="bp-yes">Every query and save runs as the viewing user, so sharing and field-level security apply. Passed the Salesforce Security Review</td><td>Up to the Apex you write</td></tr>
-                    <tr><td>Maintenance</td><td class="bp-yes">The vendor ships updates in the package</td><td>Your code to keep current</td></tr>
+                    <tr><td>Security</td><td class="bp-win">Every query and save runs as the viewing user, so sharing and field-level security apply. Passed the Salesforce Security Review</td><td class="bp-lose">Up to the Apex you write</td></tr>
+                    <tr><td>Maintenance</td><td class="bp-win">The vendor ships updates in the package</td><td class="bp-lose">Your code to keep current</td></tr>
                     </tbody>
                 </table>
                 </div>

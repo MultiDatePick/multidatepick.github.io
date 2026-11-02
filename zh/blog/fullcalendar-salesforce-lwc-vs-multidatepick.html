@@ -54,6 +54,22 @@
         .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
         .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
         .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        /* Who wins: scorecard over the comparison table, winning cell per row. */
+        .bp-score { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 12px; margin: 18px 0 4px; }
+        .bp-score-tile { border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 16px; background: #fff; display: flex; flex-direction: column; gap: 2px; }
+        .bp-score-tile.is-win { background: #0F2D52; border-color: #0F2D52; box-shadow: 0 10px 26px -12px rgba(15, 45, 82, 0.55); }
+        .bp-score-name { font-weight: 700; color: #0F2D52; font-size: 0.95rem; }
+        .bp-score-n { font-size: 2.2rem; font-weight: 800; line-height: 1.1; color: #94A3B8; }
+        .bp-score-l { font-size: 0.82rem; color: #64748B; }
+        .is-win .bp-score-name, .is-win .bp-score-n { color: #fff; }
+        .is-win .bp-score-l { color: #CBD5E1; }
+        .bp-pill { align-self: flex-start; background: #F97316; color: #fff; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 999px; padding: 3px 9px; margin-bottom: 4px; white-space: nowrap; }
+        .bp-grid th.bp-best { background: #0F2D52; color: #fff; border-bottom-color: #F97316; }
+        .bp-grid th.bp-best .bp-pill { margin: 0 0 0 8px; vertical-align: 2px; }
+        .bp-grid td.bp-win, .bp-grid tr:hover td.bp-win { background: #F0FDF4; color: #0F2D52; font-weight: 600; }
+        .bp-grid td.bp-win::before { content: "\2713"; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #16A34A; color: #fff; font-size: 0.7rem; font-weight: 800; margin-right: 8px; vertical-align: 1px; }
+        .bp-grid td.bp-lose { color: #94A3B8; }
+        @media (max-width: 600px) { .bp-score { grid-template-columns: 1fr; } }
         .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
         .bp-pair .sc-shot { margin: 0; }
         .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
@@ -252,22 +268,27 @@
 
                 <h2 style="margin-top:44px;">功能清单并排对比</h2>
                 <p>以下是大家在寻找可定制 Salesforce 日历时会列出的功能。“内置”表示管理员点几下即可开启，“自行开发”表示需要开发人员编写代码。</p>
+                <div class="bp-score">
+                    <div class="bp-score-tile is-win"><span class="bp-pill">最佳选择</span><span class="bp-score-name">MultiDatePick</span><span class="bp-score-n">8</span><span class="bp-score-l">项领先</span></div>
+                    <div class="bp-score-tile"><span class="bp-score-name">FullCalendar LWC</span><span class="bp-score-n">0</span><span class="bp-score-l">项领先</span></div>
+                    <div class="bp-score-tile"><span class="bp-score-name">持平</span><span class="bp-score-n">4</span><span class="bp-score-l">项</span></div>
+                </div>
                 <div style="overflow-x:auto;">
                 <table class="property-table bp-grid">
-                    <thead><tr><th style="width:26%;">功能</th><th style="width:40%;">MultiDatePick</th><th style="width:34%;">FullCalendar LWC</th></tr></thead>
+                    <thead><tr><th style="width:26%;">功能</th><th class="bp-best" style="width:40%;">MultiDatePick<span class="bp-pill">最佳选择</span></th><th style="width:34%;">FullCalendar LWC</th></tr></thead>
                     <tbody>
-                    <tr><td>视图</td><td class="bp-yes">内置五种：月历、资源时间轴、按小时的周视图、使用率热力图和日程列表，可按放置位置选择</td><td class="bp-yes">月、周、日和列表；时间轴和资源视图需要 Premium 许可证</td></tr>
+                    <tr><td>视图</td><td class="bp-win">内置五种：月历、资源时间轴、按小时的周视图、使用率热力图和日程列表，可按放置位置选择</td><td class="bp-lose">月、周、日和列表；时间轴和资源视图需要 Premium 许可证</td></tr>
                     <tr><td>拖放</td><td class="bp-yes">在时间轴上拖动预订即可移动，拖动边缘即可调整时长；跨天拖动可选择日期范围</td><td class="bp-yes">拖动、放置和调整大小，回调函数需自行编写</td></tr>
-                    <tr><td>按 Salesforce 字段着色</td><td class="bp-yes">为任意选项列表的每个值设置颜色，以填充、条形或两者同时显示，并提供筛选标签</td><td>在 JavaScript 中自行把字段值映射到颜色</td></tr>
-                    <tr><td>以自定义对象为数据源</td><td class="bp-yes">任何带有日期或日期/时间字段的对象，标准或自定义均可，包括任务和活动</td><td>Apex 和数据层需自行编写</td></tr>
-                    <tr><td>筛选</td><td class="bp-yes">状态筛选标签、记录筛选条件（例如 <code>OwnerId=ME; Status__c=Confirmed</code>）、资源筛选和隐藏的状态</td><td>筛选功能需自行开发</td></tr>
+                    <tr><td>按 Salesforce 字段着色</td><td class="bp-win">为任意选项列表的每个值设置颜色，以填充、条形或两者同时显示，并提供筛选标签</td><td class="bp-lose">在 JavaScript 中自行把字段值映射到颜色</td></tr>
+                    <tr><td>以自定义对象为数据源</td><td class="bp-win">任何带有日期或日期/时间字段的对象，标准或自定义均可，包括任务和活动</td><td class="bp-lose">Apex 和数据层需自行编写</td></tr>
+                    <tr><td>筛选</td><td class="bp-win">状态筛选标签、记录筛选条件（例如 <code>OwnerId=ME; Status__c=Confirmed</code>）、资源筛选和隐藏的状态</td><td class="bp-lose">筛选功能需自行开发</td></tr>
                     <tr><td>事件详情与记录链接</td><td class="bp-yes">悬停卡片可显示任意字段（包括查找字段），月视图日期上显示名称，日程视图可加列，一键打开记录</td><td class="bp-yes">通过代码完全控制事件渲染</td></tr>
                     <tr><td>标签与按钮</td><td class="bp-yes">按钮、标题、保存和记录标签，切换器中显示哪些视图，尺寸从最小到全宽</td><td class="bp-yes">通过代码配置工具栏</td></tr>
-                    <tr><td>保存记录</td><td class="bp-yes">点击保存即写入您的记录，可按日期、范围、时间块或资源各存一条；也可以把日期交给屏幕 Flow（Screen Flow）</td><td>保存逻辑需自行开发</td></tr>
-                    <tr><td>预订规则</td><td class="bp-yes">容量、冲突检查、最短提前通知、滚动预订时间窗、缓冲时间、营业时间，以及按资源设置的屏蔽日期</td><td>需自行开发</td></tr>
+                    <tr><td>保存记录</td><td class="bp-win">点击保存即写入您的记录，可按日期、范围、时间块或资源各存一条；也可以把日期交给屏幕 Flow（Screen Flow）</td><td class="bp-lose">保存逻辑需自行开发</td></tr>
+                    <tr><td>预订规则</td><td class="bp-win">容量、冲突检查、最短提前通知、滚动预订时间窗、缓冲时间、营业时间，以及按资源设置的屏蔽日期</td><td class="bp-lose">需自行开发</td></tr>
                     <tr><td>语言与时区</td><td class="bp-yes">九种语言，日期和时间按每个用户的 Salesforce 区域设置和时区显示</td><td class="bp-yes">通过代码提供丰富的区域设置和时区选项</td></tr>
-                    <tr><td>安全</td><td class="bp-yes">每次查询和保存都以查看页面的用户身份运行，共享规则和字段级安全性照常生效。已通过 Salesforce 安全审查</td><td>取决于您编写的 Apex</td></tr>
-                    <tr><td>维护</td><td class="bp-yes">由供应商通过软件包发布更新</td><td>代码需由您自己持续更新</td></tr>
+                    <tr><td>安全</td><td class="bp-win">每次查询和保存都以查看页面的用户身份运行，共享规则和字段级安全性照常生效。已通过 Salesforce 安全审查</td><td class="bp-lose">取决于您编写的 Apex</td></tr>
+                    <tr><td>维护</td><td class="bp-win">由供应商通过软件包发布更新</td><td class="bp-lose">代码需由您自己持续更新</td></tr>
                     </tbody>
                 </table>
                 </div>

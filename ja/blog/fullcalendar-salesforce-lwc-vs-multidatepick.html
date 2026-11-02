@@ -54,6 +54,22 @@
         .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
         .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
         .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        /* Who wins: scorecard over the comparison table, winning cell per row. */
+        .bp-score { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 12px; margin: 18px 0 4px; }
+        .bp-score-tile { border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 16px; background: #fff; display: flex; flex-direction: column; gap: 2px; }
+        .bp-score-tile.is-win { background: #0F2D52; border-color: #0F2D52; box-shadow: 0 10px 26px -12px rgba(15, 45, 82, 0.55); }
+        .bp-score-name { font-weight: 700; color: #0F2D52; font-size: 0.95rem; }
+        .bp-score-n { font-size: 2.2rem; font-weight: 800; line-height: 1.1; color: #94A3B8; }
+        .bp-score-l { font-size: 0.82rem; color: #64748B; }
+        .is-win .bp-score-name, .is-win .bp-score-n { color: #fff; }
+        .is-win .bp-score-l { color: #CBD5E1; }
+        .bp-pill { align-self: flex-start; background: #F97316; color: #fff; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 999px; padding: 3px 9px; margin-bottom: 4px; white-space: nowrap; }
+        .bp-grid th.bp-best { background: #0F2D52; color: #fff; border-bottom-color: #F97316; }
+        .bp-grid th.bp-best .bp-pill { margin: 0 0 0 8px; vertical-align: 2px; }
+        .bp-grid td.bp-win, .bp-grid tr:hover td.bp-win { background: #F0FDF4; color: #0F2D52; font-weight: 600; }
+        .bp-grid td.bp-win::before { content: "\2713"; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #16A34A; color: #fff; font-size: 0.7rem; font-weight: 800; margin-right: 8px; vertical-align: 1px; }
+        .bp-grid td.bp-lose { color: #94A3B8; }
+        @media (max-width: 600px) { .bp-score { grid-template-columns: 1fr; } }
         .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
         .bp-pair .sc-shot { margin: 0; }
         .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
@@ -252,22 +268,27 @@
 
                 <h2 style="margin-top:44px;">要件を並べて比較</h2>
                 <p>カスタマイズできる Salesforce カレンダーを探すときによく挙がる機能です。「組み込み」は管理者がクリックで有効にできること、「自分で構築」は開発者がコードを書く必要があることを意味します。</p>
+                <div class="bp-score">
+                    <div class="bp-score-tile is-win"><span class="bp-pill">おすすめ</span><span class="bp-score-name">MultiDatePick</span><span class="bp-score-n">8</span><span class="bp-score-l">項目で優位</span></div>
+                    <div class="bp-score-tile"><span class="bp-score-name">FullCalendar LWC</span><span class="bp-score-n">0</span><span class="bp-score-l">項目で優位</span></div>
+                    <div class="bp-score-tile"><span class="bp-score-name">互角</span><span class="bp-score-n">4</span><span class="bp-score-l">項目</span></div>
+                </div>
                 <div style="overflow-x:auto;">
                 <table class="property-table bp-grid">
-                    <thead><tr><th style="width:26%;">機能</th><th style="width:40%;">MultiDatePick</th><th style="width:34%;">FullCalendar LWC</th></tr></thead>
+                    <thead><tr><th style="width:26%;">機能</th><th class="bp-best" style="width:40%;">MultiDatePick<span class="bp-pill">おすすめ</span></th><th style="width:34%;">FullCalendar LWC</th></tr></thead>
                     <tbody>
-                    <tr><td>表示</td><td class="bp-yes">5 つを組み込み: 月カレンダー、リソースタイムライン、時間単位の週表示、稼働率ヒートマップ、予定一覧。配置ごとに選択</td><td class="bp-yes">月、週、日、リスト。タイムラインとリソース表示には Premium ライセンスが必要</td></tr>
+                    <tr><td>表示</td><td class="bp-win">5 つを組み込み: 月カレンダー、リソースタイムライン、時間単位の週表示、稼働率ヒートマップ、予定一覧。配置ごとに選択</td><td class="bp-lose">月、週、日、リスト。タイムラインとリソース表示には Premium ライセンスが必要</td></tr>
                     <tr><td>ドラッグ&ドロップ</td><td class="bp-yes">タイムライン上の予約をドラッグして移動、端をドラッグして時間を変更。複数の日にまたがってドラッグすると期間を選択</td><td class="bp-yes">ドラッグ、ドロップ、リサイズに対応。コールバックは自分で記述</td></tr>
-                    <tr><td>Salesforce の項目に基づく色分け</td><td class="bp-yes">任意の選択リストの値ごとに色を設定。塗りつぶし、バー、またはその両方で表示し、フィルターピルも付属</td><td>項目の値と色の対応を JavaScript で記述</td></tr>
-                    <tr><td>カスタムオブジェクトをデータソースに</td><td class="bp-yes">日付項目または日付/時間項目があれば、ToDo や行動を含む標準・カスタムのどのオブジェクトでも利用可能</td><td>Apex とデータ層を自分で記述</td></tr>
-                    <tr><td>フィルター</td><td class="bp-yes">状況のフィルターピル、<code>OwnerId=ME; Status__c=Confirmed</code> のようなレコードフィルター、リソースフィルター、非表示の状況</td><td>フィルターを自分で構築</td></tr>
+                    <tr><td>Salesforce の項目に基づく色分け</td><td class="bp-win">任意の選択リストの値ごとに色を設定。塗りつぶし、バー、またはその両方で表示し、フィルターピルも付属</td><td class="bp-lose">項目の値と色の対応を JavaScript で記述</td></tr>
+                    <tr><td>カスタムオブジェクトをデータソースに</td><td class="bp-win">日付項目または日付/時間項目があれば、ToDo や行動を含む標準・カスタムのどのオブジェクトでも利用可能</td><td class="bp-lose">Apex とデータ層を自分で記述</td></tr>
+                    <tr><td>フィルター</td><td class="bp-win">状況のフィルターピル、<code>OwnerId=ME; Status__c=Confirmed</code> のようなレコードフィルター、リソースフィルター、非表示の状況</td><td class="bp-lose">フィルターを自分で構築</td></tr>
                     <tr><td>予定の詳細とレコードへのリンク</td><td class="bp-yes">任意の項目 (参照項目も可) を表示するホバーカード、月表示の日付に名前を表示、予定一覧に列を追加、ワンクリックでレコードへ</td><td class="bp-yes">予定の描画をコードで完全に制御</td></tr>
                     <tr><td>ラベルとボタン</td><td class="bp-yes">ボタン、タイトル、保存、レコードの各ラベル、切替に表示する表示の種類、最小から全幅までのサイズ</td><td class="bp-yes">ツールバーをコードで設定</td></tr>
-                    <tr><td>レコードの保存</td><td class="bp-yes">保存時にレコードを作成。日付ごと、期間ごと、時間ブロックごと、リソースごとに 1 件。または日付を画面フロー (Screen Flow) に返す</td><td>保存処理を自分で構築</td></tr>
-                    <tr><td>予約ルール</td><td class="bp-yes">定員、競合チェック、最低事前通知、自動で進む予約期間、バッファー、営業時間、リソースごとのブロック日</td><td>自分で構築</td></tr>
+                    <tr><td>レコードの保存</td><td class="bp-win">保存時にレコードを作成。日付ごと、期間ごと、時間ブロックごと、リソースごとに 1 件。または日付を画面フロー (Screen Flow) に返す</td><td class="bp-lose">保存処理を自分で構築</td></tr>
+                    <tr><td>予約ルール</td><td class="bp-win">定員、競合チェック、最低事前通知、自動で進む予約期間、バッファー、営業時間、リソースごとのブロック日</td><td class="bp-lose">自分で構築</td></tr>
                     <tr><td>言語とタイムゾーン</td><td class="bp-yes">9 言語に対応。日付と時刻は各ユーザーの Salesforce のロケールとタイムゾーンで表示</td><td class="bp-yes">豊富なロケールとタイムゾーンのオプションをコードで設定</td></tr>
-                    <tr><td>セキュリティ</td><td class="bp-yes">すべてのクエリと保存を表示中のユーザーとして実行するため、共有設定と項目レベルセキュリティが適用されます。Salesforce のセキュリティレビューに合格済み</td><td>自分で書く Apex 次第</td></tr>
-                    <tr><td>保守</td><td class="bp-yes">ベンダーがパッケージで更新を提供</td><td>自社コードを最新に保つ必要あり</td></tr>
+                    <tr><td>セキュリティ</td><td class="bp-win">すべてのクエリと保存を表示中のユーザーとして実行するため、共有設定と項目レベルセキュリティが適用されます。Salesforce のセキュリティレビューに合格済み</td><td class="bp-lose">自分で書く Apex 次第</td></tr>
+                    <tr><td>保守</td><td class="bp-win">ベンダーがパッケージで更新を提供</td><td class="bp-lose">自社コードを最新に保つ必要あり</td></tr>
                     </tbody>
                 </table>
                 </div>

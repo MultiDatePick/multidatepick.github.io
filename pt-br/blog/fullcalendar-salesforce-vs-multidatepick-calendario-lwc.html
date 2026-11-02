@@ -54,6 +54,22 @@
         .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
         .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
         .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        /* Who wins: scorecard over the comparison table, winning cell per row. */
+        .bp-score { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 12px; margin: 18px 0 4px; }
+        .bp-score-tile { border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 16px; background: #fff; display: flex; flex-direction: column; gap: 2px; }
+        .bp-score-tile.is-win { background: #0F2D52; border-color: #0F2D52; box-shadow: 0 10px 26px -12px rgba(15, 45, 82, 0.55); }
+        .bp-score-name { font-weight: 700; color: #0F2D52; font-size: 0.95rem; }
+        .bp-score-n { font-size: 2.2rem; font-weight: 800; line-height: 1.1; color: #94A3B8; }
+        .bp-score-l { font-size: 0.82rem; color: #64748B; }
+        .is-win .bp-score-name, .is-win .bp-score-n { color: #fff; }
+        .is-win .bp-score-l { color: #CBD5E1; }
+        .bp-pill { align-self: flex-start; background: #F97316; color: #fff; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 999px; padding: 3px 9px; margin-bottom: 4px; white-space: nowrap; }
+        .bp-grid th.bp-best { background: #0F2D52; color: #fff; border-bottom-color: #F97316; }
+        .bp-grid th.bp-best .bp-pill { margin: 0 0 0 8px; vertical-align: 2px; }
+        .bp-grid td.bp-win, .bp-grid tr:hover td.bp-win { background: #F0FDF4; color: #0F2D52; font-weight: 600; }
+        .bp-grid td.bp-win::before { content: "\2713"; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #16A34A; color: #fff; font-size: 0.7rem; font-weight: 800; margin-right: 8px; vertical-align: 1px; }
+        .bp-grid td.bp-lose { color: #94A3B8; }
+        @media (max-width: 600px) { .bp-score { grid-template-columns: 1fr; } }
         .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
         .bp-pair .sc-shot { margin: 0; }
         .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
@@ -252,22 +268,27 @@
 
                 <h2 style="margin-top:44px;">A lista de recursos, lado a lado</h2>
                 <p>Estes são os recursos que as pessoas pedem quando procuram um calendário personalizável para Salesforce. "Pronto" significa que um administrador ativa com cliques. "Você constrói" significa que um desenvolvedor escreve o código.</p>
+                <div class="bp-score">
+                    <div class="bp-score-tile is-win"><span class="bp-pill">Melhor escolha</span><span class="bp-score-name">MultiDatePick</span><span class="bp-score-n">8</span><span class="bp-score-l">linhas vencidas</span></div>
+                    <div class="bp-score-tile"><span class="bp-score-name">FullCalendar LWC</span><span class="bp-score-n">0</span><span class="bp-score-l">linhas vencidas</span></div>
+                    <div class="bp-score-tile"><span class="bp-score-name">Empate</span><span class="bp-score-n">4</span><span class="bp-score-l">linhas</span></div>
+                </div>
                 <div style="overflow-x:auto;">
                 <table class="property-table bp-grid">
-                    <thead><tr><th style="width:26%;">Recurso</th><th style="width:40%;">MultiDatePick</th><th style="width:34%;">FullCalendar LWC</th></tr></thead>
+                    <thead><tr><th style="width:26%;">Recurso</th><th class="bp-best" style="width:40%;">MultiDatePick<span class="bp-pill">Melhor escolha</span></th><th style="width:34%;">FullCalendar LWC</th></tr></thead>
                     <tbody>
-                    <tr><td>Visualizações</td><td class="bp-yes">Cinco prontas: calendário mensal, linha do tempo de recursos, semana por hora, mapa de calor de ocupação e lista de agenda, escolhidas em cada posicionamento</td><td class="bp-yes">Mês, semana, dia e lista; as visualizações de linha do tempo e de recursos exigem licença Premium</td></tr>
+                    <tr><td>Visualizações</td><td class="bp-win">Cinco prontas: calendário mensal, linha do tempo de recursos, semana por hora, mapa de calor de ocupação e lista de agenda, escolhidas em cada posicionamento</td><td class="bp-lose">Mês, semana, dia e lista; as visualizações de linha do tempo e de recursos exigem licença Premium</td></tr>
                     <tr><td>Arrastar e soltar</td><td class="bp-yes">Arraste uma reserva na linha do tempo para movê-la, arraste a borda para mudar a duração; arraste por vários dias para escolher um intervalo</td><td class="bp-yes">Arrastar, soltar e redimensionar, com callbacks que você escreve</td></tr>
-                    <tr><td>Cores a partir de campos do Salesforce</td><td class="bp-yes">Uma cor para cada valor de qualquer lista de opções, exibida como preenchimento, barras ou ambos, com botões de filtro</td><td>Você mapeia valores de campo para cores em JavaScript</td></tr>
-                    <tr><td>Objetos personalizados como fonte</td><td class="bp-yes">Qualquer objeto com campo Data ou Data/Hora, padrão ou personalizado, incluindo Tarefa e Evento</td><td>Você escreve o Apex e a camada de dados</td></tr>
-                    <tr><td>Filtros</td><td class="bp-yes">Botões de filtro por status, um filtro de registros como <code>OwnerId=ME; Status__c=Confirmed</code>, filtros de recurso e status ocultos</td><td>Você constrói os filtros</td></tr>
+                    <tr><td>Cores a partir de campos do Salesforce</td><td class="bp-win">Uma cor para cada valor de qualquer lista de opções, exibida como preenchimento, barras ou ambos, com botões de filtro</td><td class="bp-lose">Você mapeia valores de campo para cores em JavaScript</td></tr>
+                    <tr><td>Objetos personalizados como fonte</td><td class="bp-win">Qualquer objeto com campo Data ou Data/Hora, padrão ou personalizado, incluindo Tarefa e Evento</td><td class="bp-lose">Você escreve o Apex e a camada de dados</td></tr>
+                    <tr><td>Filtros</td><td class="bp-win">Botões de filtro por status, um filtro de registros como <code>OwnerId=ME; Status__c=Confirmed</code>, filtros de recurso e status ocultos</td><td class="bp-lose">Você constrói os filtros</td></tr>
                     <tr><td>Detalhes do evento e links para o registro</td><td class="bp-yes">Cartão ao passar o mouse com quaisquer campos (lookups também), nomes nos dias do mês, colunas extras na Agenda, um clique até o registro</td><td class="bp-yes">Controle total da renderização dos eventos em código</td></tr>
                     <tr><td>Rótulos e botões</td><td class="bp-yes">Rótulos do botão, do título, do salvar e do registro, quais visualizações aparecem no seletor, tamanhos de minúsculo a largura total</td><td class="bp-yes">Barra de ferramentas configurável em código</td></tr>
-                    <tr><td>Salvar registros</td><td class="bp-yes">Grava seus registros ao Salvar, um por data, por intervalo, por bloco de horário ou por recurso; ou devolve as datas a um fluxo de tela (Screen Flow)</td><td>Você constrói o salvamento</td></tr>
-                    <tr><td>Regras de reserva</td><td class="bp-yes">Capacidade, verificação de conflitos, antecedência mínima, janela de reserva móvel, intervalos entre reservas, horário comercial e dias bloqueados por recurso</td><td>Você constrói as regras</td></tr>
+                    <tr><td>Salvar registros</td><td class="bp-win">Grava seus registros ao Salvar, um por data, por intervalo, por bloco de horário ou por recurso; ou devolve as datas a um fluxo de tela (Screen Flow)</td><td class="bp-lose">Você constrói o salvamento</td></tr>
+                    <tr><td>Regras de reserva</td><td class="bp-win">Capacidade, verificação de conflitos, antecedência mínima, janela de reserva móvel, intervalos entre reservas, horário comercial e dias bloqueados por recurso</td><td class="bp-lose">Você constrói as regras</td></tr>
                     <tr><td>Idiomas e fusos horários</td><td class="bp-yes">Nove idiomas, datas e horários na localidade e no fuso horário do Salesforce de cada usuário</td><td class="bp-yes">Amplas opções de localidade e fuso horário em código</td></tr>
-                    <tr><td>Segurança</td><td class="bp-yes">Cada consulta e cada salvamento rodam como o usuário que está vendo a página, então o compartilhamento e a segurança em nível de campo valem. Aprovado na Security Review do Salesforce</td><td>Depende do Apex que você escrever</td></tr>
-                    <tr><td>Manutenção</td><td class="bp-yes">O fornecedor entrega as atualizações no pacote</td><td>Seu código para manter atualizado</td></tr>
+                    <tr><td>Segurança</td><td class="bp-win">Cada consulta e cada salvamento rodam como o usuário que está vendo a página, então o compartilhamento e a segurança em nível de campo valem. Aprovado na Security Review do Salesforce</td><td class="bp-lose">Depende do Apex que você escrever</td></tr>
+                    <tr><td>Manutenção</td><td class="bp-win">O fornecedor entrega as atualizações no pacote</td><td class="bp-lose">Seu código para manter atualizado</td></tr>
                     </tbody>
                 </table>
                 </div>
