@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No-Code-Kalender für Salesforce (LWC): 36 Aufgaben ohne Code</title>
+    <meta name="description" content="No-Code-Kalender für Salesforce (LWC): 36 Kalenderaufgaben von Buchungsregeln bis Sprachen, in MultiDatePick je eine Einstellung, in FullCalendar Code.">
+    <link rel="canonical" href="https://multidatepick.com/de/blog/no-code-salesforce-kalender.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* No-code calendar post: same look as the other posts; .nc-group heads each task table. */
+        .section h3.nc-group { margin: 34px 0 6px; color: #0F2D52; font-size: 1.12rem; }
+        .section .container > p + p { margin-top: 14px; }
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        /* Who wins: scorecard over the comparison table, winning cell per row. */
+        .bp-score { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 12px; margin: 18px 0 4px; }
+        .bp-score-tile { border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 16px; background: #fff; display: flex; flex-direction: column; gap: 2px; }
+        .bp-score-tile.is-win { background: #0F2D52; border-color: #0F2D52; box-shadow: 0 10px 26px -12px rgba(15, 45, 82, 0.55); }
+        .bp-score-name { font-weight: 700; color: #0F2D52; font-size: 0.95rem; }
+        .bp-score-n { font-size: 2.2rem; font-weight: 800; line-height: 1.1; color: #94A3B8; }
+        .bp-score-l { font-size: 0.82rem; color: #64748B; }
+        .is-win .bp-score-name, .is-win .bp-score-n { color: #fff; }
+        .is-win .bp-score-l { color: #CBD5E1; }
+        .bp-pill { align-self: flex-start; background: #F97316; color: #fff; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 999px; padding: 3px 9px; margin-bottom: 4px; white-space: nowrap; }
+        .bp-grid th.bp-best { background: #0F2D52; color: #fff; border-bottom-color: #F97316; }
+        .bp-grid th.bp-best .bp-pill { margin: 0 0 0 8px; vertical-align: 2px; }
+        .bp-grid td.bp-win, .bp-grid tr:hover td.bp-win { background: #F0FDF4; color: #0F2D52; font-weight: 600; }
+        .bp-grid td.bp-win::before { content: "\2713"; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #16A34A; color: #fff; font-size: 0.7rem; font-weight: 800; margin-right: 8px; vertical-align: 1px; }
+        .bp-grid td.bp-lose { color: #94A3B8; }
+        @media (max-width: 600px) { .bp-score { grid-template-columns: 1fr; } }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Der No-Code-Kalender für Salesforce: 36 Aufgaben ohne Code">
+    <meta property="og:description" content="No-Code-Kalender für Salesforce (LWC): 36 Kalenderaufgaben von Buchungsregeln bis Sprachen, in MultiDatePick je eine Einstellung, in FullCalendar Code.">
+    <meta property="og:image" content="https://multidatepick.com/images/de/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/de/blog/no-code-salesforce-kalender.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="de_DE">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Der No-Code-Kalender für Salesforce: 36 Aufgaben ohne Code">
+    <meta name="twitter:description" content="No-Code-Kalender für Salesforce (LWC): 36 Kalenderaufgaben von Buchungsregeln bis Sprachen, in MultiDatePick je eine Einstellung, in FullCalendar Code.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/de/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/no-code-salesforce-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/no-code-salesforce-kalender.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/calendario-salesforce-sin-codigo.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/calendrier-salesforce-no-code.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/calendario-salesforce-no-code.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/calendario-salesforce-sem-codigo.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/no-code-salesforce-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/no-code-salesforce-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/no-code-salesforce-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/no-code-salesforce-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Demnächst auf der Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Banner schließen" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/de/" class="logo"><img src="/images/logo.png" alt="MultiDatePick-Logo: Salesforce-Kalender für mehrere Termine und Ressourcenbuchung" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Navigation ein-/ausblenden"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produkt <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/salesforce-mehrfach-datumsauswahl.html">Date</a></li>
+                        <li><a href="/de/salesforce-datum-zeitfenster-auswahl.html">Date Time</a></li>
+                        <li><a href="/de/salesforce-buchungskalender.html">Booking</a></li>
+                        <li><a href="/de/blog/salesforce-kalenderansichten.html">Fünf Kalenderansichten</a></li>
+                        <li><a href="/de/salesforce-kalender-konfigurationen.html">Config Library</a></li>
+                        <li><a href="/de/vertrauen-sicherheit.html">Vertrauen &amp; Sicherheit</a></li>
+                        <li><a href="/de/barrierefreiheit-vpat.html">Barrierefreiheit (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Lösungen <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/salesforce-kalender.html">Salesforce-Kalender</a></li>
+                        <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Personaldienstleistung &amp; Recruiting</a></li>
+                        <li><a href="/de/salesforce-interviewplanung.html">Interviewplanung</a></li>
+                        <li><a href="/de/salesforce-besprechungsraum-buchung.html">Besprechungsraum-Buchung</a></li>
+                        <li><a href="/de/salesforce-experience-cloud-buchungskalender.html">Buchung in Experience Cloud</a></li>
+                        <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Kampagnentermine</a></li>
+                        <li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html">Behörden / Section 508</a></li>
+                        <li><a href="/de/salesforce-lightning-scheduler-alternative.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/de/preise.html">Preise</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Doku <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/erste-schritte.html">Erste Schritte</a></li>
+                        <li><a href="/de/benutzerhandbuch.html">Benutzerhandbuch</a></li>
+                        <li><a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a></li>
+                        <li><a href="/de/app-start-experience-seiten.html">App-, Start- &amp; Experience-Seiten</a></li>
+                        <li><a href="/de/flow-mit-vs-code-bereitstellen.html">Flow bereitstellen (VS Code)</a></li>
+                        <li><a href="/de/fehlerbehebung.html">Fehlerbehebung</a></li>
+                        <li><a href="/de/haeufige-fragen.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/de/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/de/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Live-Demo testen</a></li>
+                <li><a href="/de/zum-start-benachrichtigen.html" class="nav-cta">Zum Start benachrichtigen</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Der No-Code-Kalender für Salesforce: 36 Aufgaben, keine Zeile Code",
+                "description": "No-Code-Kalender für Salesforce (LWC): 36 Kalenderaufgaben von Buchungsregeln bis Sprachen, in MultiDatePick je eine Einstellung, in FullCalendar Code.",
+                "datePublished": "2026-11-03",
+                "dateModified": "2026-11-03",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/de/blog/no-code-salesforce-kalender.html",
+                "image": "https://multidatepick.com/images/de/wizard/salesforce-kalender-einrichtungsassistent-poster.png",
+                "inLanguage": "de"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Gibt es einen No-Code-Kalender als LWC für Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Ja. MultiDatePick ist ein Kalender als Lightning Web Component, den Sie per Klick einrichten: im Einrichtungsassistenten oder im Lightning App Builder, auf jedem Standard- oder benutzerdefinierten Objekt. Er lädt und speichert Ihre Datensätze selbst, Sie schreiben also weder Apex noch JavaScript."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Lässt sich FullCalendar besser anpassen als MultiDatePick?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Nur für Entwickler. FullCalendar ist eine Bibliothek: Alles ist möglich, wenn jemand den Code schreibt und pflegt. Für Administratoren ist MultiDatePick der besser anpassbare Kalender: 36 gängige Aufgaben, von Buchungsregeln bis zu neun Sprachen, sind jeweils eine Einstellung."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Kann ein Salesforce-Administrator MultiDatePick ohne Entwickler einrichten?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Ja. Der Einrichtungsassistent fragt nach der Seite und Ihren Datensätzen, füllt die naheliegenden Felder vor und zeigt eine Live-Vorschau des echten Kalenders. Danach ziehen Sie die Komponente auf die Seite und tragen ihren Config Name ein."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Brauche ich Apex, um Datensätze aus einem Kalender zu speichern?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Mit MultiDatePick nicht. Beim Speichern schreibt MultiDatePick einen Datensatz pro Tag, pro Zeitraum, pro Zeitblock oder pro Ressource, oder gibt die Termine an einen Bildschirm-Flow (Screen Flow) weiter. Jedes Speichern läuft als der Benutzer, der die Seite ansieht, mit Freigaben und Sicherheit auf Feldebene."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Kann ich den Kalender später ohne Deployment ändern?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Ja. Öffnen Sie die Konfiguration im Einrichtungsassistenten, ändern Sie eine Einstellung und speichern Sie; der Kalender übernimmt sie beim nächsten Laden. Konfigurationen sind Benutzerdefinierte Metadaten (Custom Metadata), Sie können sie also weiterhin mit Änderungssets oder der Salesforce CLI verschieben, wenn Sie möchten."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Funktioniert ein No-Code-Kalender in Bildschirm-Flows und auf Experience Cloud-Sites?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Ja. Dieselbe Komponente kommt auf einen Flow-Bildschirm, wo die gewählten Termine zu Flow-Variablen werden, und auf eine öffentliche Experience Cloud-Site, wo Gäste nach denselben Regeln buchen."
+                        }
+                    }
+                ],
+                "inLanguage": "de"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/wizard/salesforce-kalender-einrichtungsassistent.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/de/wizard/salesforce-kalender-einrichtungsassistent-poster.png",
+                "caption": "Animierter Durchlauf durch den MultiDatePick-Einrichtungsassistenten in Salesforce: Kontakt-Datensatzseite, Buchung eines Beraters, Advisor Appointment gewählt und Felder automatisch ausgefüllt, Berater und Zeiten, zum Schluss Prüfen",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/wizard/salesforce-intelligente-feldzuordnung-automatisch.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/de/wizard/salesforce-intelligente-feldzuordnung-automatisch-poster.png",
+                "caption": "Animierte Demo der intelligenten Feldzuordnung im MultiDatePick-Einrichtungsassistenten für Salesforce: Eine eingefügte Konfiguration listet zehn fehlende Verweise, ein Objekt wird gewählt, und die Felder Startzeit, Endzeit und Status ordnen sich selbst zu",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/views/salesforce-kalender-statusanzeige-stile.png",
+                "caption": "Ein Buchungsmonat in Salesforce in den vier Statusanzeige-Stilen von MultiDatePick: Balken unter jedem Tag, Punkte, eine farbige Füllung, die diagonal geteilt ist, wenn ein Tag zwei Status hat, und ein Badge mit der Anzahl",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/marketing/salesforce-serientermine-2-und-4-freitag.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/de/marketing/salesforce-serientermine-2-und-4-freitag-poster.png",
+                "caption": "Animierte Demo eines Wiederholungsmusters in der MultiDatePick-Datumsauswahl für Salesforce: Wiederholungsmuster hinzufügen, Benutzerdefinierte Tage, Freitag, das 2. und 4. Vorkommen, ein Enddatum in drei Monaten, eine Vorschau mit sechs Freitagen, dann füllt Daten hinzufügen sie in einem Zwei-Monats-Kalender ein",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/marketing/salesforce-kalender-kapazitaet-zeitfenster.png",
+                "caption": "Salesforce-Buchungskalender mit Kapazitätsanzeigen und Konflikterkennung, die an jedem Zeitfenster Doppelbuchungen verhindert",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/marketing/salesforce-kalender-fuenf-ansichten.png",
+                "caption": "MultiDatePick mit Salesforce-Buchungen in allen fünf Ansichten: Ressourcen-Zeitachse, Monatskalender, Auslastungs-Heatmap, Wochenraster und Agenda-Liste",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/views/salesforce-auslastung-heatmap-demo.gif",
+                "thumbnailUrl": "https://multidatepick.com/images/de/views/salesforce-auslastung-heatmap-demo-poster.png",
+                "caption": "Animierte Demo der MultiDatePick-Auslastungs-Heatmap in Salesforce: Berater untereinander mit gebuchter Kapazität pro Tag, Hover über einen vollen Tag, dann Klick öffnet die Woche dieses Beraters",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Der No-Code-Kalender für Salesforce: 36 Aufgaben, keine Zeile Code</h1>
+                <p class="subtitle">FullCalendar lässt sich anpassen, wenn Sie einen Entwickler haben. MultiDatePick passt der Administrator an, der den Kalender braucht. Hier sind 36 alltägliche Kalenderaufgaben im direkten Vergleich, damit Sie den Sieger auf einen Blick sehen.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Veröffentlicht am 3. November 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">„Welcher LWC-Kalender lässt sich am besten anpassen?“ „Kann ich einen Salesforce-Kalender ohne Code anpassen?“ „Gibt es eine No-Code-Alternative zu FullCalendar?“ Hinter all diesen Suchen steckt dieselbe Frage, und die Antwort hängt an zwei Wörtern: anpassbar für wen?</p>
+
+                <p><strong>FullCalendar</strong> ist eine JavaScript-Bibliothek. Jede Option steckt im Code, also schreibt in Salesforce ein Entwickler die Lightning Web Component, das Apex zum Laden und Speichern der Datensätze, die Tests und das Deployment, und das bei jeder Änderung aufs Neue. <strong>MultiDatePick</strong> ist ein fertiger Salesforce-Kalender. Jede Option ist eine Einstellung, die ein Administrator im Einrichtungsassistenten oder im Lightning App Builder wählt, auf jedem Standard- oder benutzerdefinierten Objekt. <strong>Kein Apex, kein JavaScript, kein Deployment.</strong></p>
+
+                <div class="sc-note">
+                    <strong>Die kurze Antwort:</strong> Für einen No-Code-Kalender in Salesforce wählen Sie MultiDatePick. Alle 36 Aufgaben unten sind in MultiDatePick eine Einstellung und in FullCalendar Code: vom Platzieren des Kalenders auf einer Seite über das Verhindern von Doppelbuchungen bis zur Anzeige in neun Sprachen.</div>
+
+                <figure class="sc-shot">
+                    <img src="/images/de/wizard/salesforce-kalender-einrichtungsassistent-poster.png" data-gif="/images/de/wizard/salesforce-kalender-einrichtungsassistent.gif" alt="Animierter Durchlauf durch den MultiDatePick-Einrichtungsassistenten in Salesforce: Kontakt-Datensatzseite, Buchung eines Beraters, Advisor Appointment gewählt und Felder automatisch ausgefüllt, Berater und Zeiten, zum Schluss Prüfen" loading="lazy" width="1000" height="740" data-zoomable>
+                    <figcaption>Ein Salesforce-Buchungskalender, eingerichtet im Einrichtungsassistenten: Seite, Datensätze und Zeiten wählen. Kein Code, in keinem Schritt.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Anpassbar für wen?</h2>
+                <p>Anpassbar kann zweierlei heißen. Eine Bibliothek passen die Leute an, die Code dafür schreiben: Alles ist möglich, und alles wird zum Projekt. Eine konfigurierbare Komponente passen die Leute an, die sie nutzen: Jede Option ist schon gebaut, getestet und abgesichert, und Sie wählen die aus, die Sie brauchen.</p>
+                <p>In Salesforce entscheidet dieser Unterschied, wem Ihr Kalender gehört. Bei FullCalendar sind das ein Entwickler, eine Apex-Testsuite mit 75% Abdeckung und ein Deployment für jede Änderung. Bei MultiDatePick ist es der Administrator, der weiß, wie das Unternehmen seine Räume, Mitarbeiter und Termine bucht, und eine Änderung gilt, sobald er sie speichert.</p>
+
+                <h2 style="margin-top:44px;">36 Kalenderaufgaben im direkten Vergleich</h2>
+                <p>Jede Zeile ist eine Aufgabe, die auf dem Tisch eines Administrators landet. Die grüne Zelle gewinnt: per Einstellung erledigt, ohne Code. „Code“ heißt: Ein Entwickler schreibt es in der Lightning Web Component und im Apex für FullCalendar.</p>
+                <div class="bp-score">
+                    <div class="bp-score-tile is-win"><span class="bp-pill">Beste Wahl</span><span class="bp-score-name">MultiDatePick</span><span class="bp-score-n">36</span><span class="bp-score-l">von 36 Aufgaben per Einstellung</span></div>
+                    <div class="bp-score-tile"><span class="bp-score-name">FullCalendar LWC</span><span class="bp-score-n">0</span><span class="bp-score-l">von 36 Aufgaben ohne Code</span></div>
+                    <div class="bp-score-tile"><span class="bp-score-name">Apex, das Sie schreiben</span><span class="bp-score-n">0</span><span class="bp-score-l">Zeilen mit MultiDatePick</span></div>
+                </div>
+
+                <h3 class="nc-group">Den Kalender dort einsetzen, wo gearbeitet wird</h3>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Aufgabe</th><th class="bp-best" style="width:40%;">MultiDatePick<span class="bp-pill">Ohne Code</span></th><th style="width:32%;">FullCalendar LWC</th></tr></thead>
+                    <tbody>
+                    <tr><td>Einen Kalender auf einer Datensatzseite einfügen</td><td class="bp-win">Die Komponente im Lightning App Builder auf die Seite ziehen und ihren Config Name eintragen</td><td class="bp-lose">Code: eine Lightning Web Component, FullCalendar als statische Ressource, ein Deployment</td></tr>
+                    <tr><td>Einrichtung</td><td class="bp-win">Einrichtungsassistent: Er fragt nach der Seite und Ihren Datensätzen, füllt die naheliegenden Felder vor und zeigt eine Live-Vorschau</td><td class="bp-lose">Code: jede Option eine Eigenschaft in JavaScript</td></tr>
+                    <tr><td>Auf der Startseite oder einer App-Seite platzieren</td><td class="bp-win">Dieselbe Komponente; Show All Records mit einem Record Filter wie <code>OwnerId=ME</code></td><td class="bp-lose">Code: ein zweiter Datenweg für Seiten ohne Datensatz</td></tr>
+                    <tr><td>In einem Bildschirm-Flow (Screen Flow) nutzen</td><td class="bp-win">Auf einen Flow-Bildschirm ziehen; die gewählten Termine und Uhrzeiten stehen als Flow-Variablen bereit</td><td class="bp-lose">Code: eine Flow-Bildschirmkomponente mit eigenen Ausgaben</td></tr>
+                    <tr><td>Öffentlich auf einer Experience Cloud-Site anbieten</td><td class="bp-win">Dieselbe Komponente, mit dem Berechtigungssatz MultiDatePick - Guest für Gastbenutzer</td><td class="bp-lose">Code: Gastzugriff, Freigaben und Apex für nicht angemeldete Benutzer</td></tr>
+                    <tr><td>Die Einrichtung in eine andere Org übernehmen</td><td class="bp-win">Die Konfiguration als JSON exportieren und in der anderen Org importieren; Smart Field Mapping ordnet fehlende Felder zu</td><td class="bp-lose">Code: ein Deployment, samt Apex-Tests, die es bestehen muss</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <figure class="sc-shot">
+                    <img src="/images/de/wizard/salesforce-intelligente-feldzuordnung-automatisch-poster.png" data-gif="/images/de/wizard/salesforce-intelligente-feldzuordnung-automatisch.gif" alt="Animierte Demo der intelligenten Feldzuordnung im MultiDatePick-Einrichtungsassistenten für Salesforce: Eine eingefügte Konfiguration listet zehn fehlende Verweise, ein Objekt wird gewählt, und die Felder Startzeit, Endzeit und Status ordnen sich selbst zu" loading="lazy" width="1024" height="688" data-zoomable>
+                    <figcaption>Einen Kalender in eine andere Org umziehen: Konfiguration einfügen, ein Objekt wählen, und die Felder ordnen sich selbst zu.</figcaption>
+                </figure>
+
+                <h3 class="nc-group">Ihre eigenen Datensätze anzeigen</h3>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Aufgabe</th><th class="bp-best" style="width:40%;">MultiDatePick<span class="bp-pill">Ohne Code</span></th><th style="width:32%;">FullCalendar LWC</th></tr></thead>
+                    <tbody>
+                    <tr><td>Datensätze aus einem benutzerdefinierten Objekt anzeigen</td><td class="bp-win">Objekt und Datumsfeld wählen</td><td class="bp-lose">Code: eine Apex-Abfrage, die Felder auf Ereignisse abbildet</td></tr>
+                    <tr><td>Aufgaben, Ereignisse oder Opportunities anzeigen</td><td class="bp-win">Jedes Objekt mit einem Datums- oder Datum/Uhrzeit-Feld, Standard oder benutzerdefiniert</td><td class="bp-lose">Code: weiteres Apex für jedes Objekt</td></tr>
+                    <tr><td>Verknüpfte Datensätze anzeigen, etwa Aufgaben an den Kontakten eines Accounts</td><td class="bp-win">Rollup Field, bis zu fünf Lookups entfernt</td><td class="bp-lose">Code: Abfragen über Beziehungen hinweg</td></tr>
+                    <tr><td>Nur bestimmte Datensätze anzeigen</td><td class="bp-win">Record Filter, etwa <code>OwnerId=ME; Status__c=Confirmed</code></td><td class="bp-lose">Code: Filterlogik in Apex oder JavaScript</td></tr>
+                    <tr><td>Nach Status einfärben</td><td class="bp-win">Status Field und Status Colors, als Füllung, Balken oder beides, mit Filter-Pills</td><td class="bp-lose">Code: jedem Wert in JavaScript eine Farbe zuordnen</td></tr>
+                    <tr><td>Eine zweite Auswahlliste hinzufügen, etwa einen Besprechungstyp</td><td class="bp-win">Second Picklist Field, mit den Werten, die zur Wahl stehen</td><td class="bp-lose">Code: die Auswahl, das Speichern und die Anzeige</td></tr>
+                    <tr><td>Details beim Hover anzeigen</td><td class="bp-win">Hover Popover Fields, auch Lookups, ein Klick zum Datensatz</td><td class="bp-lose">Code: ein Render-Hook für Ereignisse und ein Tooltip</td></tr>
+                    <tr><td>Freigaben und Sicherheit auf Feldebene einhalten</td><td class="bp-win">Jede Abfrage und jedes Speichern läuft als der Benutzer, der die Seite ansieht</td><td class="bp-lose">Code: nur so sicher wie das Apex, das Sie schreiben</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <figure class="sc-shot">
+                    <img src="/images/de/views/salesforce-kalender-statusanzeige-stile.png" alt="Ein Buchungsmonat in Salesforce in den vier Statusanzeige-Stilen von MultiDatePick: Balken unter jedem Tag, Punkte, eine farbige Füllung, die diagonal geteilt ist, wenn ein Tag zwei Status hat, und ein Badge mit der Anzahl" loading="lazy" width="2000" height="2766" data-zoomable>
+                    <figcaption>Farben aus einer Auswahlliste, auf vier Arten angezeigt. Jeder Stil ist eine Einstellung, kein Block JavaScript.</figcaption>
+                </figure>
+
+                <h3 class="nc-group">Termine auswählen und Datensätze speichern</h3>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Aufgabe</th><th class="bp-best" style="width:40%;">MultiDatePick<span class="bp-pill">Ohne Code</span></th><th style="width:32%;">FullCalendar LWC</th></tr></thead>
+                    <tbody>
+                    <tr><td>Einzelne, verstreute Tage auswählen lassen</td><td class="bp-win">Integriert: beliebige Tage anklicken oder über einen Zeitraum ziehen</td><td class="bp-lose">Code: FullCalendar wählt immer nur einen zusammenhängenden Zeitraum</td></tr>
+                    <tr><td>Einen Zeitraum als einen Datensatz speichern</td><td class="bp-win">End Date Field: Aufeinanderfolgende Tage werden zu einem Datensatz mit Start und Ende</td><td class="bp-lose">Code: das Gruppieren und das Speichern</td></tr>
+                    <tr><td>Ein Wiederholungsmuster hinzufügen, etwa jeden Montag und Mittwoch</td><td class="bp-win">Show Recurring Pattern Button: Wochentage, Wochenenden, benutzerdefinierte Tage oder der 2. und 4. Freitag</td><td class="bp-lose">Code: ein Formular für das Muster und die Datumsberechnung</td></tr>
+                    <tr><td>Zeitfenster auswählen</td><td class="bp-win">Time Interval (Minutes), Earliest Time und Latest Time</td><td class="bp-lose">Code: eine Zeitfenster-Auswahl und ihr Speichern</td></tr>
+                    <tr><td>Pro Auswahl einen Datensatz speichern</td><td class="bp-win">Integriert, mit Default Record Name und Default Field Values</td><td class="bp-lose">Code: Apex-Inserts, Fehlerbehandlung und Tests</td></tr>
+                    <tr><td>Begrenzen, wie viele Termine jemand wählt</td><td class="bp-win">Max Dates Allowed, mit eigener Limit Reached Message</td><td class="bp-lose">Code: in JavaScript zählen und sperren</td></tr>
+                    <tr><td>Buchungen an Outlook oder Google Kalender senden</td><td class="bp-win">Show Add to Calendar After Saving</td><td class="bp-lose">Code: die Kalenderdatei selbst erzeugen</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <figure class="sc-shot" style="max-width:560px;margin:20px auto;">
+                    <img src="/images/de/marketing/salesforce-serientermine-2-und-4-freitag-poster.png" data-gif="/images/de/marketing/salesforce-serientermine-2-und-4-freitag.gif" alt="Animierte Demo eines Wiederholungsmusters in der MultiDatePick-Datumsauswahl für Salesforce: Wiederholungsmuster hinzufügen, Benutzerdefinierte Tage, Freitag, das 2. und 4. Vorkommen, ein Enddatum in drei Monaten, eine Vorschau mit sechs Freitagen, dann füllt Daten hinzufügen sie in einem Zwei-Monats-Kalender ein" loading="lazy" width="700" height="900" data-zoomable>
+                    <figcaption>Der 2. und 4. Freitag für drei Monate, in Sekunden gewählt. Eine Schaltfläche in MultiDatePick.</figcaption>
+                </figure>
+
+                <h3 class="nc-group">Buchungsregeln</h3>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Aufgabe</th><th class="bp-best" style="width:40%;">MultiDatePick<span class="bp-pill">Ohne Code</span></th><th style="width:32%;">FullCalendar LWC</th></tr></thead>
+                    <tbody>
+                    <tr><td>Räume, Geräte oder Personen mit Kapazität buchen</td><td class="bp-win">Komponente Booking: Resource Object, Capacity Field und Live-Kapazitätsanzeigen</td><td class="bp-lose">Code: Ressourcenansichten brauchen eine Premium-Lizenz, Kapazität bauen Sie selbst</td></tr>
+                    <tr><td>Doppelbuchungen verhindern</td><td class="bp-win">Conflict Behavior: blockieren, überspringen oder zulassen</td><td class="bp-lose">Code: Überschneidungsregeln in JavaScript und eine Prüfung auf dem Server</td></tr>
+                    <tr><td>Vorlauf verlangen und begrenzen, wie weit im Voraus gebucht wird</td><td class="bp-win">Minimum Notice (Hours) und Book Up To (Days Ahead)</td><td class="bp-lose">Code: Datumsgrenzen, die Sie berechnen und durchsetzen</td></tr>
+                    <tr><td>Einen Puffer zwischen Buchungen lassen</td><td class="bp-win">Buffer Between Bookings (Minutes)</td><td class="bp-lose">Code: die Pufferberechnung</td></tr>
+                    <tr><td>Eigene Geschäftszeiten pro Ressource nutzen</td><td class="bp-win">Business Hours Start Field und End Field am Ressourcendatensatz</td><td class="bp-lose">Code: Zeiten pro Ressource, die Sie laden und anwenden</td></tr>
+                    <tr><td>Feiertage, Schließtage und Abwesenheiten sperren</td><td class="bp-win">Blocked Dates aus jedem Objekt, ganztägig oder für einen Teil des Tages, mit angezeigtem Grund</td><td class="bp-lose">Code: Hintergrundereignisse, die Sie abfragen und zeichnen</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <figure class="sc-shot">
+                    <img src="/images/de/marketing/salesforce-kalender-kapazitaet-zeitfenster.png" alt="Salesforce-Buchungskalender mit Kapazitätsanzeigen und Konflikterkennung, die an jedem Zeitfenster Doppelbuchungen verhindert" loading="lazy" width="1362" height="2528" data-zoomable>
+                    <figcaption>Kapazität an jedem Zeitfenster, Konflikte schon vor dem Speichern erkannt. Zwei Einstellungen, kein Code.</figcaption>
+                </figure>
+
+                <h3 class="nc-group">Ansichten und Aussehen</h3>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Aufgabe</th><th class="bp-best" style="width:40%;">MultiDatePick<span class="bp-pill">Ohne Code</span></th><th style="width:32%;">FullCalendar LWC</th></tr></thead>
+                    <tbody>
+                    <tr><td>Mehr als ein Monatsraster bieten</td><td class="bp-win">Available Views: Kalender, Zeitachse, Woche, Auslastungs-Heatmap und Agenda, pro Seite wählbar</td><td class="bp-lose">Code: Zeitachsenansichten brauchen eine Premium-Lizenz; eine Auslastungs-Heatmap gibt es nicht</td></tr>
+                    <tr><td>Eine Zeitachse nach einem Feld gruppieren, etwa nach Team oder Region</td><td class="bp-win">Timeline Group By Field</td><td class="bp-lose">Code, zusätzlich zur Premium-Zeitachse</td></tr>
+                    <tr><td>Viele Datensätze auf einmal ändern</td><td class="bp-win">Enable Edit Mode: mehrere Datensätze gemeinsam verschieben, ihren Status ändern oder löschen</td><td class="bp-lose">Code: Drag-Handler und Apex-Updates</td></tr>
+                    <tr><td>Schaltflächen und Titel umbenennen</td><td class="bp-win">Button Label, Calendar Title und Save Button Label</td><td class="bp-lose">Code: Symbolleisten-Optionen in JavaScript</td></tr>
+                    <tr><td>An die Seite anpassen</td><td class="bp-win">Calendar Size von winzig bis volle Breite, Two-Month View, Week Starts on Monday</td><td class="bp-lose">Code: Optionen und CSS</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <figure class="sc-shot">
+                    <img src="/images/de/marketing/salesforce-kalender-fuenf-ansichten.png" alt="MultiDatePick mit Salesforce-Buchungen in allen fünf Ansichten: Ressourcen-Zeitachse, Monatskalender, Auslastungs-Heatmap, Wochenraster und Agenda-Liste" loading="lazy" width="2000" height="1160" data-zoomable>
+                    <figcaption>Dieselben Datensätze in fünf Ansichten, gewählt mit einer Einstellung. Bei FullCalendar braucht die Zeitachse eine Premium-Lizenz, und eine Auslastungsansicht gibt es gar nicht.</figcaption>
+                </figure>
+
+                <h3 class="nc-group">Benutzer, Sprachen und Wartung</h3>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Aufgabe</th><th class="bp-best" style="width:40%;">MultiDatePick<span class="bp-pill">Ohne Code</span></th><th style="width:32%;">FullCalendar LWC</th></tr></thead>
+                    <tbody>
+                    <tr><td>In der Sprache jedes Benutzers anzeigen</td><td class="bp-win">Neun Sprachen integriert: Englisch, Deutsch, Spanisch, Französisch, Italienisch, Portugiesisch, Japanisch, Chinesisch und Hindi</td><td class="bp-lose">Code: FullCalendar übersetzt seine eigenen Schaltflächen; Ihre Beschriftungen und Meldungen übersetzen Sie selbst</td></tr>
+                    <tr><td>Uhrzeiten in der Zeitzone jedes Benutzers anzeigen</td><td class="bp-win">Automatisch, aus den Salesforce-Einstellungen jedes Benutzers</td><td class="bp-lose">Code: Zeitzonen-Optionen und Umrechnungen</td></tr>
+                    <tr><td>Barrierefreiheitsvorgaben erfüllen</td><td class="bp-win">Unterstützung für Tastatur und Screenreader, mit veröffentlichtem VPAT für WCAG 2.1 AA</td><td class="bp-lose">Code: eigene Tests und eigene Dokumentation</td></tr>
+                    <tr><td>Mit Salesforce-Releases Schritt halten</td><td class="bp-win">Updates kommen mit dem Paket</td><td class="bp-lose">Code: Sie pflegen ihn selbst, Release für Release</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">So sieht No-Code-Anpassung aus</h2>
+                <p>Jede dieser 36 Aufgaben ist eine Entscheidung, die ein Administrator an einer dieser Stellen trifft:</p>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>Der Einrichtungsassistent</h3><p>Eine Lightning-Registerkarte, die nach Ihrer Seite und Ihren Datensätzen fragt, die naheliegenden Felder vorausfüllt und den echten Kalender zeigt, bevor Sie speichern.</p></div>
+                    <div class="tl-feat"><h3>Lightning App Builder</h3><p>Jede Einstellung ist auch eine Eigenschaft der Komponente, sodass Sie eine Seite anpassen können, ohne die anderen anzufassen.</p></div>
+                    <div class="tl-feat"><h3>Die Config Library</h3><p>41 fertige Konfigurationen, von Besprechungsräumen bis zu Abwesenheiten, zum Importieren und Anpassen.</p></div>
+                    <div class="tl-feat"><h3>Export und Import</h3><p>Eine Konfiguration ist JSON, das Sie in eine Sandbox oder eine andere Org mitnehmen; fehlende Felder werden für Sie zugeordnet.</p></div>
+                    <div class="tl-feat"><h3>Flow Builder</h3><p>Den Kalender auf einen Flow-Bildschirm ziehen und die gewählten Termine in den nächsten Schritten nutzen.</p></div>
+                    <div class="tl-feat"><h3>Experience Builder</h3><p>Denselben Kalender auf eine öffentliche Website stellen, mit denselben Regeln für Gäste.</p></div>
+                </div>
+
+                <figure class="sc-shot">
+                    <img src="/images/de/views/salesforce-auslastung-heatmap-demo-poster.png" data-gif="/images/de/views/salesforce-auslastung-heatmap-demo.gif" alt="Animierte Demo der MultiDatePick-Auslastungs-Heatmap in Salesforce: Berater untereinander mit gebuchter Kapazität pro Tag, Hover über einen vollen Tag, dann Klick öffnet die Woche dieses Beraters" loading="lazy" width="880" height="780" data-zoomable>
+                    <figcaption>Eine Auslastungs-Heatmap, die zeigt, wer wie stark gebucht ist, eingeschaltet mit einer Einstellung. In FullCalendar gibt es keine solche Ansicht.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Wann Code trotzdem sinnvoll ist</h2>
+                <p>Wenn Sie ein eigenes Kalenderprodukt bauen, einen Ansichtstyp brauchen, den kein Kalender bietet, oder Termine zeigen, die außerhalb von Salesforce liegen, sind eine Bibliothek und ein Entwicklerteam das richtige Werkzeug. Für einen Kalender auf Ihren Salesforce-Datensätzen heißt Code wählen, erst einmal MultiDatePick selbst nachzubauen: das Apex, das Speichern, die Kapazitäts- und Konfliktprüfung, die Sicherheit, die Tests und die Übersetzungen, bevor irgendjemand etwas bucht.</p>
+
+                <div class="sc-note">
+                    <strong>Lieber Funktionen statt Aufgaben vergleichen?</strong> Die Checkliste Funktion für Funktion steht im Beitrag <a href="/de/blog/fullcalendar-salesforce-lwc-kalender-vergleich.html">FullCalendar in Salesforce vs. MultiDatePick</a>, jede einzelne Einstellung im Beitrag <a href="/de/blog/anpassbarer-salesforce-kalender.html">Die am besten anpassbare Kalender-App für Salesforce</a>.</div>
+
+                <h2 style="margin-top:44px;">Häufige Fragen</h2>
+                <div class="tl-faq">
+                    <details><summary>Gibt es einen No-Code-Kalender als LWC für Salesforce?</summary><p>Ja. MultiDatePick ist ein Kalender als Lightning Web Component, den Sie per Klick einrichten: im Einrichtungsassistenten oder im Lightning App Builder, auf jedem Standard- oder benutzerdefinierten Objekt. Er lädt und speichert Ihre Datensätze selbst, Sie schreiben also weder Apex noch JavaScript.</p></details>
+                    <details><summary>Lässt sich FullCalendar besser anpassen als MultiDatePick?</summary><p>Nur für Entwickler. FullCalendar ist eine Bibliothek: Alles ist möglich, wenn jemand den Code schreibt und pflegt. Für Administratoren ist MultiDatePick der besser anpassbare Kalender: 36 gängige Aufgaben, von Buchungsregeln bis zu neun Sprachen, sind jeweils eine Einstellung.</p></details>
+                    <details><summary>Kann ein Salesforce-Administrator MultiDatePick ohne Entwickler einrichten?</summary><p>Ja. Der Einrichtungsassistent fragt nach der Seite und Ihren Datensätzen, füllt die naheliegenden Felder vor und zeigt eine Live-Vorschau des echten Kalenders. Danach ziehen Sie die Komponente auf die Seite und tragen ihren Config Name ein.</p></details>
+                    <details><summary>Brauche ich Apex, um Datensätze aus einem Kalender zu speichern?</summary><p>Mit MultiDatePick nicht. Beim Speichern schreibt MultiDatePick einen Datensatz pro Tag, pro Zeitraum, pro Zeitblock oder pro Ressource, oder gibt die Termine an einen Bildschirm-Flow (Screen Flow) weiter. Jedes Speichern läuft als der Benutzer, der die Seite ansieht, mit Freigaben und Sicherheit auf Feldebene.</p></details>
+                    <details><summary>Kann ich den Kalender später ohne Deployment ändern?</summary><p>Ja. Öffnen Sie die Konfiguration im Einrichtungsassistenten, ändern Sie eine Einstellung und speichern Sie; der Kalender übernimmt sie beim nächsten Laden. Konfigurationen sind Benutzerdefinierte Metadaten (Custom Metadata), Sie können sie also weiterhin mit Änderungssets oder der Salesforce CLI verschieben, wenn Sie möchten.</p></details>
+                    <details><summary>Funktioniert ein No-Code-Kalender in Bildschirm-Flows und auf Experience Cloud-Sites?</summary><p>Ja. Dieselbe Komponente kommt auf einen Flow-Bildschirm, wo die gewählten Termine zu Flow-Variablen werden, und auf eine öffentliche Experience Cloud-Site, wo Gäste nach denselben Regeln buchen.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Der anpassbare Kalender, ohne Code.</h2>
+                    <p>Klicken Sie sich durch die Live-Demo, oder starten Sie mit einer fertigen Konfiguration aus der <a href="/de/salesforce-kalender-konfigurationen.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/de/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=no-code-salesforce-calendar" class="btn btn-demo" target="_blank" rel="noopener">Live-Demo testen</a> <a href="/de/zum-start-benachrichtigen.html" class="btn btn-primary">Zum Start benachrichtigen</a> <a href="/de/erste-schritte.html" class="btn btn-secondary">Erste Schritte</a>
+                    </div>
+                    <ul class="check-list"><li>$20/Benutzer/Monat, alle Funktionen</li><li>30 Tage kostenlos, ohne Kreditkarte</li><li>100 % nativ in Salesforce</li><li>Ohne Apex</li><li>Demnächst auf der Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Weiterführende Artikel</h3>
+                    <ul>
+                        <li><a href="/de/blog/fullcalendar-salesforce-lwc-kalender-vergleich.html">FullCalendar in Salesforce vs. MultiDatePick</a></li>
+                        <li><a href="/de/blog/anpassbarer-salesforce-kalender.html">Die am besten anpassbare Kalender-App für Salesforce</a></li>
+                        <li><a href="/de/blog/salesforce-kalender-ohne-code-konfigurieren.html">Salesforce-Kalender ohne Code konfigurieren</a></li>
+                        <li><a href="/de/blog/salesforce-kalenderansichten.html">Fünf Kalenderansichten in einer Salesforce-Komponente</a></li>
+                        <li><a href="/de/salesforce-kalender-konfigurationen.html">Config Library: importfertige Kalenderkonfigurationen</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/de/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick-Logo: Salesforce-Kalender für mehrere Termine und Ressourcenbuchung" width="180" height="45">
+                    </a>
+                    <p>Die am umfassendsten anpassbare Kalenderkomponenten-Suite für Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produkt</h4>
+                    <ul>
+                        <li><a href="/de/salesforce-mehrfach-datumsauswahl.html">Date</a></li>
+                        <li><a href="/de/salesforce-datum-zeitfenster-auswahl.html">Date Time</a></li>
+                        <li><a href="/de/salesforce-buchungskalender.html">Booking</a></li>
+                        <li><a href="/de/blog/salesforce-kalenderansichten.html">Fünf Kalenderansichten</a></li>
+                        <li><a href="/de/salesforce-kalender-konfigurationen.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Lösungen</h4>
+                    <ul>
+                        <li><a href="/de/salesforce-kalender.html">Salesforce-Kalender</a></li>
+                        <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Personaldienstleistung &amp; Recruiting</a></li>
+                        <li><a href="/de/salesforce-interviewplanung.html">Interviewplanung</a></li>
+                        <li><a href="/de/salesforce-besprechungsraum-buchung.html">Besprechungsraum-Buchung</a></li>
+                        <li><a href="/de/salesforce-experience-cloud-buchungskalender.html">Buchung in Experience Cloud</a></li>
+                        <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Kampagnentermine</a></li>
+                        <li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html">Behörden / Section 508</a></li>
+                        <li><a href="/de/salesforce-lightning-scheduler-alternative.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Doku</h4>
+                    <ul>
+                        <li><a href="/de/erste-schritte.html">Erste Schritte</a></li>
+                        <li><a href="/de/benutzerhandbuch.html">Benutzerhandbuch</a></li>
+                        <li><a href="/de/salesforce-kalender-entwickler-leitfaden.html">Entwicklerhandbuch</a></li>
+                        <li><a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a></li>
+                        <li><a href="/de/app-start-experience-seiten.html">App-, Start- &amp; Experience-Seiten</a></li>
+                        <li><a href="/de/flow-mit-vs-code-bereitstellen.html">Flow bereitstellen (VS Code)</a></li>
+                        <li><a href="/de/fehlerbehebung.html">Fehlerbehebung</a></li>
+                        <li><a href="/de/haeufige-fragen.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Unternehmen</h4>
+                    <ul>
+                        <li><a href="/de/preise.html">Preise</a></li>
+                        <li><a href="/de/blog/">Blog</a></li>
+                        <li><a href="/de/vertrauen-sicherheit.html">Vertrauen &amp; Sicherheit</a></li>
+                        <li><a href="/de/barrierefreiheit-vpat.html">Barrierefreiheit</a></li>
+                        <li><a href="/de/zum-start-benachrichtigen.html">Zum Start benachrichtigen</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Alle Rechte vorbehalten.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Sprache" translate="no"><ul><li><a href="/blog/no-code-salesforce-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/no-code-salesforce-kalender.html" hreflang="de" lang="de" aria-current="page">Deutsch</a></li><li><a href="/es/blog/calendario-salesforce-sin-codigo.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/calendrier-salesforce-no-code.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/calendario-salesforce-no-code.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/calendario-salesforce-sem-codigo.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/no-code-salesforce-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/no-code-salesforce-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/no-code-salesforce-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Bild vergrößern</p><p data-k="expand-diagram">Diagramm vergrößern</p><p data-k="close">Schließen</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>
