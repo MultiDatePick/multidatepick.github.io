@@ -10,9 +10,9 @@ MultiDatePick is a Salesforce calendar for many dates, times and bookings. Stand
 
 | Component | What it does | Guide |
 | --- | --- | --- |
-| **Date** | Many dates, ranges and recurring patterns, with status colors | [Salesforce multi-date picker](https://multidatepick.com/multidatepickdates.html) |
-| **Date Time** | Dates plus a time slot grid and conflict checks | [Salesforce date and time slot picker](https://multidatepick.com/multidatepickdatetime.html) |
-| **Booking** | Rooms, equipment or people, with availability and capacity | [Salesforce booking calendar](https://multidatepick.com/salesforce-booking-calendar.html) |
+| **Dates** | Many dates, ranges and recurring patterns, with status colors | [Salesforce multi-date picker](https://multidatepick.com/multidatepickdates.html) |
+| **Dates & Times** | Dates plus a time slot grid and conflict checks | [Salesforce date and time slot picker](https://multidatepick.com/multidatepickdatetime.html) |
+| **Resource Booking** | Rooms, equipment or people, with availability and capacity | [Salesforce booking calendar](https://multidatepick.com/salesforce-booking-calendar.html) |
 
 ## Five views of the same records
 
