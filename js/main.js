@@ -29,10 +29,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggle = document.querySelector('.nav-toggle');
     const nav = document.querySelector('.site-header nav');
     if (toggle && nav) {
+        // The open menu scrolls inside the space left below the header (style.css). The header's
+        // bottom edge moves while the announcement banner scrolls away, so it is measured, not assumed.
+        const header = nav.closest('.site-header');
+        const fitMenu = () => {
+            if (header && nav.classList.contains('open')) {
+                nav.style.setProperty('--nav-top', Math.max(0, Math.round(header.getBoundingClientRect().bottom)) + 'px');
+            }
+        };
         toggle.addEventListener('click', () => {
             nav.classList.toggle('open');
             toggle.classList.toggle('active');
+            fitMenu();
         });
+        window.addEventListener('scroll', fitMenu, { passive: true });
+        window.addEventListener('resize', fitMenu);
         nav.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 nav.classList.remove('open');

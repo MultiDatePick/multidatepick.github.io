@@ -544,10 +544,20 @@ a.card-link-wrapper .card { transition: transform var(--transition), box-shadow 
     .usecases-grid { grid-template-columns: repeat(2, 1fr); }
     .nav-toggle { display: block; }
     .site-header nav { display: none; }
+    /* The open menu is 22 links tall, more than a phone or tablet screen, and it sits in the sticky
+       header, so it scrolls on its own: it fills the screen below the header and no further.
+       --nav-top is the header's bottom edge on screen, set by main.js when the menu opens (it
+       includes the announcement banner while that is still in view); 65px is the header's own
+       height (64px bar + 1px border) for the moment before the script runs. */
     .site-header nav.open {
-        display: block; position: absolute; top: 64px; left: 0; right: 0;
+        display: block; position: absolute; top: 100%; left: 0; right: 0;
         background: var(--white); border-bottom: 1px solid var(--gray-100);
         box-shadow: var(--shadow-lg); z-index: 99;
+        max-height: calc(100vh - var(--nav-top, 65px));
+        overflow-y: auto; overscroll-behavior: contain;
+    }
+    @supports (height: 100dvh) {
+        .site-header nav.open { max-height: calc(100dvh - var(--nav-top, 65px)); }
     }
     .site-header nav.open .nav-links {
         flex-direction: column; padding: 16px 24px; gap: 12px; align-items: stretch;
@@ -574,6 +584,14 @@ a.card-link-wrapper .card { transition: transform var(--transition), box-shadow 
     .footer-inner { grid-template-columns: 1fr; gap: 24px; }
     .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
     .property-table { display: block; overflow-x: auto; }
+}
+
+/* Comparison tables (.bp-grid, styled on each post) on a phone: one long German word in a cell set
+   the table's minimum width and the page scrolled sideways. A cell may now break a word that cannot
+   fit, hyphenated on translated pages where the browser knows the language. */
+@media (max-width: 640px) {
+    .bp-grid th, .bp-grid td { overflow-wrap: anywhere; }
+    html:not([lang="en"]) .bp-grid th, html:not([lang="en"]) .bp-grid td { hyphens: auto; }
 }
 
 @media (max-width: 480px) {
@@ -789,7 +807,8 @@ a.card-link-wrapper .card { transition: transform var(--transition), box-shadow 
 .config-btn-group {
     display: flex; gap: 8px; align-self: flex-start; margin-top: auto; flex-wrap: wrap;
 }
-.config-btn-group .btn { flex: 1; min-width: 0; white-space: nowrap; }
+/* The label may wrap: "Für den Einrichtungsassistenten kopieren" is wider than a phone-width card. */
+.config-btn-group .btn { flex: 1; min-width: 0; white-space: normal; }
 .btn-outline {
     background: transparent; color: var(--blue-700); border: 2px solid var(--blue-500);
 }

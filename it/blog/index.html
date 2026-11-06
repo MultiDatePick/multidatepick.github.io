@@ -503,7 +503,7 @@
             <div class="container bl-layout">
                 <nav class="bl-side" aria-label="Argomenti del blog">
                     <p class="bl-side-title">Argomenti</p>
-                    <button type="button" class="bl-filter is-active" data-topic="all" data-intro="Tutte le guide, dalla più recente." aria-pressed="true"><span>Tutti gli articoli</span><span class="bl-count">19</span></button> <button type="button" class="bl-filter" data-topic="calendar-views" data-intro="Cinque modi di vedere gli stessi record Salesforce, e quando usare ciascuno." aria-pressed="false"><span>Viste calendario</span><span class="bl-count">3</span></button> <button type="button" class="bl-filter" data-topic="scheduling-booking" data-intro="Fasce orarie, conflitti, capacità e date ricorrenti sui tuoi oggetti." aria-pressed="false"><span>Pianificazione e prenotazioni</span><span class="bl-count">4</span></button> <button type="button" class="bl-filter" data-topic="setup-flow" data-intro="Dalla configurazione guidata a un flusso su schermo, senza scrivere codice." aria-pressed="false"><span>Configurazione e flussi</span><span class="bl-count">5</span></button> <button type="button" class="bl-filter" data-topic="use-cases" data-intro="Cosa mettono i team su un calendario Salesforce a più date." aria-pressed="false"><span>Casi d'uso</span><span class="bl-count">5</span></button> <button type="button" class="bl-filter" data-topic="accessibility-government" data-intro="WCAG 2.1 AA, Section 508 e il VPAT dietro il calendario." aria-pressed="false"><span>Accessibilità e pubblica amministrazione</span><span class="bl-count">2</span></button>
+                    <button type="button" class="bl-filter is-active" data-topic="all" data-intro="Tutte le guide, dalla più recente." aria-pressed="true"><span>Tutti gli articoli</span><span class="bl-count" translate="no">20</span></button> <button type="button" class="bl-filter" data-topic="calendar-views" data-intro="Cinque modi di vedere gli stessi record Salesforce, e quando usare ciascuno." aria-pressed="false"><span>Viste calendario</span><span class="bl-count" translate="no">3</span></button> <button type="button" class="bl-filter" data-topic="scheduling-booking" data-intro="Fasce orarie, conflitti, capacità e date ricorrenti sui tuoi oggetti." aria-pressed="false"><span>Pianificazione e prenotazioni</span><span class="bl-count" translate="no">4</span></button> <button type="button" class="bl-filter" data-topic="setup-flow" data-intro="Dalla configurazione guidata a un flusso su schermo, senza scrivere codice." aria-pressed="false"><span>Configurazione e flussi</span><span class="bl-count" translate="no">6</span></button> <button type="button" class="bl-filter" data-topic="use-cases" data-intro="Cosa mettono i team su un calendario Salesforce a più date." aria-pressed="false"><span>Casi d'uso</span><span class="bl-count" translate="no">5</span></button> <button type="button" class="bl-filter" data-topic="accessibility-government" data-intro="WCAG 2.1 AA, Section 508 e il VPAT dietro il calendario." aria-pressed="false"><span>Accessibilità e pubblica amministrazione</span><span class="bl-count" translate="no">2</span></button>
                 </nav>
                 <div class="bl-main">
                     <span class="bl-anchor" id="calendar-views"></span>
@@ -714,6 +714,17 @@
         var posts = document.querySelectorAll('#bl-posts .sc-post');
         var heading = document.getElementById('bl-heading');
         var intro = document.getElementById('bl-intro');
+        function inTopic(p, id) {
+            return id === 'all' || (' ' + p.getAttribute('data-topics') + ' ').indexOf(' ' + id + ' ') >= 0;
+        }
+        // Each count comes from the posts on the page, so adding or retagging a post keeps it right.
+        buttons.forEach(function (b) {
+            var c = b.querySelector('.bl-count');
+            if (!c) return;
+            var n = 0;
+            posts.forEach(function (p) { if (inTopic(p, b.getAttribute('data-topic'))) n++; });
+            c.textContent = n;
+        });
         function pick(id, updateUrl) {
             var chosen = null;
             buttons.forEach(function (b) {
@@ -724,7 +735,7 @@
             });
             if (!chosen) return;
             posts.forEach(function (p) {
-                p.hidden = id !== 'all' && (' ' + p.getAttribute('data-topics') + ' ').indexOf(' ' + id + ' ') < 0;
+                p.hidden = !inTopic(p, id);
             });
             heading.textContent = chosen.querySelector('span').textContent;
             intro.textContent = chosen.getAttribute('data-intro');

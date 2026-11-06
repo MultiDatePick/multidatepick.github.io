@@ -141,11 +141,11 @@
                 <input type="hidden" name="Campaign_ID" value="701am00002Cx2sPAAR">
                 <input type="hidden" name="member_status" value="Submitted">
                 <div class="lead-row">
-                    <div class="lead-field"><label for="first_name">First name</label><input id="first_name" name="first_name" maxlength="40" type="text" required></div>
-                    <div class="lead-field"><label for="last_name">Last name</label><input id="last_name" name="last_name" maxlength="80" type="text" required></div>
+                    <div class="lead-field"><label for="first_name">First name</label><input id="first_name" name="first_name" maxlength="40" type="text" autocomplete="given-name" required></div>
+                    <div class="lead-field"><label for="last_name">Last name</label><input id="last_name" name="last_name" maxlength="80" type="text" autocomplete="family-name" required></div>
                 </div>
-                <div class="lead-field"><label for="email">Work email</label><input id="email" name="email" maxlength="80" type="email" required></div>
-                <div class="lead-field"><label for="company">Company</label><input id="company" name="company" maxlength="40" type="text" required></div>
+                <div class="lead-field"><label for="email">Work email</label><input id="email" name="email" maxlength="80" type="email" autocomplete="email" required></div>
+                <div class="lead-field"><label for="company">Company</label><input id="company" name="company" maxlength="40" type="text" autocomplete="organization" required></div>
                 <!-- Attribution fields: auto-filled from first-touch, never shown to the visitor -->
                 <input type="hidden" id="00Nam000019R2bD" name="00Nam000019R2bD" value=""><!-- UTM Source -->
                 <input type="hidden" id="00Nam000019R2bC" name="00Nam000019R2bC" value=""><!-- UTM Medium -->
@@ -286,6 +286,12 @@
         Object.keys(map).forEach(function(id){ var el = document.getElementById(id); if(el) el.value = map[id]; });
         form.addEventListener('submit', function(e){
             if (document.getElementById('mdp_hp_field').value) { e.preventDefault(); return; }
+            // A name of only spaces passes "required", so trim the visible fields first and then let
+            // the browser's own check (in the visitor's language) stop the submit if one is now empty.
+            form.querySelectorAll('input[type="text"], input[type="email"]').forEach(function(el){
+                if (el.id !== 'mdp_hp_field') el.value = el.value.trim();
+            });
+            if (!form.checkValidity()) { e.preventDefault(); form.reportValidity(); return; }
             try { gtag('event', 'contact_submit', { form: 'get-started' }); } catch(_){}
         });
     })();

@@ -227,7 +227,9 @@
         .empty-section-msg { display:none; padding:40px 20px; text-align:center; color:var(--gray-500); font-size:.9rem; font-style:italic; }
         .config-grid:not(:has(.config-card:not(.shape-hidden))) + .empty-section-msg { display:block; }
         .config-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; }
-        @media(max-width:768px) { .config-grid { grid-template-columns:1fr; } }
+        /* minmax(0,1fr) and the word breaks: one long German or Portuguese word set every card's
+           minimum width, wider than a phone, so the page scrolled sideways. */
+        @media(max-width:768px) { .config-grid { grid-template-columns:minmax(0,1fr); } .config-card { min-width:0; overflow-wrap:anywhere; } html:not([lang="en"]) .config-card { hyphens:auto; } }
         /* ── Object Mapping Diagrams ── */
         .diagram-section { margin-bottom:40px; }
         .diagram-label { text-align:center; margin-bottom:6px; font-size:1.1rem; font-weight:700; color:var(--blue-900); }
@@ -241,9 +243,12 @@
         .obj-box { border-radius:10px; overflow:hidden; }
         .obj-header { padding:12px 16px; font-weight:700; font-size:.85rem; letter-spacing:.3px; }
         .obj-body { padding:16px; }
-        .obj-field { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:6px; margin-bottom:4px; font-size:.78rem; font-family:'Fira Code','Cascadia Code','Consolas',monospace; }
+        /* flex-wrap: a label that does not fit beside its field name drops to the next line instead of
+           running out of the box (the German "Lookup auf übergeordneten Datensatz" did at 768px). */
+        .obj-field { display:flex; flex-wrap:wrap; align-items:center; gap:2px 8px; padding:7px 10px; border-radius:6px; margin-bottom:4px; font-size:.78rem; font-family:'Fira Code','Cascadia Code','Consolas',monospace; }
+        .obj-field .prop-name { min-width:0; overflow-wrap:anywhere; }
         .obj-field .field-label { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:.72rem; color:#64748B; margin-left:auto; white-space:nowrap; text-align:right; }
-        @media(max-width:900px) { .obj-field .field-label { white-space:normal; } }
+        @media(max-width:900px) { .obj-field .field-label { white-space:normal; min-width:0; overflow-wrap:anywhere; } html:not([lang="en"]) .obj-field .field-label { hyphens:auto; } }
         .obj-orange { border:2px solid #FB923C; }
         .obj-orange .obj-header { background:linear-gradient(135deg,#F97316,#EA580C); color:white; }
         .obj-orange .obj-body { background:#FFF7ED; }
@@ -425,7 +430,7 @@
                     <h3 style="color:#9A3412;font-size:1.15rem;margin-bottom:10px;">कॉन्फ़िगरेशन आयात कैसे होता है</h3>
                     <p style="color:#7C2D12;font-size:.95rem;line-height:1.6;margin-bottom:12px;">ये नमूना कॉन्फ़िगरेशन MultiDatePick के साथ आने वाले डेमो ऑब्जेक्ट (<code style="background:#FED7AA;padding:1px 5px;border-radius:3px;">Schedule__c</code>, <code style="background:#FED7AA;padding:1px 5px;border-radius:3px;">Event__c</code>, <code style="background:#FED7AA;padding:1px 5px;border-radius:3px;">Resource__c</code>) पर बने हैं। आपका org लगभग हमेशा अपने ऑब्जेक्ट और फ़ील्ड नाम इस्तेमाल करेगा। यह अपेक्षित है और पूरी तरह सपोर्टेड है।</p>
                     <ol style="color:#7C2D12;font-size:.95rem;line-height:1.7;padding-left:22px;margin-bottom:12px;">
-                        <li>नीचे किसी भी कार्ड पर <strong>Copy for Setup Wizard</strong>।</li>
+                        <li>नीचे किसी भी कार्ड पर <strong>सेटअप विज़ार्ड के लिए कॉपी करें</strong>।</li>
                         <li>Setup Wizard के <strong>आयात</strong> टैब में <strong>पेस्ट करें</strong> (App Launcher, MultiDatePick Setup Wizard, आयात)।</li>
                         <li><strong>फ़ील्ड मैप करें:</strong> Wizard का <strong>Smart Field Mapping</strong> पैनल JSON में बताए हर ऑब्जेक्ट और फ़ील्ड की सूची देता है, हर एक के साथ आपके org के ऑब्जेक्ट और फ़ील्ड का ड्रॉपडाउन। जो आपके org में हैं उन पर ठीक है लिखा होता है; हर अनुपस्थित के लिए विकल्प चुनें, जो चाहें बदलें और <strong>लागू करें और डिप्लॉय</strong> पर क्लिक करें।</li>
                         <li><strong>उसका Config Name इस्तेमाल करें:</strong> कंपोनेंट को किसी Lightning पेज, Experience साइट या Flow स्क्रीन पर रखें और Config Name टाइप करें।</li>
@@ -568,7 +573,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="cv-meta">Timeline Window 21 दिन</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 2 -->
@@ -595,7 +600,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="cv-meta">Timeline Window 21 दिन</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 3 -->
@@ -621,7 +626,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 4 -->
@@ -647,7 +652,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="cv-meta">Timeline Window 14 दिन</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 5 -->
@@ -676,7 +681,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 6 -->
@@ -699,7 +704,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="cv-meta">Timeline Window 21 दिन</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 7 -->
@@ -726,7 +731,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="cv-meta">Timeline Window 21 दिन</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 8 -->
@@ -752,7 +757,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-timeline vbadge-default">टाइमलाइन (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="cv-meta">Timeline Window 21 दिन</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 9 -->
@@ -776,7 +781,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-timeline vbadge-default">टाइमलाइन (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="cv-meta">Timeline Window 21 दिन</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 10 - Office Closure Calendar (pairs with DateTime config "Holiday Aware Appointment Booking") -->
@@ -802,7 +807,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                 </div>
@@ -842,7 +847,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 2 -->
@@ -868,7 +873,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="cv-meta">Timeline Window 14 दिन</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 3 -->
@@ -895,7 +900,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 4 -->
@@ -923,7 +928,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 5 -->
@@ -953,7 +958,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-timeline vbadge-default">टाइमलाइन (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="cv-meta">Timeline Window 21 दिन</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 6 -->
@@ -980,7 +985,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 7 -->
@@ -1005,7 +1010,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 8 -->
@@ -1032,7 +1037,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 9 -->
@@ -1057,7 +1062,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 10 - Holiday Aware Appointment Booking (pairs with Dates config "Office Closure Calendar") -->
@@ -1085,7 +1090,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                 </div>
@@ -1124,7 +1129,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-week">सप्ताह</span> <span class="vbadge vbadge-utilization">उपयोग</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 10</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <div class="config-card" id="time-aware-resource-closures" data-config-file="Time_Aware_Resource_Closures.json" data-shape="per-block">
@@ -1149,7 +1154,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-utilization">उपयोग</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 10</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 2 -->
@@ -1172,7 +1177,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-week">सप्ताह</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 10</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 3 -->
@@ -1200,7 +1205,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-timeline vbadge-default">टाइमलाइन (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-utilization">उपयोग</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 15</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 4 -->
@@ -1226,7 +1231,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-week">सप्ताह</span> <span class="vbadge vbadge-utilization">उपयोग</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 8</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 5 -->
@@ -1252,7 +1257,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-timeline vbadge-default">टाइमलाइन (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-week">सप्ताह</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 12</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 6 -->
@@ -1278,7 +1283,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 8</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 7 -->
@@ -1307,7 +1312,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-week">सप्ताह</span> <span class="vbadge vbadge-utilization">उपयोग</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 10</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- Multi-Site Workshop - Distinct aggregation -->
@@ -1334,7 +1339,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-timeline vbadge-default">टाइमलाइन (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-utilization">उपयोग</span> <span class="cv-meta">Timeline Window 21 दिन, Max View Resources 10</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- Active Conference Rooms - resource filter showcase (multi-field AND) -->
@@ -1361,7 +1366,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-week">सप्ताह</span> <span class="vbadge vbadge-utilization">उपयोग</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 8</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- Catering Equipment Bundle - Combined aggregation -->
@@ -1389,7 +1394,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-utilization">उपयोग</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 10</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 8 -->
@@ -1416,7 +1421,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 8</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 9 -->
@@ -1444,7 +1449,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-timeline vbadge-default">टाइमलाइन (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="cv-meta">Timeline Window 21 दिन, Max View Resources 12</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 10 -->
@@ -1470,7 +1475,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 11 -->
@@ -1499,7 +1504,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-timeline vbadge-default">टाइमलाइन (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-week">सप्ताह</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 12</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- Bulk Site Booking - skip behavior, multi-site dispatch -->
@@ -1529,7 +1534,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-timeline vbadge-default">टाइमलाइन (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-utilization">उपयोग</span> <span class="cv-meta">Timeline Window 21 दिन, Max View Resources 12</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- Training Batch Enrollment - skip behavior, capacity-limited sessions -->
@@ -1559,7 +1564,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-calendar vbadge-default">कैलेंडर (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-utilization">उपयोग</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 8</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 38 -->
@@ -1585,7 +1590,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-timeline vbadge-default">टाइमलाइन (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-utilization">उपयोग</span> <span class="vbadge vbadge-week">सप्ताह</span> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 20</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 39 -->
@@ -1610,7 +1615,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-timeline vbadge-default">टाइमलाइन (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-week">सप्ताह</span> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="cv-meta">Timeline Window 14 दिन, Max View Resources 25</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 40 -->
@@ -1636,7 +1641,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-agenda vbadge-default">एजेंडा (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-utilization">उपयोग</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="cv-meta">Timeline Window 30 दिन, Max View Resources 30</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                     <!-- 41 -->
@@ -1663,7 +1668,7 @@
                             <strong>व्यू:</strong> <span class="vbadge vbadge-week vbadge-default">सप्ताह (डिफ़ॉल्ट)</span> <span class="vbadge vbadge-timeline">टाइमलाइन</span> <span class="vbadge vbadge-agenda">एजेंडा</span> <span class="vbadge vbadge-calendar">कैलेंडर</span> <span class="cv-meta">Timeline Window 14 दिन, Agenda Fields</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">सेटअप विज़ार्ड के लिए कॉपी करें</button>
                         </div>
                     </div>
                 </div>

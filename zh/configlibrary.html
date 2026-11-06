@@ -227,7 +227,9 @@
         .empty-section-msg { display:none; padding:40px 20px; text-align:center; color:var(--gray-500); font-size:.9rem; font-style:italic; }
         .config-grid:not(:has(.config-card:not(.shape-hidden))) + .empty-section-msg { display:block; }
         .config-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; }
-        @media(max-width:768px) { .config-grid { grid-template-columns:1fr; } }
+        /* minmax(0,1fr) and the word breaks: one long German or Portuguese word set every card's
+           minimum width, wider than a phone, so the page scrolled sideways. */
+        @media(max-width:768px) { .config-grid { grid-template-columns:minmax(0,1fr); } .config-card { min-width:0; overflow-wrap:anywhere; } html:not([lang="en"]) .config-card { hyphens:auto; } }
         /* ── Object Mapping Diagrams ── */
         .diagram-section { margin-bottom:40px; }
         .diagram-label { text-align:center; margin-bottom:6px; font-size:1.1rem; font-weight:700; color:var(--blue-900); }
@@ -241,9 +243,12 @@
         .obj-box { border-radius:10px; overflow:hidden; }
         .obj-header { padding:12px 16px; font-weight:700; font-size:.85rem; letter-spacing:.3px; }
         .obj-body { padding:16px; }
-        .obj-field { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:6px; margin-bottom:4px; font-size:.78rem; font-family:'Fira Code','Cascadia Code','Consolas',monospace; }
+        /* flex-wrap: a label that does not fit beside its field name drops to the next line instead of
+           running out of the box (the German "Lookup auf übergeordneten Datensatz" did at 768px). */
+        .obj-field { display:flex; flex-wrap:wrap; align-items:center; gap:2px 8px; padding:7px 10px; border-radius:6px; margin-bottom:4px; font-size:.78rem; font-family:'Fira Code','Cascadia Code','Consolas',monospace; }
+        .obj-field .prop-name { min-width:0; overflow-wrap:anywhere; }
         .obj-field .field-label { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:.72rem; color:#64748B; margin-left:auto; white-space:nowrap; text-align:right; }
-        @media(max-width:900px) { .obj-field .field-label { white-space:normal; } }
+        @media(max-width:900px) { .obj-field .field-label { white-space:normal; min-width:0; overflow-wrap:anywhere; } html:not([lang="en"]) .obj-field .field-label { hyphens:auto; } }
         .obj-orange { border:2px solid #FB923C; }
         .obj-orange .obj-header { background:linear-gradient(135deg,#F97316,#EA580C); color:white; }
         .obj-orange .obj-body { background:#FFF7ED; }
@@ -425,7 +430,7 @@
                     <h3 style="color:#9A3412;font-size:1.15rem;margin-bottom:10px;">导入配置的流程</h3>
                     <p style="color:#7C2D12;font-size:.95rem;line-height:1.6;margin-bottom:12px;">这些示例配置基于 MultiDatePick 自带的演示对象（<code style="background:#FED7AA;padding:1px 5px;border-radius:3px;">Schedule__c</code>、<code style="background:#FED7AA;padding:1px 5px;border-radius:3px;">Event__c</code>、<code style="background:#FED7AA;padding:1px 5px;border-radius:3px;">Resource__c</code>）构建。您的组织几乎总会使用自己的对象和字段名称。这在预期之内，并且完全支持。</p>
                     <ol style="color:#7C2D12;font-size:.95rem;line-height:1.7;padding-left:22px;margin-bottom:12px;">
-                        <li>在下方任意卡片上单击 <strong>Copy for Setup Wizard</strong>。</li>
+                        <li>在下方任意卡片上单击<strong>复制供设置向导使用</strong>。</li>
                         <li><strong>粘贴</strong>到设置向导的<strong>导入</strong>选项卡中（应用程序启动器 > MultiDatePick 设置向导 > 导入）。</li>
                         <li><strong>映射字段：</strong>向导的<strong>智能字段映射 (Smart Field Mapping)</strong> 面板会列出 JSON 中提到的每个对象和字段，并为每一项提供您组织中对象和字段的下拉列表。您组织中已有的标为“正常”；为每个“缺失”项选好替代项，按需修改其他项，然后单击<strong>应用映射</strong>。</li>
                         <li><strong>按 Config Name 使用：</strong>把组件放到 Lightning 页面、Experience 站点或 Flow 屏幕上，输入 Config Name。</li>
@@ -568,7 +573,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-agenda">日程</span> <span class="cv-meta">时间轴窗口 21 天</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 2 -->
@@ -595,7 +600,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-agenda">日程</span> <span class="cv-meta">时间轴窗口 21 天</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 3 -->
@@ -621,7 +626,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-agenda">日程</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 4 -->
@@ -647,7 +652,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-agenda">日程</span> <span class="cv-meta">时间轴窗口 14 天</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 5 -->
@@ -676,7 +681,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-agenda">日程</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 6 -->
@@ -699,7 +704,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-agenda">日程</span> <span class="cv-meta">时间轴窗口 21 天</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 7 -->
@@ -726,7 +731,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-agenda">日程</span> <span class="cv-meta">时间轴窗口 21 天</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 8 -->
@@ -752,7 +757,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-agenda">日程</span> <span class="cv-meta">时间轴窗口 21 天</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 9 -->
@@ -776,7 +781,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-agenda">日程</span> <span class="cv-meta">时间轴窗口 21 天</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 10 - Office Closure Calendar (pairs with DateTime config "Holiday Aware Appointment Booking") -->
@@ -802,7 +807,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-agenda">日程</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                 </div>
@@ -842,7 +847,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-week vbadge-default">周（默认）</span> <span class="vbadge vbadge-agenda">日程</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 2 -->
@@ -868,7 +873,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-week vbadge-default">周（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-agenda">日程</span> <span class="cv-meta">时间轴窗口 14 天</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 3 -->
@@ -895,7 +900,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-week vbadge-default">周（默认）</span> <span class="vbadge vbadge-agenda">日程</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 4 -->
@@ -923,7 +928,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-week vbadge-default">周（默认）</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 5 -->
@@ -953,7 +958,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-agenda">日程</span> <span class="cv-meta">时间轴窗口 21 天</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 6 -->
@@ -980,7 +985,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-week vbadge-default">周（默认）</span> <span class="vbadge vbadge-agenda">日程</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 7 -->
@@ -1005,7 +1010,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-week vbadge-default">周（默认）</span> <span class="vbadge vbadge-agenda">日程</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 8 -->
@@ -1032,7 +1037,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-week vbadge-default">周（默认）</span> <span class="vbadge vbadge-agenda">日程</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 9 -->
@@ -1057,7 +1062,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-week vbadge-default">周（默认）</span> <span class="vbadge vbadge-agenda">日程</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 10 - Holiday Aware Appointment Booking (pairs with Dates config "Office Closure Calendar") -->
@@ -1085,7 +1090,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-week vbadge-default">周（默认）</span> <span class="vbadge vbadge-agenda">日程</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                 </div>
@@ -1124,7 +1129,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-week">周</span> <span class="vbadge vbadge-utilization">使用率</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 10</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <div class="config-card" id="time-aware-resource-closures" data-config-file="Time_Aware_Resource_Closures.json" data-shape="per-block">
@@ -1149,7 +1154,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-utilization">使用率</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 10</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 2 -->
@@ -1172,7 +1177,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-week">周</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 10</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 3 -->
@@ -1200,7 +1205,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-utilization">使用率</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 15</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 4 -->
@@ -1226,7 +1231,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-week">周</span> <span class="vbadge vbadge-utilization">使用率</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 8</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 5 -->
@@ -1252,7 +1257,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-week">周</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 12</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 6 -->
@@ -1278,7 +1283,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-week vbadge-default">周（默认）</span> <span class="vbadge vbadge-agenda">日程</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 8</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 7 -->
@@ -1307,7 +1312,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-week">周</span> <span class="vbadge vbadge-utilization">使用率</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 10</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- Multi-Site Workshop - Distinct aggregation -->
@@ -1334,13 +1339,13 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-utilization">使用率</span> <span class="cv-meta">时间轴窗口 21 天，视图中最大资源数 10</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- Active Conference Rooms - resource filter showcase (multi-field AND) -->
                     <div class="config-card" id="active-conference-rooms" data-config-file="Active_Conference_Rooms.json" data-shape="multi-resource">
                         <span class="config-badge badge-booking">Resource Booking</span>
-                        <h4>Active Conference Rooms (Filtered Picker)</h4>
+                        <h4>启用中的会议室（筛选选择器）</h4>
                         <p class="config-desc">演示如何用<strong>多字段 AND</strong> 语法设置 <b>Resource Filter Field</b> + <b>Resource Filter Value</b>（资源筛选值）。选择器只显示 <code>Active__c = true</code> 且 <code>Resource_Type__c = 'Conference Room'</code> 的资源。分号分隔符把两个筛选条件组合起来；管理员可以换成资源对象上的任意字段/值组合。</p>
                         <div class="config-note">
                             <strong>筛选语法速查：</strong>字段之间用 <code>;</code> 表示 AND，值之间用 <code>,</code> 表示 OR。<code>;</code> 两侧的字段数必须一致。示例：<code>Resource_Type__c=Conference Room</code> · <code>Building__c=North,South</code>（OR）· <code>Resource_Type__c;Building__c=Conference Room;North,South</code>（AND，第二个字段内为 OR）。</div>
@@ -1361,7 +1366,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-week">周</span> <span class="vbadge vbadge-utilization">使用率</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 8</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- Catering Equipment Bundle - Combined aggregation -->
@@ -1389,7 +1394,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-utilization">使用率</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 10</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 8 -->
@@ -1416,7 +1421,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-week vbadge-default">周（默认）</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 8</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 9 -->
@@ -1444,7 +1449,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-agenda">日程</span> <span class="cv-meta">时间轴窗口 21 天，视图中最大资源数 12</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 10 -->
@@ -1470,7 +1475,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-week vbadge-default">周（默认）</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 11 -->
@@ -1499,7 +1504,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-week">周</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 12</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- Bulk Site Booking - skip behavior, multi-site dispatch -->
@@ -1529,7 +1534,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-utilization">使用率</span> <span class="cv-meta">时间轴窗口 21 天，视图中最大资源数 12</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- Training Batch Enrollment - skip behavior, capacity-limited sessions -->
@@ -1559,7 +1564,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-calendar vbadge-default">日历（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-utilization">使用率</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 8</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 38 -->
@@ -1585,7 +1590,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-utilization">使用率</span> <span class="vbadge vbadge-week">周</span> <span class="vbadge vbadge-calendar">日历</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 20</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 39 -->
@@ -1610,7 +1615,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-week">周</span> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-agenda">日程</span> <span class="cv-meta">时间轴窗口 14 天，视图中最大资源数 25</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 40 -->
@@ -1636,7 +1641,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-agenda vbadge-default">日程（默认）</span> <span class="vbadge vbadge-utilization">使用率</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="cv-meta">时间轴窗口 30 天，视图中最大资源数 30</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                     <!-- 41 -->
@@ -1663,7 +1668,7 @@
                             <strong>视图：</strong> <span class="vbadge vbadge-week vbadge-default">周（默认）</span> <span class="vbadge vbadge-timeline">时间轴</span> <span class="vbadge vbadge-agenda">日程</span> <span class="vbadge vbadge-calendar">日历</span> <span class="cv-meta">时间轴窗口 14 天，日程字段</span>
                         </div>
                         <div class="config-btn-group">
-                            <button class="btn btn-primary btn-sm btn-copy-json">Copy for Setup Wizard</button>
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
                         </div>
                     </div>
                 </div>
