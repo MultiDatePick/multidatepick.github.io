@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce में कैलेंडर से एक साथ कई टास्क बनाएँ</title>
+    <meta name="description" content="Salesforce में एक साथ कई टास्क बनाएँ: कैलेंडर पर दिन चुनें, Subject, Status और Priority तय करें, और हर दिन का एक Task सहेजें। न Flow, न Apex।">
+    <link rel="canonical" href="https://multidatepick.com/hi/blog/create-salesforce-tasks-calendar.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Tasks post: same look as the Timeline, Utilization and Related Records posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.tk-narrow { max-width: 600px; margin-left: auto; margin-right: auto; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce में कैलेंडर से एक साथ कई टास्क बनाएँ">
+    <meta property="og:description" content="Salesforce में एक साथ कई टास्क बनाएँ: कैलेंडर पर दिन चुनें, Subject, Status और Priority तय करें, और हर दिन का एक Task सहेजें। न Flow, न Apex।">
+    <meta property="og:image" content="https://multidatepick.com/images/hi/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/hi/blog/create-salesforce-tasks-calendar.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="hi_IN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce में कैलेंडर से एक साथ कई टास्क बनाएँ">
+    <meta name="twitter:description" content="Salesforce में एक साथ कई टास्क बनाएँ: कैलेंडर पर दिन चुनें, Subject, Status और Priority तय करें, और हर दिन का एक Task सहेजें। न Flow, न Apex।">
+    <meta name="twitter:image" content="https://multidatepick.com/images/hi/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-mehrere-aufgaben-im-kalender-erstellen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/crear-varias-tareas-salesforce-calendario.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/creer-plusieurs-taches-salesforce-calendrier.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/creare-piu-attivita-salesforce-calendario.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">जल्द ही Salesforce AppExchange पर <button class="banner-close" id="bannerClose" aria-label="बैनर हटाएँ" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/hi/" class="logo"><img src="/images/logo.png" alt="MultiDatePick लोगो: Salesforce मल्टी-डेट कैलेंडर और संसाधन बुकिंग कंपोनेंट" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="नेविगेशन खोलें/बंद करें"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">प्रोडक्ट <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/hi/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/hi/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/hi/blog/salesforce-calendar-views.html">पाँच कैलेंडर व्यू</a></li>
+                        <li><a href="/hi/configlibrary.html">Config Library</a></li>
+                        <li><a href="/hi/trust.html">भरोसा और सुरक्षा</a></li>
+                        <li><a href="/hi/accessibility.html">सुगम्यता (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">समाधान <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/salesforce-calendar.html">Salesforce कैलेंडर</a></li>
+                        <li><a href="/hi/salesforce-calendar-staffing-recruiting.html">स्टाफ़िंग और रिक्रूटिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-interview-scheduling.html">इंटरव्यू शेड्यूलिंग</a></li>
+                        <li><a href="/hi/salesforce-conference-room-booking-calendar.html">कॉन्फ़्रेंस रूम बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-experience-cloud-booking.html">Experience Cloud बुकिंग</a></li>
+                        <li><a href="/hi/blog/salesforce-campaign-multiple-dates.html">Campaign की तारीखें</a></li>
+                        <li><a href="/hi/blog/salesforce-section-508-government-calendar.html">सरकारी विभाग / Section 508</a></li>
+                        <li><a href="/hi/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/hi/pricing.html">कीमत</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">डॉक्स <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/blog/no-code-salesforce-calendar.html">नो-कोड सेटअप</a></li>
+                        <li><a href="/hi/gettingstarted.html">शुरुआत करें</a></li>
+                        <li><a href="/hi/user-guide.html">यूज़र गाइड</a></li>
+                        <li><a href="/hi/flowcheatsheet.html">Screen Flow गाइड</a></li>
+                        <li><a href="/hi/home-app-experience.html">ऐप, होम और Experience पेज</a></li>
+                        <li><a href="/hi/troubleshooting.html">समस्या निवारण</a></li>
+                        <li><a href="/hi/faq.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/hi/blog/">ब्लॉग</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/hi/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">लाइव डेमो आज़माएँ</a></li>
+                <li><a href="/hi/notify-me-at-launch.html" class="nav-cta">लॉन्च पर सूचना पाएँ</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "कैलेंडर से Salesforce टास्क बनाएँ: दिन चुनें, एक बार सहेजें",
+                "description": "Salesforce में एक साथ कई टास्क बनाएँ: कैलेंडर पर दिन चुनें, Subject, Status और Priority तय करें, और हर दिन का एक Task सहेजें। न Flow, न Apex।",
+                "datePublished": "2026-11-08",
+                "dateModified": "2026-11-08",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/hi/blog/create-salesforce-tasks-calendar.html",
+                "image": "https://multidatepick.com/images/hi/blog/salesforce-create-tasks-calendar-poster.png",
+                "inLanguage": "hi"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce में एक साथ कई टास्क कैसे बनाएँ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "रिकॉर्ड पेज पर MultiDatePick Dates कंपोनेंट लगाएँ और सहेजने वाले ऑब्जेक्ट के रूप में Task चुनें। जिस भी दिन टास्क चाहिए उस पर क्लिक करें, Subject लिखें और सहेजें पर क्लिक करें। MultiDatePick हर दिन का एक स्टैंडर्ड Salesforce Task बनाता है, हर एक अपनी ड्यू डेट के साथ और रिकॉर्ड से जुड़ा हुआ, एक ही बार सहेजने में। इसमें न Flow लगता है, न Apex।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "क्या ऐसी तारीखों पर Salesforce टास्क बनाए जा सकते हैं जो किसी पैटर्न पर नहीं चलतीं?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "हाँ। आप ठीक वही दिन क्लिक करते हैं जो चाहिए, जैसे 3, 11 और 24 तारीख, और हर दिन एक टास्क बन जाता है। जब दिन किसी पैटर्न पर चलते हैं, तो आवर्ती पैटर्न जोड़ें बटन उन्हें आपके लिए भर देता है: हर मंगलवार, हर दूसरे सप्ताह, या हर महीने का पहला या आखिरी शुक्रवार।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "किन रिकॉर्ड पेज से इस तरह टास्क बनाए जा सकते हैं?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "हर उस रिकॉर्ड से जिससे टास्क जोड़े जा सकते हैं। अकाउंट, अवसर (Opportunity), केस और activities वाले कस्टम ऑब्जेक्ट Related To (WhatId) से जुड़ते हैं। कॉन्टैक्ट और लीड Name (WhoId) से जुड़ते हैं। कॉन्टैक्ट पेज पर Salesforce कॉन्टैक्ट का अकाउंट भी भर देता है, इसलिए नए टास्क अकाउंट पर भी दिखते हैं।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "क्या सभी नए टास्क को एक जैसी Priority, Status या Assigned To दी जा सकती है?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "हाँ। स्टेटस पिकर सहेजे जा रहे टास्क का Status तय करता है। डिफ़ॉल्ट फ़ील्ड मान हर नए टास्क पर कोई भी दूसरा फ़ील्ड भर देता है, जैसे Priority=High, Comments में एक लाइन, या टास्क किसी व्यक्ति को असाइन करने के लिए OwnerId में उस यूज़र का Id। इसके बिना, Salesforce में हमेशा की तरह टास्क उसी व्यक्ति को असाइन होते हैं जो उन्हें सहेजता है।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "क्या Salesforce टास्क कैलेंडर पर देखे जा सकते हैं?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "हाँ। रिकॉर्ड पेज पर कैलेंडर उस रिकॉर्ड के टास्क उनके स्टेटस के रंगों में दिखाता है। ऐप या होम पेज पर सभी रिकॉर्ड दिखाएँ चालू करें और रिकॉर्ड फ़िल्टर में OwnerId=ME डालें, तो आपको सिर्फ़ अपने टास्क का कैलेंडर मिलता है, हर Subject अपने दिन में लिखा हुआ। विवरण के लिए किसी दिन पर होवर करें, या सूची के रूप में देखने के लिए एजेंडा व्यू जोड़ें।"
+                        }
+                    }
+                ],
+                "inLanguage": "hi"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/hi/blog/salesforce-create-tasks-calendar.gif",
+                "caption": "कैलेंडर से Salesforce टास्क बनाने का एनिमेटेड डेमो, अकाउंट पेज पर: चार दिन चुने गए, Subject लिखा गया, और टास्क बनाएँ से चार टास्क सहेजे गए जो अपने स्टेटस के रंग में दिखते हैं",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/hi/blog/salesforce-tasks-activity-timeline.png",
+                "caption": "अकाउंट पर Salesforce Activity timeline: कैलेंडर से बने चार ग्राहक चेक-इन टास्क, हर एक अपनी ड्यू डेट और High priority फ़्लैग के साथ, अकाउंट के दूसरे टास्क के बीच",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/hi/blog/salesforce-task-calendar-month.png",
+                "caption": "Salesforce टास्क कैलेंडर का मासिक व्यू: हर टास्क का Subject उसके दिन में लिखा, उसके स्टेटस के रंग में, ऊपर स्टेटस फ़िल्टर",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/hi/blog/salesforce-task-calendar-setup.png",
+                "caption": "Salesforce टास्क के लिए MultiDatePick Setup Wizard की फ़ील्ड स्क्रीन: Related To (WhatId), Due Date Only (ActivityDate), Subject, एक डिफ़ॉल्ट Subject और डिफ़ॉल्ट फ़ील्ड मान Priority=High",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/hi/marketing/salesforce-recurring-date-pattern-2nd-4th-friday.gif",
+                "caption": "MultiDatePick Salesforce डेट पिकर में आवर्ती तारीख पैटर्न का एनिमेटेड डेमो: हर महीने का दूसरा और चौथा शुक्रवार, पहले प्रीव्यू, फिर कैलेंडर में जोड़ा गया",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>कैलेंडर से Salesforce टास्क बनाएँ: दिन चुनें, एक बार सहेजें</h1>
+                <p class="subtitle">जिस भी दिन टास्क चाहिए उस पर क्लिक करें, Subject लिखें और सहेजें। हर दिन का एक स्टैंडर्ड Salesforce Task, रिकॉर्ड से जुड़ा, बिना Flow, बिना Apex और बिना कोड।</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">प्रकाशित 8 नवंबर 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"एक ही टास्क कई तारीखों पर कैसे बनाएँ?" "क्या Salesforce में एक साथ कई टास्क बन सकते हैं?" "अपने टास्क कैलेंडर पर कैसे देखें?" New Task बटन एक ड्यू डेट वाला एक टास्क सहेजता है। आवर्ती सीरीज़ एक तय शेड्यूल पर दोहराई जाती है। चार चुने हुए दिनों पर चार कॉल वाले फ़ॉलो-अप प्लान के लिए अब भी उसी फ़ॉर्म से चार बार गुज़रना पड़ता है।</p>
+
+                <p>MultiDatePick रिकॉर्ड पेज पर एक कैलेंडर लगाता है। दिन क्लिक करें, Subject लिखें और सहेजें पर क्लिक करें: <strong>हर दिन का एक Salesforce Task</strong>, हर एक रिकॉर्ड से जुड़ा, Status, Priority और Comments पहले से भरे हुए। ये आम Task हैं, इसलिए Activity timeline, रिपोर्ट और हर list view में दिखते हैं। <strong>न Flow, न Apex।</strong></p>
+
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/hi/blog/salesforce-create-tasks-calendar-poster.png" data-gif="/images/hi/blog/salesforce-create-tasks-calendar.gif" alt="कैलेंडर से Salesforce टास्क बनाने का एनिमेटेड डेमो, अकाउंट पेज पर: चार दिन चुने गए, Subject लिखा गया, और टास्क बनाएँ से चार टास्क सहेजे गए जो अपने स्टेटस के रंग में दिखते हैं" loading="lazy" decoding="async" width="588" height="726" data-zoomable>
+                    <figcaption>चार दिन, एक Subject, एक क्लिक: अकाउंट पर चार Salesforce टास्क।</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">आपको क्या मिलता है</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>हर दिन का एक टास्क</h3><p>आप जिस भी दिन पर क्लिक करते हैं, वह अपना अलग Task बन जाता है, उसी दिन की ड्यू डेट के साथ। दस दिन, दस टास्क, एक बार सहेजना।</p></div>
+                    <div class="tl-feat"><h3>रिकॉर्ड से जुड़े</h3><p>हर टास्क पेज के रिकॉर्ड से जुड़ा होता है: कोई अकाउंट, अवसर, केस या कस्टम रिकॉर्ड, या वह कॉन्टैक्ट या लीड जिसके लिए वह है।</p></div>
+                    <div class="tl-feat"><h3>आपके लिए पहले से भरे</h3><p>आपका लिखा Subject, आपका चुना Status, और Priority या Comments जैसा कोई भी दूसरा फ़ील्ड, हर नए टास्क पर।</p></div>
+                    <div class="tl-feat"><h3>कोई भी दिन</h3><p>बिखरे हुए दिन क्लिक करें, लगातार दिनों पर ड्रैग करें, या हर दूसरे मंगलवार जैसा आवर्ती पैटर्न जोड़ें।</p></div>
+                    <div class="tl-feat"><h3>कैलेंडर पर टास्क</h3><p>मौजूदा टास्क अपने स्टेटस के रंगों में दिखते हैं। Subject और Status देखने के लिए किसी दिन पर होवर करें, या हर Subject उसके दिन में लिखा दिखाएँ।</p></div>
+                    <div class="tl-feat"><h3>बाद में बदलें</h3><p>संपादन मोड किसी टास्क को दूसरे दिन पर ले जाता है, उसका स्टेटस बदलता है या उसे डिलीट करता है, एक टास्क के लिए या कई के लिए एक साथ।</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">दिन चुनें, एक बार सहेजें</h2>
+                <p>कैलेंडर रिकॉर्ड पेज पर रहता है और रिकॉर्ड के मौजूदा टास्क उनके स्टेटस के रंग में दिखाता है। ग्राहक चेक-इन की एक सीरीज़ प्लान करने में चार कदम लगते हैं:</p>
+                <ol class="cp-steps">
+                    <li><strong>दिन क्लिक करें।</strong> हर वह दिन चुनें जिस पर टास्क चाहिए। चुना हुआ दिन नारंगी हो जाता है; उसे हटाने के लिए फिर से क्लिक करें।</li>
+                    <li><strong>Subject लिखें।</strong> रिकॉर्ड लेबल बॉक्स में वह Subject होता है जो हर नए टास्क को मिलता है, जैसे ग्राहक चेक-इन।</li>
+                    <li><strong>स्टेटस चुनें।</strong> Not Started, In Progress या आपकी Task Status picklist का कोई भी मान।</li>
+                    <li><strong>सहेजें पर क्लिक करें।</strong> हर दिन का एक Task बनता है और रिकॉर्ड से जुड़ जाता है। दिन तुरंत स्टेटस का रंग ले लेते हैं।</li>
+                </ol>
+                <p>किसी भी दिन पर पॉइंटर ले जाकर उसके टास्क का Subject और Status देखें, और वहीं से टास्क खोलें। जिन दिनों पर पहले से टास्क है, उन पर एक और भी जुड़ सकता है, जब एक दिन में कई की अनुमति दें चालू हो।</p>
+
+                <h2 style="margin-top:44px;">असली Salesforce Task, Activity timeline में</h2>
+                <p>यहाँ कुछ भी कॉपी या कस्टम ऑब्जेक्ट नहीं है। हर दिन एक स्टैंडर्ड Task सहेजता है, इसलिए वह आपकी टीम के हाथ से बनाए किसी भी टास्क जैसा ही काम करता है: वह रिकॉर्ड की Activity timeline में, Tasks टैब पर, रिपोर्ट और list view में, और असाइनी की to-do सूची में दिखता है। कॉन्टैक्ट या लीड पर टास्क Name से जुड़ता है; अकाउंट, अवसर, केस या कस्टम ऑब्जेक्ट पर Related To से।</p>
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/hi/blog/salesforce-tasks-activity-timeline.png" alt="अकाउंट पर Salesforce Activity timeline: कैलेंडर से बने चार ग्राहक चेक-इन टास्क, हर एक अपनी ड्यू डेट और High priority फ़्लैग के साथ, अकाउंट के दूसरे टास्क के बीच" loading="lazy" width="1262" height="1976" data-zoomable>
+                    <figcaption>अकाउंट की Activity timeline में चारों चेक-इन, हर एक पर डिफ़ॉल्ट फ़ील्ड मान से लगा High priority का निशान।</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">हर टास्क एक कैलेंडर पर</h2>
+                <p>यही कंपोनेंट टास्क कैलेंडर की तरह भी काम करता है। ऐप या होम पेज पर सभी रिकॉर्ड दिखाएँ चालू करें, तो यह हर वह Task दिखाता है जो आप देख सकते हैं; <code>OwnerId=ME</code> जैसा रिकॉर्ड फ़िल्टर जोड़ें, तो हर व्यक्ति अपने टास्क देखता है। हर दिन में रिकॉर्ड के नाम दिखाएँ चालू होने पर हर Subject अपने दिन में, अपने स्टेटस के रंग में लिखा दिखता है, और कैलेंडर के ऊपर के पिल स्टेटस के हिसाब से फ़िल्टर करते हैं।</p>
+                <figure class="sc-shot">
+                    <img src="/images/hi/blog/salesforce-task-calendar-month.png" alt="Salesforce टास्क कैलेंडर का मासिक व्यू: हर टास्क का Subject उसके दिन में लिखा, उसके स्टेटस के रंग में, ऊपर स्टेटस फ़िल्टर" loading="lazy" width="1989" height="1334" data-zoomable>
+                    <figcaption>Subject और स्टेटस के साथ टास्क का एक महीना, अकाउंट से सहेजे गए चारों चेक-इन समेत।</figcaption>
+                </figure>
+                <p>किसी अकाउंट के कॉन्टैक्ट और अवसरों पर टास्क पहले से बिखरे हुए हैं? रोलअप फ़ील्ड उन्हें भी अकाउंट के कैलेंडर पर ले आता है। <a href="/hi/blog/salesforce-calendar-related-records.html">देखें कि अकाउंट कैलेंडर संबंधित रिकॉर्ड कैसे दिखाता है</a>।</p>
+
+                <h2 style="margin-top:44px;">जब दिन किसी पैटर्न पर चलते हैं</h2>
+                <p>कुछ टास्क प्लान दोहराए जाते हैं: हर दूसरे मंगलवार एक कॉल, महीने के आखिरी शुक्रवार को एक रिपोर्ट, दूसरे और चौथे शुक्रवार को एक समीक्षा। <strong>आवर्ती पैटर्न जोड़ें</strong> ये दिन आपके लिए भर देता है, जोड़ने से पहले तारीखें दिखाता है, और आपकी तय की गई अंत तारीख पर रुक जाता है। हर दिन फिर भी अपने अलग Task के रूप में सहेजा जाता है, इसलिए आप बाकी को छुए बिना किसी एक को खिसका या छोड़ सकते हैं।</p>
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/hi/marketing/salesforce-recurring-date-pattern-2nd-4th-friday-poster.png" data-gif="/images/hi/marketing/salesforce-recurring-date-pattern-2nd-4th-friday.gif" alt="MultiDatePick Salesforce डेट पिकर में आवर्ती तारीख पैटर्न का एनिमेटेड डेमो: हर महीने का दूसरा और चौथा शुक्रवार, पहले प्रीव्यू, फिर कैलेंडर में जोड़ा गया" loading="lazy" decoding="async" width="700" height="900" data-zoomable>
+                    <figcaption>हर महीने का दूसरा और चौथा शुक्रवार, एक ही कदम में प्रीव्यू करके जोड़ा गया।</figcaption>
+                </figure>
+                <p>और पैटर्न, और तारीख रेंज उन्हें क्यों नहीं संभाल सकती, यह <a href="/hi/blog/recurring-date-patterns-in-salesforce.html">Salesforce में आवर्ती तारीख पैटर्न</a> में पढ़ें।</p>
+
+                <h2 style="margin-top:44px;">Setup Wizard में सेट करें</h2>
+                <p>न कोड, न कोई Flow बनाना। Setup Wizard कॉन्फ़िगरेशन लिखता है और कंपोनेंट उसे पढ़ता है:</p>
+                <ol class="cp-steps">
+                    <li><strong>चुनें कि कैलेंडर कहाँ दिखेगा।</strong> MultiDatePick Setup Wizard टैब खोलें, रिकॉर्ड पेज चुनें (यहाँ Account) और प्रति दिनांक एक रिकॉर्ड वाला तरीका।</li>
+                    <li><strong>हर चुनी गई तारीख को Task के रूप में सेव करें।</strong> फ़ील्ड स्क्रीन पर <strong>Task</strong> पर क्लिक करें, फिर पेज से जुड़ाव जाँचें: अकाउंट पर <strong>Related To ID (WhatId)</strong>, या कॉन्टैक्ट या लीड पर <strong>Name ID (WhoId)</strong>। विज़ार्ड <strong>Due Date Only (ActivityDate)</strong> और <strong>Subject</strong> अपने आप भर देता है।</li>
+                    <li><strong>बाकी भरें।</strong> एक डिफ़ॉल्ट Subject लिखें, Subject साफ़ रखने के लिए रिकॉर्ड नाम में दिनांक/समय जोड़ें से टिक हटाएँ, और <code>Priority=High</code> जैसे डिफ़ॉल्ट फ़ील्ड मान डालें। कॉन्फ़िगरेशन को <code>Account_Tasks</code> जैसे नाम से सहेजें।</li>
+                    <li><strong>कंपोनेंट को पेज पर लगाएँ।</strong> Lightning App Builder में MultiDatePick Dates कंपोनेंट को अकाउंट पेज पर जोड़ें और <strong>Config Name</strong> में वही नाम डालें।</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/hi/blog/salesforce-task-calendar-setup.png" alt="Salesforce टास्क के लिए MultiDatePick Setup Wizard की फ़ील्ड स्क्रीन: Related To (WhatId), Due Date Only (ActivityDate), Subject, एक डिफ़ॉल्ट Subject और डिफ़ॉल्ट फ़ील्ड मान Priority=High" loading="lazy" width="1999" height="528" data-zoomable>
+                    <figcaption>एक क्लिक में Task: Related To, Due Date Only और Subject, साथ में एक डिफ़ॉल्ट Subject और Priority=High।</figcaption>
+                </figure>
+                <p>स्टेटस के रंग आपकी Task Status वैल्यू से आते हैं, इसलिए Completed हरा और Deferred ग्रे हो सकता है। बाद में कॉन्फ़िगरेशन बदलें, तो उसे इस्तेमाल करने वाला हर पेज अगली बार लोड होते ही बदलाव अपना लेता है।</p>
+
+                <h2 style="margin-top:44px;">इस तरह टास्क कौन बनाता है</h2>
+                <p>हर वह व्यक्ति जिसका प्लान एक ड्यू डेट नहीं, बल्कि कुछ चुने हुए दिन हैं:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>अकाउंट मैनेजर</strong><span>पूरे साल के तिमाही चेक-इन और साइट विज़िट, अकाउंट पर एक ही बार में प्लान।</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>सेल्स फ़ॉलो-अप</strong><span>डेमो के बाद दूसरे, सातवें और चौदहवें दिन की कॉल, मीटिंग खत्म होने से पहले ही अवसर पर बनाई गईं।</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>कस्टमर सक्सेस</strong><span>ग्राहक के साथ तय दिनों पर ऑनबोर्डिंग सत्र, हर एक अपने स्टेटस वाला टास्क।</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>कंप्लायंस और फ़ाइनेंस</strong><span>तय तारीखों पर पड़ने वाली फ़ाइलिंग और रिव्यू की डेडलाइन, उनके ज़िम्मेदार व्यक्ति को असाइन।</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>नॉन-प्रॉफ़िट</strong><span>किसी बड़े डोनर के लिए धन्यवाद कॉल और रिश्ते मज़बूत करने वाले संपर्क, पूरे सीज़न में फैले हुए।</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>सर्विस टीमें</strong><span>केस बंद होने के बाद फ़ॉलो-अप जाँच, उन दिनों पर जो ग्राहक ने माँगे।</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">इसे आकार देने वाली सेटिंग्स</h2>
+                <p>हर एक Setup Wizard का एक फ़ील्ड और कंपोनेंट की एक प्रॉपर्टी है, इसलिए यहाँ कोड की ज़रूरत नहीं:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">सेटिंग</th><th>टास्क के लिए यह क्या करता है</th><th style="width:22%;">API नाम</th></tr></thead>
+                    <tbody>
+                    <tr><td>चाइल्ड ऑब्जेक्ट API नाम (Child Object API Name)</td><td>Task: हर चुना गया दिन Salesforce Task के रूप में सहेजा जाता है।</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>संबंध फ़ील्ड API नाम (Relationship Field API Name)</td><td>अकाउंट, अवसर, केस और कस्टम ऑब्जेक्ट पर WhatId (Related To); कॉन्टैक्ट और लीड पर WhoId (Name)।</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>दिनांक फ़ील्ड API नाम (Date Field API Name)</td><td>ActivityDate, टास्क की ड्यू डेट।</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>रिकॉर्ड नाम फ़ील्ड और डिफ़ॉल्ट रिकॉर्ड नाम (Record Name Field and Default Record Name)</td><td>Subject, और वह Subject जो बॉक्स में पहले से लिखा आता है।</td><td><code>recordNameField</code>, <code>defaultRecordName</code></td></tr>
+                    <tr><td>स्थिति फ़ील्ड और स्थिति रंग (Status Field and Status Colors)</td><td>Status, हर मान के लिए एक रंग के साथ, जैसे Completed:#22C55E।</td><td><code>statusField</code>, <code>statusColors</code></td></tr>
+                    <tr><td>डिफ़ॉल्ट फ़ील्ड मान (Default Field Values)</td><td>हर नए टास्क पर कोई भी दूसरा फ़ील्ड, जैसे Priority=High, या टास्क असाइन करने के लिए OwnerId।</td><td><code>defaultFieldValues</code></td></tr>
+                    <tr><td>एक दिन में कई की अनुमति दें (Allow Multiple Per Day)</td><td>जिस दिन पहले से टास्क है, उस पर एक और जुड़ सकता है।</td><td><code>allowMultiplePerDay</code></td></tr>
+                    <tr><td>हर दिन में रिकॉर्ड के नाम दिखाएँ (Show Record Names in Each Day)</td><td>बड़ा और पूरी चौड़ाई साइज़ वाले कैलेंडर पर हर टास्क का Subject उसके दिन में लिखता है।</td><td><code>monthShowNames</code></td></tr>
+                    <tr><td>सभी रिकॉर्ड दिखाएँ और रिकॉर्ड फ़िल्टर (Show All Records and Record Filter)</td><td>ऐप या होम पेज पर हर टास्क का कैलेंडर, या OwnerId=ME के साथ सिर्फ़ आपके टास्क का।</td><td><code>showAllRecords</code>, <code>recordFilter</code></td></tr>
+                    <tr><td>Config Name</td><td>Setup Wizard का सहेजा कॉन्फ़िगरेशन। इसे सेट करें और बाकी खाली छोड़ें।</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>महीने के ग्रिड से कहीं ज़्यादा।</strong> उपलब्ध दृश्य में एजेंडा जोड़ें, तो यही टास्क दिन-ब-दिन सूची के रूप में भी दिखते हैं, कैलेंडर से बस एक क्लिक दूर। <a href="/hi/blog/salesforce-calendar-views.html">पाँचों व्यू देखें</a>।</div>
+
+                <h2 style="margin-top:44px;">लोग अक्सर पूछते हैं</h2>
+                <div class="tl-faq">
+                    <details><summary>Salesforce में एक साथ कई टास्क कैसे बनाएँ?</summary><p>रिकॉर्ड पेज पर MultiDatePick Dates कंपोनेंट लगाएँ और सहेजने वाले ऑब्जेक्ट के रूप में Task चुनें। जिस भी दिन टास्क चाहिए उस पर क्लिक करें, Subject लिखें और सहेजें पर क्लिक करें। MultiDatePick हर दिन का एक स्टैंडर्ड Salesforce Task बनाता है, हर एक अपनी ड्यू डेट के साथ और रिकॉर्ड से जुड़ा हुआ, एक ही बार सहेजने में। इसमें न Flow लगता है, न Apex।</p></details>
+                    <details><summary>क्या ऐसी तारीखों पर Salesforce टास्क बनाए जा सकते हैं जो किसी पैटर्न पर नहीं चलतीं?</summary><p>हाँ। आप ठीक वही दिन क्लिक करते हैं जो चाहिए, जैसे 3, 11 और 24 तारीख, और हर दिन एक टास्क बन जाता है। जब दिन किसी पैटर्न पर चलते हैं, तो आवर्ती पैटर्न जोड़ें बटन उन्हें आपके लिए भर देता है: हर मंगलवार, हर दूसरे सप्ताह, या हर महीने का पहला या आखिरी शुक्रवार।</p></details>
+                    <details><summary>किन रिकॉर्ड पेज से इस तरह टास्क बनाए जा सकते हैं?</summary><p>हर उस रिकॉर्ड से जिससे टास्क जोड़े जा सकते हैं। अकाउंट, अवसर (Opportunity), केस और activities वाले कस्टम ऑब्जेक्ट Related To (WhatId) से जुड़ते हैं। कॉन्टैक्ट और लीड Name (WhoId) से जुड़ते हैं। कॉन्टैक्ट पेज पर Salesforce कॉन्टैक्ट का अकाउंट भी भर देता है, इसलिए नए टास्क अकाउंट पर भी दिखते हैं।</p></details>
+                    <details><summary>क्या सभी नए टास्क को एक जैसी Priority, Status या Assigned To दी जा सकती है?</summary><p>हाँ। स्टेटस पिकर सहेजे जा रहे टास्क का Status तय करता है। डिफ़ॉल्ट फ़ील्ड मान हर नए टास्क पर कोई भी दूसरा फ़ील्ड भर देता है, जैसे Priority=High, Comments में एक लाइन, या टास्क किसी व्यक्ति को असाइन करने के लिए OwnerId में उस यूज़र का Id। इसके बिना, Salesforce में हमेशा की तरह टास्क उसी व्यक्ति को असाइन होते हैं जो उन्हें सहेजता है।</p></details>
+                    <details><summary>क्या Salesforce टास्क कैलेंडर पर देखे जा सकते हैं?</summary><p>हाँ। रिकॉर्ड पेज पर कैलेंडर उस रिकॉर्ड के टास्क उनके स्टेटस के रंगों में दिखाता है। ऐप या होम पेज पर सभी रिकॉर्ड दिखाएँ चालू करें और रिकॉर्ड फ़िल्टर में OwnerId=ME डालें, तो आपको सिर्फ़ अपने टास्क का कैलेंडर मिलता है, हर Subject अपने दिन में लिखा हुआ। विवरण के लिए किसी दिन पर होवर करें, या सूची के रूप में देखने के लिए एजेंडा व्यू जोड़ें।</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>दिन चुनें। टास्क तैयार।</h2>
+                    <p>लाइव डेमो में घूमकर देखें, या <a href="/hi/configlibrary.html">Config Library</a> के किसी तैयार कॉन्फ़िगरेशन से शुरू करें।</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/hi/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=create-salesforce-tasks-calendar" class="btn btn-demo" target="_blank" rel="noopener">लाइव डेमो आज़माएँ</a> <a href="/hi/notify-me-at-launch.html" class="btn btn-primary">लॉन्च पर सूचना पाएँ</a> <a href="/hi/gettingstarted.html" class="btn btn-secondary">शुरुआत करें</a>
+                    </div>
+                    <ul class="check-list"><li>$20/यूज़र/माह, हर फ़ीचर</li><li>30 दिन का फ़्री ट्रायल, कार्ड नहीं</li><li>100% नेटिव Salesforce</li><li>कोई Apex नहीं</li><li>जल्द ही Salesforce AppExchange पर</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>संबंधित लेख</h3>
+                    <ul>
+                        <li><a href="/hi/blog/salesforce-calendar-related-records.html">अकाउंट कैलेंडर पर कॉन्टैक्ट और अवसर के टास्क दिखाएँ</a></li>
+                        <li><a href="/hi/blog/recurring-date-patterns-in-salesforce.html">Salesforce में आवर्ती तारीख पैटर्न (Recurring Dates)</a></li>
+                        <li><a href="/hi/blog/no-code-salesforce-calendar.html">नो-कोड Salesforce कैलेंडर, एक-एक काम करके</a></li>
+                        <li><a href="/hi/blog/salesforce-calendar-setup-wizard.html">Setup Wizard में Salesforce कैलेंडर कॉन्फ़िगर करें</a></li>
+                        <li><a href="/hi/multidatepickdates.html">MultiDatePick Dates कैलेंडर</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/hi/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick लोगो: Salesforce मल्टी-डेट कैलेंडर और संसाधन बुकिंग कंपोनेंट" width="180" height="45">
+                    </a>
+                    <p>Salesforce के लिए सबसे ज़्यादा कस्टमाइज़ करने योग्य कैलेंडर कंपोनेंट सुइट।</p>
+                </div>
+                <div class="footer-links">
+                    <h4>प्रोडक्ट</h4>
+                    <ul>
+                        <li><a href="/hi/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/hi/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/hi/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/hi/blog/salesforce-calendar-views.html">पाँच कैलेंडर व्यू</a></li>
+                        <li><a href="/hi/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>समाधान</h4>
+                    <ul>
+                        <li><a href="/hi/salesforce-calendar.html">Salesforce कैलेंडर</a></li>
+                        <li><a href="/hi/salesforce-calendar-staffing-recruiting.html">स्टाफ़िंग और रिक्रूटिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-interview-scheduling.html">इंटरव्यू शेड्यूलिंग</a></li>
+                        <li><a href="/hi/salesforce-conference-room-booking-calendar.html">कॉन्फ़्रेंस रूम बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-experience-cloud-booking.html">Experience Cloud बुकिंग</a></li>
+                        <li><a href="/hi/blog/salesforce-campaign-multiple-dates.html">Campaign की तारीखें</a></li>
+                        <li><a href="/hi/blog/salesforce-section-508-government-calendar.html">सरकारी विभाग / Section 508</a></li>
+                        <li><a href="/hi/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>डॉक्स</h4>
+                    <ul>
+                        <li><a href="/hi/gettingstarted.html">शुरुआत करें</a></li>
+                        <li><a href="/hi/user-guide.html">यूज़र गाइड</a></li>
+                        <li><a href="/hi/flowcheatsheet.html">Screen Flow गाइड</a></li>
+                        <li><a href="/hi/home-app-experience.html">ऐप, होम और Experience पेज</a></li>
+                        <li><a href="/hi/troubleshooting.html">समस्या निवारण</a></li>
+                        <li><a href="/hi/faq.html">FAQ</a></li>
+                    </ul>
+                    <h4>डेवलपर्स के लिए</h4>
+                    <ul>
+                        <li><a href="/hi/salesforce-calendar-developer-guide.html">डेवलपर गाइड</a></li>
+                        <li><a href="/hi/deploy-flow-vscode.html">Flow डिप्लॉय करें (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>कंपनी</h4>
+                    <ul>
+                        <li><a href="/hi/pricing.html">कीमत</a></li>
+                        <li><a href="/hi/blog/">ब्लॉग</a></li>
+                        <li><a href="/hi/trust.html">भरोसा और सुरक्षा</a></li>
+                        <li><a href="/hi/accessibility.html">सुगम्यता</a></li>
+                        <li><a href="/hi/notify-me-at-launch.html">लॉन्च पर सूचना पाएँ</a></li>
+                        <li><a href="mailto:support@multidatepick.com">सपोर्ट</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. सर्वाधिकार सुरक्षित।</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="भाषा" translate="no"><ul><li><a href="/blog/create-salesforce-tasks-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-mehrere-aufgaben-im-kalender-erstellen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/crear-varias-tareas-salesforce-calendario.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/creer-plusieurs-taches-salesforce-calendrier.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/creare-piu-attivita-salesforce-calendario.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/create-salesforce-tasks-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/create-salesforce-tasks-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/create-salesforce-tasks-calendar.html" hreflang="hi" lang="hi" aria-current="page">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">इमेज बड़ी करें</p><p data-k="expand-diagram">आरेख बड़ा करें</p><p data-k="close">बंद करें</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

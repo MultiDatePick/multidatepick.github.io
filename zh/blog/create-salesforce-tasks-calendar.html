@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 批量创建任务：在日历上选日期，一次保存</title>
+    <meta name="description" content="一次批量创建多个 Salesforce 任务：在日历上选择日期，设置主题、状态和优先级，保存后每天生成一条任务。无需 Flow，无需 Apex。">
+    <link rel="canonical" href="https://multidatepick.com/zh/blog/create-salesforce-tasks-calendar.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Tasks post: same look as the Timeline, Utilization and Related Records posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.tk-narrow { max-width: 600px; margin-left: auto; margin-right: auto; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce 批量创建任务：在日历上选日期，一次保存">
+    <meta property="og:description" content="一次批量创建多个 Salesforce 任务：在日历上选择日期，设置主题、状态和优先级，保存后每天生成一条任务。无需 Flow，无需 Apex。">
+    <meta property="og:image" content="https://multidatepick.com/images/zh/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/blog/create-salesforce-tasks-calendar.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 批量创建任务：在日历上选日期，一次保存">
+    <meta name="twitter:description" content="一次批量创建多个 Salesforce 任务：在日历上选择日期，设置主题、状态和优先级，保存后每天生成一条任务。无需 Flow，无需 Apex。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/zh/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-mehrere-aufgaben-im-kalender-erstellen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/crear-varias-tareas-salesforce-calendario.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/creer-plusieurs-taches-salesforce-calendrier.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/creare-piu-attivita-salesforce-calendario.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/blog/no-code-salesforce-calendar.html">无代码设置</a></li>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "在日历上批量创建 Salesforce 任务：选好日期，一次保存",
+                "description": "一次批量创建多个 Salesforce 任务：在日历上选择日期，设置主题、状态和优先级，保存后每天生成一条任务。无需 Flow，无需 Apex。",
+                "datePublished": "2026-11-08",
+                "dateModified": "2026-11-08",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/zh/blog/create-salesforce-tasks-calendar.html",
+                "image": "https://multidatepick.com/images/zh/blog/salesforce-create-tasks-calendar-poster.png",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "如何在 Salesforce 中一次批量创建多个任务？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "把 MultiDatePick Dates 组件放到记录页面上，并将保存的对象设为任务。单击每个需要任务的日期，输入主题，然后保存。MultiDatePick 只需保存一次，就为每天创建一条标准 Salesforce 任务，每条都有自己的到期日期，并关联到该记录。整个过程不涉及 Flow，也不涉及 Apex。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "日期没有规律，也能创建 Salesforce 任务吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "能。直接单击需要的日期，例如 3 日、11 日和 24 日，每一天都会成为一条任务。如果日期确实有规律，“添加循环模式”按钮会帮您自动填好：每周二、隔周，或每月第一个周一、最后一个周五。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "哪些记录页面可以这样创建任务？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "任何可以关联任务的记录都可以。客户、业务机会、个案以及启用了活动的自定义对象，通过相关项（WhatId）关联；联系人和潜在客户通过名称（WhoId）关联。在联系人页面上，Salesforce 还会自动填入该联系人所属的客户，因此新任务也会显示在客户上。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "每条新任务都能设置相同的优先级、状态或被分配人吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "能。状态选择器设置所保存任务的状态。“默认字段值”可以为每条新任务填写任何其他字段，例如 Priority=High、一行注释，或把 OwnerId 设为某个用户的 Id，把任务分配给此人。不设置时，任务按 Salesforce 的常规做法分配给保存它们的人。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "能在日历上查看我的 Salesforce 任务吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "能。在记录页面上，日历按状态颜色显示该记录的任务。在应用程序页面或主页上，开启“显示所有记录”，并把“记录筛选器”设为 OwnerId=ME，就能得到一个只显示您自己任务的日历，每个主题都写在对应的日期里。悬停在某一天上可查看详情，也可以添加日程视图，以列表形式查看。"
+                        }
+                    }
+                ],
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-create-tasks-calendar.gif",
+                "caption": "在客户页面的日历上批量创建 Salesforce 任务的动画演示：选择四天，输入主题，单击“创建任务”保存四条任务，并以状态颜色显示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-tasks-activity-timeline.png",
+                "caption": "客户上的 Salesforce 活动时间线：从日历创建的四条“客户回访”任务，各带到期日期和高优先级标记，与客户的其他任务排在一起",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-task-calendar-month.png",
+                "caption": "Salesforce 任务日历月视图：每条任务以主题写在对应日期中，按状态着色，上方有状态筛选标签",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-task-calendar-setup.png",
+                "caption": "用于 Salesforce 任务的 MultiDatePick 设置向导“字段”屏幕：相关项（WhatId）、仅到期日期（ActivityDate）、主题、默认主题，以及默认字段值 Priority=High",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/marketing/salesforce-recurring-date-pattern-2nd-4th-friday.gif",
+                "caption": "MultiDatePick Salesforce 日期选择器中循环日期模式的动画演示：每月第 2 和第 4 个周五，先预览，再添加到日历",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>在日历上批量创建 Salesforce 任务：选好日期，一次保存</h1>
+                <p class="subtitle">单击每个需要任务的日期，输入主题，然后保存。每天生成一条标准 Salesforce 任务，并关联到该记录，无需 Flow，无需 Apex，无需代码。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">发布于 2026 年 11 月 8 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">“怎样在多个日期创建同一个任务？”“Salesforce 能一次批量创建多个任务吗？”“怎样在日历上查看我的任务？”“新建任务”按钮一次只能保存一条任务、一个到期日期。重复任务只能按固定周期重复。在选定的四天里安排四次跟进电话，仍然要把同一张表单填四遍。</p>
+
+                <p>MultiDatePick 把日历放到记录页面上。单击日期，输入主题，然后保存：<strong>每天一条 Salesforce 任务</strong>，每条都关联到该记录，状态、优先级和注释都已填好。它们就是普通任务，所以会出现在活动时间线、报表和每个列表视图中。<strong>无需 Flow，无需 Apex。</strong></p>
+
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/zh/blog/salesforce-create-tasks-calendar-poster.png" data-gif="/images/zh/blog/salesforce-create-tasks-calendar.gif" alt="在客户页面的日历上批量创建 Salesforce 任务的动画演示：选择四天，输入主题，单击“创建任务”保存四条任务，并以状态颜色显示" loading="lazy" decoding="async" width="588" height="726" data-zoomable>
+                    <figcaption>四天，一个主题，单击一次：客户上就有了四条 Salesforce 任务。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">能得到什么</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>每天一条任务</h3><p>您单击的每一天都会成为一条独立的任务，以当天为到期日期。十天，十条任务，保存一次。</p></div>
+                    <div class="tl-feat"><h3>关联到记录</h3><p>每条任务都关联到页面上的记录：客户、业务机会、个案或自定义记录，或者任务所针对的联系人或潜在客户。</p></div>
+                    <div class="tl-feat"><h3>自动填好</h3><p>您输入的主题、选择的状态，以及优先级、注释等任何其他字段，都会填入每条新任务。</p></div>
+                    <div class="tl-feat"><h3>任意日期都行</h3><p>单击零散的日期，拖选一段连续日期，或添加循环模式，例如隔周的周二。</p></div>
+                    <div class="tl-feat"><h3>日历上的任务</h3><p>已有任务按状态颜色显示。悬停在某一天上可查看主题和状态，也可以把每个主题写在对应的日期里。</p></div>
+                    <div class="tl-feat"><h3>以后随时修改</h3><p>编辑模式可以把任务移到另一天、更改状态或删除，一条或多条都能一次完成。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">选好日期，一次保存</h2>
+                <p>日历位于记录页面上，并按状态颜色显示该记录已有的任务。安排一系列客户回访只需四步：</p>
+                <ol class="cp-steps">
+                    <li><strong>单击日期。</strong>选择每个需要任务的日期。选中的日期会变成橙色；再次单击即可取消。</li>
+                    <li><strong>输入主题。</strong>“记录标签”框中填写每条新任务的主题，例如“客户回访”。</li>
+                    <li><strong>选择状态。</strong>Not Started、In Progress，或任务状态选项列表中的任意值。</li>
+                    <li><strong>保存。</strong>每天创建一条任务，并关联到该记录。这些日期会立即显示状态颜色。</li>
+                </ol>
+                <p>指向任意一天即可看到该任务的主题和状态，并可从那里打开任务。开启“允许每天多条”后，已有任务的日期也可以再添加一条。</p>
+
+                <h2 style="margin-top:44px;">真正的 Salesforce 任务，显示在活动时间线中</h2>
+                <p>这里没有副本，也没有自定义对象。每一天保存的都是一条标准任务，因此它和团队手动创建的任务完全一样：会显示在记录的活动时间线、任务选项卡、报表和列表视图中，以及被分配人的待办列表里。在联系人或潜在客户上，任务通过名称关联；在客户、业务机会、个案或自定义对象上，则通过相关项关联。</p>
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/zh/blog/salesforce-tasks-activity-timeline.png" alt="客户上的 Salesforce 活动时间线：从日历创建的四条“客户回访”任务，各带到期日期和高优先级标记，与客户的其他任务排在一起" loading="lazy" width="1262" height="1976" data-zoomable>
+                    <figcaption>客户活动时间线中的四次客户回访，每条都由默认字段值标记为高优先级。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">所有任务，一个日历</h2>
+                <p>同一个组件也可以用作任务日历。在应用程序页面或主页上，开启“显示所有记录”（Show All Records），它就会显示您能看到的所有任务；再添加 <code>OwnerId=ME</code> 这样的“记录筛选器”（Record Filter），每个人就只看到自己的任务。开启“在每天中显示记录名称”（Show Record Names in Each Day）后，每个主题都会按状态颜色写在对应的日期里，日历上方的状态标签可按状态筛选。</p>
+                <figure class="sc-shot">
+                    <img src="/images/zh/blog/salesforce-task-calendar-month.png" alt="Salesforce 任务日历月视图：每条任务以主题写在对应日期中，按状态着色，上方有状态筛选标签" loading="lazy" width="1989" height="1334" data-zoomable>
+                    <figcaption>按主题和状态查看一个月的任务，包括从客户保存的四次客户回访。</figcaption>
+                </figure>
+                <p>任务已经分散在客户的联系人和业务机会上？Rollup Field（汇总字段）也能把它们带到客户的日历上。<a href="/zh/blog/salesforce-calendar-related-records.html">了解客户日历如何显示相关记录</a>。</p>
+
+                <h2 style="margin-top:44px;">当日期有规律时</h2>
+                <p>有些任务计划会重复：隔周周二的电话、每月最后一个周五的报告、每月第 2 和第 4 个周五的评审。<strong>添加循环模式</strong>会帮您填好这些日期，在添加之前先显示出来，并在您设定的结束日期停止。每一天仍然保存为一条独立的任务，因此您可以移动或跳过其中一条，而不影响其他任务。</p>
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/zh/marketing/salesforce-recurring-date-pattern-2nd-4th-friday-poster.png" data-gif="/images/zh/marketing/salesforce-recurring-date-pattern-2nd-4th-friday.gif" alt="MultiDatePick Salesforce 日期选择器中循环日期模式的动画演示：每月第 2 和第 4 个周五，先预览，再添加到日历" loading="lazy" decoding="async" width="700" height="900" data-zoomable>
+                    <figcaption>每月第 2 和第 4 个周五，一步完成预览和添加。</figcaption>
+                </figure>
+                <p>更多模式，以及为什么日期范围无法表达它们，请参阅 <a href="/zh/blog/recurring-date-patterns-in-salesforce.html">Salesforce 中的循环日期模式</a>。</p>
+
+                <h2 style="margin-top:44px;">在设置向导中完成设置</h2>
+                <p>无需代码，也无需构建 Flow。设置向导写入配置，组件读取配置：</p>
+                <ol class="cp-steps">
+                    <li><strong>选择日历放在哪里。</strong>打开 MultiDatePick 设置向导选项卡，选择记录页面（此处为客户）和每个日期一条记录的保存方式。</li>
+                    <li><strong>将每个选中的日期保存为任务。</strong>在“字段”屏幕上单击 <strong>任务</strong>，然后检查与页面的关联：客户上用 <strong>相关项 ID（WhatId）</strong>，联系人或潜在客户上用 <strong>名称 ID（WhoId）</strong>。向导会自动填好 <strong>仅到期日期（ActivityDate）</strong> 和 <strong>主题</strong>。</li>
+                    <li><strong>填写其余内容。</strong>输入默认主题，取消勾选“在记录名称后追加日期/时间”，让主题保持简洁，并在“默认字段值”中输入 <code>Priority=High</code> 这样的值。用 <code>Account_Tasks</code> 这样的名称保存配置。</li>
+                    <li><strong>把组件放到页面上。</strong>在 Lightning App Builder 中，把 MultiDatePick Dates 组件添加到客户页面，并在 <strong>Config Name</strong> 中输入配置名称。</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/zh/blog/salesforce-task-calendar-setup.png" alt="用于 Salesforce 任务的 MultiDatePick 设置向导“字段”屏幕：相关项（WhatId）、仅到期日期（ActivityDate）、主题、默认主题，以及默认字段值 Priority=High" loading="lazy" width="1999" height="528" data-zoomable>
+                    <figcaption>单击一次选择任务：自动填入相关项、仅到期日期和主题，再加上默认主题和 Priority=High。</figcaption>
+                </figure>
+                <p>状态颜色来自您的任务状态值，因此 Completed 可以是绿色，Deferred 可以是灰色。以后修改配置，所有使用该配置的页面在下次加载时都会生效。</p>
+
+                <h2 style="margin-top:44px;">哪些团队这样创建任务</h2>
+                <p>凡是计划落在几个选定日期、而不是单个到期日期上的人都适用：</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>客户经理</strong><span>全年的季度回访和现场拜访，在客户上一次规划好。</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>销售跟进</strong><span>演示后第 2、7、14 天的电话，在会议结束前就在业务机会上创建好。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>客户成功</strong><span>在与客户商定的日期安排上线培训，每次都是一条有自己状态的任务。</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>合规与财务</strong><span>落在固定日期的申报和审核截止日，分配给负责的人。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>非营利组织</strong><span>给大额捐赠人的感谢电话和关系维护，分布在整个季度。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>服务团队</strong><span>个案关闭后的跟进检查，安排在客户要求的日期。</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">决定其行为的设置</h2>
+                <p>以下每一项都是设置向导中的一个字段，也是组件上的一个属性，因此这里没有任何内容需要代码：</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">设置项</th><th>对任务的作用</th><th style="width:22%;">API 名称</th></tr></thead>
+                    <tbody>
+                    <tr><td>子对象 API 名称</td><td>Task（任务）：每个选中的日期都保存为一条 Salesforce 任务。</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>关系字段 API 名称</td><td>客户、业务机会、个案和自定义对象上用 WhatId（相关项）；联系人和潜在客户上用 WhoId（名称）。</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>日期字段 API 名称</td><td>ActivityDate，任务的到期日期。</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>记录名称字段和默认记录名称（Record Name Field and Default Record Name）</td><td>Subject（主题），以及输入框中预先填好的主题。</td><td><code>recordNameField</code>、<code>defaultRecordName</code></td></tr>
+                    <tr><td>状态字段和状态颜色（Status Field and Status Colors）</td><td>Status（状态），每个值一种颜色，例如 Completed:#22C55E。</td><td><code>statusField</code>、<code>statusColors</code></td></tr>
+                    <tr><td>默认字段值（Default Field Values）</td><td>每条新任务上的任何其他字段，例如 Priority=High，或用 OwnerId 分配任务。</td><td><code>defaultFieldValues</code></td></tr>
+                    <tr><td>允许每天多条（Allow Multiple Per Day）</td><td>已有任务的日期还可以再添加一条。</td><td><code>allowMultiplePerDay</code></td></tr>
+                    <tr><td>在每天中显示记录名称（Show Record Names in Each Day）</td><td>在“大”和“全宽”日历上，把每条任务的主题写在对应的日期里。</td><td><code>monthShowNames</code></td></tr>
+                    <tr><td>显示所有记录和记录筛选器（Show All Records and Record Filter）</td><td>在应用程序页面或主页上显示所有任务的日历，或用 OwnerId=ME 只显示您自己的任务。</td><td><code>showAllRecords</code>、<code>recordFilter</code></td></tr>
+                    <tr><td>配置名称（Config Name）</td><td>设置向导保存的配置。设置这一项，其余留空即可。</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>不只是月视图。</strong>在“可用视图”中加入日程（Agenda），同样的任务还会按天以列表显示，与日历一键切换。<a href="/zh/blog/salesforce-calendar-views.html">查看全部五种视图</a>。</div>
+
+                <h2 style="margin-top:44px;">常见问题</h2>
+                <div class="tl-faq">
+                    <details><summary>如何在 Salesforce 中一次批量创建多个任务？</summary><p>把 MultiDatePick Dates 组件放到记录页面上，并将保存的对象设为任务。单击每个需要任务的日期，输入主题，然后保存。MultiDatePick 只需保存一次，就为每天创建一条标准 Salesforce 任务，每条都有自己的到期日期，并关联到该记录。整个过程不涉及 Flow，也不涉及 Apex。</p></details>
+                    <details><summary>日期没有规律，也能创建 Salesforce 任务吗？</summary><p>能。直接单击需要的日期，例如 3 日、11 日和 24 日，每一天都会成为一条任务。如果日期确实有规律，“添加循环模式”按钮会帮您自动填好：每周二、隔周，或每月第一个周一、最后一个周五。</p></details>
+                    <details><summary>哪些记录页面可以这样创建任务？</summary><p>任何可以关联任务的记录都可以。客户、业务机会、个案以及启用了活动的自定义对象，通过相关项（WhatId）关联；联系人和潜在客户通过名称（WhoId）关联。在联系人页面上，Salesforce 还会自动填入该联系人所属的客户，因此新任务也会显示在客户上。</p></details>
+                    <details><summary>每条新任务都能设置相同的优先级、状态或被分配人吗？</summary><p>能。状态选择器设置所保存任务的状态。“默认字段值”可以为每条新任务填写任何其他字段，例如 Priority=High、一行注释，或把 OwnerId 设为某个用户的 Id，把任务分配给此人。不设置时，任务按 Salesforce 的常规做法分配给保存它们的人。</p></details>
+                    <details><summary>能在日历上查看我的 Salesforce 任务吗？</summary><p>能。在记录页面上，日历按状态颜色显示该记录的任务。在应用程序页面或主页上，开启“显示所有记录”，并把“记录筛选器”设为 OwnerId=ME，就能得到一个只显示您自己任务的日历，每个主题都写在对应的日期里。悬停在某一天上可查看详情，也可以添加日程视图，以列表形式查看。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>选好日期，任务就有了。</h2>
+                    <p>在在线演示中随意体验，或从 <a href="/zh/configlibrary.html">Config Library</a> 中的现成配置开始。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=create-salesforce-tasks-calendar" class="btn btn-demo" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-primary">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">入门指南</a>
+                    </div>
+                    <ul class="check-list"><li>$20/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>100% Salesforce 原生</li><li>无需 Apex</li><li>即将登陆 Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>相关阅读</h3>
+                    <ul>
+                        <li><a href="/zh/blog/salesforce-calendar-related-records.html">在客户日历上显示联系人和业务机会的任务</a></li>
+                        <li><a href="/zh/blog/recurring-date-patterns-in-salesforce.html">Salesforce 中的循环日期模式</a></li>
+                        <li><a href="/zh/blog/no-code-salesforce-calendar.html">无代码 Salesforce 日历，逐项详解</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-setup-wizard.html">在设置向导中配置 Salesforce 日历</a></li>
+                        <li><a href="/zh/multidatepickdates.html">MultiDatePick Dates 日历</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>产品</h4>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>解决方案</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>文档</h4>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                    <h4>面向开发者</h4>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar-developer-guide.html">开发者指南</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>公司</h4>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/blog/create-salesforce-tasks-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-mehrere-aufgaben-im-kalender-erstellen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/crear-varias-tareas-salesforce-calendario.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/creer-plusieurs-taches-salesforce-calendrier.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/creare-piu-attivita-salesforce-calendario.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/create-salesforce-tasks-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/create-salesforce-tasks-calendar.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/blog/create-salesforce-tasks-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

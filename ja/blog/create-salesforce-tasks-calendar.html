@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce の ToDo をカレンダーから一括作成</title>
+    <meta name="description" content="Salesforce の ToDo を一括作成。カレンダーで日を選び、件名、状況、優先度を決めて保存すると、1 日 1 件の ToDo ができます。フローも Apex も不要です。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/create-salesforce-tasks-calendar.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Tasks post: same look as the Timeline, Utilization and Related Records posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.tk-narrow { max-width: 600px; margin-left: auto; margin-right: auto; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Salesforce の ToDo をカレンダーから一括作成">
+    <meta property="og:description" content="Salesforce の ToDo を一括作成。カレンダーで日を選び、件名、状況、優先度を決めて保存すると、1 日 1 件の ToDo ができます。フローも Apex も不要です。">
+    <meta property="og:image" content="https://multidatepick.com/images/ja/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/create-salesforce-tasks-calendar.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce の ToDo をカレンダーから一括作成">
+    <meta name="twitter:description" content="Salesforce の ToDo を一括作成。カレンダーで日を選び、件名、状況、優先度を決めて保存すると、1 日 1 件の ToDo ができます。フローも Apex も不要です。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/ja/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-mehrere-aufgaben-im-kalender-erstellen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/crear-varias-tareas-salesforce-calendario.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/creer-plusieurs-taches-salesforce-calendrier.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/creare-piu-attivita-salesforce-calendario.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/blog/no-code-salesforce-calendar.html">ノーコード設定</a></li>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce の ToDo をカレンダーで一括作成: 日を選んで、保存は 1 回だけ",
+                "description": "Salesforce の ToDo を一括作成。カレンダーで日を選び、件名、状況、優先度を決めて保存すると、1 日 1 件の ToDo ができます。フローも Apex も不要です。",
+                "datePublished": "2026-11-08",
+                "dateModified": "2026-11-08",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/create-salesforce-tasks-calendar.html",
+                "image": "https://multidatepick.com/images/ja/blog/salesforce-create-tasks-calendar-poster.png",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce で複数の ToDo を一括作成するには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "MultiDatePick の Dates コンポーネントをレコードページに配置し、保存先のオブジェクトに ToDo を指定します。ToDo が必要な日をすべてクリックし、件名を入力して保存します。MultiDatePick が 1 日ごとに標準の Salesforce ToDo を 1 件ずつ作成し、それぞれに期日を設定してレコードに関連付けます。保存は 1 回だけで、フローも Apex も使いません。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "パターンのない不規則な日付にも、Salesforce の ToDo を作成できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。3 日、11 日、24 日のように必要な日をそのままクリックすれば、それぞれが ToDo になります。日付にパターンがある場合は、「繰り返しパターンを追加」ボタンで自動入力できます。毎週火曜、隔週、毎月の第 1 月曜や最終金曜といった具合です。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "この方法で ToDo を作成できるのは、どのレコードページですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "ToDo を関連付けられるレコードなら、どれでも使えます。取引先、商談、ケース、活動を許可したカスタムオブジェクトは関連先 (WhatId) で、取引先責任者とリードは名前 (WhoId) で紐づきます。取引先責任者のページでは、Salesforce がその取引先責任者の取引先も自動で設定するため、新しい ToDo は取引先にも表示されます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "新しい ToDo すべてに、同じ優先度、状況、任命先を設定できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。「状況」の選択欄で、保存する ToDo の状況を設定します。それ以外の項目は「既定の項目値」で新しい ToDo すべてに入力できます。たとえば Priority=High、コメント欄の一文、特定のユーザーに割り当てるなら OwnerId にそのユーザーの ID を指定します。設定しなければ、Salesforce の通常の動作どおり、保存した人が任命先になります。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce の ToDo をカレンダーで表示できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。レコードページでは、そのレコードの ToDo が状況の色でカレンダーに表示されます。アプリケーションページやホームページでは、「すべてのレコードを表示」をオンにして「レコードフィルター」に OwnerId=ME を設定すると、自分の ToDo のカレンダーになり、各日に件名が表示されます。日にカーソルを合わせれば詳細が表示され、予定一覧表示を加えれば一覧でも確認できます。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-create-tasks-calendar.gif",
+                "caption": "取引先ページのカレンダーから Salesforce の ToDo を一括作成するアニメーションデモ: 4 日を選び、件名を入力し、「ToDo を作成」で 4 件の ToDo を保存すると、状況の色で表示される",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-tasks-activity-timeline.png",
+                "caption": "Salesforce の取引先の活動タイムライン: カレンダーから作成した 4 件の「顧客フォローアップ」ToDo が、それぞれの期日と優先度「高」のフラグ付きで、取引先のほかの ToDo と並んでいる",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-task-calendar-month.png",
+                "caption": "Salesforce の ToDo カレンダーの月表示: すべての ToDo が件名で各日に書き込まれ、状況の色で表示され、上部に状況のフィルターがある",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-task-calendar-setup.png",
+                "caption": "Salesforce の ToDo 用 MultiDatePick セットアップウィザードの「項目」画面: 関連先 (WhatId)、期日 (ActivityDate)、件名、既定の件名、既定の項目値 Priority=High",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/marketing/salesforce-recurring-date-pattern-2nd-4th-friday.gif",
+                "caption": "MultiDatePick の Salesforce 日付ピッカーで繰り返し日付パターンを設定するアニメーションデモ: 毎月の第 2・第 4 金曜日をプレビューしてから、カレンダーに追加",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce の ToDo をカレンダーで一括作成: 日を選んで、保存は 1 回だけ</h1>
+                <p class="subtitle">ToDo が必要な日をすべてクリックし、件名を入力して保存。1 日に 1 件の標準 Salesforce ToDo が、レコードに関連付けて作成されます。フローも Apex もコードも不要です。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 11 月 8 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">「同じ ToDo を複数の日付に作成するには?」「Salesforce で ToDo をまとめて作成できる?」「自分の ToDo をカレンダーで見るには?」「新規 ToDo」ボタンで保存できるのは、期日が 1 つの ToDo 1 件だけです。繰り返し ToDo は決まった周期でしか繰り返せません。選んだ 4 日にフォローアップの電話を 4 回入れる計画でも、同じフォームを 4 回入力することになります。</p>
+
+                <p>MultiDatePick は、レコードページにカレンダーを置きます。日をクリックし、件名を入力して保存すれば、<strong>1 日に 1 件の Salesforce ToDo</strong> が作成されます。どれもレコードに関連付けられ、状況、優先度、コメントも入力済みです。普通の ToDo なので、活動タイムライン、レポート、すべてのリストビューに表示されます。<strong>フローも Apex も不要です。</strong></p>
+
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/ja/blog/salesforce-create-tasks-calendar-poster.png" data-gif="/images/ja/blog/salesforce-create-tasks-calendar.gif" alt="取引先ページのカレンダーから Salesforce の ToDo を一括作成するアニメーションデモ: 4 日を選び、件名を入力し、「ToDo を作成」で 4 件の ToDo を保存すると、状況の色で表示される" loading="lazy" decoding="async" width="588" height="726" data-zoomable>
+                    <figcaption>4 日、件名 1 つ、クリック 1 回で、取引先に 4 件の Salesforce ToDo。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">できること</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>1 日に 1 件の ToDo</h3><p>クリックした日がそれぞれ 1 件の ToDo になり、その日が期日になります。10 日なら 10 件、保存は 1 回です。</p></div>
+                    <div class="tl-feat"><h3>レコードに関連付け</h3><p>各 ToDo はページのレコードに関連付けられます。取引先、商談、ケース、カスタムレコード、または対象の取引先責任者やリードです。</p></div>
+                    <div class="tl-feat"><h3>項目は自動で入力</h3><p>入力した件名、選んだ状況、さらに優先度やコメントなどほかの項目も、新しい ToDo すべてに入力されます。</p></div>
+                    <div class="tl-feat"><h3>どんな日でも</h3><p>飛び飛びの日をクリック、連続する日をドラッグ、または隔週の火曜日のような繰り返しパターンを追加できます。</p></div>
+                    <div class="tl-feat"><h3>カレンダーで ToDo を確認</h3><p>既存の ToDo は状況の色で表示されます。日にカーソルを合わせると件名と状況が表示され、各日に件名を書き込むこともできます。</p></div>
+                    <div class="tl-feat"><h3>あとから変更</h3><p>編集モードでは、ToDo を別の日に移動したり、状況を変えたり、削除したりできます。1 件ずつでも、まとめてでも操作できます。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">日を選んで、保存は 1 回</h2>
+                <p>カレンダーはレコードページに置かれ、そのレコードにすでにある ToDo を状況の色で表示します。顧客フォローアップを何回か計画する手順は 4 つです。</p>
+                <ol class="cp-steps">
+                    <li><strong>日をクリックします。</strong> ToDo が必要な日をそれぞれ選びます。選んだ日はオレンジ色になり、もう一度クリックすると選択が外れます。</li>
+                    <li><strong>件名を入力します。</strong> 「レコードのラベル」欄に、新しい ToDo すべての件名 (例: 顧客フォローアップ) を入力します。</li>
+                    <li><strong>状況を選びます。</strong> Not Started、In Progress など、ToDo の「状況」選択リストにある値ならどれでも選べます。</li>
+                    <li><strong>保存します。</strong> 1 日に 1 件の ToDo が作成され、レコードに関連付けられます。選んだ日はすぐに状況の色に変わります。</li>
+                </ol>
+                <p>日にカーソルを合わせると、その ToDo の件名と状況が表示され、そこから ToDo を開けます。「1 日に複数を許可」をオンにすれば、すでに ToDo がある日にもう 1 件追加できます。</p>
+
+                <h2 style="margin-top:44px;">活動タイムラインに表示される、本物の Salesforce ToDo</h2>
+                <p>コピーでもカスタムオブジェクトでもありません。各日は標準の ToDo として保存されるため、チームが手作業で作成した ToDo と同じように扱われます。レコードの活動タイムライン、ToDo タブ、レポートやリストビュー、任命先の ToDo リストに表示されます。取引先責任者やリードでは名前で、取引先、商談、ケース、カスタムオブジェクトでは関連先で紐づきます。</p>
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/ja/blog/salesforce-tasks-activity-timeline.png" alt="Salesforce の取引先の活動タイムライン: カレンダーから作成した 4 件の「顧客フォローアップ」ToDo が、それぞれの期日と優先度「高」のフラグ付きで、取引先のほかの ToDo と並んでいる" loading="lazy" width="1262" height="1976" data-zoomable>
+                    <figcaption>取引先の活動タイムラインに並んだ 4 件の顧客フォローアップ。既定の項目値により、どれも優先度「高」のフラグ付きです。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">すべての ToDo を 1 つのカレンダーに</h2>
+                <p>同じコンポーネントが ToDo カレンダーとしても使えます。アプリケーションページやホームページで「すべてのレコードを表示」(Show All Records) をオンにすると、自分が参照できるすべての ToDo が表示されます。<code>OwnerId=ME</code> のような「レコードフィルター」(Record Filter) を加えれば、各ユーザーには自分の ToDo だけが表示されます。「各日にレコード名を表示」(Show Record Names in Each Day) をオンにすると、各日に件名が状況の色で書き込まれ、カレンダー上部の状況ピルで状況ごとに絞り込めます。</p>
+                <figure class="sc-shot">
+                    <img src="/images/ja/blog/salesforce-task-calendar-month.png" alt="Salesforce の ToDo カレンダーの月表示: すべての ToDo が件名で各日に書き込まれ、状況の色で表示され、上部に状況のフィルターがある" loading="lazy" width="1989" height="1334" data-zoomable>
+                    <figcaption>件名と状況で見る 1 か月分の ToDo。取引先から保存した 4 件の顧客フォローアップも含まれています。</figcaption>
+                </figure>
+                <p>取引先の取引先責任者や商談に ToDo が分散していませんか? 積み上げ項目 (Rollup Field) を使えば、それらも取引先のカレンダーに表示できます。<a href="/ja/blog/salesforce-calendar-related-records.html">取引先カレンダーで関連レコードを表示する方法</a>をご覧ください。</p>
+
+                <h2 style="margin-top:44px;">日付にパターンがあるとき</h2>
+                <p>繰り返す ToDo の計画もあります。隔週火曜の電話、毎月最終金曜のレポート、第 2・第 4 金曜のレビューなどです。<strong>繰り返しパターンを追加</strong>を使えば、それらの日を自動で入力し、追加する前に日付を表示し、設定した終了日で止まります。各日はそれぞれ別の ToDo として保存されるので、1 件だけ移動したり取りやめたりしても、ほかには影響しません。</p>
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/ja/marketing/salesforce-recurring-date-pattern-2nd-4th-friday-poster.png" data-gif="/images/ja/marketing/salesforce-recurring-date-pattern-2nd-4th-friday.gif" alt="MultiDatePick の Salesforce 日付ピッカーで繰り返し日付パターンを設定するアニメーションデモ: 毎月の第 2・第 4 金曜日をプレビューしてから、カレンダーに追加" loading="lazy" decoding="async" width="700" height="900" data-zoomable>
+                    <figcaption>毎月の第 2・第 4 金曜日を、プレビューして 1 回で追加。</figcaption>
+                </figure>
+                <p>ほかのパターンや、日付範囲では表せない理由は、<a href="/ja/blog/recurring-date-patterns-in-salesforce.html">Salesforce で繰り返しの日付パターンを扱う</a>で解説しています。</p>
+
+                <h2 style="margin-top:44px;">セットアップウィザードで設定する</h2>
+                <p>コードも、作成するフローも不要です。セットアップウィザードが設定を書き込み、コンポーネントがそれを読み込みます。</p>
+                <ol class="cp-steps">
+                    <li><strong>カレンダーの配置場所を選びます。</strong> MultiDatePick セットアップウィザードのタブを開き、レコードページ (ここでは取引先) と、保存方法として日付ごとに 1 件のレコードを選びます。</li>
+                    <li><strong>選んだ日を ToDo として保存するよう設定します。</strong> 「項目」画面で <strong>ToDo</strong> をクリックし、ページとの関連付けを確認します。取引先なら <strong>関連先 ID (WhatId)</strong>、取引先責任者やリードなら <strong>名前 ID (WhoId)</strong> です。<strong>期日 (ActivityDate)</strong> と <strong>件名</strong> はウィザードが自動で入力します。</li>
+                    <li><strong>残りを入力します。</strong> 既定の件名を入力し、件名をすっきり保つため「レコード名に日付/時刻を追加」のチェックを外し、「既定の項目値」に <code>Priority=High</code> などを入力します。<code>Account_Tasks</code> のような名前で設定を保存します。</li>
+                    <li><strong>ページにコンポーネントを配置します。</strong> Lightning App Builder で、取引先ページに MultiDatePick の Dates コンポーネントを追加し、<strong>Config Name</strong> に設定名を入力します。</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/ja/blog/salesforce-task-calendar-setup.png" alt="Salesforce の ToDo 用 MultiDatePick セットアップウィザードの「項目」画面: 関連先 (WhatId)、期日 (ActivityDate)、件名、既定の件名、既定の項目値 Priority=High" loading="lazy" width="1999" height="528" data-zoomable>
+                    <figcaption>ToDo をワンクリックで選択: 関連先、期日、件名が入り、既定の件名と Priority=High を追加。</figcaption>
+                </figure>
+                <p>状況の色は ToDo の状況の値ごとに決まるため、Completed は緑、Deferred はグレーにできます。あとで設定を変更すると、その設定を使うすべてのページに次回の読み込みから反映されます。</p>
+
+                <h2 style="margin-top:44px;">この方法で ToDo を作成しているチーム</h2>
+                <p>期日が 1 つではなく、選んだ数日に予定がある計画なら、どんな業務にも使えます。</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>アカウントマネージャー</strong><span>1 年分の四半期ごとのフォローアップや現地訪問を、取引先でまとめて計画。</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>営業のフォローアップ</strong><span>デモの 2 日後、7 日後、14 日後の電話を、打ち合わせが終わる前に商談に作成。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>カスタマーサクセス</strong><span>顧客と合意した日のオンボーディングセッションを、それぞれ状況を持つ ToDo として。</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>コンプライアンスと財務</strong><span>決まった日付に来る申告やレビューの期限を、担当者に割り当てて。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>非営利団体</strong><span>大口寄付者へのお礼の電話や関係づくりの連絡を、シーズンを通じて計画。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>サービスチーム</strong><span>ケースのクローズ後のフォローアップ確認を、顧客が希望した日に。</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">動作を決める設定</h2>
+                <p>いずれもセットアップウィザードの項目とコンポーネントのプロパティなので、コードは一切不要です。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">設定</th><th>ToDo での役割</th><th style="width:22%;">API 参照名</th></tr></thead>
+                    <tbody>
+                    <tr><td>子オブジェクトの API 参照名（Child Object API Name）</td><td>Task (ToDo): 選んだ日がそれぞれ Salesforce の ToDo として保存されます。</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>関連項目の API 参照名（Relationship Field API Name）</td><td>取引先、商談、ケース、カスタムオブジェクトでは WhatId (関連先)、取引先責任者とリードでは WhoId (名前)。</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>日付項目の API 参照名（Date Field API Name）</td><td>ActivityDate (ToDo の期日)。</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>レコード名項目とデフォルトレコード名（Record Name Field and Default Record Name）</td><td>Subject (件名) と、入力欄に最初から入っている件名。</td><td><code>recordNameField</code>、<code>defaultRecordName</code></td></tr>
+                    <tr><td>状況項目と状況の色（Status Field and Status Colors）</td><td>Status (状況) と値ごとの色 (例: Completed:#22C55E)。</td><td><code>statusField</code>、<code>statusColors</code></td></tr>
+                    <tr><td>既定の項目値（Default Field Values）</td><td>新しい ToDo すべてに入れるほかの項目 (例: Priority=High、割り当て先を指定する OwnerId)。</td><td><code>defaultFieldValues</code></td></tr>
+                    <tr><td>1 日に複数を許可（Allow Multiple Per Day）</td><td>すでに ToDo がある日にも、もう 1 件追加できます。</td><td><code>allowMultiplePerDay</code></td></tr>
+                    <tr><td>各日にレコード名を表示（Show Record Names in Each Day）</td><td>カレンダーサイズが「大」または「全幅」のとき、各 ToDo の件名をその日に書き込みます。</td><td><code>monthShowNames</code></td></tr>
+                    <tr><td>「すべてのレコードを表示」と「レコードフィルター」（Show All Records and Record Filter）</td><td>アプリケーションページやホームページで、すべての ToDo、または OwnerId=ME で自分の ToDo だけを表示するカレンダー。</td><td><code>showAllRecords</code>、<code>recordFilter</code></td></tr>
+                    <tr><td>設定名（Config Name）</td><td>セットアップウィザードで保存した設定。これを設定すれば、ほかは空欄のままで構いません。</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>月表示のグリッドだけではありません。</strong> 「利用可能な表示」に予定一覧 (Agenda) を加えると、同じ ToDo が日ごとの一覧でも表示され、カレンダーからワンクリックで切り替えられます。<a href="/ja/blog/salesforce-calendar-views.html">5 つの表示をすべて見る</a>。</div>
+
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="tl-faq">
+                    <details><summary>Salesforce で複数の ToDo を一括作成するには?</summary><p>MultiDatePick の Dates コンポーネントをレコードページに配置し、保存先のオブジェクトに ToDo を指定します。ToDo が必要な日をすべてクリックし、件名を入力して保存します。MultiDatePick が 1 日ごとに標準の Salesforce ToDo を 1 件ずつ作成し、それぞれに期日を設定してレコードに関連付けます。保存は 1 回だけで、フローも Apex も使いません。</p></details>
+                    <details><summary>パターンのない不規則な日付にも、Salesforce の ToDo を作成できますか?</summary><p>はい。3 日、11 日、24 日のように必要な日をそのままクリックすれば、それぞれが ToDo になります。日付にパターンがある場合は、「繰り返しパターンを追加」ボタンで自動入力できます。毎週火曜、隔週、毎月の第 1 月曜や最終金曜といった具合です。</p></details>
+                    <details><summary>この方法で ToDo を作成できるのは、どのレコードページですか?</summary><p>ToDo を関連付けられるレコードなら、どれでも使えます。取引先、商談、ケース、活動を許可したカスタムオブジェクトは関連先 (WhatId) で、取引先責任者とリードは名前 (WhoId) で紐づきます。取引先責任者のページでは、Salesforce がその取引先責任者の取引先も自動で設定するため、新しい ToDo は取引先にも表示されます。</p></details>
+                    <details><summary>新しい ToDo すべてに、同じ優先度、状況、任命先を設定できますか?</summary><p>はい。「状況」の選択欄で、保存する ToDo の状況を設定します。それ以外の項目は「既定の項目値」で新しい ToDo すべてに入力できます。たとえば Priority=High、コメント欄の一文、特定のユーザーに割り当てるなら OwnerId にそのユーザーの ID を指定します。設定しなければ、Salesforce の通常の動作どおり、保存した人が任命先になります。</p></details>
+                    <details><summary>Salesforce の ToDo をカレンダーで表示できますか?</summary><p>はい。レコードページでは、そのレコードの ToDo が状況の色でカレンダーに表示されます。アプリケーションページやホームページでは、「すべてのレコードを表示」をオンにして「レコードフィルター」に OwnerId=ME を設定すると、自分の ToDo のカレンダーになり、各日に件名が表示されます。日にカーソルを合わせれば詳細が表示され、予定一覧表示を加えれば一覧でも確認できます。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>日を選べば、ToDo ができあがる。</h2>
+                    <p>ライブデモを操作してみるか、<a href="/ja/configlibrary.html">Config Library</a> のすぐに使える設定から始めましょう。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=create-salesforce-tasks-calendar" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/blog/salesforce-calendar-related-records.html">取引先カレンダーに取引先責任者と商談の ToDo を表示する</a></li>
+                        <li><a href="/ja/blog/recurring-date-patterns-in-salesforce.html">Salesforce で繰り返しの日付パターンを扱う</a></li>
+                        <li><a href="/ja/blog/no-code-salesforce-calendar.html">ノーコードの Salesforce カレンダー: できることを 1 つずつ紹介</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-setup-wizard.html">セットアップウィザードで Salesforce カレンダーを設定する</a></li>
+                        <li><a href="/ja/multidatepickdates.html">MultiDatePick の Dates カレンダー</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h4>製品</h4>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ソリューション</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>ドキュメント</h4>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                    <h4>開発者向け</h4>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar-developer-guide.html">開発者ガイド</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>会社情報</h4>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/create-salesforce-tasks-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-mehrere-aufgaben-im-kalender-erstellen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/crear-varias-tareas-salesforce-calendario.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/creer-plusieurs-taches-salesforce-calendrier.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/creare-piu-attivita-salesforce-calendario.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/create-salesforce-tasks-calendar.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/create-salesforce-tasks-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/create-salesforce-tasks-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

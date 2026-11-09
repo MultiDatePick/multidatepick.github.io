@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar várias tarefas no Salesforce de uma vez, no calendário</title>
+    <meta name="description" content="Crie várias tarefas no Salesforce de uma vez: escolha os dias no calendário, defina assunto, status e prioridade e salve uma por dia. Sem Flow nem Apex.">
+    <link rel="canonical" href="https://multidatepick.com/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Tasks post: same look as the Timeline, Utilization and Related Records posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.tk-narrow { max-width: 600px; margin-left: auto; margin-right: auto; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Criar várias tarefas no Salesforce de uma vez, no calendário">
+    <meta property="og:description" content="Crie várias tarefas no Salesforce de uma vez: escolha os dias no calendário, defina assunto, status e prioridade e salve uma por dia. Sem Flow nem Apex.">
+    <meta property="og:image" content="https://multidatepick.com/images/pt-br/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Criar várias tarefas no Salesforce de uma vez, no calendário">
+    <meta name="twitter:description" content="Crie várias tarefas no Salesforce de uma vez: escolha os dias no calendário, defina assunto, status e prioridade e salve uma por dia. Sem Flow nem Apex.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/pt-br/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-mehrere-aufgaben-im-kalender-erstellen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/crear-varias-tareas-salesforce-calendario.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/creer-plusieurs-taches-salesforce-calendrier.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/creare-piu-attivita-salesforce-calendario.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Em breve no Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Fechar aviso" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/pt-br/" class="logo"><img src="/images/logo.png" alt="Logotipo do MultiDatePick: calendário de várias datas e reserva de recursos para Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Abrir ou fechar o menu"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">Dates</a></li>
+                        <li><a href="/pt-br/seletor-de-data-e-hora-salesforce.html">Dates &amp; Times</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">Resource Booking</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Cinco visualizações de calendário</a></li>
+                        <li><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a></li>
+                        <li><a href="/pt-br/confianca-e-seguranca.html">Confiança e segurança</a></li>
+                        <li><a href="/pt-br/acessibilidade-vpat.html">Acessibilidade (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Soluções <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/calendario-salesforce.html">Calendário Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas</a></li>
+                        <li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html">Reserva de salas de reunião</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html">Datas de campanha</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">Governo / Section 508</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pt-br/precos.html">Preços</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentação <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/blog/calendario-salesforce-sem-codigo.html">Configuração sem código</a></li>
+                        <li><a href="/pt-br/primeiros-passos.html">Primeiros passos</a></li>
+                        <li><a href="/pt-br/guia-do-usuario.html">Guia do usuário</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">Guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html">Páginas de aplicativo, iniciais e do Experience Cloud</a></li>
+                        <li><a href="/pt-br/solucao-de-problemas.html">Solução de problemas</a></li>
+                        <li><a href="/pt-br/perguntas-frequentes.html">Perguntas frequentes</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pt-br/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/pt-BR/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Experimente a demo ao vivo</a></li>
+                <li><a href="/pt-br/avise-me-no-lancamento.html" class="nav-cta">Avise-me no lançamento</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Criar tarefas no Salesforce pelo calendário: escolha os dias e salve uma vez",
+                "description": "Crie várias tarefas no Salesforce de uma vez: escolha os dias no calendário, defina assunto, status e prioridade e salve uma por dia. Sem Flow nem Apex.",
+                "datePublished": "2026-11-08",
+                "dateModified": "2026-11-08",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html",
+                "image": "https://multidatepick.com/images/pt-br/blog/criar-tarefas-salesforce-calendario-poster.png",
+                "inLanguage": "pt-BR"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Como criar várias tarefas de uma vez no Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Coloque o componente Dates do MultiDatePick na página de registro, com Tarefa como o objeto em que ele salva. Clique em cada dia que precisa de uma tarefa, digite o assunto e clique em Salvar. O MultiDatePick cria uma Tarefa padrão do Salesforce por dia, cada uma com a sua própria data de vencimento e vinculada ao registro, em um único salvamento. Não há Flow nem Apex envolvidos."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Posso criar tarefas no Salesforce em datas que não seguem um padrão?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. Você clica nos dias exatos de que precisa, como o dia 3, o dia 11 e o dia 24, e cada um vira uma tarefa. Quando os dias seguem um padrão, o botão Adicionar Padrão Recorrente os preenche para você: toda terça-feira, a cada duas semanas, ou a primeira ou a última sexta-feira de cada mês."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Em quais páginas de registro dá para criar tarefas assim?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Em qualquer registro ao qual uma tarefa possa ser relacionada. Contas, oportunidades, casos e objetos personalizados com atividades se ligam pelo campo Relativo a (WhatId). Contatos e leads se ligam pelo campo Nome (WhoId). Em uma página de contato, o Salesforce também preenche a conta do contato, então as novas tarefas aparecem também na conta."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Todas as novas tarefas podem ter a mesma prioridade, o mesmo status ou o mesmo responsável?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. O seletor de status define o Status das tarefas que estão sendo salvas. A opção Valores de campo padrão preenche qualquer outro campo em todas as novas tarefas, por exemplo Priority=High, uma linha em Comentários ou OwnerId com o Id de um usuário, para atribuir as tarefas a essa pessoa. Sem ela, as tarefas ficam atribuídas a quem as salva, como sempre no Salesforce."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Posso ver minhas tarefas do Salesforce em um calendário?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. Em uma página de registro, o calendário mostra as tarefas desse registro nas cores de status. Em uma página de aplicativo ou inicial, ative Mostrar todos os registros e defina o Filtro de registros como OwnerId=ME para ter um calendário só com as suas tarefas, cada assunto escrito no seu dia. Passe o mouse sobre um dia para ver os detalhes, ou adicione a visualização Agenda para vê-las em forma de lista."
+                        }
+                    }
+                ],
+                "inLanguage": "pt-BR"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/pt-br/blog/criar-tarefas-salesforce-calendario.gif",
+                "caption": "Demo animada de como criar tarefas no Salesforce pelo calendário de uma conta: quatro dias escolhidos, o assunto digitado e Criar tarefas salva quatro tarefas, que aparecem na cor do status",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/pt-br/blog/tarefas-salesforce-linha-do-tempo-atividades.png",
+                "caption": "Linha do tempo de atividades do Salesforce na conta: as quatro tarefas Acompanhamento do cliente criadas pelo calendário, cada uma com a data de vencimento e a marca de prioridade Alta, entre as outras tarefas da conta",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/pt-br/blog/calendario-tarefas-salesforce-mes.png",
+                "caption": "Calendário de tarefas do Salesforce na visualização mensal: cada tarefa escrita no seu dia pelo assunto, na cor do status, com filtros de status acima",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/pt-br/blog/calendario-tarefas-salesforce-configuracao.png",
+                "caption": "Tela Campos do Assistente de Configuração do MultiDatePick para tarefas do Salesforce: Relativo a (WhatId), Somente data de vencimento (ActivityDate), Assunto, um assunto padrão e Valores de campo padrão Priority=High",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/pt-br/marketing/salesforce-datas-recorrentes-segunda-e-quarta-sexta.gif",
+                "caption": "Demo animada de um padrão de datas recorrentes no seletor de datas do MultiDatePick para Salesforce: a 2ª e a 4ª sexta-feira de cada mês, mostradas na prévia e depois adicionadas ao calendário",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Criar tarefas no Salesforce pelo calendário: escolha os dias e salve uma vez</h1>
+                <p class="subtitle">Clique em cada dia que precisa de uma tarefa, digite o assunto e salve. Uma Tarefa padrão do Salesforce por dia, vinculada ao registro, sem Flow, sem Apex e sem código.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Publicado em 8 de novembro de 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"Como crio a mesma tarefa em várias datas?" "Dá para criar várias tarefas de uma vez no Salesforce?" "Como vejo minhas tarefas em um calendário?" O botão Nova tarefa salva uma tarefa com uma data de vencimento. Uma série recorrente se repete em uma programação fixa. Um plano de acompanhamento com quatro ligações em quatro dias escolhidos ainda exige passar quatro vezes pelo mesmo formulário.</p>
+
+                <p>O MultiDatePick coloca um calendário na página de registro. Clique nos dias, digite o assunto e clique em Salvar: <strong>uma Tarefa do Salesforce por dia</strong>, cada uma vinculada ao registro, com status, prioridade e comentários já preenchidos. São tarefas comuns, então aparecem na linha do tempo de atividades, nos relatórios e em todos os modos de exibição de lista. <strong>Sem Flow, sem Apex.</strong></p>
+
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/pt-br/blog/criar-tarefas-salesforce-calendario-poster.png" data-gif="/images/pt-br/blog/criar-tarefas-salesforce-calendario.gif" alt="Demo animada de como criar tarefas no Salesforce pelo calendário de uma conta: quatro dias escolhidos, o assunto digitado e Criar tarefas salva quatro tarefas, que aparecem na cor do status" loading="lazy" decoding="async" width="588" height="726" data-zoomable>
+                    <figcaption>Quatro dias, um assunto, um clique: quatro tarefas do Salesforce na conta.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">O que você ganha</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>Uma tarefa por dia</h3><p>Cada dia em que você clica vira uma Tarefa própria, com esse dia como data de vencimento. Dez dias, dez tarefas, um único salvamento.</p></div>
+                    <div class="tl-feat"><h3>Vinculadas ao registro</h3><p>Cada tarefa fica relacionada ao registro da página: uma conta, oportunidade, caso ou registro personalizado, ou o contato ou lead a que ela se refere.</p></div>
+                    <div class="tl-feat"><h3>Preenchidas para você</h3><p>O assunto que você digita, o status que você escolhe e qualquer outro campo, como prioridade ou comentários, em todas as novas tarefas.</p></div>
+                    <div class="tl-feat"><h3>Quaisquer dias</h3><p>Clique em dias soltos, arraste por uma sequência deles ou adicione um padrão recorrente, como terça sim, terça não.</p></div>
+                    <div class="tl-feat"><h3>Tarefas no calendário</h3><p>As tarefas existentes aparecem nas cores de status. Passe o mouse sobre um dia para ver o assunto e o status, ou mostre cada assunto escrito no seu dia.</p></div>
+                    <div class="tl-feat"><h3>Altere depois</h3><p>O Modo de Edição move uma tarefa para outro dia, muda o status dela ou a exclui, para uma tarefa ou para várias de uma vez.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Escolha os dias, salve uma vez</h2>
+                <p>O calendário fica na página de registro e mostra as tarefas que o registro já tem, na cor do status. Planejar uma série de acompanhamentos do cliente leva quatro passos:</p>
+                <ol class="cp-steps">
+                    <li><strong>Clique nos dias.</strong> Escolha cada dia que precisa de uma tarefa. Um dia escolhido fica laranja; clique nele de novo para desmarcá-lo.</li>
+                    <li><strong>Digite o assunto.</strong> A caixa Rótulo do Registro guarda o assunto que toda nova tarefa recebe, como Acompanhamento do cliente.</li>
+                    <li><strong>Escolha o status.</strong> Não iniciado, Em andamento ou qualquer valor da sua lista de opções Status da tarefa.</li>
+                    <li><strong>Clique em Salvar.</strong> Uma Tarefa por dia é criada e vinculada ao registro. Os dias ganham a cor do status na hora.</li>
+                </ol>
+                <p>Aponte para qualquer dia para ver o assunto e o status da tarefa, e abra a tarefa dali mesmo. Dias que já têm uma tarefa também podem receber outra, quando Permitir vários por dia está ativado.</p>
+
+                <h2 style="margin-top:44px;">Tarefas reais do Salesforce, na linha do tempo de atividades</h2>
+                <p>Nada aqui é cópia nem objeto personalizado. Cada dia salva uma Tarefa padrão, que se comporta como qualquer tarefa que sua equipe cria à mão: aparece na linha do tempo de atividades do registro, na guia Tarefas, em relatórios e modos de exibição de lista, e na lista de tarefas do responsável. Em um contato ou lead, a tarefa se liga pelo campo Nome; em uma conta, oportunidade, caso ou objeto personalizado, pelo campo Relativo a.</p>
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/pt-br/blog/tarefas-salesforce-linha-do-tempo-atividades.png" alt="Linha do tempo de atividades do Salesforce na conta: as quatro tarefas Acompanhamento do cliente criadas pelo calendário, cada uma com a data de vencimento e a marca de prioridade Alta, entre as outras tarefas da conta" loading="lazy" width="1262" height="1976" data-zoomable>
+                    <figcaption>Os quatro acompanhamentos na linha do tempo de atividades da conta, cada um marcado com prioridade Alta por Valores de campo padrão.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Todas as tarefas em um só calendário</h2>
+                <p>O mesmo componente funciona como calendário de tarefas. Em uma página de aplicativo ou inicial, ative Mostrar todos os registros e ele mostra todas as Tarefas que você pode ver; adicione um Filtro de registros como <code>OwnerId=ME</code> e cada pessoa vê as suas. Com Mostrar os nomes dos registros em cada dia, cada assunto aparece escrito no seu dia, na cor do status, e os botões acima do calendário filtram por status.</p>
+                <figure class="sc-shot">
+                    <img src="/images/pt-br/blog/calendario-tarefas-salesforce-mes.png" alt="Calendário de tarefas do Salesforce na visualização mensal: cada tarefa escrita no seu dia pelo assunto, na cor do status, com filtros de status acima" loading="lazy" width="1989" height="1334" data-zoomable>
+                    <figcaption>Um mês de tarefas por assunto e status, incluindo os quatro acompanhamentos salvos na conta.</figcaption>
+                </figure>
+                <p>Já tem tarefas espalhadas pelos contatos e oportunidades de uma conta? Um Campo de consolidação também as traz para o calendário da conta. <a href="/pt-br/blog/calendario-conta-salesforce-registros-relacionados.html">Veja como o calendário da conta mostra registros relacionados</a>.</p>
+
+                <h2 style="margin-top:44px;">Quando os dias seguem um padrão</h2>
+                <p>Alguns planos de tarefas se repetem: uma ligação terça sim, terça não, um relatório na última sexta-feira do mês, uma revisão na 2ª e na 4ª sexta-feira. <strong>Adicionar Padrão Recorrente</strong> preenche esses dias para você, mostra as datas antes de adicioná-las e para na data final que você definir. Cada dia continua sendo salvo como uma Tarefa própria, então você pode mover ou pular uma sem mexer nas outras.</p>
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/pt-br/marketing/salesforce-datas-recorrentes-segunda-e-quarta-sexta-poster.png" data-gif="/images/pt-br/marketing/salesforce-datas-recorrentes-segunda-e-quarta-sexta.gif" alt="Demo animada de um padrão de datas recorrentes no seletor de datas do MultiDatePick para Salesforce: a 2ª e a 4ª sexta-feira de cada mês, mostradas na prévia e depois adicionadas ao calendário" loading="lazy" decoding="async" width="700" height="900" data-zoomable>
+                    <figcaption>A 2ª e a 4ª sexta-feira de cada mês, mostradas na prévia e adicionadas em um só passo.</figcaption>
+                </figure>
+                <p>Mais padrões, e por que um intervalo de datas não dá conta deles, em <a href="/pt-br/blog/datas-recorrentes-salesforce.html">datas recorrentes no Salesforce</a>.</p>
+
+                <h2 style="margin-top:44px;">Configure no Assistente de Configuração</h2>
+                <p>Sem código e sem Flow para montar. O Assistente de Configuração grava a configuração e o componente a lê:</p>
+                <ol class="cp-steps">
+                    <li><strong>Escolha onde o calendário vai ficar.</strong> Abra a guia do Assistente de Configuração do MultiDatePick, escolha a página de registro (aqui, Conta) e o formato Um registro por data.</li>
+                    <li><strong>Salve cada escolha como Tarefa.</strong> Na tela Campos, clique em <strong>Tarefa</strong> e confira o vínculo com a página: <strong>ID do relativo a (WhatId)</strong> em uma Conta, ou <strong>ID do nome (WhoId)</strong> em um Contato ou Lead. O assistente preenche <strong>Somente data de vencimento (ActivityDate)</strong> e <strong>Assunto</strong>.</li>
+                    <li><strong>Preencha o resto.</strong> Digite um assunto padrão, desmarque Anexar Data/Hora ao Nome do Registro para manter os assuntos limpos e informe Valores de campo padrão como <code>Priority=High</code>. Salve a configuração com um nome como <code>Account_Tasks</code>.</li>
+                    <li><strong>Coloque o componente na página.</strong> No Lightning App Builder, adicione o componente Dates do MultiDatePick à página da conta e informe o nome em <strong>Config Name</strong>.</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/pt-br/blog/calendario-tarefas-salesforce-configuracao.png" alt="Tela Campos do Assistente de Configuração do MultiDatePick para tarefas do Salesforce: Relativo a (WhatId), Somente data de vencimento (ActivityDate), Assunto, um assunto padrão e Valores de campo padrão Priority=High" loading="lazy" width="1999" height="528" data-zoomable>
+                    <figcaption>Tarefa em um clique: Relativo a, Somente data de vencimento e Assunto, mais um assunto padrão e Priority=High.</figcaption>
+                </figure>
+                <p>As cores de status vêm dos valores de Status da tarefa, então Concluído pode ficar verde e Adiado, cinza. Altere a configuração depois e toda página que a usa aplica a mudança no próximo carregamento.</p>
+
+                <h2 style="margin-top:44px;">Quem cria tarefas assim</h2>
+                <p>Qualquer pessoa cujo plano seja um punhado de dias escolhidos, e não uma única data de vencimento:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Gerentes de contas</strong><span>Acompanhamentos trimestrais e visitas ao cliente do ano inteiro, planejados na conta de uma só vez.</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>Follow-up de vendas</strong><span>Ligações no 2º, no 7º e no 14º dia depois de uma demo, criadas na oportunidade antes de a reunião terminar.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Sucesso do cliente</strong><span>Sessões de onboarding nos dias combinados com o cliente, cada uma como uma tarefa com status próprio.</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Compliance e finanças</strong><span>Prazos de entrega de documentos e de revisão que caem em datas fixas, atribuídos a quem cuida de cada um.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>Organizações sem fins lucrativos</strong><span>Ligações de agradecimento e contatos de relacionamento com um grande doador, distribuídos ao longo da temporada.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Equipes de atendimento</strong><span>Verificações de acompanhamento depois que um caso é fechado, nos dias que o cliente pediu.</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">As configurações que a definem</h2>
+                <p>Cada um é um campo no Assistente de Configuração e uma propriedade do componente, então nada aqui exige código:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Configuração</th><th>O que faz nas tarefas</th><th style="width:22%;">Nome da API</th></tr></thead>
+                    <tbody>
+                    <tr><td>Nome da API do Objeto Filho (Child Object API Name)</td><td>Tarefa: cada dia escolhido é salvo como uma Tarefa do Salesforce.</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>Nome da API do Campo de Relacionamento (Relationship Field API Name)</td><td>WhatId (Relativo a) em contas, oportunidades, casos e objetos personalizados; WhoId (Nome) em contatos e leads.</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>Nome da API do Campo de Data (Date Field API Name)</td><td>ActivityDate, a data de vencimento da tarefa.</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>Campo de Nome do Registro e Nome de Registro Padrão (Record Name Field and Default Record Name)</td><td>Assunto, e o assunto com que a caixa já começa preenchida.</td><td><code>recordNameField</code>, <code>defaultRecordName</code></td></tr>
+                    <tr><td>Campo de Status e Cores de Status (Status Field and Status Colors)</td><td>Status, com uma cor por valor, como Completed:#22C55E.</td><td><code>statusField</code>, <code>statusColors</code></td></tr>
+                    <tr><td>Valores de campo padrão (Default Field Values)</td><td>Qualquer outro campo em todas as novas tarefas, como Priority=High, ou OwnerId para atribuí-las a alguém.</td><td><code>defaultFieldValues</code></td></tr>
+                    <tr><td>Permitir vários por dia (Allow Multiple Per Day)</td><td>Um dia que já tem uma tarefa pode receber outra.</td><td><code>allowMultiplePerDay</code></td></tr>
+                    <tr><td>Mostrar os nomes dos registros em cada dia (Show Record Names in Each Day)</td><td>Escreve o assunto de cada tarefa no seu dia nos calendários de tamanho Grande e Largura total.</td><td><code>monthShowNames</code></td></tr>
+                    <tr><td>Mostrar todos os registros e Filtro de registros (Show All Records and Record Filter)</td><td>Um calendário de todas as tarefas em uma página de aplicativo ou inicial, ou só das suas, com OwnerId=ME.</td><td><code>showAllRecords</code>, <code>recordFilter</code></td></tr>
+                    <tr><td>Nome da Configuração (Config Name)</td><td>A configuração salva pelo Assistente de Configuração. Defina esta e deixe o resto em branco.</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Mais que uma grade mensal.</strong> Inclua Agenda em Visualizações Disponíveis e as mesmas tarefas também aparecem como lista, dia a dia, a um clique do calendário. <a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Veja as cinco visualizações</a>.</div>
+
+                <h2 style="margin-top:44px;">Perguntas frequentes</h2>
+                <div class="tl-faq">
+                    <details><summary>Como criar várias tarefas de uma vez no Salesforce?</summary><p>Coloque o componente Dates do MultiDatePick na página de registro, com Tarefa como o objeto em que ele salva. Clique em cada dia que precisa de uma tarefa, digite o assunto e clique em Salvar. O MultiDatePick cria uma Tarefa padrão do Salesforce por dia, cada uma com a sua própria data de vencimento e vinculada ao registro, em um único salvamento. Não há Flow nem Apex envolvidos.</p></details>
+                    <details><summary>Posso criar tarefas no Salesforce em datas que não seguem um padrão?</summary><p>Sim. Você clica nos dias exatos de que precisa, como o dia 3, o dia 11 e o dia 24, e cada um vira uma tarefa. Quando os dias seguem um padrão, o botão Adicionar Padrão Recorrente os preenche para você: toda terça-feira, a cada duas semanas, ou a primeira ou a última sexta-feira de cada mês.</p></details>
+                    <details><summary>Em quais páginas de registro dá para criar tarefas assim?</summary><p>Em qualquer registro ao qual uma tarefa possa ser relacionada. Contas, oportunidades, casos e objetos personalizados com atividades se ligam pelo campo Relativo a (WhatId). Contatos e leads se ligam pelo campo Nome (WhoId). Em uma página de contato, o Salesforce também preenche a conta do contato, então as novas tarefas aparecem também na conta.</p></details>
+                    <details><summary>Todas as novas tarefas podem ter a mesma prioridade, o mesmo status ou o mesmo responsável?</summary><p>Sim. O seletor de status define o Status das tarefas que estão sendo salvas. A opção Valores de campo padrão preenche qualquer outro campo em todas as novas tarefas, por exemplo Priority=High, uma linha em Comentários ou OwnerId com o Id de um usuário, para atribuir as tarefas a essa pessoa. Sem ela, as tarefas ficam atribuídas a quem as salva, como sempre no Salesforce.</p></details>
+                    <details><summary>Posso ver minhas tarefas do Salesforce em um calendário?</summary><p>Sim. Em uma página de registro, o calendário mostra as tarefas desse registro nas cores de status. Em uma página de aplicativo ou inicial, ative Mostrar todos os registros e defina o Filtro de registros como OwnerId=ME para ter um calendário só com as suas tarefas, cada assunto escrito no seu dia. Passe o mouse sobre um dia para ver os detalhes, ou adicione a visualização Agenda para vê-las em forma de lista.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Escolha os dias. As tarefas estão prontas.</h2>
+                    <p>Explore a demo ao vivo ou comece com uma configuração pronta da <a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/pt-BR/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=create-salesforce-tasks-calendar" class="btn btn-demo" target="_blank" rel="noopener">Experimente a demo ao vivo</a> <a href="/pt-br/avise-me-no-lancamento.html" class="btn btn-primary">Avise-me no lançamento</a> <a href="/pt-br/primeiros-passos.html" class="btn btn-secondary">Primeiros passos</a>
+                    </div>
+                    <ul class="check-list"><li>$20/usuário/mês, todos os recursos</li><li>Teste grátis de 30 dias, sem cartão</li><li>100% nativo do Salesforce</li><li>Sem Apex</li><li>Em breve no Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Leia também</h3>
+                    <ul>
+                        <li><a href="/pt-br/blog/calendario-conta-salesforce-registros-relacionados.html">Mostre as tarefas de contatos e oportunidades no calendário da conta</a></li>
+                        <li><a href="/pt-br/blog/datas-recorrentes-salesforce.html">Datas recorrentes no Salesforce</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-sem-codigo.html">O calendário Salesforce sem código, tarefa por tarefa</a></li>
+                        <li><a href="/pt-br/blog/assistente-de-configuracao-calendario-salesforce.html">Configure um calendário do Salesforce no Assistente de Configuração</a></li>
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">O calendário Dates do MultiDatePick</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/pt-br/" class="logo">
+                        <img src="/images/logo.png" alt="Logotipo do MultiDatePick: calendário de várias datas e reserva de recursos para Salesforce" width="180" height="45">
+                    </a>
+                    <p>O pacote de componentes de calendário mais personalizável para Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produto</h4>
+                    <ul>
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">Dates</a></li>
+                        <li><a href="/pt-br/seletor-de-data-e-hora-salesforce.html">Dates &amp; Times</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">Resource Booking</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Cinco visualizações de calendário</a></li>
+                        <li><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluções</h4>
+                    <ul>
+                        <li><a href="/pt-br/calendario-salesforce.html">Calendário Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas</a></li>
+                        <li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html">Reserva de salas de reunião</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html">Datas de campanha</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">Governo / Section 508</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentação</h4>
+                    <ul>
+                        <li><a href="/pt-br/primeiros-passos.html">Primeiros passos</a></li>
+                        <li><a href="/pt-br/guia-do-usuario.html">Guia do usuário</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">Guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html">Páginas de aplicativo, iniciais e do Experience Cloud</a></li>
+                        <li><a href="/pt-br/solucao-de-problemas.html">Solução de problemas</a></li>
+                        <li><a href="/pt-br/perguntas-frequentes.html">Perguntas frequentes</a></li>
+                    </ul>
+                    <h4>Para desenvolvedores</h4>
+                    <ul>
+                        <li><a href="/pt-br/guia-do-desenvolvedor-calendario-salesforce.html">Guia do desenvolvedor</a></li>
+                        <li><a href="/pt-br/implantar-fluxo-vs-code.html">Implantar um fluxo (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="/pt-br/precos.html">Preços</a></li>
+                        <li><a href="/pt-br/blog/">Blog</a></li>
+                        <li><a href="/pt-br/confianca-e-seguranca.html">Confiança e segurança</a></li>
+                        <li><a href="/pt-br/acessibilidade-vpat.html">Acessibilidade</a></li>
+                        <li><a href="/pt-br/avise-me-no-lancamento.html">Avise-me no lançamento</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Suporte</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Todos os direitos reservados.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Idioma" translate="no"><ul><li><a href="/blog/create-salesforce-tasks-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-mehrere-aufgaben-im-kalender-erstellen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/crear-varias-tareas-salesforce-calendario.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/creer-plusieurs-taches-salesforce-calendrier.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/creare-piu-attivita-salesforce-calendario.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html" hreflang="pt-BR" lang="pt-BR" aria-current="page">Português (Brasil)</a></li><li><a href="/ja/blog/create-salesforce-tasks-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/create-salesforce-tasks-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/create-salesforce-tasks-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ampliar imagem</p><p data-k="expand-diagram">Ampliar diagrama</p><p data-k="close">Fechar</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

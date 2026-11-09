@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creare più attività in Salesforce insieme, da un calendario</title>
+    <meta name="description" content="Crea più attività Salesforce insieme: scegli i giorni sul calendario, imposta oggetto, stato e priorità e salva un'attività per giorno. Senza Flow né Apex.">
+    <link rel="canonical" href="https://multidatepick.com/it/blog/creare-piu-attivita-salesforce-calendario.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Tasks post: same look as the Timeline, Utilization and Related Records posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.tk-narrow { max-width: 600px; margin-left: auto; margin-right: auto; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Creare più attività in Salesforce insieme, da un calendario">
+    <meta property="og:description" content="Crea più attività Salesforce insieme: scegli i giorni sul calendario, imposta oggetto, stato e priorità e salva un'attività per giorno. Senza Flow né Apex.">
+    <meta property="og:image" content="https://multidatepick.com/images/it/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/it/blog/creare-piu-attivita-salesforce-calendario.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="it_IT">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Creare più attività in Salesforce insieme, da un calendario">
+    <meta name="twitter:description" content="Crea più attività Salesforce insieme: scegli i giorni sul calendario, imposta oggetto, stato e priorità e salva un'attività per giorno. Senza Flow né Apex.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/it/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-mehrere-aufgaben-im-kalender-erstellen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/crear-varias-tareas-salesforce-calendario.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/creer-plusieurs-taches-salesforce-calendrier.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/creare-piu-attivita-salesforce-calendario.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Presto disponibile su Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Chiudi banner" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/it/" class="logo"><img src="/images/logo.png" alt="Logo MultiDatePick: componente calendario a più date e prenotazione risorse per Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Apri/chiudi menu di navigazione"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Prodotto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Dates</a></li>
+                        <li><a href="/it/selettore-data-ora-fasce-orarie-salesforce.html">Dates &amp; Times</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Resource Booking</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Cinque viste calendario</a></li>
+                        <li><a href="/it/configurazioni-calendario-salesforce.html">Config Library</a></li>
+                        <li><a href="/it/affidabilita-e-sicurezza.html">Affidabilità e sicurezza</a></li>
+                        <li><a href="/it/accessibilita-vpat.html">Accessibilità (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Soluzioni <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/calendario-salesforce.html">Calendario Salesforce</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Staffing e recruiting</a></li>
+                        <li><a href="/it/pianificazione-colloqui-salesforce.html">Pianificazione colloqui</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce-experience-cloud.html">Prenotazioni su Experience Cloud</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Date delle campagne</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">Pubblica amministrazione / Section 508</a></li>
+                        <li><a href="/it/alternativa-salesforce-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/it/prezzi.html">Prezzi</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentazione <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/blog/calendario-salesforce-no-code.html">Configurazione no-code</a></li>
+                        <li><a href="/it/per-iniziare.html">Per iniziare</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente</a></li>
+                        <li><a href="/it/guida-flussi-su-schermo-salesforce.html">Guida ai flussi su schermo</a></li>
+                        <li><a href="/it/pagine-app-home-experience.html">Pagine app, iniziali ed Experience</a></li>
+                        <li><a href="/it/risoluzione-problemi.html">Risoluzione dei problemi</a></li>
+                        <li><a href="/it/domande-frequenti.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/it/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/it/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Prova la demo live</a></li>
+                <li><a href="/it/avvisami-al-lancio.html" class="nav-cta">Avvisami al lancio</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Creare attività Salesforce da un calendario: scegli i giorni, salva una volta sola",
+                "description": "Crea più attività Salesforce insieme: scegli i giorni sul calendario, imposta oggetto, stato e priorità e salva un'attività per giorno. Senza Flow né Apex.",
+                "datePublished": "2026-11-08",
+                "dateModified": "2026-11-08",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/it/blog/creare-piu-attivita-salesforce-calendario.html",
+                "image": "https://multidatepick.com/images/it/blog/creare-attivita-salesforce-calendario-poster.png",
+                "inLanguage": "it"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Come creo più attività contemporaneamente in Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Inserisci il componente MultiDatePick Dates nella pagina record con Attività come oggetto in cui salvare. Fai clic su ogni giorno che richiede un'attività, scrivi l'oggetto e salva. MultiDatePick crea un'attività standard di Salesforce per giorno, ognuna con la propria data di scadenza e collegata al record, con un solo salvataggio. Nessun Flow e nessun Apex."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Posso creare attività Salesforce in date che non seguono uno schema?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sì. Fai clic sui giorni esatti che ti servono, per esempio il 3, l'11 e il 24, e ognuno diventa un'attività. Quando invece i giorni seguono uno schema, il pulsante Aggiungi schema ricorrente li inserisce per te: ogni martedì, a settimane alterne oppure, per esempio, il primo lunedì o l'ultimo venerdì di ogni mese."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Da quali pagine record si possono creare attività in questo modo?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Da qualsiasi record a cui si possono correlare attività. Account, opportunità, casi e oggetti personalizzati con attività si collegano tramite Correlato a (WhatId). Referenti e lead si collegano tramite Nome (WhoId). Nella pagina di un referente, Salesforce compila anche l'account del referente, quindi le nuove attività compaiono anche sull'account."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Tutte le nuove attività possono avere la stessa priorità, lo stesso stato o lo stesso assegnatario?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sì. Il selettore di stato imposta lo Stato delle attività che salvi. Valori di campo predefiniti compila qualsiasi altro campo su ogni nuova attività, per esempio Priority=High, una riga nei Commenti oppure OwnerId con l'Id di un utente per assegnargli le attività. Senza questa impostazione, le attività vengono assegnate a chi le salva, come di consueto in Salesforce."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Posso vedere le mie attività Salesforce su un calendario?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sì. In una pagina record il calendario mostra le attività di quel record nei colori del loro stato. In una pagina app o nella pagina iniziale, attiva Mostra tutti i record e imposta Filtro dei record su OwnerId=ME per avere un calendario delle tue attività, con l'oggetto di ognuna scritto nel suo giorno. Passa il mouse su un giorno per i dettagli, oppure aggiungi la vista Agenda per vederle in un elenco."
+                        }
+                    }
+                ],
+                "inLanguage": "it"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/it/blog/creare-attivita-salesforce-calendario.gif",
+                "caption": "Demo animata: creare attività Salesforce dal calendario di un account. Quattro giorni scelti, l'oggetto digitato e Crea operazioni salva quattro attività nel colore del loro stato",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/it/blog/attivita-salesforce-cronologia-attivita.png",
+                "caption": "Sequenza temporale attività di Salesforce sull'account: le quattro attività Check-in con il cliente create dal calendario, con data di scadenza e priorità alta, tra le altre attività",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/it/blog/calendario-attivita-salesforce-mese.png",
+                "caption": "Calendario delle attività Salesforce in vista mensile: ogni attività scritta nel suo giorno, nel colore del suo stato, con i filtri di stato in alto",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/it/blog/calendario-attivita-salesforce-configurazione.png",
+                "caption": "Schermata Campi della configurazione guidata MultiDatePick per le attività Salesforce: ID correlato a (WhatId), Solo scadenza (ActivityDate), Oggetto e Priority=High",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/it/marketing/salesforce-date-ricorrenti-secondo-e-quarto-venerdi.gif",
+                "caption": "Demo animata di uno schema di date ricorrenti in Salesforce con MultiDatePick: il 2° e il 4° venerdì di ogni mese, in anteprima e poi aggiunti al calendario",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                }
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Creare attività Salesforce da un calendario: scegli i giorni, salva una volta sola</h1>
+                <p class="subtitle">Fai clic su ogni giorno che richiede un'attività, scrivi l'oggetto e salva. Un'attività standard di Salesforce per giorno, collegata al record, senza Flow, senza Apex e senza codice.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Pubblicato l'8 novembre 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"Come creo la stessa attività in più date?" "Posso creare più attività contemporaneamente in Salesforce?" "Come vedo le mie attività su un calendario?" Il pulsante standard per una nuova attività salva un'attività con una sola data di scadenza. Una serie ricorrente si ripete con una cadenza fissa. Un piano di follow-up di quattro chiamate in quattro giorni scelti significa comunque passare quattro volte dallo stesso modulo.</p>
+
+                <p>MultiDatePick aggiunge un calendario alla pagina record. Fai clic sui giorni, scrivi l'oggetto e salva: <strong>un'attività Salesforce per giorno</strong>, ognuna collegata al record, con stato, priorità e commenti già compilati. Sono normali attività, quindi compaiono nella sequenza temporale attività, nei report e in ogni visualizzazione elenco. <strong>Senza Flow, senza Apex.</strong></p>
+
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/it/blog/creare-attivita-salesforce-calendario-poster.png" data-gif="/images/it/blog/creare-attivita-salesforce-calendario.gif" alt="Demo animata: creare attività Salesforce dal calendario di un account. Quattro giorni scelti, l'oggetto digitato e Crea operazioni salva quattro attività nel colore del loro stato" loading="lazy" decoding="async" width="588" height="766" data-zoomable>
+                    <figcaption>Quattro giorni, un oggetto, un clic: quattro attività Salesforce sull'account.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Cosa ottieni</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>Un'attività per giorno</h3><p>Ogni giorno su cui fai clic diventa un'attività a sé, con quel giorno come data di scadenza. Dieci giorni, dieci attività, un solo salvataggio.</p></div>
+                    <div class="tl-feat"><h3>Collegate al record</h3><p>Ogni attività è correlata al record della pagina: un account, un'opportunità, un caso o un record personalizzato, oppure il referente o il lead a cui si riferisce.</p></div>
+                    <div class="tl-feat"><h3>Compilate per te</h3><p>L'oggetto che scrivi, lo stato che scegli e qualsiasi altro campo, come priorità o commenti, su ogni nuova attività.</p></div>
+                    <div class="tl-feat"><h3>Qualsiasi giorno</h3><p>Fai clic su giorni sparsi, trascina su più giorni di fila o aggiungi uno schema ricorrente, come un martedì sì e uno no.</p></div>
+                    <div class="tl-feat"><h3>Attività su un calendario</h3><p>Le attività esistenti compaiono nei colori del loro stato. Passa il mouse su un giorno per vedere oggetto e stato, oppure scrivi l'oggetto di ognuna nel suo giorno.</p></div>
+                    <div class="tl-feat"><h3>Modificale in seguito</h3><p>Con Modalità modifica sposti un'attività in un altro giorno, ne cambi lo stato o la elimini, una alla volta o molte insieme.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Scegli i giorni, salva una volta sola</h2>
+                <p>Il calendario si trova nella pagina record e mostra le attività che il record ha già, nel colore del loro stato. Pianificare una serie di check-in con il cliente richiede quattro passaggi:</p>
+                <ol class="cp-steps">
+                    <li><strong>Fai clic sui giorni.</strong> Scegli ogni giorno che richiede un'attività. Un giorno scelto diventa arancione; fai di nuovo clic per toglierlo.</li>
+                    <li><strong>Scrivi l'oggetto.</strong> La casella Etichetta record contiene l'oggetto che riceve ogni nuova attività, come Check-in con il cliente.</li>
+                    <li><strong>Scegli lo stato.</strong> Not Started, In Progress o qualsiasi valore del tuo elenco di selezione Stato delle attività.</li>
+                    <li><strong>Fai clic su Crea operazioni.</strong> È il pulsante di salvataggio di questo calendario. Viene creata un'attività per giorno, collegata al record, e i giorni prendono subito il colore dello stato.</li>
+                </ol>
+                <p>Punta un giorno qualsiasi per vedere oggetto e stato della sua attività, e apri l'attività da lì. Anche i giorni che hanno già un'attività possono riceverne un'altra, quando Consenti più record al giorno è attivo.</p>
+
+                <h2 style="margin-top:44px;">Vere attività Salesforce, nella sequenza temporale attività</h2>
+                <p>Niente di tutto questo è una copia o un oggetto personalizzato. Ogni giorno salva un'attività standard, che si comporta come qualsiasi attività creata a mano dal tuo team: compare nella sequenza temporale attività del record, nella scheda Attività, nei report e nelle visualizzazioni elenco, e nell'elenco delle cose da fare dell'assegnatario. Su un referente o un lead l'attività si collega tramite Nome; su un account, un'opportunità, un caso o un oggetto personalizzato, tramite Correlato a.</p>
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/it/blog/attivita-salesforce-cronologia-attivita.png" alt="Sequenza temporale attività di Salesforce sull'account: le quattro attività Check-in con il cliente create dal calendario, con data di scadenza e priorità alta, tra le altre attività" loading="lazy" width="1262" height="1976" data-zoomable>
+                    <figcaption>I quattro check-in nella sequenza temporale attività dell'account, tutti con priorità alta grazie a Valori di campo predefiniti.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Tutte le attività in un solo calendario</h2>
+                <p>Lo stesso componente funziona come calendario delle attività. In una pagina app o nella pagina iniziale, attiva Mostra tutti i record e vedrai ogni attività a cui hai accesso; aggiungi un Filtro dei record come <code>OwnerId=ME</code> e ognuno vedrà le proprie. Con Mostra i nomi dei record in ogni giorno, l'oggetto di ogni attività compare nel suo giorno, nel colore del suo stato, e i pulsanti sopra il calendario filtrano per stato.</p>
+                <figure class="sc-shot">
+                    <img src="/images/it/blog/calendario-attivita-salesforce-mese.png" alt="Calendario delle attività Salesforce in vista mensile: ogni attività scritta nel suo giorno, nel colore del suo stato, con i filtri di stato in alto" loading="lazy" width="1989" height="1334" data-zoomable>
+                    <figcaption>Un mese di attività per oggetto e stato, compresi i quattro check-in salvati dall'account.</figcaption>
+                </figure>
+                <p>Hai già attività sparse tra i referenti e le opportunità di un account? Un Campo di aggregazione le porta anche nel calendario dell'account. <a href="/it/blog/calendario-account-salesforce-record-correlati.html">Scopri come il calendario dell'account mostra i record correlati</a>.</p>
+
+                <h2 style="margin-top:44px;">Quando i giorni seguono uno schema</h2>
+                <p>Alcuni piani di attività si ripetono: una chiamata un martedì sì e uno no, un report l'ultimo venerdì del mese, una revisione il 2° e il 4° venerdì. <strong>Aggiungi schema ricorrente</strong> inserisce quei giorni per te, mostra le date prima di aggiungerle e si ferma alla data di fine che imposti. Ogni giorno si salva comunque come un'attività a sé, quindi puoi spostarne o saltarne una senza toccare le altre.</p>
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/it/marketing/salesforce-date-ricorrenti-secondo-e-quarto-venerdi-poster.png" data-gif="/images/it/marketing/salesforce-date-ricorrenti-secondo-e-quarto-venerdi.gif" alt="Demo animata di uno schema di date ricorrenti in Salesforce con MultiDatePick: il 2° e il 4° venerdì di ogni mese, in anteprima e poi aggiunti al calendario" loading="lazy" decoding="async" width="700" height="900" data-zoomable>
+                    <figcaption>Il 2° e il 4° venerdì di ogni mese, in anteprima e aggiunti in un solo passaggio.</figcaption>
+                </figure>
+                <p>Altri schemi, e perché un intervallo di date non può contenerli, in <a href="/it/blog/date-ricorrenti-salesforce.html">date ricorrenti in Salesforce</a>.</p>
+
+                <h2 style="margin-top:44px;">Configuralo con la configurazione guidata</h2>
+                <p>Niente codice e nessun Flow da costruire. La configurazione guidata scrive la configurazione e il componente la legge:</p>
+                <ol class="cp-steps">
+                    <li><strong>Scegli dove va il calendario.</strong> Apri la scheda della configurazione guidata di MultiDatePick, scegli la pagina record (qui Account) e, nel passaggio Salvataggio, Un record per data.</li>
+                    <li><strong>Salva ogni scelta come attività.</strong> Nella schermata Campi fai clic su <strong>Operazione</strong> (l'oggetto Task) e controlla il collegamento con la pagina: <strong>ID correlato a (WhatId)</strong> su un account, oppure <strong>ID nome (WhoId)</strong> su un referente o un lead. La configurazione guidata compila <strong>Solo scadenza (ActivityDate)</strong> e <strong>Oggetto</strong>.</li>
+                    <li><strong>Completa il resto.</strong> Scrivi un oggetto predefinito, togli la spunta da Aggiungi data/ora al nome del record per mantenere puliti gli oggetti e inserisci Valori di campo predefiniti come <code>Priority=High</code>. Salva la configurazione con un nome come <code>Account_Tasks</code>.</li>
+                    <li><strong>Inserisci il componente nella pagina.</strong> In Lightning App Builder aggiungi il componente MultiDatePick Dates alla pagina Account e scrivi il nome in <strong>Config Name</strong>.</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/it/blog/calendario-attivita-salesforce-configurazione.png" alt="Schermata Campi della configurazione guidata MultiDatePick per le attività Salesforce: ID correlato a (WhatId), Solo scadenza (ActivityDate), Oggetto e Priority=High" loading="lazy" width="1999" height="528" data-zoomable>
+                    <figcaption>Attività con un clic: Correlato a, Solo scadenza e Oggetto, più un oggetto predefinito e Priority=High.</figcaption>
+                </figure>
+                <p>I colori di stato derivano dai valori di Stato delle tue attività, quindi Completed può essere verde e Deferred grigio. Se modifichi la configurazione in seguito, ogni pagina che la usa applica la modifica al caricamento successivo.</p>
+
+                <h2 style="margin-top:44px;">Chi crea attività in questo modo</h2>
+                <p>Chiunque pianifichi su una manciata di giorni scelti anziché su un'unica data di scadenza:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Account manager</strong><span>Check-in trimestrali e visite in sede per tutto l'anno, pianificati sull'account in un colpo solo.</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>Follow-up commerciale</strong><span>Chiamate al giorno 2, 7 e 14 dopo una demo, create sull'opportunità prima della fine della riunione.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Customer success</strong><span>Sessioni di onboarding nei giorni concordati con il cliente, ognuna un'attività con il proprio stato.</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Compliance e finanza</strong><span>Scadenze di deposito e di revisione che cadono in date fisse, assegnate alla persona che ne è responsabile.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>Non profit</strong><span>Chiamate di ringraziamento e contatti di fidelizzazione con un grande donatore, distribuiti lungo tutta la stagione.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Team di assistenza</strong><span>Controlli di follow-up dopo la chiusura di un caso, nei giorni richiesti dal cliente.</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Le impostazioni che lo definiscono</h2>
+                <p>Ognuna è un campo della configurazione guidata e una proprietà del componente, quindi qui non serve codice:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Impostazione</th><th>Cosa fa per le attività</th><th style="width:22%;">Nome API</th></tr></thead>
+                    <tbody>
+                    <tr><td>Nome API oggetto figlio (Child Object API Name)</td><td>Task: ogni giorno scelto si salva come attività Salesforce.</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>Nome API campo relazione (Relationship Field API Name)</td><td>WhatId (Correlato a) su account, opportunità, casi e oggetti personalizzati; WhoId (Nome) su referenti e lead.</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>Nome API campo data (Date Field API Name)</td><td>ActivityDate, la data di scadenza dell'attività.</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>Campo nome record e Nome record predefinito (Record Name Field e Default Record Name)</td><td>Oggetto, e il testo con cui parte la casella.</td><td><code>recordNameField</code>, <code>defaultRecordName</code></td></tr>
+                    <tr><td>Campo stato e Colori stato (Status Field e Status Colors)</td><td>Stato, con un colore per valore, come Completed:#22C55E.</td><td><code>statusField</code>, <code>statusColors</code></td></tr>
+                    <tr><td>Valori di campo predefiniti (Default Field Values)</td><td>Qualsiasi altro campo su ogni nuova attività, come Priority=High o OwnerId per assegnarle.</td><td><code>defaultFieldValues</code></td></tr>
+                    <tr><td>Consenti più record al giorno (Allow Multiple Per Day)</td><td>Un giorno che ha già un'attività può riceverne un'altra.</td><td><code>allowMultiplePerDay</code></td></tr>
+                    <tr><td>Mostra i nomi dei record in ogni giorno (Show Record Names in Each Day)</td><td>Scrive l'oggetto di ogni attività nel suo giorno nei calendari Grande e Larghezza piena.</td><td><code>monthShowNames</code></td></tr>
+                    <tr><td>Mostra tutti i record e Filtro dei record (Show All Records e Record Filter)</td><td>Un calendario di tutte le attività in una pagina app o nella pagina iniziale, oppure solo delle tue con OwnerId=ME.</td><td><code>showAllRecords</code>, <code>recordFilter</code></td></tr>
+                    <tr><td>Nome configurazione (Config Name)</td><td>La configurazione salvata con la configurazione guidata. Imposta questa e lascia vuoto il resto.</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Non solo una griglia mensile.</strong> Aggiungi Agenda in Viste disponibili e le stesse attività compaiono anche come elenco, giorno per giorno, a un clic dal calendario. <a href="/it/blog/viste-calendario-salesforce.html">Scopri tutte e cinque le viste</a>.</div>
+
+                <h2 style="margin-top:44px;">Domande frequenti</h2>
+                <div class="tl-faq">
+                    <details><summary>Come creo più attività contemporaneamente in Salesforce?</summary><p>Inserisci il componente MultiDatePick Dates nella pagina record con Attività come oggetto in cui salvare. Fai clic su ogni giorno che richiede un'attività, scrivi l'oggetto e salva. MultiDatePick crea un'attività standard di Salesforce per giorno, ognuna con la propria data di scadenza e collegata al record, con un solo salvataggio. Nessun Flow e nessun Apex.</p></details>
+                    <details><summary>Posso creare attività Salesforce in date che non seguono uno schema?</summary><p>Sì. Fai clic sui giorni esatti che ti servono, per esempio il 3, l'11 e il 24, e ognuno diventa un'attività. Quando invece i giorni seguono uno schema, il pulsante Aggiungi schema ricorrente li inserisce per te: ogni martedì, a settimane alterne oppure, per esempio, il primo lunedì o l'ultimo venerdì di ogni mese.</p></details>
+                    <details><summary>Da quali pagine record si possono creare attività in questo modo?</summary><p>Da qualsiasi record a cui si possono correlare attività. Account, opportunità, casi e oggetti personalizzati con attività si collegano tramite Correlato a (WhatId). Referenti e lead si collegano tramite Nome (WhoId). Nella pagina di un referente, Salesforce compila anche l'account del referente, quindi le nuove attività compaiono anche sull'account.</p></details>
+                    <details><summary>Tutte le nuove attività possono avere la stessa priorità, lo stesso stato o lo stesso assegnatario?</summary><p>Sì. Il selettore di stato imposta lo Stato delle attività che salvi. Valori di campo predefiniti compila qualsiasi altro campo su ogni nuova attività, per esempio Priority=High, una riga nei Commenti oppure OwnerId con l'Id di un utente per assegnargli le attività. Senza questa impostazione, le attività vengono assegnate a chi le salva, come di consueto in Salesforce.</p></details>
+                    <details><summary>Posso vedere le mie attività Salesforce su un calendario?</summary><p>Sì. In una pagina record il calendario mostra le attività di quel record nei colori del loro stato. In una pagina app o nella pagina iniziale, attiva Mostra tutti i record e imposta Filtro dei record su OwnerId=ME per avere un calendario delle tue attività, con l'oggetto di ognuna scritto nel suo giorno. Passa il mouse su un giorno per i dettagli, oppure aggiungi la vista Agenda per vederle in un elenco.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Scegli i giorni. Le attività sono pronte.</h2>
+                    <p>Esplora la demo dal vivo, oppure parti da una configurazione pronta nella <a href="/it/configurazioni-calendario-salesforce.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/it/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=create-salesforce-tasks-calendar" class="btn btn-demo" target="_blank" rel="noopener">Prova la demo live</a> <a href="/it/avvisami-al-lancio.html" class="btn btn-primary">Avvisami al lancio</a> <a href="/it/per-iniziare.html" class="btn btn-secondary">Per iniziare</a>
+                    </div>
+                    <ul class="check-list"><li>$20/utente/mese, tutte le funzionalità</li><li>Prova gratuita di 30 giorni, senza carta</li><li>100% nativo Salesforce</li><li>Senza Apex</li><li>Presto disponibile su Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Letture correlate</h3>
+                    <ul>
+                        <li><a href="/it/blog/calendario-account-salesforce-record-correlati.html">Mostrare le attività di referenti e opportunità nel calendario dell'account</a></li>
+                        <li><a href="/it/blog/date-ricorrenti-salesforce.html">Date ricorrenti in Salesforce</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-no-code.html">Il calendario Salesforce no-code, attività per attività</a></li>
+                        <li><a href="/it/blog/configurazione-guidata-calendario-salesforce.html">Configurare un calendario Salesforce con la configurazione guidata</a></li>
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Il calendario MultiDatePick Dates</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/it/" class="logo">
+                        <img src="/images/logo.png" alt="Logo MultiDatePick: componente calendario a più date e prenotazione risorse per Salesforce" width="180" height="45">
+                    </a>
+                    <p>La suite di componenti calendario più personalizzabile per Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Prodotto</h4>
+                    <ul>
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Dates</a></li>
+                        <li><a href="/it/selettore-data-ora-fasce-orarie-salesforce.html">Dates &amp; Times</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Resource Booking</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Cinque viste calendario</a></li>
+                        <li><a href="/it/configurazioni-calendario-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Soluzioni</h4>
+                    <ul>
+                        <li><a href="/it/calendario-salesforce.html">Calendario Salesforce</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Staffing e recruiting</a></li>
+                        <li><a href="/it/pianificazione-colloqui-salesforce.html">Pianificazione colloqui</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce-experience-cloud.html">Prenotazioni su Experience Cloud</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Date delle campagne</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">Pubblica amministrazione / Section 508</a></li>
+                        <li><a href="/it/alternativa-salesforce-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentazione</h4>
+                    <ul>
+                        <li><a href="/it/per-iniziare.html">Per iniziare</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente</a></li>
+                        <li><a href="/it/guida-flussi-su-schermo-salesforce.html">Guida ai flussi su schermo</a></li>
+                        <li><a href="/it/pagine-app-home-experience.html">Pagine app, iniziali ed Experience</a></li>
+                        <li><a href="/it/risoluzione-problemi.html">Risoluzione dei problemi</a></li>
+                        <li><a href="/it/domande-frequenti.html">FAQ</a></li>
+                    </ul>
+                    <h4>Per sviluppatori</h4>
+                    <ul>
+                        <li><a href="/it/guida-sviluppatori-calendario-salesforce.html">Guida per sviluppatori</a></li>
+                        <li><a href="/it/distribuire-flusso-vs-code.html">Distribuire un flusso (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Azienda</h4>
+                    <ul>
+                        <li><a href="/it/prezzi.html">Prezzi</a></li>
+                        <li><a href="/it/blog/">Blog</a></li>
+                        <li><a href="/it/affidabilita-e-sicurezza.html">Affidabilità e sicurezza</a></li>
+                        <li><a href="/it/accessibilita-vpat.html">Accessibilità</a></li>
+                        <li><a href="/it/avvisami-al-lancio.html">Avvisami al lancio</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Supporto</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Tutti i diritti riservati.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Lingua" translate="no"><ul><li><a href="/blog/create-salesforce-tasks-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-mehrere-aufgaben-im-kalender-erstellen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/crear-varias-tareas-salesforce-calendario.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/creer-plusieurs-taches-salesforce-calendrier.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/creare-piu-attivita-salesforce-calendario.html" hreflang="it" lang="it" aria-current="page">Italiano</a></li><li><a href="/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/create-salesforce-tasks-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/create-salesforce-tasks-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/create-salesforce-tasks-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ingrandisci immagine</p><p data-k="expand-diagram">Ingrandisci diagramma</p><p data-k="close">Chiudi</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

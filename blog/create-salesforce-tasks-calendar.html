@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Multiple Salesforce Tasks at Once, From a Calendar</title>
+    <meta name="description" content="Create multiple Salesforce Tasks at once: pick the days on a calendar, set the subject, status and priority, and save one Task per day. No Flow, no Apex.">
+    <link rel="canonical" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/solutions.css">
+    <style>
+        /* Tasks post: same look as the Timeline, Utilization and Related Records posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.tk-narrow { max-width: 600px; margin-left: auto; margin-right: auto; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta property="og:title" content="Create Multiple Salesforce Tasks at Once, From a Calendar">
+    <meta property="og:description" content="Create multiple Salesforce Tasks at once: pick the days on a calendar, set the subject, status and priority, and save one Task per day. No Flow, no Apex.">
+    <meta property="og:image" content="https://multidatepick.com/images/og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Create Multiple Salesforce Tasks at Once, From a Calendar">
+    <meta name="twitter:description" content="Create multiple Salesforce Tasks at once: pick the days on a calendar, set the subject, status and priority, and save one Task per day. No Flow, no Apex.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-mehrere-aufgaben-im-kalender-erstellen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/crear-varias-tareas-salesforce-calendario.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/creer-plusieurs-taches-salesforce-calendrier.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/creare-piu-attivita-salesforce-calendario.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/create-salesforce-tasks-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/create-salesforce-tasks-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">
+        Coming soon to the Salesforce AppExchange
+        <button class="banner-close" id="bannerClose" aria-label="Dismiss banner" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="../images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Product <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Five Calendar Views</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                        <li><a href="/trust.html">Trust &amp; Security</a></li>
+                        <li><a href="/accessibility.html">Accessibility (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Solutions <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
+                        <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Dates</a></li>
+                        <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pricing.html">Pricing</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Docs <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/blog/no-code-salesforce-calendar.html">No-Code Setup</a></li>
+                        <li><a href="/gettingstarted.html">Getting Started</a></li>
+                        <li><a href="/user-guide.html">User Guide</a></li>
+                        <li><a href="/flowcheatsheet.html">Screen Flow Guide</a></li>
+                        <li><a href="/home-app-experience.html">App, Home &amp; Experience Pages</a></li>
+                        <li><a href="/troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/en-US/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Try the Live Demo</a></li>
+                <li><a href="/notify-me-at-launch.html" class="nav-cta">Notify Me at Launch</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {"@type": "Article", "headline": "Create Salesforce Tasks From a Calendar: Pick the Days, Save Once", "description": "Create multiple Salesforce Tasks at once: pick the days on a calendar, set the subject, status and priority, and save one Task per day. No Flow, no Apex.", "datePublished": "2026-11-08", "dateModified": "2026-11-08", "author": {"@type": "Organization", "name": "MultiDatePick"}, "publisher": {"@type": "Organization", "name": "MultiDatePick"}, "mainEntityOfPage": "https://multidatepick.com/blog/create-salesforce-tasks-calendar.html", "image": "https://multidatepick.com/images/blog/salesforce-create-tasks-calendar-poster.png"},
+                {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I create multiple tasks at once in Salesforce?", "acceptedAnswer": {"@type": "Answer", "text": "Put the MultiDatePick Dates component on the record page with Task as the object it saves. Click every day that needs a task, type the subject, and click Save. MultiDatePick creates one standard Salesforce Task per day, each with its own due date and linked to the record, in a single save. No Flow and no Apex are involved."}}, {"@type": "Question", "name": "Can I create Salesforce tasks on dates that do not follow a pattern?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. You click the exact days you need, such as the 3rd, the 11th and the 24th, and each one becomes a task. When the days do follow a pattern, the Add Recurring Pattern button fills them in for you: every Tuesday, every other week, or the 1st or last weekday of each month."}}, {"@type": "Question", "name": "Which record pages can create tasks this way?", "acceptedAnswer": {"@type": "Answer", "text": "Any record that tasks can be related to. Accounts, Opportunities, Cases and custom objects with activities link through Related To (WhatId). Contacts and Leads link through Name (WhoId). On a Contact page, Salesforce also fills in the contact's account, so the new tasks show on the account too."}}, {"@type": "Question", "name": "Can every new task get the same priority, status or assignee?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The status picker sets the Status of the tasks being saved. Default Field Values fills any other field on every new task, for example Priority=High, a Comments line, or OwnerId set to a user's Id to assign the tasks to that person. Without it, tasks are assigned to the person who saves them, as usual in Salesforce."}}, {"@type": "Question", "name": "Can I see my Salesforce tasks on a calendar?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. On a record page the calendar shows that record's tasks in their status colors. On an app or Home page, turn on Show All Records and set Record Filter to OwnerId=ME for a calendar of your own tasks, with each subject written in its day. Hover a day for the details, or add the Agenda view for a list of them."}}]},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/blog/salesforce-create-tasks-calendar.gif", "caption": "Animated demo of creating Salesforce Tasks from a calendar on an account page: four days picked, the subject typed, Create Tasks saves four tasks that appear in their status color", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/blog/salesforce-tasks-activity-timeline.png", "caption": "Salesforce Activity timeline on the account: the four Customer check-in tasks created from the calendar, each with its due date and High priority flag, among the account's other tasks", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/blog/salesforce-task-calendar-month.png", "caption": "Salesforce task calendar month view: every task written in its day by subject, in the color of its status, with status filters above", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/blog/salesforce-task-calendar-setup.png", "caption": "MultiDatePick Setup Wizard Fields screen for Salesforce Tasks: Related To (WhatId), Due Date Only (ActivityDate), Subject, a default subject and Default Field Values Priority=High", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/marketing/salesforce-recurring-date-pattern-2nd-4th-friday.gif", "caption": "Animated demo of a recurring date pattern in the MultiDatePick Salesforce date picker: the 2nd and 4th Friday of each month, previewed, then added to the calendar", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}}
+            ]
+        }
+        </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Create Salesforce Tasks From a Calendar: Pick the Days, Save Once</h1>
+                <p class="subtitle">Click every day that needs a task, type the subject, and save. One standard Salesforce Task per day, linked to the record, with no Flow, no Apex and no code.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Published November 8, 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"How do I create the same task on several dates?" "Can I create multiple tasks at once in Salesforce?" "How do I see my tasks on a calendar?" The New Task button saves one task with one due date. A recurring series repeats on a fixed schedule. A follow-up plan of four calls on four chosen days is still four trips through the same form.</p>
+
+                <p>MultiDatePick puts a calendar on the record page. Click the days, type the subject and click Save: <strong>one Salesforce Task per day</strong>, each linked to the record, with its status, priority and comments filled in. They are ordinary Tasks, so they show in the Activity timeline, in reports and in every list view. <strong>No Flow, no Apex.</strong></p>
+
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/blog/salesforce-create-tasks-calendar-poster.png" data-gif="/images/blog/salesforce-create-tasks-calendar.gif" alt="Animated demo of creating Salesforce Tasks from a calendar on an account page: four days picked, the subject typed, Create Tasks saves four tasks that appear in their status color" loading="lazy" decoding="async" width="588" height="726" data-zoomable>
+                    <figcaption>Four days, one subject, one click: four Salesforce Tasks on the account.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">What you get</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>One task per day</h3><p>Every day you click becomes its own Task, with that day as its due date. Ten days, ten tasks, one save.</p></div>
+                    <div class="tl-feat"><h3>Linked to the record</h3><p>Each task is related to the page's record: an account, opportunity, case or custom record, or the contact or lead it is for.</p></div>
+                    <div class="tl-feat"><h3>Filled in for you</h3><p>The subject you type, the status you pick, and any other field such as priority or comments, on every new task.</p></div>
+                    <div class="tl-feat"><h3>Any days at all</h3><p>Click scattered days, drag across a run of them, or add a recurring pattern such as every other Tuesday.</p></div>
+                    <div class="tl-feat"><h3>Tasks on a calendar</h3><p>Existing tasks show in their status colors. Hover a day for the subject and status, or write each subject in its day.</p></div>
+                    <div class="tl-feat"><h3>Change them later</h3><p>Edit Mode moves a task to another day, changes its status or deletes it, for one task or many at once.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Pick the days, save once</h2>
+                <p>The calendar sits on the record page and shows the tasks the record already has, in the color of their status. Planning a series of customer check-ins takes four steps:</p>
+                <ol class="cp-steps">
+                    <li><strong>Click the days.</strong> Pick each day that needs a task. A picked day turns orange; click it again to drop it.</li>
+                    <li><strong>Type the subject.</strong> The Record Label box holds the subject every new task gets, such as Customer check-in.</li>
+                    <li><strong>Choose the status.</strong> Not Started, In Progress or any value of your Task Status picklist.</li>
+                    <li><strong>Click Save.</strong> One Task per day is created and linked to the record. The days take the status color straight away.</li>
+                </ol>
+                <p>Point at any day to see its task's subject and status, and open the task from there. Days that already have a task can take another one too, when Allow Multiple Per Day is on.</p>
+
+                <h2 style="margin-top:44px;">Real Salesforce Tasks, in the Activity timeline</h2>
+                <p>Nothing here is a copy or a custom object. Each day saves a standard Task, so it behaves like any task your team creates by hand: it shows in the record's Activity timeline, on the Tasks tab, in reports and list views, and in the assignee's to-do list. On a contact or lead the task links through Name; on an account, opportunity, case or custom object, through Related To.</p>
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/blog/salesforce-tasks-activity-timeline.png" alt="Salesforce Activity timeline on the account: the four Customer check-in tasks created from the calendar, each with its due date and High priority flag, among the account's other tasks" loading="lazy" width="1262" height="1976" data-zoomable>
+                    <figcaption>The four check-ins in the account's Activity timeline, each flagged High priority by Default Field Values.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Every task on one calendar</h2>
+                <p>The same component works as a task calendar. On an app or Home page, turn on Show All Records and it shows every Task you can see; add a Record Filter such as <code>OwnerId=ME</code> and each person sees their own. With Show Record Names in Each Day, each subject is written in its day, in the color of its status, and the pills above the calendar filter by status.</p>
+                <figure class="sc-shot">
+                    <img src="/images/blog/salesforce-task-calendar-month.png" alt="Salesforce task calendar month view: every task written in its day by subject, in the color of its status, with status filters above" loading="lazy" width="1989" height="1334" data-zoomable>
+                    <figcaption>A month of tasks by subject and status, including the four check-ins saved from the account.</figcaption>
+                </figure>
+                <p>Already have tasks spread across an account's contacts and opportunities? A Rollup Field brings them onto the account's calendar too. <a href="/blog/salesforce-calendar-related-records.html">See how the account calendar shows related records</a>.</p>
+
+                <h2 style="margin-top:44px;">When the days follow a pattern</h2>
+                <p>Some task plans repeat: a call every other Tuesday, a report on the last Friday of the month, a review on the 2nd and 4th Friday. <strong>Add Recurring Pattern</strong> fills those days in for you, shows the dates before it adds them, and stops at the end date you set. Each day still saves as its own Task, so you can move or skip one without touching the rest.</p>
+                <figure class="sc-shot tk-narrow">
+                    <img src="/images/marketing/salesforce-recurring-date-pattern-2nd-4th-friday-poster.png" data-gif="/images/marketing/salesforce-recurring-date-pattern-2nd-4th-friday.gif" alt="Animated demo of a recurring date pattern in the MultiDatePick Salesforce date picker: the 2nd and 4th Friday of each month, previewed, then added to the calendar" loading="lazy" decoding="async" width="700" height="900" data-zoomable>
+                    <figcaption>The 2nd and 4th Friday of each month, previewed and added in one step.</figcaption>
+                </figure>
+                <p>More patterns, and why a date range cannot hold them, in <a href="/blog/recurring-date-patterns-in-salesforce.html">recurring date patterns in Salesforce</a>.</p>
+
+                <h2 style="margin-top:44px;">Set it up in the Setup Wizard</h2>
+                <p>No code, and no Flow to build. The Setup Wizard writes the configuration and the component reads it:</p>
+                <ol class="cp-steps">
+                    <li><strong>Choose where the calendar goes.</strong> Open the MultiDatePick Setup Wizard tab, pick the record page (Account here) and the one record per date shape.</li>
+                    <li><strong>Save each pick as a Task.</strong> On the Fields screen click <strong>Task</strong>, then check the link to the page: <strong>Related To ID (WhatId)</strong> on an Account, or <strong>Name ID (WhoId)</strong> on a Contact or Lead. The wizard fills in <strong>Due Date Only (ActivityDate)</strong> and <strong>Subject</strong>.</li>
+                    <li><strong>Fill in the rest.</strong> Type a default subject, untick Append Date/Time to Record Name to keep subjects clean, and enter Default Field Values such as <code>Priority=High</code>. Save the config under a name like <code>Account_Tasks</code>.</li>
+                    <li><strong>Drop the component on the page.</strong> In Lightning App Builder, add the MultiDatePick Dates component to the Account page and enter the name in <strong>Config Name</strong>.</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/blog/salesforce-task-calendar-setup.png" alt="MultiDatePick Setup Wizard Fields screen for Salesforce Tasks: Related To (WhatId), Due Date Only (ActivityDate), Subject, a default subject and Default Field Values Priority=High" loading="lazy" width="1999" height="528" data-zoomable>
+                    <figcaption>Task in one click: Related To, Due Date Only and Subject, plus a default subject and Priority=High.</figcaption>
+                </figure>
+                <p>Status colors come from your Task Status values, so Completed can be green and Deferred grey. Change the config later and every page that uses it picks the change up on its next load.</p>
+
+                <h2 style="margin-top:44px;">Who creates tasks this way</h2>
+                <p>Anyone whose plan is a handful of chosen days rather than a single due date:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Account managers</strong><span>Quarterly check-ins and site visits for the year, planned on the account in one go.</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>Sales follow-up</strong><span>Calls on day 2, day 7 and day 14 after a demo, created on the opportunity before the meeting ends.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Customer success</strong><span>Onboarding sessions on the days agreed with the customer, each one a task with its own status.</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Compliance and finance</strong><span>Filing and review deadlines that fall on fixed dates, assigned to the person who owns them.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>Nonprofits</strong><span>Thank-you calls and stewardship touches for a major donor, spread across the season.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Service teams</strong><span>Follow-up checks after a case closes, on the days the customer asked for.</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">The settings that shape it</h2>
+                <p>Each one is a field in the Setup Wizard and a property on the component, so nothing here needs code:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Setting</th><th>What it does for tasks</th><th style="width:22%;">API name</th></tr></thead>
+                    <tbody>
+                    <tr><td>Child Object API Name</td><td>Task: every picked day saves as a Salesforce Task.</td><td><code>relatedObjectApiName</code></td></tr>
+                    <tr><td>Relationship Field API Name</td><td>WhatId (Related To) on accounts, opportunities, cases and custom objects; WhoId (Name) on contacts and leads.</td><td><code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>Date Field API Name</td><td>ActivityDate, the task's due date.</td><td><code>dateFieldApiName</code></td></tr>
+                    <tr><td>Record Name Field and Default Record Name</td><td>Subject, and the subject the box starts with.</td><td><code>recordNameField</code>, <code>defaultRecordName</code></td></tr>
+                    <tr><td>Status Field and Status Colors</td><td>Status, with a color per value, such as Completed:#22C55E.</td><td><code>statusField</code>, <code>statusColors</code></td></tr>
+                    <tr><td>Default Field Values</td><td>Any other field on every new task, such as Priority=High or OwnerId to assign them.</td><td><code>defaultFieldValues</code></td></tr>
+                    <tr><td>Allow Multiple Per Day</td><td>A day that already has a task can take another.</td><td><code>allowMultiplePerDay</code></td></tr>
+                    <tr><td>Show Record Names in Each Day</td><td>Writes each task's subject in its day on Large and Full Width calendars.</td><td><code>monthShowNames</code></td></tr>
+                    <tr><td>Show All Records and Record Filter</td><td>An app or Home page calendar of every task, or only yours with OwnerId=ME.</td><td><code>showAllRecords</code>, <code>recordFilter</code></td></tr>
+                    <tr><td>Config Name</td><td>The config saved by the Setup Wizard. Set this and leave the rest blank.</td><td><code>configName</code></td></tr>
+                </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>More than a month grid.</strong> List Agenda in Available Views and the same tasks also show as a list, day by day, a click away from the calendar. <a href="/blog/salesforce-calendar-views.html">See all five views</a>.
+                </div>
+
+                <h2 style="margin-top:44px;">Questions people ask</h2>
+                <div class="tl-faq">
+                    <details><summary>How do I create multiple tasks at once in Salesforce?</summary><p>Put the MultiDatePick Dates component on the record page with Task as the object it saves. Click every day that needs a task, type the subject, and click Save. MultiDatePick creates one standard Salesforce Task per day, each with its own due date and linked to the record, in a single save. No Flow and no Apex are involved.</p></details>
+                    <details><summary>Can I create Salesforce tasks on dates that do not follow a pattern?</summary><p>Yes. You click the exact days you need, such as the 3rd, the 11th and the 24th, and each one becomes a task. When the days do follow a pattern, the Add Recurring Pattern button fills them in for you: every Tuesday, every other week, or the 1st or last weekday of each month.</p></details>
+                    <details><summary>Which record pages can create tasks this way?</summary><p>Any record that tasks can be related to. Accounts, Opportunities, Cases and custom objects with activities link through Related To (WhatId). Contacts and Leads link through Name (WhoId). On a Contact page, Salesforce also fills in the contact's account, so the new tasks show on the account too.</p></details>
+                    <details><summary>Can every new task get the same priority, status or assignee?</summary><p>Yes. The status picker sets the Status of the tasks being saved. Default Field Values fills any other field on every new task, for example Priority=High, a Comments line, or OwnerId set to a user's Id to assign the tasks to that person. Without it, tasks are assigned to the person who saves them, as usual in Salesforce.</p></details>
+                    <details><summary>Can I see my Salesforce tasks on a calendar?</summary><p>Yes. On a record page the calendar shows that record's tasks in their status colors. On an app or Home page, turn on Show All Records and set Record Filter to OwnerId=ME for a calendar of your own tasks, with each subject written in its day. Hover a day for the details, or add the Agenda view for a list of them.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Pick the days. Get the tasks.</h2>
+                    <p>Click around the live demo, or start from a ready-made config in the <a href="/configlibrary.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/en-US/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=create-salesforce-tasks-calendar" class="btn btn-demo" target="_blank" rel="noopener">Try the Live Demo</a>
+                        <a href="/notify-me-at-launch.html" class="btn btn-primary">Notify Me at Launch</a>
+                        <a href="/gettingstarted.html" class="btn btn-secondary">Getting Started</a>
+                    </div>
+                    <ul class="check-list"><li>$20/user/month, every feature</li><li>30-day free trial, no card</li><li>100% native Salesforce</li><li>No Apex</li><li>Coming soon to the Salesforce AppExchange</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Related reading</h3>
+                    <ul>
+                        <li><a href="/blog/salesforce-calendar-related-records.html">Show contact and opportunity tasks on the account calendar</a></li>
+                        <li><a href="/blog/recurring-date-patterns-in-salesforce.html">Recurring date patterns in Salesforce</a></li>
+                        <li><a href="/blog/no-code-salesforce-calendar.html">The no-code Salesforce calendar, task by task</a></li>
+                        <li><a href="/blog/salesforce-calendar-setup-wizard.html">Configure a Salesforce calendar in the Setup Wizard</a></li>
+                        <li><a href="/multidatepickdates.html">The MultiDatePick Dates calendar</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/" class="logo">
+                        <img src="../images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45">
+                    </a>
+                    <p>The most customizable calendar component suite for Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Five Calendar Views</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Solutions</h4>
+                    <ul>
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
+                        <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Dates</a></li>
+                        <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Docs</h4>
+                    <ul>
+                        <li><a href="/gettingstarted.html">Getting Started</a></li>
+                        <li><a href="/user-guide.html">User Guide</a></li>
+                        <li><a href="/flowcheatsheet.html">Screen Flow Guide</a></li>
+                        <li><a href="/home-app-experience.html">App, Home &amp; Experience Pages</a></li>
+                        <li><a href="/troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                    </ul>
+                    <h4>For developers</h4>
+                    <ul>
+                        <li><a href="/salesforce-calendar-developer-guide.html">Developer Guide</a></li>
+                        <li><a href="/deploy-flow-vscode.html">Deploy a Flow (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="/pricing.html">Pricing</a></li>
+                        <li><a href="/blog/">Blog</a></li>
+                        <li><a href="/trust.html">Trust &amp; Security</a></li>
+                        <li><a href="/accessibility.html">Accessibility</a></li>
+                        <li><a href="/notify-me-at-launch.html">Notify Me at Launch</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. All rights reserved.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a>
+                    <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Language" translate="no"><ul><li><a href="/blog/create-salesforce-tasks-calendar.html" hreflang="en" lang="en" aria-current="page">English</a></li><li><a href="/de/blog/salesforce-mehrere-aufgaben-im-kalender-erstellen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/crear-varias-tareas-salesforce-calendario.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/creer-plusieurs-taches-salesforce-calendrier.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/creare-piu-attivita-salesforce-calendario.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/criar-varias-tarefas-salesforce-calendario.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/create-salesforce-tasks-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/create-salesforce-tasks-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/create-salesforce-tasks-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="../js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Expand image</p><p data-k="expand-diagram">Expand diagram</p><p data-k="close">Close</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>
