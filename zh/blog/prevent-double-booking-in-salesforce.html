@@ -96,7 +96,7 @@
                         <li><a href="/zh/multidatepickdates.html">Dates</a></li>
                         <li><a href="/zh/multidatepickdatetime.html">Dates &amp; Times</a></li>
                         <li><a href="/zh/salesforce-booking-calendar.html">Resource Booking</a></li>
-                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">六种日历视图</a></li>
                         <li><a href="/zh/configlibrary.html">Config Library</a></li>
                         <li><a href="/zh/trust.html">信任与安全</a></li>
                         <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
@@ -108,9 +108,10 @@
                         <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
                         <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
                         <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-class-scheduling.html">课程排期</a></li>
                         <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
                         <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
-                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日历</a></li>
                         <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
                         <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
                     </ul>
@@ -144,7 +145,7 @@
                 "headline": "在 Salesforce 中防止重复预订：冲突检测与容量",
                 "description": "验证规则要等用户选完才触发。如何在选择之前就检查可用性，以及一个时间段可容纳多个预订时如何处理容量。",
                 "datePublished": "2026-07-21",
-                "dateModified": "2026-10-21",
+                "dateModified": "2026-11-10",
                 "author": {
                     "@type": "Organization",
                     "name": "MultiDatePick"
@@ -155,6 +156,52 @@
                 },
                 "mainEntityOfPage": "https://multidatepick.com/zh/blog/prevent-double-booking-in-salesforce.html",
                 "image": "https://multidatepick.com/images/zh/marketing/salesforce-calendar-capacity.png",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "如何在 Salesforce 中防止重复预订？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "在用户选择时就检查冲突，而不只是在保存时。MultiDatePick 在日历加载时读取已有的预订，标出已被占用的时间段，在每个时间段上显示 3/5 这样的实时容量，保存时再检查一次。然后由 Conflict Behavior（冲突行为）决定阻止保存、跳过冲突日期还是允许保存。无需代码。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "验证规则能阻止 Salesforce 中的重复预订吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "不能。验证规则只能看到正在保存的那条记录，无法查询其他预订，所以它判断不出 9:30 到 10:30 与 9:00 到 10:00 重叠。记录触发的 Flow 或 Apex 可以做到，但只能在用户选完之后。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "如何为每个时间段设置名额上限？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "为资源设置一个容量字段，例如 5 个名额。之后每个时间段都会显示 3/5 这样的实时标记，已满的时间段无法选择。计数方式是“已预订占容量”，因此一门课程、一个班次或一个工位区会恰好约满到上限为止。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "冲突和容量有什么区别？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "冲突是两个预订争抢只能容纳一个的东西，比如一间会议室或一位面试官。容量则是能容纳多个的资源，比如有 20 个座位的课程，问题在于还剩几个。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "所选日期中有一部分冲突时会怎样？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "由您用冲突行为来决定：阻止会拒绝保存并列出冲突，跳过会保存空闲的日期并报告其余日期，允许则照常预订。在屏幕 Flow 中，Conflict Dates 和 Successful Bookings Count 输出会告诉下一个屏幕发生了什么。"
+                        }
+                    }
+                ],
                 "inLanguage": "zh-Hans"
             },
             {
@@ -191,7 +238,8 @@
         </section>
         <section class="section">
             <div class="container" style="max-width:820px;">
-                <p class="sc-meta">发布于 2026 年 7 月 21 日 &middot; 更新于 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+                <p class="sc-meta">发布于 2026 年 7 月 21 日 &middot; 更新于 2026 年 11 月 10 日 &middot; MultiDatePick</p>
+                <div class="sc-answer"><p class="sc-answer__q">如何在 Salesforce 中防止重复预订？</p><p>在用户选择时就检查冲突，而不只是在保存时。MultiDatePick 在日历加载时读取已有的预订，标出已被占用的时间段，在每个时间段上显示 3/5 这样的实时容量，保存时再检查一次。然后由 Conflict Behavior（冲突行为）决定阻止保存、跳过冲突日期还是允许保存。无需代码。</p></div>
                 <p class="sc-lead">重复预订是一个时机问题。等到标准 Salesforce 中的任何功能能告诉您会议室已被占用时，用户早已选好了它，填完了表单的其余部分，并转去做别的事了。</p>
 
                 <h2 style="margin-top:44px;">为什么常见的工具都不管用</h2>
@@ -240,13 +288,22 @@
                 <div class="sc-note">
                     <strong>MultiDatePick 的做法。</strong>日历呈现时读取现有记录，把已占用的时间段显示为已占用，用实时的“已预订占容量”标记统计容量，并在保存时再次检查冲突。<strong>冲突行为</strong>可设为 block、skip 或 allow。在屏幕 Flow（Screen Flow）中，<strong>Conflict Dates</strong> 和 <strong>Successful Bookings Count</strong> 输出会准确告诉下一个屏幕发生了什么。</div>
 
+                <h2 style="margin-top:44px;">常见问题</h2>
+                <div class="tl-faq">
+                    <details><summary>如何在 Salesforce 中防止重复预订？</summary><p>在用户选择时就检查冲突，而不只是在保存时。MultiDatePick 在日历加载时读取已有的预订，标出已被占用的时间段，在每个时间段上显示 3/5 这样的实时容量，保存时再检查一次。然后由 Conflict Behavior（冲突行为）决定阻止保存、跳过冲突日期还是允许保存。无需代码。</p></details>
+                    <details><summary>验证规则能阻止 Salesforce 中的重复预订吗？</summary><p>不能。验证规则只能看到正在保存的那条记录，无法查询其他预订，所以它判断不出 9:30 到 10:30 与 9:00 到 10:00 重叠。记录触发的 Flow 或 Apex 可以做到，但只能在用户选完之后。</p></details>
+                    <details><summary>如何为每个时间段设置名额上限？</summary><p>为资源设置一个容量字段，例如 5 个名额。之后每个时间段都会显示 3/5 这样的实时标记，已满的时间段无法选择。计数方式是“已预订占容量”，因此一门课程、一个班次或一个工位区会恰好约满到上限为止。</p></details>
+                    <details><summary>冲突和容量有什么区别？</summary><p>冲突是两个预订争抢只能容纳一个的东西，比如一间会议室或一位面试官。容量则是能容纳多个的资源，比如有 20 个座位的课程，问题在于还剩几个。</p></details>
+                    <details><summary>所选日期中有一部分冲突时会怎样？</summary><p>由您用冲突行为来决定：阻止会拒绝保存并列出冲突，跳过会保存空闲的日期并报告其余日期，允许则照常预订。在屏幕 Flow 中，Conflict Dates 和 Successful Bookings Count 输出会告诉下一个屏幕发生了什么。</p></details>
+                </div>
+
                 <div class="bp-end">
                     <h2>在做出选择的那一刻杜绝重复预订</h2>
                     <p>在在线演示中预订一个时间段，看看已占用的时间如何从网格中消失。</p>
                     <div class="bp-end-ctas">
                         <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=prevent-double-booking-in-salesforce" class="btn btn-demo" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-primary">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">入门指南</a>
                     </div>
-                    <ul class="check-list"><li>$20/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>100% Salesforce 原生</li><li>无需 Apex</li><li>即将登陆 Salesforce AppExchange</li></ul>
+                    <ul class="check-list"><li>$20/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>100% Salesforce 原生</li><li>无需 Apex</li><li>已通过 Salesforce 安全审查</li></ul>
                 </div>
 
                 <div class="sc-related">
@@ -277,7 +334,7 @@
                         <li><a href="/zh/multidatepickdates.html">Dates</a></li>
                         <li><a href="/zh/multidatepickdatetime.html">Dates &amp; Times</a></li>
                         <li><a href="/zh/salesforce-booking-calendar.html">Resource Booking</a></li>
-                        <li><a href="/zh/blog/salesforce-calendar-views.html">五种日历视图</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">六种日历视图</a></li>
                         <li><a href="/zh/configlibrary.html">Config Library</a></li>
                     </ul>
                 </div>
@@ -287,9 +344,10 @@
                         <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
                         <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
                         <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-class-scheduling.html">课程排期</a></li>
                         <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
                         <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
-                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日期</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日历</a></li>
                         <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
                         <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
                     </ul>

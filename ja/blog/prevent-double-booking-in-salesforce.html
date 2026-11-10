@@ -96,7 +96,7 @@
                         <li><a href="/ja/multidatepickdates.html">Dates</a></li>
                         <li><a href="/ja/multidatepickdatetime.html">Dates &amp; Times</a></li>
                         <li><a href="/ja/salesforce-booking-calendar.html">Resource Booking</a></li>
-                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">6 つのカレンダー表示</a></li>
                         <li><a href="/ja/configlibrary.html">Config Library</a></li>
                         <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
                         <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
@@ -108,9 +108,10 @@
                         <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
                         <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
                         <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-class-scheduling.html">クラス・講座スケジュール</a></li>
                         <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
                         <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
-                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンカレンダー</a></li>
                         <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
                         <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
                     </ul>
@@ -144,7 +145,7 @@
                 "headline": "Salesforce でダブルブッキングを防ぐ: 競合検出と定員管理",
                 "description": "入力規則が動くのは、ユーザーが選んだあと。選ぶ前に空き状況を確認する方法と、複数の予約が入る定員の扱い方を解説します。",
                 "datePublished": "2026-07-21",
-                "dateModified": "2026-10-21",
+                "dateModified": "2026-11-10",
                 "author": {
                     "@type": "Organization",
                     "name": "MultiDatePick"
@@ -155,6 +156,52 @@
                 },
                 "mainEntityOfPage": "https://multidatepick.com/ja/blog/prevent-double-booking-in-salesforce.html",
                 "image": "https://multidatepick.com/images/ja/marketing/salesforce-calendar-capacity.png",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce でダブルブッキングを防ぐには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "保存時だけでなく、選ぶ時点で重複をチェックします。MultiDatePick はカレンダーの読み込み時に既存の予約を読み、埋まった枠に印を付け、各枠に 3/5 のような定員をリアルタイムで表示し、保存時にも再チェックします。そのうえで Conflict Behavior (競合の動作) が保存をブロックするか、重複する日をスキップするか、許可するかを決めます。コードは不要です。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "入力規則で Salesforce のダブルブッキングを防げますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。入力規則が見られるのは保存中のレコードだけで、ほかの予約を検索できません。そのため 9:30 から 10:30 が 9:00 から 10:00 と重なることを判断できません。レコードトリガーフローや Apex なら判断できますが、それもユーザーが選び終えた後です。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "時間枠ごとに席数の上限を設定するには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "リソースに定員項目を持たせます (例: 5 席)。すると各時間枠に 3/5 のようなバッジがリアルタイムで表示され、満席の枠は選べなくなります。数えるのは定員に対する予約数なので、クラス、シフト、デスクエリアは上限まで埋まり、それ以上は入りません。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "競合と定員の違いは何ですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "競合とは、会議室や面接官のように 1 件しか受けられないものを 2 件の予約が取り合うことです。定員とは、20 席のクラスのように複数を受けられるリソースのことで、問題はあと何席残っているかです。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "選んだ日付の一部が重複したらどうなりますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Conflict Behavior (競合の動作) で選べます。ブロックは保存を拒否して重複を一覧表示し、スキップは空いている日だけ保存して残りを報告し、許可はそのまま予約します。画面フロー (Screen Flow) では、出力の Conflict Dates と Successful Bookings Count で次の画面に結果を伝えられます。"
+                        }
+                    }
+                ],
                 "inLanguage": "ja"
             },
             {
@@ -191,7 +238,8 @@
         </section>
         <section class="section">
             <div class="container" style="max-width:820px;">
-                <p class="sc-meta">公開日 2026 年 7 月 21 日 &middot; 更新日 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+                <p class="sc-meta">公開日 2026 年 7 月 21 日 &middot; 更新日 2026 年 11 月 10 日 &middot; MultiDatePick</p>
+                <div class="sc-answer"><p class="sc-answer__q">Salesforce でダブルブッキングを防ぐには?</p><p>保存時だけでなく、選ぶ時点で重複をチェックします。MultiDatePick はカレンダーの読み込み時に既存の予約を読み、埋まった枠に印を付け、各枠に 3/5 のような定員をリアルタイムで表示し、保存時にも再チェックします。そのうえで Conflict Behavior (競合の動作) が保存をブロックするか、重複する日をスキップするか、許可するかを決めます。コードは不要です。</p></div>
                 <p class="sc-lead">ダブルブッキングはタイミングの問題です。標準の Salesforce の仕組みが「その会議室は埋まっています」と伝えられる頃には、ユーザーはもう会議室を選び、フォームの残りを入力して、次の作業に移っています。</p>
 
                 <h2 style="margin-top:44px;">定番のツールがうまくいかない理由</h2>
@@ -240,13 +288,22 @@
                 <div class="sc-note">
                     <strong>MultiDatePick の仕組み。</strong> カレンダーの表示時に既存のレコードを読み込み、埋まった枠は埋まっていると表示し、予約数/定員のバッジで定員をリアルタイムに数え、保存時にも競合を再チェックします。<strong>Conflict Behavior</strong>（競合の動作） で block、skip、allow を設定します。画面フロー (Screen Flow) では、<strong>Conflict Dates</strong> と <strong>Successful Bookings Count</strong> の出力で、次の画面に何が起きたかを正確に伝えます。</div>
 
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="tl-faq">
+                    <details><summary>Salesforce でダブルブッキングを防ぐには?</summary><p>保存時だけでなく、選ぶ時点で重複をチェックします。MultiDatePick はカレンダーの読み込み時に既存の予約を読み、埋まった枠に印を付け、各枠に 3/5 のような定員をリアルタイムで表示し、保存時にも再チェックします。そのうえで Conflict Behavior (競合の動作) が保存をブロックするか、重複する日をスキップするか、許可するかを決めます。コードは不要です。</p></details>
+                    <details><summary>入力規則で Salesforce のダブルブッキングを防げますか?</summary><p>いいえ。入力規則が見られるのは保存中のレコードだけで、ほかの予約を検索できません。そのため 9:30 から 10:30 が 9:00 から 10:00 と重なることを判断できません。レコードトリガーフローや Apex なら判断できますが、それもユーザーが選び終えた後です。</p></details>
+                    <details><summary>時間枠ごとに席数の上限を設定するには?</summary><p>リソースに定員項目を持たせます (例: 5 席)。すると各時間枠に 3/5 のようなバッジがリアルタイムで表示され、満席の枠は選べなくなります。数えるのは定員に対する予約数なので、クラス、シフト、デスクエリアは上限まで埋まり、それ以上は入りません。</p></details>
+                    <details><summary>競合と定員の違いは何ですか?</summary><p>競合とは、会議室や面接官のように 1 件しか受けられないものを 2 件の予約が取り合うことです。定員とは、20 席のクラスのように複数を受けられるリソースのことで、問題はあと何席残っているかです。</p></details>
+                    <details><summary>選んだ日付の一部が重複したらどうなりますか?</summary><p>Conflict Behavior (競合の動作) で選べます。ブロックは保存を拒否して重複を一覧表示し、スキップは空いている日だけ保存して残りを報告し、許可はそのまま予約します。画面フロー (Screen Flow) では、出力の Conflict Dates と Successful Bookings Count で次の画面に結果を伝えられます。</p></details>
+                </div>
+
                 <div class="bp-end">
                     <h2>選ぶ瞬間にダブルブッキングを防ぐ</h2>
                     <p>ライブデモで枠を予約して、埋まった時間がグリッドから消えるのを確かめてください。</p>
                     <div class="bp-end-ctas">
                         <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=prevent-double-booking-in-salesforce" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
                     </div>
-                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce セキュリティレビューに合格</li></ul>
                 </div>
 
                 <div class="sc-related">
@@ -277,7 +334,7 @@
                         <li><a href="/ja/multidatepickdates.html">Dates</a></li>
                         <li><a href="/ja/multidatepickdatetime.html">Dates &amp; Times</a></li>
                         <li><a href="/ja/salesforce-booking-calendar.html">Resource Booking</a></li>
-                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">6 つのカレンダー表示</a></li>
                         <li><a href="/ja/configlibrary.html">Config Library</a></li>
                     </ul>
                 </div>
@@ -287,9 +344,10 @@
                         <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
                         <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
                         <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-class-scheduling.html">クラス・講座スケジュール</a></li>
                         <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
                         <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
-                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンカレンダー</a></li>
                         <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
                         <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
                     </ul>

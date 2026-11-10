@@ -98,7 +98,7 @@
                         <li><a href="/multidatepickdates.html">Dates</a></li>
                         <li><a href="/multidatepickdatetime.html">Dates &amp; Times</a></li>
                         <li><a href="/salesforce-booking-calendar.html">Resource Booking</a></li>
-                        <li><a href="/blog/salesforce-calendar-views.html">Five Calendar Views</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Six Calendar Views</a></li>
                         <li><a href="/configlibrary.html">Config Library</a></li>
                         <li><a href="/trust.html">Trust &amp; Security</a></li>
                         <li><a href="/accessibility.html">Accessibility (VPAT)</a></li>
@@ -110,9 +110,10 @@
                         <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
                         <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
                         <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-class-scheduling.html">Class &amp; Course Scheduling</a></li>
                         <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
                         <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
-                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Dates</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Calendar</a></li>
                         <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
                         <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
                     </ul>
@@ -139,13 +140,105 @@
     <main class="page-content">
         <script type="application/ld+json">
         {
-            "@context": "https://schema.org",
-            "@graph": [
-                {"@type": "Article", "headline": "Salesforce Flow Loops: Create a Record for Every Date or Shift", "description": "How to create multiple records from one Salesforce Screen Flow: parse the picked dates, loop through them, and save once after the loop. Three starter flows for shifts, days off and date ranges.", "datePublished": "2026-10-29", "dateModified": "2026-10-29", "author": {"@type": "Organization", "name": "MultiDatePick"}, "publisher": {"@type": "Organization", "name": "MultiDatePick"}, "mainEntityOfPage": "https://multidatepick.com/blog/salesforce-flow-loop-multiple-records.html", "image": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png"},
-                {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I create multiple records from one Salesforce Screen Flow?", "acceptedAnswer": {"@type": "Answer", "text": "Collect the choices on one screen, loop through them, and in the loop use an Assignment to fill a record variable and add it to a record collection. After the loop, one Create Records element saves the whole collection."}}, {"@type": "Question", "name": "Should Create Records go inside a Flow loop?", "acceptedAnswer": {"@type": "Answer", "text": "No. A Create Records inside a loop saves once per item, and a transaction allows 150 such saves, so a long list fails and every list runs slower. Build a record collection in the loop and save it once after the loop ends."}}, {"@type": "Question", "name": "How do I loop through JSON in Salesforce Flow?", "acceptedAnswer": {"@type": "Answer", "text": "Flow cannot read JSON on its own. Turn it into a collection first: MultiDatePick includes an action, Parse Date Entries from JSON, that turns the calendar's JSON output into a list of entries with fromDate, toDate, startTime and endTime, which a Loop element can walk."}}, {"@type": "Question", "name": "How do I add multiple shifts to a job in Salesforce?", "acceptedAnswer": {"@type": "Answer", "text": "Put a date and time picker on a Screen Flow launched from the job record, let the recruiter pick the shift days and hours, parse the picks into a list, and loop over it to build one shift record per day, linked to the job. Save them all in one Create Records after the loop."}}, {"@type": "Question", "name": "Do I need Apex to loop through picked dates?", "acceptedAnswer": {"@type": "Answer", "text": "No. The parsing action ships with MultiDatePick, and the loop, assignment and save are standard Flow elements. For whole days you do not even need the action: the calendar also outputs a plain list of picked days."}}]},
-                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png", "caption": "A Salesforce Screen Flow in Flow Builder that adds shifts: a MultiDatePick screen, a Parse Date Entries action, a loop that builds each shift, and one Create Records after the loop", "width": 940, "height": 1780, "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}, "copyrightNotice": "© 2026 MultiDatePick"},
-                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-shift-picker.png", "caption": "MultiDatePick date and time picker in a Salesforce Screen Flow: three shift days picked in November with 13:00 to 14:00 selected for all of them", "width": 1900, "height": 1917, "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}, "copyrightNotice": "© 2026 MultiDatePick"}
-            ]
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Article",
+              "headline": "Salesforce Flow Loops: Create a Record for Every Date or Shift",
+              "description": "How to create multiple records from one Salesforce Screen Flow: parse the picked dates, loop through them, and save once after the loop. Three starter flows for shifts, days off and date ranges.",
+              "datePublished": "2026-10-29",
+              "dateModified": "2026-11-10",
+              "author": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "mainEntityOfPage": "https://multidatepick.com/blog/salesforce-flow-loop-multiple-records.html",
+              "image": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "How do I create a record for every date in a Salesforce Screen Flow?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "You may not need a loop. Put the MultiDatePick calendar on the screen and bind Parent Record Id to the record the flow runs for: it saves one record per picked date or time block itself. When you want full control, loop its output instead: an Assignment inside the loop, one Create Records after it."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How do I create multiple records from one Salesforce Screen Flow?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Collect the choices on one screen, loop through them, and in the loop use an Assignment to fill a record variable and add it to a record collection. After the loop, one Create Records element saves the whole collection."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Should Create Records go inside a Flow loop?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. A Create Records inside a loop saves once per item, and a transaction allows 150 such saves, so a long list fails and every list runs slower. Build a record collection in the loop and save it once after the loop ends."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How do I loop through JSON in Salesforce Flow?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Flow cannot read JSON on its own. Turn it into a collection first: MultiDatePick includes an action, Parse Date Entries from JSON, that turns the calendar's JSON output into a list of entries with fromDate, toDate, startTime and endTime, which a Loop element can walk."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How do I add multiple shifts to a job in Salesforce?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Put a date and time picker on a Screen Flow launched from the job record, let the recruiter pick the shift days and hours, parse the picks into a list, and loop over it to build one shift record per day, linked to the job. Save them all in one Create Records after the loop."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Do I need Apex to loop through picked dates?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. The parsing action ships with MultiDatePick, and the loop, assignment and save are standard Flow elements. For whole days you do not even need the action: the calendar also outputs a plain list of picked days."
+                  }
+                }
+              ]
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-add-shifts-builder.png",
+              "caption": "A Salesforce Screen Flow in Flow Builder that adds shifts: a MultiDatePick screen, a Parse Date Entries action, a loop that builds each shift, and one Create Records after the loop",
+              "width": 940,
+              "height": 1780,
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-loop-shift-picker.png",
+              "caption": "MultiDatePick date and time picker in a Salesforce Screen Flow: three shift days picked in November with 13:00 to 14:00 selected for all of them",
+              "width": 1900,
+              "height": 1917,
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            }
+          ]
         }
         </script>
         <section class="guide-hero">
@@ -156,7 +249,8 @@
         </section>
         <section class="section">
             <div class="container" style="max-width:820px;">
-                <p class="sc-meta">Published October 29, 2026 &middot; MultiDatePick</p>
+                <p class="sc-meta">Published October 29, 2026 &middot; Updated November 10, 2026 &middot; MultiDatePick</p>
+                <div class="sc-answer"><p class="sc-answer__q">How do I create a record for every date in a Salesforce Screen Flow?</p><p>You may not need a loop. Put the MultiDatePick calendar on the screen and bind Parent Record Id to the record the flow runs for: it saves one record per picked date or time block itself. When you want full control, loop its output instead: an Assignment inside the loop, one Create Records after it.</p></div>
 
                 <p class="sc-lead">A recruiter needs to add twelve shifts to a job. A manager approves a week off. An event planner books a three-day workshop and a follow-up day. Each one is a single decision on a single screen, and each one should become several records.</p>
 
@@ -272,6 +366,7 @@
 
                 <h2 style="margin-top:44px;">Questions people ask</h2>
                 <div class="bp-faq">
+                    <details><summary>How do I create a record for every date in a Salesforce Screen Flow?</summary><p>You may not need a loop. Put the MultiDatePick calendar on the screen and bind Parent Record Id to the record the flow runs for: it saves one record per picked date or time block itself. When you want full control, loop its output instead: an Assignment inside the loop, one Create Records after it.</p></details>
                     <details><summary>How do I create multiple records from one Salesforce Screen Flow?</summary><p>Collect the choices on one screen, loop through them, and in the loop use an Assignment to fill a record variable and add it to a record collection. After the loop, one Create Records element saves the whole collection.</p></details>
                     <details><summary>Should Create Records go inside a Flow loop?</summary><p>No. A Create Records inside a loop saves once per item, and a transaction allows 150 such saves, so a long list fails and every list runs slower. Build a record collection in the loop and save it once after the loop ends.</p></details>
                     <details><summary>How do I loop through JSON in Salesforce Flow?</summary><p>Flow cannot read JSON on its own. Turn it into a collection first: MultiDatePick includes an action, Parse Date Entries from JSON, that turns the calendar's JSON output into a list of entries with fromDate, toDate, startTime and endTime, which a Loop element can walk.</p></details>
@@ -287,7 +382,7 @@
                         <a href="/notify-me-at-launch.html" class="btn btn-primary">Notify Me at Launch</a>
                         <a href="/flowcheatsheet.html" class="btn btn-secondary">Screen Flow Guide</a>
                     </div>
-                    <ul class="check-list"><li>$20/user/month, every feature</li><li>30-day free trial, no card</li><li>100% native Salesforce</li><li>No Apex</li><li>Coming soon to the Salesforce AppExchange</li></ul>
+                    <ul class="check-list"><li>$20/user/month, every feature</li><li>30-day free trial, no card</li><li>100% native Salesforce</li><li>No Apex</li><li>Passed Salesforce Security Review</li></ul>
                 </div>
 
                 <div class="sc-related">
@@ -318,7 +413,7 @@
                         <li><a href="/multidatepickdates.html">Dates</a></li>
                         <li><a href="/multidatepickdatetime.html">Dates &amp; Times</a></li>
                         <li><a href="/salesforce-booking-calendar.html">Resource Booking</a></li>
-                        <li><a href="/blog/salesforce-calendar-views.html">Five Calendar Views</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Six Calendar Views</a></li>
                         <li><a href="/configlibrary.html">Config Library</a></li>
                     </ul>
                 </div>
@@ -328,9 +423,10 @@
                         <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
                         <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
                         <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-class-scheduling.html">Class &amp; Course Scheduling</a></li>
                         <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
                         <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
-                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Dates</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Calendar</a></li>
                         <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
                         <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
                     </ul>

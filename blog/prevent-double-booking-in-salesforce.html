@@ -97,7 +97,7 @@
                         <li><a href="/multidatepickdates.html">Dates</a></li>
                         <li><a href="/multidatepickdatetime.html">Dates &amp; Times</a></li>
                         <li><a href="/salesforce-booking-calendar.html">Resource Booking</a></li>
-                        <li><a href="/blog/salesforce-calendar-views.html">Five Calendar Views</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Six Calendar Views</a></li>
                         <li><a href="/configlibrary.html">Config Library</a></li>
                         <li><a href="/trust.html">Trust &amp; Security</a></li>
                         <li><a href="/accessibility.html">Accessibility (VPAT)</a></li>
@@ -109,9 +109,10 @@
                         <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
                         <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
                         <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-class-scheduling.html">Class &amp; Course Scheduling</a></li>
                         <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
                         <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
-                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Dates</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Calendar</a></li>
                         <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
                         <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
                     </ul>
@@ -138,12 +139,94 @@
     <main class="page-content">
         <script type="application/ld+json">
         {
-            "@context": "https://schema.org",
-            "@graph": [
-                {"@type": "Article", "headline": "Preventing Double-Booking in Salesforce: Conflict Detection and Capacity", "description": "Validation rules fire after the user has already chosen. How to check availability before selection, and handle capacity where more than one booking fits.", "datePublished": "2026-07-21", "dateModified": "2026-10-21", "author": {"@type": "Organization", "name": "MultiDatePick"}, "publisher": {"@type": "Organization", "name": "MultiDatePick"}, "mainEntityOfPage": "https://multidatepick.com/blog/prevent-double-booking-in-salesforce.html", "image": "https://multidatepick.com/images/marketing/salesforce-calendar-capacity.png"},
-                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-capacity.png", "caption": "Salesforce booking calendar showing capacity badges and conflict detection preventing double-booking on each slot", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}, "copyrightNotice": "© 2026 MultiDatePick"},
-                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.webp", "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png", "caption": "Animated demo of the MultiDatePick Salesforce utilization heatmap: advisors down the side showing booked of capacity per day, hovering a full day, then clicking it to open that advisor's week", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}, "copyrightNotice": "© 2026 MultiDatePick"}
-            ]
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Article",
+              "headline": "Preventing Double-Booking in Salesforce: Conflict Detection and Capacity",
+              "description": "Validation rules fire after the user has already chosen. How to check availability before selection, and handle capacity where more than one booking fits.",
+              "datePublished": "2026-07-21",
+              "dateModified": "2026-11-10",
+              "author": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "mainEntityOfPage": "https://multidatepick.com/blog/prevent-double-booking-in-salesforce.html",
+              "image": "https://multidatepick.com/images/marketing/salesforce-calendar-capacity.png"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "How do I prevent double booking in Salesforce?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Check for clashes when people pick, not only when they save. MultiDatePick reads the existing bookings as the calendar loads, marks taken slots, shows live capacity such as 3/5 on each slot, and checks again on save. Conflict Behavior then blocks the save, skips the clashing dates or allows them. No code."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can a validation rule stop double booking in Salesforce?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. A validation rule only sees the record being saved and cannot query other bookings, so it cannot tell that 9:30 to 10:30 overlaps 9:00 to 10:00. A record-triggered Flow or Apex can, but only after the user has chosen."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How do I set seat limits per time slot?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Give the resource a capacity field, for example 5 seats. Each time slot then shows a live badge such as 3/5, and a full slot cannot be picked. The count is booked of capacity, so a class, a shift or a desk zone fills up to its limit and no further."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "What is the difference between a conflict and capacity?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A conflict is two bookings competing for something that holds one, like a room or an interviewer. Capacity is a resource that holds several, like a class with twenty seats, where the question is how many are left."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "What happens when some of the picked dates clash?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "You choose with Conflict Behavior: Block refuses the save and lists the clash, Skip saves the free dates and reports the rest, and Allow books them anyway. In a Screen Flow, the Conflict Dates and Successful Bookings Count outputs tell the next screen what happened."
+                  }
+                }
+              ]
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-capacity.png",
+              "caption": "Salesforce booking calendar showing capacity badges and conflict detection preventing double-booking on each slot",
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo.webp",
+              "thumbnailUrl": "https://multidatepick.com/images/views/salesforce-utilization-view-demo-poster.png",
+              "caption": "Animated demo of the MultiDatePick Salesforce utilization heatmap: advisors down the side showing booked of capacity per day, hovering a full day, then clicking it to open that advisor's week",
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            }
+          ]
         }
         </script>
         <section class="guide-hero">
@@ -154,7 +237,8 @@
         </section>
         <section class="section">
             <div class="container" style="max-width:820px;">
-                <p class="sc-meta">Published July 21, 2026 &middot; Updated October 21, 2026 &middot; MultiDatePick</p>
+                <p class="sc-meta">Published July 21, 2026 &middot; Updated November 10, 2026 &middot; MultiDatePick</p>
+                <div class="sc-answer"><p class="sc-answer__q">How do I prevent double booking in Salesforce?</p><p>Check for clashes when people pick, not only when they save. MultiDatePick reads the existing bookings as the calendar loads, marks taken slots, shows live capacity such as 3/5 on each slot, and checks again on save. Conflict Behavior then blocks the save, skips the clashing dates or allows them. No code.</p></div>
                 <p class="sc-lead">Double-booking is a timing problem. By the time anything in standard Salesforce can tell you the room is taken, the user has already chosen it, filled in the rest of the form, and moved on.</p>
 
                 <h2 style="margin-top:44px;">Why the obvious tools do not work</h2>
@@ -204,6 +288,15 @@
                     <strong>How MultiDatePick does it.</strong> It reads existing records when the calendar renders, shows taken slots as taken, counts capacity with a live booked of capacity badge, and checks for conflicts again on save. <strong>Conflict Behavior</strong> sets block, skip or allow. In a Screen Flow, the <strong>Conflict Dates</strong> and <strong>Successful Bookings Count</strong> outputs tell the next screen exactly what happened.
                 </div>
 
+                <h2 style="margin-top:44px;">Questions people ask</h2>
+                <div class="tl-faq">
+                    <details><summary>How do I prevent double booking in Salesforce?</summary><p>Check for clashes when people pick, not only when they save. MultiDatePick reads the existing bookings as the calendar loads, marks taken slots, shows live capacity such as 3/5 on each slot, and checks again on save. Conflict Behavior then blocks the save, skips the clashing dates or allows them. No code.</p></details>
+                    <details><summary>Can a validation rule stop double booking in Salesforce?</summary><p>No. A validation rule only sees the record being saved and cannot query other bookings, so it cannot tell that 9:30 to 10:30 overlaps 9:00 to 10:00. A record-triggered Flow or Apex can, but only after the user has chosen.</p></details>
+                    <details><summary>How do I set seat limits per time slot?</summary><p>Give the resource a capacity field, for example 5 seats. Each time slot then shows a live badge such as 3/5, and a full slot cannot be picked. The count is booked of capacity, so a class, a shift or a desk zone fills up to its limit and no further.</p></details>
+                    <details><summary>What is the difference between a conflict and capacity?</summary><p>A conflict is two bookings competing for something that holds one, like a room or an interviewer. Capacity is a resource that holds several, like a class with twenty seats, where the question is how many are left.</p></details>
+                    <details><summary>What happens when some of the picked dates clash?</summary><p>You choose with Conflict Behavior: Block refuses the save and lists the clash, Skip saves the free dates and reports the rest, and Allow books them anyway. In a Screen Flow, the Conflict Dates and Successful Bookings Count outputs tell the next screen what happened.</p></details>
+                </div>
+
                 <div class="bp-end">
                     <h2>Stop double-booking at the moment of choice</h2>
                     <p>Book a slot in the live demo and watch taken times drop out of the grid.</p>
@@ -212,7 +305,7 @@
                         <a href="/notify-me-at-launch.html" class="btn btn-primary">Notify Me at Launch</a>
                         <a href="/gettingstarted.html" class="btn btn-secondary">Getting Started</a>
                     </div>
-                    <ul class="check-list"><li>$20/user/month, every feature</li><li>30-day free trial, no card</li><li>100% native Salesforce</li><li>No Apex</li><li>Coming soon to the Salesforce AppExchange</li></ul>
+                    <ul class="check-list"><li>$20/user/month, every feature</li><li>30-day free trial, no card</li><li>100% native Salesforce</li><li>No Apex</li><li>Passed Salesforce Security Review</li></ul>
                 </div>
 
                 <div class="sc-related">
@@ -243,7 +336,7 @@
                         <li><a href="/multidatepickdates.html">Dates</a></li>
                         <li><a href="/multidatepickdatetime.html">Dates &amp; Times</a></li>
                         <li><a href="/salesforce-booking-calendar.html">Resource Booking</a></li>
-                        <li><a href="/blog/salesforce-calendar-views.html">Five Calendar Views</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Six Calendar Views</a></li>
                         <li><a href="/configlibrary.html">Config Library</a></li>
                     </ul>
                 </div>
@@ -253,9 +346,10 @@
                         <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
                         <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
                         <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-class-scheduling.html">Class &amp; Course Scheduling</a></li>
                         <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
                         <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
-                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Dates</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Calendar</a></li>
                         <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
                         <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
                     </ul>

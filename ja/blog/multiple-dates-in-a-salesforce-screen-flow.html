@@ -96,7 +96,7 @@
                         <li><a href="/ja/multidatepickdates.html">Dates</a></li>
                         <li><a href="/ja/multidatepickdatetime.html">Dates &amp; Times</a></li>
                         <li><a href="/ja/salesforce-booking-calendar.html">Resource Booking</a></li>
-                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">6 つのカレンダー表示</a></li>
                         <li><a href="/ja/configlibrary.html">Config Library</a></li>
                         <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
                         <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
@@ -108,9 +108,10 @@
                         <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
                         <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
                         <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-class-scheduling.html">クラス・講座スケジュール</a></li>
                         <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
                         <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
-                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンカレンダー</a></li>
                         <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
                         <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
                     </ul>
@@ -144,7 +145,7 @@
                 "headline": "Salesforce 画面フロー (Screen Flow) でユーザーに複数の日付を選ばせる方法",
                 "description": "Salesforce の 1 つのフロー画面で複数の日付を受け取る方法と、その後のコレクションの扱い方。ループ、JSON の解析、標準コンポーネントの限界を解説します。",
                 "datePublished": "2026-05-01",
-                "dateModified": "2026-10-21",
+                "dateModified": "2026-11-10",
                 "author": {
                     "@type": "Organization",
                     "name": "MultiDatePick"
@@ -155,6 +156,52 @@
                 },
                 "mainEntityOfPage": "https://multidatepick.com/ja/blog/multiple-dates-in-a-salesforce-screen-flow.html",
                 "image": "https://multidatepick.com/images/ja/flow-guide/salesforce-screen-flow-select-multiple-dates.webp",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce の画面フロー (Screen Flow) で複数の日付を選ぶには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Flow の日付入力は 1 つの日付しか持てないため、画面に複数日付を選べるカレンダーコンポーネントを追加します。MultiDatePick なら、必要な日付をすべてクリックで選べ、フローにはテキストコレクションとして返ります。Parent Record Id を設定すれば、日付ごとに 1 件のレコードをコンポーネント自身が保存します。ループも Apex も不要です。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "日付入力を複数並べたり、開始日と終了日を使ったりしてはいけないのはなぜですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "入力を複数並べると上限が固定され、空欄の項目が残ります。開始日と終了日は、日付が連続していないと正しく表せません。3 日、4 日、11 日、18 日が 16 日間になってしまいます。複数日付のカレンダーなら、選んだ日だけがそのまま返ります。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "コンポーネントはフローに何を返しますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Selected Dates (ISO 形式の日付のテキストコレクション)、連続した日を 1 件のレコードにまとめる場合の Date Ranges JSON、日付ごとの時刻を持つ Dates With Times JSON、そして予約用の Successful Bookings Count と Conflict Dates です。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "レコードを作成するのにループは必要ですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。親レコードの Id を Parent Record Id に渡すと、画面の保存時にコンポーネントが日付ごとに子レコードを 1 件ずつ作成します。空欄にするのは、出力をループして独自の方法でレコードを作りたい場合だけです。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Flow Builder でチェックボックスの設定が無視されるのはなぜですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Flow Builder で空欄のままのチェックボックス入力は、false ではなく「空」になります。チェックボックスは使わず、カレンダーはセットアップウィザードで作成し、画面コンポーネントでは Config Name だけを設定してください。"
+                        }
+                    }
+                ],
                 "inLanguage": "ja"
             },
             {
@@ -203,7 +250,8 @@
         </section>
         <section class="section">
             <div class="container" style="max-width:820px;">
-                <p class="sc-meta">公開日 2026 年 5 月 1 日 &middot; 更新日 2026 年 10 月 21 日 &middot; MultiDatePick</p>
+                <p class="sc-meta">公開日 2026 年 5 月 1 日 &middot; 更新日 2026 年 11 月 10 日 &middot; MultiDatePick</p>
+                <div class="sc-answer"><p class="sc-answer__q">Salesforce の画面フロー (Screen Flow) で複数の日付を選ぶには?</p><p>Flow の日付入力は 1 つの日付しか持てないため、画面に複数日付を選べるカレンダーコンポーネントを追加します。MultiDatePick なら、必要な日付をすべてクリックで選べ、フローにはテキストコレクションとして返ります。Parent Record Id を設定すれば、日付ごとに 1 件のレコードをコンポーネント自身が保存します。ループも Apex も不要です。</p></div>
                 <p class="sc-lead">管理者なら誰もが一度はぶつかる問題です。休暇申請、勤務可能日の回答フォーム、研修の申し込み。ユーザーは連続しているとは限らない複数の日付を選ぶ必要があるのに、フロー標準の日付コンポーネントで受け取れるのはちょうど 1 つだけです。</p>
 
                 <h2 style="margin-top:44px;">よくある回避策と、その問題点</h2>
@@ -260,13 +308,22 @@
                 <h2 style="margin-top:44px;">作る前にレコードの形を決める</h2>
                 <p>同じ 9 つの選択日でも、9 件のレコードにも、連続する日を期間にまとめて 4 件のレコードにも、サブブロックを持つ 1 件の親レコードにもできます。どれが正しいかは、必要なレポートによって変わります。フローを作る前に決めておきましょう。後から変えると、フローの修正だけでなくデータの移行も必要になるからです。</p>
 
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="tl-faq">
+                    <details><summary>Salesforce の画面フロー (Screen Flow) で複数の日付を選ぶには?</summary><p>Flow の日付入力は 1 つの日付しか持てないため、画面に複数日付を選べるカレンダーコンポーネントを追加します。MultiDatePick なら、必要な日付をすべてクリックで選べ、フローにはテキストコレクションとして返ります。Parent Record Id を設定すれば、日付ごとに 1 件のレコードをコンポーネント自身が保存します。ループも Apex も不要です。</p></details>
+                    <details><summary>日付入力を複数並べたり、開始日と終了日を使ったりしてはいけないのはなぜですか?</summary><p>入力を複数並べると上限が固定され、空欄の項目が残ります。開始日と終了日は、日付が連続していないと正しく表せません。3 日、4 日、11 日、18 日が 16 日間になってしまいます。複数日付のカレンダーなら、選んだ日だけがそのまま返ります。</p></details>
+                    <details><summary>コンポーネントはフローに何を返しますか?</summary><p>Selected Dates (ISO 形式の日付のテキストコレクション)、連続した日を 1 件のレコードにまとめる場合の Date Ranges JSON、日付ごとの時刻を持つ Dates With Times JSON、そして予約用の Successful Bookings Count と Conflict Dates です。</p></details>
+                    <details><summary>レコードを作成するのにループは必要ですか?</summary><p>いいえ。親レコードの Id を Parent Record Id に渡すと、画面の保存時にコンポーネントが日付ごとに子レコードを 1 件ずつ作成します。空欄にするのは、出力をループして独自の方法でレコードを作りたい場合だけです。</p></details>
+                    <details><summary>Flow Builder でチェックボックスの設定が無視されるのはなぜですか?</summary><p>Flow Builder で空欄のままのチェックボックス入力は、false ではなく「空」になります。チェックボックスは使わず、カレンダーはセットアップウィザードで作成し、画面コンポーネントでは Config Name だけを設定してください。</p></details>
+                </div>
+
                 <div class="bp-end">
                     <h2>次のフローには本物の複数日付ピッカーを</h2>
                     <p>ライブデモで日付をクリックしてみてから、「はじめに」の手順に沿ってフロー画面にコンポーネントを追加してください。</p>
                     <div class="bp-end-ctas">
                         <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=multiple-dates-in-a-salesforce-screen-flow" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
                     </div>
-                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce AppExchange で近日公開</li></ul>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce セキュリティレビューに合格</li></ul>
                 </div>
 
                 <div class="sc-related">
@@ -297,7 +354,7 @@
                         <li><a href="/ja/multidatepickdates.html">Dates</a></li>
                         <li><a href="/ja/multidatepickdatetime.html">Dates &amp; Times</a></li>
                         <li><a href="/ja/salesforce-booking-calendar.html">Resource Booking</a></li>
-                        <li><a href="/ja/blog/salesforce-calendar-views.html">5 つのカレンダー表示</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">6 つのカレンダー表示</a></li>
                         <li><a href="/ja/configlibrary.html">Config Library</a></li>
                     </ul>
                 </div>
@@ -307,9 +364,10 @@
                         <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
                         <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
                         <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-class-scheduling.html">クラス・講座スケジュール</a></li>
                         <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
                         <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
-                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンの日程</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンカレンダー</a></li>
                         <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
                         <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
                     </ul>

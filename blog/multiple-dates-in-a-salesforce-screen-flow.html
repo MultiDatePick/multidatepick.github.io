@@ -97,7 +97,7 @@
                         <li><a href="/multidatepickdates.html">Dates</a></li>
                         <li><a href="/multidatepickdatetime.html">Dates &amp; Times</a></li>
                         <li><a href="/salesforce-booking-calendar.html">Resource Booking</a></li>
-                        <li><a href="/blog/salesforce-calendar-views.html">Five Calendar Views</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Six Calendar Views</a></li>
                         <li><a href="/configlibrary.html">Config Library</a></li>
                         <li><a href="/trust.html">Trust &amp; Security</a></li>
                         <li><a href="/accessibility.html">Accessibility (VPAT)</a></li>
@@ -109,9 +109,10 @@
                         <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
                         <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
                         <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-class-scheduling.html">Class &amp; Course Scheduling</a></li>
                         <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
                         <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
-                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Dates</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Calendar</a></li>
                         <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
                         <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
                     </ul>
@@ -138,13 +139,106 @@
     <main class="page-content">
         <script type="application/ld+json">
         {
-            "@context": "https://schema.org",
-            "@graph": [
-                {"@type": "Article", "headline": "How to Let Users Pick Multiple Dates in a Salesforce Screen Flow", "description": "How to capture many dates in one Salesforce Flow screen, and what to do with the collection afterwards. Loops, parsing and the limits of standard components.", "datePublished": "2026-05-01", "dateModified": "2026-10-21", "author": {"@type": "Organization", "name": "MultiDatePick"}, "publisher": {"@type": "Organization", "name": "MultiDatePick"}, "mainEntityOfPage": "https://multidatepick.com/blog/multiple-dates-in-a-salesforce-screen-flow.html", "image": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates.webp"},
-                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates.webp", "thumbnailUrl": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates-poster.png", "caption": "Animated demo of a Salesforce Screen Flow time off request: the user clicks three days on a MultiDatePick calendar, submits, and the next flow screen lists the three dates the flow received", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}, "copyrightNotice": "© 2026 MultiDatePick"},
-                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-builder-add-booking-component.webp", "thumbnailUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-builder-add-booking-component-poster.png", "caption": "Animated demo in Salesforce Flow Builder: open a screen, search MultiDatePick, drag the Resource Booking component onto the screen, set Config Name to a saved Setup Wizard config, click Done and Save", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}, "copyrightNotice": "© 2026 MultiDatePick"},
-                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-dates-status.png", "caption": "Salesforce Screen Flow with a multi-date calendar component letting a user select several dates at once", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}, "copyrightNotice": "© 2026 MultiDatePick"}
-            ]
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Article",
+              "headline": "How to Let Users Pick Multiple Dates in a Salesforce Screen Flow",
+              "description": "How to capture many dates in one Salesforce Flow screen, and what to do with the collection afterwards. Loops, parsing and the limits of standard components.",
+              "datePublished": "2026-05-01",
+              "dateModified": "2026-11-10",
+              "author": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "mainEntityOfPage": "https://multidatepick.com/blog/multiple-dates-in-a-salesforce-screen-flow.html",
+              "image": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates.webp"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "How do I pick multiple dates in a Salesforce Screen Flow?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Flow's Date input holds one date, so add a multi-date calendar component to the screen. With MultiDatePick, people click every date they need, and the flow gets them back as a Text collection. Set Parent Record Id and it saves one record per date itself, with no Loop and no Apex."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Why not use several Date inputs or a start and end date?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Several inputs give a fixed ceiling and empty fields, and a start and end date is wrong whenever the days are not consecutive: the 3rd, 4th, 11th and 18th become sixteen days. A multi-date calendar returns exactly the days picked."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "What does the component return to the flow?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Selected Dates, a Text collection of ISO dates; Date Ranges JSON when consecutive days collapse into one record; Dates With Times JSON for per-date times; and Successful Bookings Count and Conflict Dates for bookings."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Do I need a Loop to create the records?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. Pass the parent record's Id into Parent Record Id and the component creates one child record per date when the screen is saved. Leave it blank only when you want to loop the output and create records your own way."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Why are my checkbox settings ignored in Flow Builder?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A checkbox input left blank in Flow Builder is empty, not false. Skip them: build the calendar in the Setup Wizard and set only Config Name on the screen component."
+                  }
+                }
+              ]
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates.webp",
+              "thumbnailUrl": "https://multidatepick.com/images/flow-guide/salesforce-screen-flow-select-multiple-dates-poster.png",
+              "caption": "Animated demo of a Salesforce Screen Flow time off request: the user clicks three days on a MultiDatePick calendar, submits, and the next flow screen lists the three dates the flow received",
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-builder-add-booking-component.webp",
+              "thumbnailUrl": "https://multidatepick.com/images/flow-guide/salesforce-flow-builder-add-booking-component-poster.png",
+              "caption": "Animated demo in Salesforce Flow Builder: open a screen, search MultiDatePick, drag the Resource Booking component onto the screen, set Config Name to a saved Setup Wizard config, click Done and Save",
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/marketing/salesforce-calendar-dates-status.png",
+              "caption": "Salesforce Screen Flow with a multi-date calendar component letting a user select several dates at once",
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            }
+          ]
         }
         </script>
         <section class="guide-hero">
@@ -155,7 +249,8 @@
         </section>
         <section class="section">
             <div class="container" style="max-width:820px;">
-                <p class="sc-meta">Published May 1, 2026 &middot; Updated October 21, 2026 &middot; MultiDatePick</p>
+                <p class="sc-meta">Published May 1, 2026 &middot; Updated November 10, 2026 &middot; MultiDatePick</p>
+                <div class="sc-answer"><p class="sc-answer__q">How do I pick multiple dates in a Salesforce Screen Flow?</p><p>Flow&rsquo;s Date input holds one date, so add a multi-date calendar component to the screen. With MultiDatePick, people click every date they need, and the flow gets them back as a Text collection. Set Parent Record Id and it saves one record per date itself, with no Loop and no Apex.</p></div>
                 <p class="sc-lead">Every admin hits this eventually. A time-off request, an availability form, a training sign-up: the user needs to select several dates that are not necessarily consecutive, and Flow's standard Date component captures exactly one.</p>
 
                 <h2 style="margin-top:44px;">The workarounds, and why they hurt</h2>
@@ -213,6 +308,15 @@
                 <h2 style="margin-top:44px;">Decide the record shape before you build</h2>
                 <p>The same nine selected dates can become nine records, or four records if consecutive days collapse into ranges, or one parent record with sub-blocks. Each is correct for a different report. Decide it before you build the flow, because changing it afterwards means migrating data as well as editing the flow.</p>
 
+                <h2 style="margin-top:44px;">Questions people ask</h2>
+                <div class="tl-faq">
+                    <details><summary>How do I pick multiple dates in a Salesforce Screen Flow?</summary><p>Flow&rsquo;s Date input holds one date, so add a multi-date calendar component to the screen. With MultiDatePick, people click every date they need, and the flow gets them back as a Text collection. Set Parent Record Id and it saves one record per date itself, with no Loop and no Apex.</p></details>
+                    <details><summary>Why not use several Date inputs or a start and end date?</summary><p>Several inputs give a fixed ceiling and empty fields, and a start and end date is wrong whenever the days are not consecutive: the 3rd, 4th, 11th and 18th become sixteen days. A multi-date calendar returns exactly the days picked.</p></details>
+                    <details><summary>What does the component return to the flow?</summary><p>Selected Dates, a Text collection of ISO dates; Date Ranges JSON when consecutive days collapse into one record; Dates With Times JSON for per-date times; and Successful Bookings Count and Conflict Dates for bookings.</p></details>
+                    <details><summary>Do I need a Loop to create the records?</summary><p>No. Pass the parent record&rsquo;s Id into Parent Record Id and the component creates one child record per date when the screen is saved. Leave it blank only when you want to loop the output and create records your own way.</p></details>
+                    <details><summary>Why are my checkbox settings ignored in Flow Builder?</summary><p>A checkbox input left blank in Flow Builder is empty, not false. Skip them: build the calendar in the Setup Wizard and set only Config Name on the screen component.</p></details>
+                </div>
+
                 <div class="bp-end">
                     <h2>Put a real multi-date picker in your next Flow</h2>
                     <p>Click the dates in the live demo, then follow Getting Started to add the component to a flow screen.</p>
@@ -221,7 +325,7 @@
                         <a href="/notify-me-at-launch.html" class="btn btn-primary">Notify Me at Launch</a>
                         <a href="/gettingstarted.html" class="btn btn-secondary">Getting Started</a>
                     </div>
-                    <ul class="check-list"><li>$20/user/month, every feature</li><li>30-day free trial, no card</li><li>100% native Salesforce</li><li>No Apex</li><li>Coming soon to the Salesforce AppExchange</li></ul>
+                    <ul class="check-list"><li>$20/user/month, every feature</li><li>30-day free trial, no card</li><li>100% native Salesforce</li><li>No Apex</li><li>Passed Salesforce Security Review</li></ul>
                 </div>
 
                 <div class="sc-related">
@@ -252,7 +356,7 @@
                         <li><a href="/multidatepickdates.html">Dates</a></li>
                         <li><a href="/multidatepickdatetime.html">Dates &amp; Times</a></li>
                         <li><a href="/salesforce-booking-calendar.html">Resource Booking</a></li>
-                        <li><a href="/blog/salesforce-calendar-views.html">Five Calendar Views</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Six Calendar Views</a></li>
                         <li><a href="/configlibrary.html">Config Library</a></li>
                     </ul>
                 </div>
@@ -262,9 +366,10 @@
                         <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
                         <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
                         <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-class-scheduling.html">Class &amp; Course Scheduling</a></li>
                         <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
                         <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
-                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Dates</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Calendar</a></li>
                         <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
                         <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
                     </ul>
