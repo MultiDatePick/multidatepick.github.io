@@ -900,9 +900,19 @@ a.card-link-wrapper .card { transition: transform var(--transition), box-shadow 
     cursor: zoom-out;
     padding: 24px;
 }
-.lightbox-overlay.open { opacity: 1; visibility: visible; }
-.lightbox-overlay img {
+.lightbox-overlay.open { opacity: 1; visibility: visible; transition: opacity .25s ease, visibility 0s; }   /* visible at once, so the close button can take focus */
+/* The zoomed image and its caption (main.js: a carousel slide's caption or the figure's figcaption) */
+.lightbox-figure {
+    margin: 0;
     max-width: 97vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    cursor: default;
+}
+.lightbox-figure img {
+    max-width: 100%;
     max-height: 93vh;
     border-radius: 12px;
     box-shadow: 0 12px 60px rgba(0,0,0,.4);
@@ -910,7 +920,48 @@ a.card-link-wrapper .card { transition: transform var(--transition), box-shadow 
     transition: transform .3s ease;
     object-fit: contain;
 }
-.lightbox-overlay.open img { transform: scale(1); }
+.lightbox-overlay.open .lightbox-figure img { transform: scale(1); }
+.lightbox-overlay.has-caption .lightbox-figure img { max-height: calc(93vh - 110px); }
+.lightbox-overlay.has-nav .lightbox-figure { max-width: calc(100vw - 160px); }
+.lightbox-caption { max-width: 860px; margin: 0; padding: 10px 16px; border-radius: 10px; background: rgba(15,23,42,.94); color: #F1F5F9; font-size: 15px; line-height: 1.5; text-align: center; }
+.lightbox-caption[hidden] { display: none; }
+.lightbox-caption strong { color: #fff; font-weight: 700; }
+.lightbox-caption a { color: #93C5FD; text-decoration: underline; }
+/* Previous and next: only inside a carousel (has-nav) */
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    border: none;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s;
+}
+.lightbox-overlay.has-nav .lightbox-nav { display: flex; }
+.lightbox-overlay.open-svg .lightbox-nav { display: none; }
+.lightbox-prev { left: 20px; }
+.lightbox-next { right: 20px; }
+.lightbox-nav:hover { background: rgba(255,255,255,.3); }
+.lightbox-close, .lightbox-nav { z-index: 2; background: rgba(30,41,59,.92); }
+.lightbox-close:hover, .lightbox-nav:hover { background: rgba(71,85,105,.95); }
+.lightbox-nav svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2.5; }
+.lightbox-close:focus-visible, .lightbox-nav:focus-visible { outline: 3px solid #FB923C; outline-offset: 2px; }
+@media (max-width: 640px) {
+    .lightbox-overlay { padding: 64px 12px 24px; }
+    .lightbox-overlay.has-nav { padding-bottom: 84px; }
+    .lightbox-overlay.has-nav .lightbox-figure { max-width: 100%; }
+    .lightbox-overlay.has-caption .lightbox-figure img { max-height: calc(100vh - 300px); }
+    .lightbox-caption { font-size: 14px; }
+    .lightbox-nav { top: auto; bottom: 18px; transform: none; }
+    .lightbox-prev { left: calc(50% - 64px); }
+    .lightbox-next { right: calc(50% - 64px); }
+}
 
 /* SVG host inside the lightbox (used for the data-shape diagrams) */
 .lightbox-svg-host {
@@ -945,6 +996,7 @@ a.card-link-wrapper .card { transition: transform var(--transition), box-shadow 
     transition: background .2s;
 }
 .lightbox-close:hover { background: rgba(255,255,255,.3); }
+@media (max-width: 640px) { .lightbox-close { top: 12px; right: 12px; } }
 .lightbox-close svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2.5; }
 
 /* ═══════════════════════════════════════════════════════════
