@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <!-- First-touch attribution capture -->
+  <script>
+  (function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}})();
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Appointment Scheduling: Set Times per Advisor</title>
+    <meta name="description" content="Salesforce appointment scheduling with no code: offer only the times you choose, set times per advisor, keep clients private, and let them book on your site.">
+    <link rel="canonical" href="https://multidatepick.com/blog/salesforce-appointment-scheduling.html">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/solutions.css">
+    <style>
+        /* Appointment scheduling post: same look as the Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <meta property="og:title" content="Salesforce Appointment Scheduling: Set Times per Advisor">
+    <meta property="og:description" content="Salesforce appointment scheduling with no code: offer only the times you choose, set times per advisor, keep clients private, and let them book on your site.">
+    <meta property="og:image" content="https://multidatepick.com/images/blog/salesforce-appointment-scheduling.png">
+    <meta property="og:url" content="https://multidatepick.com/blog/salesforce-appointment-scheduling.html">
+    <meta property="og:type" content="article">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce Appointment Scheduling: Set Times per Advisor">
+    <meta name="twitter:description" content="Salesforce appointment scheduling with no code: offer only the times you choose, set times per advisor, keep clients private, and let them book on your site.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/blog/salesforce-appointment-scheduling.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-terminplanung-termine-buchen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/agendar-citas-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/prise-de-rendez-vous-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/prenotazione-appuntamenti-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/agendamento-de-consultas-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-appointment-scheduling.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">
+        Coming soon to the Salesforce AppExchange
+        <button class="banner-close" id="bannerClose" aria-label="Dismiss banner" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="../images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Product <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Six Calendar Views</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                        <li><a href="/trust.html">Trust &amp; Security</a></li>
+                        <li><a href="/accessibility.html">Accessibility (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">Solutions <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
+                        <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-class-scheduling.html">Class &amp; Course Scheduling</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Calendar</a></li>
+                        <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pricing.html">Pricing</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Docs <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/blog/no-code-salesforce-calendar.html">No-Code Setup</a></li>
+                        <li><a href="/gettingstarted.html">Getting Started</a></li>
+                        <li><a href="/user-guide.html">User Guide</a></li>
+                        <li><a href="/flowcheatsheet.html">Screen Flow Guide</a></li>
+                        <li><a href="/home-app-experience.html">App, Home &amp; Experience Pages</a></li>
+                        <li><a href="/troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/en-US/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Try the Live Demo</a></li>
+                <li><a href="/notify-me-at-launch.html" class="nav-cta">Notify Me at Launch</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Article",
+              "headline": "Salesforce Appointment Scheduling: Set Times for Every Advisor, No Code",
+              "description": "Salesforce appointment scheduling with no code: offer only the times you choose, set times per advisor, keep clients private, and let them book on your site.",
+              "datePublished": "2026-11-12",
+              "dateModified": "2026-11-12",
+              "author": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "mainEntityOfPage": "https://multidatepick.com/blog/salesforce-appointment-scheduling.html",
+              "image": "https://multidatepick.com/images/blog/salesforce-appointment-scheduling.png"
+            },
+            {
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "How do I schedule appointments in Salesforce without code?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Add the MultiDatePick Resource Booking calendar to a record page, an app page, a Screen Flow or an Experience Cloud site, and point it at your own appointment object and your advisors. Then choose the start times you offer, the appointment length, minimum notice, limits per client and closed days in the Setup Wizard. Staff book inside Salesforce, clients book on your site, and every appointment is a record on your own object."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can I offer only set appointment times, like 9:00 and 10:30?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Choose Only these times in the Setup Wizard and add each start time, for example 9:00, 10:30, 1:00, 2:30 and 4:00. The time grid shows only those starts, each lasting the Booking Length. A listed time that is taken, closed or too soon shows greyed out."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can each advisor have their own appointment times?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Add a text field to your advisor object, type each advisor's start times in 24-hour form, such as 08:00,09:30,11:00, and set Only These Times Field to it. When a client picks that advisor, the grid shows that advisor's times. Each advisor's working hours can come from two time fields on their record too."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can clients book appointments on an Experience Cloud site without logging in?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. The calendar works on public Experience Cloud pages for guests. A pop-up asks for their name, email and other details before the appointment saves, and every limit, notice period and conflict check runs on the server."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can a client see other clients' appointments?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Not when you choose Busy. Set Show Other People's Bookings As to Busy for site guests, or Busy for everyone, and other appointments draw as a hatched Unavailable block with no name, no details and no link. The names are removed on the server, so they never reach the browser."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Do I need Salesforce Scheduler to book appointments in Salesforce?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. Salesforce Scheduler is an add-on license with its own data model. MultiDatePick books appointments on the objects you already have, custom or standard, for $20 per user per month with every feature included. See how the two compare."
+                  }
+                }
+              ]
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/blog/salesforce-appointment-scheduling-only-these-times.webp",
+              "caption": "Animated demo of Salesforce appointment scheduling in MultiDatePick: on a public booking page an advisor is picked, the time grid shows only the start times on that advisor's list (9:00 AM, 10:30 AM, 1:00 PM, 2:30 PM and 4:00 PM) with taken ones shown as busy, one time is picked and Request Appointment is pressed",
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/marketing/salesforce-booking-details-popup.webp",
+              "caption": "Animated demo of a guest booking on a Salesforce Experience Cloud site with MultiDatePick: an advisor and an open time picked, Request Appointment opens a form for name, email, meeting type and topic, and the booking saves",
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/salesforce-booking-calendar-status-colors.png",
+              "caption": "MultiDatePick Salesforce booking calendar showing one advisor's month: a status-colored bar under each booked day (Requested, Confirmed, Met, No-Show, Cancelled), split bars on the days that mix statuses, and a switcher for the Calendar, Timeline, Week, Utilization and Agenda views",
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/views/salesforce-calendar-custom-buttons.png",
+              "caption": "Salesforce booking calendar with a custom button on each booking: the hover card for an advisor's busy day lists two client appointments, each with a Send a reminder button, and the pop-up it opens running the Flow the admin picked in the Setup Wizard",
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/blog/salesforce-add-to-calendar-month-view.png",
+              "caption": "Salesforce booking calendar in MultiDatePick, month view, just after a consultation was requested: a bar reading Saved. Add it to your calendar, with an Add to Calendar button above the November calendar",
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+              "@type": "ImageObject",
+              "contentUrl": "https://multidatepick.com/images/blog/salesforce-appointment-scheduling.png",
+              "caption": "Salesforce appointment scheduling: set times for every advisor (article cover image)",
+              "creditText": "MultiDatePick",
+              "creator": {
+                "@type": "Organization",
+                "name": "MultiDatePick"
+              },
+              "copyrightNotice": "© 2026 MultiDatePick"
+            }
+          ]
+        }
+        </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce Appointment Scheduling: Set Times for Every Advisor, No Code</h1>
+                <p class="subtitle">Offer the exact appointment times you choose, give each advisor their own, and let staff or clients book them, inside Salesforce or on your Experience Cloud site.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Published November 12, 2026 &middot; MultiDatePick</p>
+                <div class="sc-answer"><p class="sc-answer__q">How do I schedule appointments in Salesforce without code?</p><p>Add the MultiDatePick Resource Booking calendar to a record page, an app page, a Screen Flow or an Experience Cloud site, and point it at your own appointment object and your advisors. Then choose the start times you offer, the appointment length, minimum notice, limits per client and closed days in the Setup Wizard. Staff book inside Salesforce, clients book on your site, and every appointment is a record on your own object.</p></div>
+
+                <p class="sc-lead">"How do clients book an appointment with us in Salesforce?" "Can each advisor set their own appointment times?" "How do I stop people booking at 9:17?" "Can a client see who else is booked?" An appointment is a simple thing until a real business runs on it, and then every one of those questions needs an answer.</p>
+
+                <p>MultiDatePick answers them on the objects you already have. Pick an advisor, see <strong>only the start times that advisor offers</strong>, pick one, and book. The appointment saves as a record on your own object, with its status, its client and its length, and no other client ever sees a name. <strong>No code, no Apex, no add-on license.</strong></p>
+
+                <figure class="sc-shot" style="max-width:800px;margin:24px auto;">
+                    <img src="/images/blog/salesforce-appointment-scheduling-only-these-times-poster.png" data-gif="/images/blog/salesforce-appointment-scheduling-only-these-times.webp" alt="Animated demo of Salesforce appointment scheduling in MultiDatePick: on a public booking page an advisor is picked, the time grid shows only the start times on that advisor's list (9:00 AM, 10:30 AM, 1:00 PM, 2:30 PM and 4:00 PM) with taken ones shown as busy, one time is picked and Request Appointment is pressed" loading="lazy" decoding="async" width="800" height="1000" data-zoomable>
+                    <figcaption>Pick an advisor, see only the times on their list, pick one, book.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">What appointment scheduling needs, and what you get</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>Only these times</h3><p>List the start times you offer, such as 9:00, 10:30, 1:00, 2:30 and 4:00. The grid shows those and nothing else.</p></div>
+                    <div class="tl-feat"><h3>Each advisor's own times</h3><p>One text field on the advisor holds their own list. Pick the advisor and the grid follows it.</p></div>
+                    <div class="tl-feat"><h3>The right length</h3><p>A 30, 45 or 60 minute appointment books in one click, with a buffer after each one if you want it.</p></div>
+                    <div class="tl-feat"><h3>Busy only</h3><p>Other clients' appointments show as Busy, with no name, no details and no link, enforced on the server.</p></div>
+                    <div class="tl-feat"><h3>Rules that protect the day</h3><p>Minimum notice, how far ahead, a limit per client and closed days, checked again at every save.</p></div>
+                    <div class="tl-feat"><h3>After the booking</h3><p>Statuses from Requested to Confirmed, a Flow button for reminders, and Add to Calendar for the client.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Offer only the appointment times you choose</h2>
+                <p>Most calendars cut the day into equal slots: every 15 or 30 minutes from opening to close. That suits a meeting room. It does not suit a practice that sees clients at 9:00, 10:30, 1:00, 2:30 and 4:00, with the gaps between kept for notes, calls and lunch.</p>
+                <p><strong>Only these times</strong> fixes that. In the Setup Wizard, choose Only these times and add each start time. The time grid then offers those starts and no others, on every day and in every view. Each one lasts the <strong>Booking Length</strong>, so a 60 minute length turns 10:30 into a 10:30 to 11:30 appointment in one click.</p>
+                <p>Everything else still guards a listed time. A time that is already booked, closed for the day, too soon for your notice period, outside the advisor's hours or too close to the next appointment shows greyed out, so clients see the time exists and is taken, instead of a gap they cannot explain.</p>
+
+                <h2 style="margin-top:44px;">Each advisor, their own times and hours</h2>
+                <p>One advisor works mornings, another sees clients at 8:00 before the office opens, a third keeps Fridays for reviews. Add a text field to your advisor object, such as <strong>Available Times</strong>, and type each advisor's starts in 24-hour form: <code translate="no">08:00,09:30,11:00</code>. Point <strong>Only These Times Field</strong> at it (in the Setup Wizard, <strong>Each Resource's Own Times</strong>), and when a client picks that advisor, the grid shows that advisor's times. An advisor with the field left blank uses the calendar's own list.</p>
+                <p>Working hours come from the advisor too: <strong>Business Hours Start Field</strong> and <strong>Business Hours End Field</strong> read two time fields on the advisor record. A day off, a training afternoon or an office closure goes in your closures object with an optional advisor, so it closes the day for one advisor or for everyone, and can show its reason on the calendar. When one appointment needs two people, such as an advisor and a specialist, only the times both of them offer are shown.</p>
+
+                <h2 style="margin-top:44px;">Booked by staff in Salesforce, or by clients on your site</h2>
+                <p>The same calendar works in both places. <strong>Staff</strong> book from a record page, an app page or a Screen Flow, with every detail visible: who is booked, for what, and in what status. <strong>Clients</strong> book on a public Experience Cloud page without logging in. The <strong>Record details pop-up</strong> asks them for their name, email, the meeting type and a note before the appointment saves.</p>
+                <figure class="sc-shot" style="max-width:800px;margin:24px auto;">
+                    <img src="/images/marketing/salesforce-booking-details-popup-poster.png" data-gif="/images/marketing/salesforce-booking-details-popup.webp" alt="Animated demo of a guest booking on a Salesforce Experience Cloud site with MultiDatePick: an advisor and an open time picked, Request Appointment opens a form for name, email, meeting type and topic, and the booking saves" loading="lazy" decoding="async" width="800" height="960" data-zoomable>
+                    <figcaption>On a public site, the client gives their details in a pop-up before the appointment saves.</figcaption>
+                </figure>
+                <p>On that public page, other clients' appointments show as <strong>Busy</strong>. Set <strong>Show Other People's Bookings As</strong> to Busy for site guests, and staff still see every name while visitors see a hatched Unavailable block with no name, no hover card and no link. The names are removed on the server, so they never reach the visitor's browser. <a href="/salesforce-calendar-experience-cloud-booking.html">See how to build a public booking page on Experience Cloud</a>.</p>
+
+                <h2 style="margin-top:44px;">Rules that keep the appointment book sane</h2>
+                <p>Each rule is one setting, and each is checked again on the server when the appointment saves, so reloading the page never gets around it.</p>
+                <div style="overflow-x:auto;">
+                <table class="bp-grid">
+                    <tr><th style="width:30%;">The rule</th><th>What it does for appointments</th></tr>
+                    <tr><td>Minimum notice</td><td><strong>Minimum Notice (Hours)</strong>: 24 requires a full day of notice. Earlier days are greyed out, and on the cut-off day the earlier times close.</td></tr>
+                    <tr><td>How far ahead</td><td><strong>Book Up To (Days Ahead)</strong>: 60 keeps the book open two months out, and moves forward every day.</td></tr>
+                    <tr><td>Limit per client</td><td><strong>Limit per Person</strong>: how many upcoming appointments one client can hold, counted by their email or contact in <strong>Limit per Person Client Field</strong>. Staff can book past it after a confirmation; site visitors cannot.</td></tr>
+                    <tr><td>Per day</td><td><strong>Max Bookings per Day</strong>: how many separate appointments one person can pick on a single day.</td></tr>
+                    <tr><td>Closed days</td><td>Holidays, office closures and days off, for the whole office or one advisor, for a whole day or part of one, with the reason shown.</td></tr>
+                    <tr><td>Breathing room</td><td><strong>Buffer Between Bookings (Minutes)</strong>: 15 keeps a quarter hour free after each appointment.</td></tr>
+                    <tr><td>No double booking</td><td>A taken time is greyed out before anyone clicks, and the save checks again. <a href="/blog/prevent-double-booking-in-salesforce.html">How conflicts and capacity work</a>.</td></tr>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">Confirmations and statuses</h2>
+                <p>An appointment moves through a life: requested, confirmed, met, sometimes cancelled or missed. Point <strong>Status Field</strong> at your status picklist and each status gets its own color. <strong>Selectable Statuses</strong> decides what a booking can be saved as: set it to Requested on the public page, and every client request arrives as Requested for your team to confirm. Add Cancelled to <strong>Ignored Statuses</strong>, and a cancelled appointment frees its time at once.</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/salesforce-booking-calendar-status-colors.png" alt="MultiDatePick Salesforce booking calendar showing one advisor's month: a status-colored bar under each booked day (Requested, Confirmed, Met, No-Show, Cancelled), split bars on the days that mix statuses, and a switcher for the Calendar, Timeline, Week, Utilization and Agenda views" loading="lazy" decoding="async" width="1362" height="1616" data-zoomable>
+                    <figcaption>One advisor's month, colored by status: Requested, Confirmed, Met, No-Show and Cancelled.</figcaption>
+                </figure>
+                <p>The client gets a confirmation the moment they book: turn on <strong>Show In-Component Toast</strong> and write your own words in <strong>Success Toast Message</strong>, such as "Thank you. We will confirm your appointment within one business day."</p>
+
+                <h2 style="margin-top:44px;">Reminders and follow-ups with a Flow button</h2>
+                <p>The Setup Wizard's custom buttons run one of your own Flows. Put a <strong>Send a reminder</strong> button on every appointment, and staff send the reminder from the calendar in one click. A button can show only on certain statuses, such as Confirmed, act on several appointments picked in Edit Mode, or run on its own after every save, so a Flow can send the confirmation email without anyone pressing anything.</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/views/salesforce-calendar-custom-buttons.png" alt="Salesforce booking calendar with a custom button on each booking: the hover card for an advisor's busy day lists two client appointments, each with a Send a reminder button, and the pop-up it opens running the Flow the admin picked in the Setup Wizard" loading="lazy" decoding="async" width="1644" height="1618" data-zoomable>
+                    <figcaption>A Send a reminder button on each appointment runs the Flow the admin picked.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Add to Calendar for the client</h2>
+                <p>Turn on <strong>Show Add to Calendar After Saving</strong>, and the client leaves with the appointment in Outlook, Google or Apple Calendar: the right date and time, the advisor's name in the title. It is a calendar file made in the browser, so public site guests get it too, and nothing leaves Salesforce until they download it. <a href="/blog/salesforce-add-to-calendar.html">More on Add to Calendar</a>.</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/blog/salesforce-add-to-calendar-month-view.png" alt="Salesforce booking calendar in MultiDatePick, month view, just after a consultation was requested: a bar reading Saved. Add it to your calendar, with an Add to Calendar button above the November calendar" loading="lazy" decoding="async" width="700" height="776" data-zoomable>
+                    <figcaption>Right after the request: Add to Calendar, one click.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Who books appointments this way</h2>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Financial advisors</strong><span>Client reviews at set times, each advisor with their own hours, and the firm's other clients shown only as Busy.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Clinics and therapists</strong><span>Fixed 50 minute sessions at the hours each practitioner keeps, with a day of notice required.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Salons and spas</strong><span>Each stylist's own start times, a buffer to reset the chair, and a limit on open bookings per client.</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Consultants</strong><span>Discovery calls at four set times a day, booked from a public page and confirmed by the team.</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>Service teams</strong><span>Installation and repair visits in morning and afternoon windows, booked by the dispatcher in Salesforce.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>Universities</strong><span>Advising and tutoring appointments at office hours each advisor publishes, with a reminder Flow the day before.</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">The settings that shape it</h2>
+                <p>Each is a step in the Setup Wizard, and a property on the Resource Booking component in Lightning App Builder, Experience Builder and Flow Builder.</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">Setting</th><th>What it does</th></tr></thead>
+                    <tbody>
+                    <tr><td>Only These Times</td><td>The only start times people can pick, in 24-hour form: <code translate="no">09:00,10:30,13:00,14:30,16:00</code>. Leave blank for every interval.</td></tr>
+                    <tr><td>Only These Times Field</td><td>A text field on the advisor holding that advisor's own start times. Blank on an advisor means the list above.</td></tr>
+                    <tr><td>Booking Length (Minutes) <code translate="no">bookingLength</code></td><td>How long each appointment lasts. One click books the whole block.</td></tr>
+                    <tr><td>Business Hours Start and End Field</td><td>Time fields on the advisor for when their day starts and ends.</td></tr>
+                    <tr><td>Show Other People's Bookings As <code translate="no">bookingPrivacy</code></td><td>Details, Busy for site guests, or Busy for everyone.</td></tr>
+                    <tr><td>Minimum Notice (Hours) <code translate="no">minNoticeHours</code></td><td>How soon the next appointment can start.</td></tr>
+                    <tr><td>Book Up To (Days Ahead) <code translate="no">maxDaysAhead</code></td><td>How far ahead clients can book.</td></tr>
+                    <tr><td>Limit per Person <code translate="no">limitPerPerson</code></td><td>Upcoming appointments one client can hold, counted by the Client Field.</td></tr>
+                    <tr><td>Selectable Statuses <code translate="no">selectableStatuses</code></td><td>The status a new appointment is saved as, such as Requested on a public page.</td></tr>
+                    <tr><td>Record Details Pop-up</td><td>Asks for the client's name, email and other fields before the save.</td></tr>
+                    <tr><td>Show Add to Calendar After Saving <code translate="no">showAddToCalendar</code></td><td>An Add to Calendar button after every save.</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Every appointment, six ways to see it.</strong> The same appointments show on the month Calendar, Timeline, Week, Utilization, Agenda and Map, so the front desk, the advisor and the manager each get the view they need. <a href="/blog/salesforce-calendar-views.html">See all six views</a>.
+                </div>
+
+                <h2 style="margin-top:44px;">Questions people ask</h2>
+                <div class="tl-faq">
+                    <details><summary>How do I schedule appointments in Salesforce without code?</summary><p>Add the MultiDatePick Resource Booking calendar to a record page, an app page, a Screen Flow or an Experience Cloud site, and point it at your own appointment object and your advisors. Then choose the start times you offer, the appointment length, minimum notice, limits per client and closed days in the Setup Wizard. Staff book inside Salesforce, clients book on your site, and every appointment is a record on your own object.</p></details>
+                    <details><summary>Can I offer only set appointment times, like 9:00 and 10:30?</summary><p>Yes. Choose Only these times in the Setup Wizard and add each start time, for example 9:00, 10:30, 1:00, 2:30 and 4:00. The time grid shows only those starts, each lasting the Booking Length. A listed time that is taken, closed or too soon shows greyed out.</p></details>
+                    <details><summary>Can each advisor have their own appointment times?</summary><p>Yes. Add a text field to your advisor object, type each advisor's start times in 24-hour form, such as 08:00,09:30,11:00, and set Only These Times Field to it. When a client picks that advisor, the grid shows that advisor's times. Each advisor's working hours can come from two time fields on their record too.</p></details>
+                    <details><summary>Can clients book appointments on an Experience Cloud site without logging in?</summary><p>Yes. The calendar works on public Experience Cloud pages for guests. A pop-up asks for their name, email and other details before the appointment saves, and every limit, notice period and conflict check runs on the server.</p></details>
+                    <details><summary>Can a client see other clients' appointments?</summary><p>Not when you choose Busy. Set Show Other People's Bookings As to Busy for site guests, or Busy for everyone, and other appointments draw as a hatched Unavailable block with no name, no details and no link. The names are removed on the server, so they never reach the browser.</p></details>
+                    <details><summary>Do I need Salesforce Scheduler to book appointments in Salesforce?</summary><p>No. Salesforce Scheduler is an add-on license with its own data model. MultiDatePick books appointments on the objects you already have, custom or standard, for $20 per user per month with every feature included. <a href="/salesforce-calendar-vs-lightning-scheduler.html">See how the two compare</a>.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Your times. Your advisors. Your objects.</h2>
+                    <p>Request a consultation in the live demo, or start from a ready-made appointment config in the <a href="/configlibrary.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/en-US/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-appointment-scheduling" class="btn btn-demo" target="_blank" rel="noopener">Try the Live Demo</a>
+                        <a href="/notify-me-at-launch.html" class="btn btn-primary">Notify Me at Launch</a>
+                        <a href="/gettingstarted.html" class="btn btn-secondary">Getting Started</a>
+                    </div>
+                    <ul class="check-list"><li>$20/user/month, every feature</li><li>30-day free trial, no card</li><li>100% native Salesforce</li><li>No Apex</li><li>Passed Salesforce Security Review</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Related reading</h3>
+                    <ul>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Build a public booking page on Experience Cloud</a></li>
+                        <li><a href="/salesforce-booking-calendar.html">The Salesforce booking calendar for any resource</a></li>
+                        <li><a href="/blog/salesforce-calendar-time-slot-picker.html">Show only open time slots in Salesforce</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler and a no-code alternative</a></li>
+                        <li><a href="/salesforce-calendar-interview-scheduling.html">Interview scheduling in Salesforce</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/" class="logo">
+                        <img src="../images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45">
+                    </a>
+                    <p>The most customizable calendar component suite for Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h2>Product</h2>
+                    <ul>
+                        <li><a href="/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Six Calendar Views</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Solutions</h2>
+                    <ul>
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
+                        <li><a href="/salesforce-calendar-interview-scheduling.html">Interview Scheduling</a></li>
+                        <li><a href="/salesforce-class-scheduling.html">Class &amp; Course Scheduling</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Calendar</a></li>
+                        <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Docs</h2>
+                    <ul>
+                        <li><a href="/gettingstarted.html">Getting Started</a></li>
+                        <li><a href="/user-guide.html">User Guide</a></li>
+                        <li><a href="/flowcheatsheet.html">Screen Flow Guide</a></li>
+                        <li><a href="/home-app-experience.html">App, Home &amp; Experience Pages</a></li>
+                        <li><a href="/troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                    </ul>
+                    <h2>For developers</h2>
+                    <ul>
+                        <li><a href="/salesforce-calendar-developer-guide.html">Developer Guide</a></li>
+                        <li><a href="/deploy-flow-vscode.html">Deploy a Flow (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Company</h2>
+                    <ul>
+                        <li><a href="/pricing.html">Pricing</a></li>
+                        <li><a href="/blog/">Blog</a></li>
+                        <li><a href="/trust.html">Trust &amp; Security</a></li>
+                        <li><a href="/accessibility.html">Accessibility</a></li>
+                        <li><a href="/notify-me-at-launch.html">Notify Me at Launch</a></li>
+                        <li><a href="/custom-config.html">Free Custom Config</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. All rights reserved.</span>
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a>
+                    <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Language" translate="no"><ul><li><a href="/blog/salesforce-appointment-scheduling.html" hreflang="en" lang="en" aria-current="page">English</a></li><li><a href="/de/blog/salesforce-terminplanung-termine-buchen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/agendar-citas-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/prise-de-rendez-vous-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/prenotazione-appuntamenti-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/agendamento-de-consultas-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-appointment-scheduling.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-appointment-scheduling.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-appointment-scheduling.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="../js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Expand image</p><p data-k="expand-diagram">Expand diagram</p><p data-k="close">Close</p><p data-k="prev-image">Previous image</p><p data-k="next-image">Next image</p><p data-k="image-viewer">Image viewer</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>
