@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- consent:head ft -->
+  <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    (function(){var c=null;try{c=JSON.parse(localStorage.getItem('mdp_consent'));if(!c||c.v!==1||!(Date.now()-c.ts<31536000000))c=null;}catch(e){c=null;}window.mdpConsent=c;
+    if(c&&c.analytics)gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.mdpFirstTouch=function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}};if(c&&c.attribution)window.mdpFirstTouch();})();
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script defer src="/js/consent.js"></script>
+  <!-- /consent:head -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 预约排程：为每位顾问设置预约时间</title>
+    <meta name="description" content="无需代码的 Salesforce 预约管理：只提供您选定的时间，为每位顾问单独设置时段，保护客户隐私，并让客户在您的网站上在线预约。">
+    <link rel="canonical" href="https://multidatepick.com/zh/blog/salesforce-appointment-scheduling.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Appointment scheduling post: same look as the Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <meta property="og:title" content="Salesforce 预约排程：为每位顾问设置预约时间">
+    <meta property="og:description" content="无需代码的 Salesforce 预约管理：只提供您选定的时间，为每位顾问单独设置时段，保护客户隐私，并让客户在您的网站上在线预约。">
+    <meta property="og:image" content="https://multidatepick.com/images/zh/blog/salesforce-appointment-scheduling-cover.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/blog/salesforce-appointment-scheduling.html">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 预约排程：为每位顾问设置预约时间">
+    <meta name="twitter:description" content="无需代码的 Salesforce 预约管理：只提供您选定的时间，为每位顾问单独设置时段，保护客户隐私，并让客户在您的网站上在线预约。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/zh/blog/salesforce-appointment-scheduling-cover.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-terminplanung-termine-buchen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/agendar-citas-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/prise-de-rendez-vous-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/prenotazione-appuntamenti-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/agendamento-de-consultas-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-appointment-scheduling.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- consent:ui -->
+    <div class="mdp-cc-bar" id="mdpConsentBar" role="region" aria-label="Cookie 选择" hidden>
+        <p>仅在您同意后，我们才使用 Cookie 进行分析。<span class="mdp-cc-wide">数据绝不出售，也不用于广告。</span> <a href="/zh/privacy.html">隐私政策</a></p>
+        <div class="mdp-cc-btns">
+            <button type="button" class="mdp-cc-btn mdp-cc-btn--text" data-mdp-consent="settings">设置</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="reject">全部拒绝</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="accept">全部接受</button>
+        </div>
+    </div>
+    <dialog class="mdp-cc-dialog" id="mdpConsentDialog" aria-labelledby="mdpConsentTitle" aria-describedby="mdpConsentIntro">
+        <div class="mdp-cc-in">
+            <h2 id="mdpConsentTitle">Cookie 设置</h2>
+            <button type="button" class="mdp-cc-x" data-mdp-consent="close" aria-label="关闭">&times;</button>
+            <p class="mdp-cc-intro" id="mdpConsentIntro">选择本网站可以在您的浏览器中存储哪些内容。您可以随时通过每个页面底部的“Cookie 设置”进行更改。</p>
+            <div class="mdp-cc-opt">
+                <span class="mdp-cc-name">网站运行所必需</span> <span class="mdp-cc-desc">仅记住您的 Cookie 选择。</span> <span class="mdp-cc-always">始终开启</span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAnalytics">分析</label> <span class="mdp-cc-desc" id="mdpConsentAnalyticsDesc">Google Analytics 统计访问量和浏览的页面，帮助我们改进网站。</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAnalytics" aria-describedby="mdpConsentAnalyticsDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAttribution">访问来源</label> <span class="mdp-cc-desc" id="mdpConsentAttributionDesc">记住最初将您带到本网站的链接或推广活动，并随表单一起发送。</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAttribution" aria-describedby="mdpConsentAttributionDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-btns">
+                <button type="button" class="mdp-cc-btn mdp-cc-btn--line" data-mdp-consent="reject">全部拒绝</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="save">保存选择</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- /consent:ui -->
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">六种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-class-scheduling.html">课程排期</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日历</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/blog/no-code-salesforce-calendar.html">无代码设置</a></li>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce 预约排程：为每位顾问设定预约时间，无需代码",
+                "description": "无需代码的 Salesforce 预约管理：只提供您选定的时间，为每位顾问单独设置时段，保护客户隐私，并让客户在您的网站上在线预约。",
+                "datePublished": "2026-11-12",
+                "dateModified": "2026-11-12",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/zh/blog/salesforce-appointment-scheduling.html",
+                "image": "https://multidatepick.com/images/zh/blog/salesforce-appointment-scheduling-cover.png",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "如何不写代码在 Salesforce 中管理预约？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "把 MultiDatePick 的 Resource Booking 日历添加到记录页面、应用程序页面、屏幕 Flow（Screen Flow）或 Experience Cloud 站点，并指向您自己的预约对象和顾问。然后在设置向导中选择您提供的开始时间、预约时长、最短提前通知、每位客户的上限和关闭日。员工在 Salesforce 内预约，客户在您的网站上预约，每个预约都是您自己对象上的一条记录。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "能否只提供固定的预约时间，例如 9:00 和 10:30？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "能。在设置向导中选择“仅这些时间”，然后添加每个开始时间，例如 9:00、10:30、13:00、14:30 和 16:00。时间网格只显示这些开始时间，每个时段持续 Booking Length（预约时长）。列表中的时间如果已被预约、处于关闭状态或时间太近，会显示为灰色。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "每位顾问能有自己的预约时间吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "能。在顾问对象上添加一个文本字段，用 24 小时制输入每位顾问的开始时间，例如 08:00,09:30,11:00，然后把 Only These Times Field 设为该字段。客户选择这位顾问时，网格就显示这位顾问的时间。每位顾问的工作时间也可以来自其记录上的两个时间字段。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "客户不登录也能在 Experience Cloud 站点上预约吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "能。日历可以在面向访客的公开 Experience Cloud 页面上使用。保存预约前，弹窗会请访客填写姓名、电子邮件和其他信息，所有上限、提前通知期和冲突检查都在服务器端执行。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "客户能看到其他客户的预约吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "选择 Busy 就看不到。把 Show Other People's Bookings As 设为 Busy for site guests（对站点访客显示忙碌）或 Busy for everyone（对所有人显示忙碌），其他预约就会显示为带斜线的“不可用”色块，没有姓名、没有详情、没有链接。姓名在服务器端就被移除，因此根本不会到达浏览器。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "在 Salesforce 中预约需要 Salesforce Scheduler 吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "不需要。Salesforce Scheduler 是一个附加许可证，有自己的数据模型。MultiDatePick 在您已有的对象上预约，无论自定义对象还是标准对象，每用户每月 $20，包含全部功能。查看两者对比。"
+                        }
+                    }
+                ],
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-appointment-scheduling-only-these-times.webp",
+                "caption": "MultiDatePick 中 Salesforce 预约排程的动画演示：在公开预约页面上选择一位顾问，时间网格只显示该顾问列表中的开始时间（9:00、10:30、13:00、14:30 和 16:00），已被预约的显示为忙碌，选择一个时间后点击预约申请按钮",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/marketing/salesforce-booking-details-popup.webp",
+                "caption": "使用 MultiDatePick 在 Salesforce Experience Cloud 站点上进行访客预约的动画演示：选择顾问和空闲时间，点击预约申请按钮后打开表单，填写姓名、电子邮件、会面类型和主题，预约随即保存",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/salesforce-booking-calendar-status-colors.png",
+                "caption": "MultiDatePick Salesforce 预订日历中一位顾问的月份：每个已预订日期下方有按状态着色的条形（Requested、Confirmed、Met、No-Show、Cancelled），状态混合的日期显示分段条形，并可在日历、时间轴、周、使用率和日程视图之间切换",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/views/salesforce-calendar-custom-buttons.png",
+                "caption": "带自定义按钮的 Salesforce 预订日历：繁忙一天的悬停卡片列出两个客户预约，每个预约都有一个“发送提醒”按钮，点击后弹出窗口，运行在设置向导中选定的 Flow",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-add-to-calendar-month-view.png",
+                "caption": "MultiDatePick 中的 Salesforce 预订日历月视图，刚提交咨询申请：11 月日历上方显示一条“已保存。添加到您的日历”提示栏和“添加到日历”按钮",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-appointment-scheduling-cover.png",
+                "caption": "Salesforce 预约排程：为每位顾问设定预约时间（文章封面图）",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce 预约排程：为每位顾问设定预约时间，无需代码</h1>
+                <p class="subtitle">提供您自己选定的预约时间，让每位顾问拥有自己的时间，员工或客户都可以在 Salesforce 内或您的 Experience Cloud 站点上预约。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">发布于 2026 年 11 月 12 日 &middot; MultiDatePick</p>
+                <div class="sc-answer"><p class="sc-answer__q">如何不写代码在 Salesforce 中管理预约？</p><p>把 MultiDatePick 的 Resource Booking 日历添加到记录页面、应用程序页面、屏幕 Flow（Screen Flow）或 Experience Cloud 站点，并指向您自己的预约对象和顾问。然后在设置向导中选择您提供的开始时间、预约时长、最短提前通知、每位客户的上限和关闭日。员工在 Salesforce 内预约，客户在您的网站上预约，每个预约都是您自己对象上的一条记录。</p></div>
+
+                <p class="sc-lead">“客户怎样在 Salesforce 中向我们预约？”“每位顾问能设置自己的预约时间吗？”“怎样防止有人约在 9:17？”“客户能看到还有谁预约了吗？”预约本来很简单，可一旦真正的业务依靠它运转，每个问题都需要答案。</p>
+
+                <p>MultiDatePick 在您已有的对象上解决所有这些问题。选择一位顾问，只看到<strong>该顾问提供的开始时间</strong>，选一个，完成预约。预约作为一条记录保存到您自己的对象中，带有状态、客户和时长，其他客户永远看不到姓名。<strong>无需代码，无需 Apex，无需附加许可证。</strong></p>
+
+                <figure class="sc-shot" style="max-width:800px;margin:24px auto;">
+                    <img src="/images/zh/blog/salesforce-appointment-scheduling-only-these-times-poster.png" data-gif="/images/zh/blog/salesforce-appointment-scheduling-only-these-times.webp" alt="MultiDatePick 中 Salesforce 预约排程的动画演示：在公开预约页面上选择一位顾问，时间网格只显示该顾问列表中的开始时间（9:00、10:30、13:00、14:30 和 16:00），已被预约的显示为忙碌，选择一个时间后点击预约申请按钮" loading="lazy" decoding="async" width="800" height="1090" data-zoomable>
+                    <figcaption>选择顾问，只看到其列表中的时间，选一个，完成预约。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">预约排程需要什么，您能得到什么</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>仅这些时间</h3><p>列出您提供的开始时间，例如 9:00、10:30、13:00、14:30 和 16:00。网格只显示这些时间，别无其他。</p></div>
+                    <div class="tl-feat"><h3>每位顾问自己的时间</h3><p>顾问上的一个文本字段保存其专属时间列表。选择顾问，网格随之切换。</p></div>
+                    <div class="tl-feat"><h3>时长恰到好处</h3><p>30、45 或 60 分钟的预约一键完成，如有需要，每个预约之后还可留出缓冲时间。</p></div>
+                    <div class="tl-feat"><h3>仅显示忙碌</h3><p>其他客户的预约只显示为忙碌，没有姓名、没有详情、没有链接，由服务器端强制执行。</p></div>
+                    <div class="tl-feat"><h3>保护每一天的规则</h3><p>最短提前通知、最多可提前多久、每位客户的上限和关闭日，每次保存时都会再次检查。</p></div>
+                    <div class="tl-feat"><h3>预约之后</h3><p>从 Requested 到 Confirmed 的状态、用于提醒的 Flow 按钮，以及供客户使用的“添加到日历”。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">只提供您选定的预约时间</h2>
+                <p>大多数日历把一天切成等长的时段：从开门到关门，每 15 或 30 分钟一个。这适合会议室，却不适合在 9:00、10:30、13:00、14:30 和 16:00 接待客户、把中间的空档留给记录、电话和午餐的机构。</p>
+                <p><strong>仅这些时间</strong>解决了这个问题。在设置向导中选择“仅这些时间”，然后逐一添加开始时间。这样，无论哪一天、哪种视图，时间网格都只提供这些开始时间。每个预约持续 <strong>Booking Length</strong>（预约时长），因此时长设为 60 分钟时，点一下 10:30 就会生成 10:30 至 11:30 的预约。</p>
+                <p>其他所有规则仍然守护着列表中的时间。已被预约、当天关闭、早于提前通知期、超出顾问工作时间或离下一个预约太近的时间都会显示为灰色，因此客户看到的是这个时间存在但已被占用，而不是一个无法解释的空白。</p>
+
+                <h2 style="margin-top:44px;">每位顾问，各有自己的时间和工作时段</h2>
+                <p>有的顾问只上午上班，有的在办公室开门前 8:00 就接待客户，还有的把周五留给复盘。在顾问对象上添加一个文本字段，例如 <strong>Available Times</strong>，然后用 24 小时制输入每位顾问的开始时间：<code translate="no">08:00,09:30,11:00</code>。把 <strong>Only These Times Field</strong> 指向该字段（在设置向导中为<strong>每个资源自己的时间</strong>），客户选择这位顾问时，网格就会显示这位顾问的时间。该字段留空的顾问使用日历自己的列表。</p>
+                <p>工作时间同样来自顾问：<strong>Business Hours Start Field</strong> 和 <strong>Business Hours End Field</strong> 读取顾问记录上的两个时间字段。休息日、培训的下午或办公室停业，都记录在您的停业日期对象中，并可选择指定顾问，从而只关闭某一位顾问或所有人的日程，还能在日历上显示原因。当一个预约需要两个人参加时，例如一位顾问加一位专家，只会显示两人都能提供的时间。</p>
+
+                <h2 style="margin-top:44px;">员工在 Salesforce 内预约，客户在您的网站上预约</h2>
+                <p>同一个日历在两个地方都能用。<strong>员工</strong>从记录页面、应用程序页面或屏幕 Flow 中预约，所有细节一目了然：谁预约了、预约什么、处于什么状态。<strong>客户</strong>无需登录即可在公开的 Experience Cloud 页面上预约。保存预约前，<strong>记录详情弹窗</strong>会请客户填写姓名、电子邮件、会面类型和备注。</p>
+                <figure class="sc-shot" style="max-width:800px;margin:24px auto;">
+                    <img src="/images/zh/marketing/salesforce-booking-details-popup-poster.png" data-gif="/images/zh/marketing/salesforce-booking-details-popup.webp" alt="使用 MultiDatePick 在 Salesforce Experience Cloud 站点上进行访客预约的动画演示：选择顾问和空闲时间，点击预约申请按钮后打开表单，填写姓名、电子邮件、会面类型和主题，预约随即保存" loading="lazy" decoding="async" width="800" height="960" data-zoomable>
+                    <figcaption>在公开站点上，客户先在弹窗中填写信息，预约随后保存。</figcaption>
+                </figure>
+                <p>在该公开页面上，其他客户的预约显示为<strong>忙碌</strong>。把 <strong>Show Other People's Bookings As</strong> 设为 Busy for site guests，员工仍能看到每个姓名，而访客只看到带斜线的“不可用”色块，没有姓名、没有悬停卡片、没有链接。姓名在服务器端就被移除，因此根本不会到达访客的浏览器。<a href="/zh/salesforce-calendar-experience-cloud-booking.html">了解如何在 Experience Cloud 上搭建公开预订页面</a>。</p>
+
+                <h2 style="margin-top:44px;">让预约簿井然有序的规则</h2>
+                <p>每条规则都只是一项设置，并在预约保存时由服务器再次检查，所以刷新页面也无法绕过。</p>
+                <div style="overflow-x:auto;">
+                <table class="bp-grid">
+                    <tr><th style="width:30%;">规则</th><th>对预约的作用</th></tr>
+                    <tr><td>最短提前通知</td><td><strong>Minimum Notice (Hours)</strong>：设为 24 表示必须提前一整天预约。更早的日期显示为灰色，截止当天较早的时间也会关闭。</td></tr>
+                    <tr><td>最多提前多久</td><td><strong>Book Up To (Days Ahead)</strong>：设为 60 表示可预约未来两个月，并且每天向前滚动。</td></tr>
+                    <tr><td>每位客户的上限</td><td><strong>Limit per Person</strong>：一位客户可同时持有的未来预约数量，按 <strong>Limit per Person Client Field</strong> 中的电子邮件或联系人计数。员工确认后可以超出上限预约，站点访客则不能。</td></tr>
+                    <tr><td>每天</td><td><strong>Max Bookings per Day</strong>：一个人在一天内可以选择的独立预约数量。</td></tr>
+                    <tr><td>关闭日</td><td>节假日、办公室停业和休息日，可针对整个办公室或某一位顾问，全天或部分时段，并显示原因。</td></tr>
+                    <tr><td>留出喘息时间</td><td><strong>Buffer Between Bookings (Minutes)</strong>：设为 15 表示每个预约之后空出一刻钟。</td></tr>
+                    <tr><td>杜绝重复预约</td><td>已占用的时间在任何人点击之前就显示为灰色，保存时还会再次检查。<a href="/zh/blog/prevent-double-booking-in-salesforce.html">了解冲突和容量的工作方式</a>。</td></tr>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">确认与状态</h2>
+                <p>一个预约有它的生命周期：已申请、已确认、已会面，有时被取消或爽约。把 <strong>Status Field</strong> 指向您的状态选项列表，每个状态都有自己的颜色。<strong>Selectable Statuses</strong> 决定预约可以保存为哪些状态：在公开页面上设为 Requested，每个客户请求都会以 Requested 状态到达，由您的团队确认。把 Cancelled 加入 <strong>Ignored Statuses</strong>，取消的预约会立即释放其时间。</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/zh/salesforce-booking-calendar-status-colors.png" alt="MultiDatePick Salesforce 预订日历中一位顾问的月份：每个已预订日期下方有按状态着色的条形（Requested、Confirmed、Met、No-Show、Cancelled），状态混合的日期显示分段条形，并可在日历、时间轴、周、使用率和日程视图之间切换" loading="lazy" decoding="async" width="1362" height="1616" data-zoomable>
+                    <figcaption>一位顾问的一个月，按状态着色：Requested、Confirmed、Met、No-Show 和 Cancelled。</figcaption>
+                </figure>
+                <p>客户预约的那一刻就会收到确认：打开 <strong>Show In-Component Toast</strong>，并在 <strong>Success Toast Message</strong> 中写下您自己的话，例如“谢谢您。我们将在一个工作日内确认您的预约。”</p>
+
+                <h2 style="margin-top:44px;">用 Flow 按钮发送提醒和跟进</h2>
+                <p>设置向导中的自定义按钮会运行您自己的 Flow。在每个预约上放一个<strong>发送提醒</strong>按钮，员工就能在日历上一键发送提醒。按钮可以只在特定状态下显示（例如 Confirmed），可以作用于在编辑模式中选中的多个预约，也可以在每次保存后自动运行，这样无需任何人点击，Flow 就能发送确认邮件。</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/zh/views/salesforce-calendar-custom-buttons.png" alt="带自定义按钮的 Salesforce 预订日历：繁忙一天的悬停卡片列出两个客户预约，每个预约都有一个“发送提醒”按钮，点击后弹出窗口，运行在设置向导中选定的 Flow" loading="lazy" decoding="async" width="1644" height="1618" data-zoomable>
+                    <figcaption>每个预约上的“发送提醒”按钮会运行管理员选定的 Flow。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">为客户提供“添加到日历”</h2>
+                <p>打开 <strong>Show Add to Calendar After Saving</strong>，客户离开时就能把预约放进 Outlook、Google 或 Apple 日历：日期和时间准确，标题中带有顾问姓名。日历文件在浏览器中生成，因此公开站点的访客也能使用，而且在他们下载之前，任何数据都不会离开 Salesforce。<a href="/zh/blog/salesforce-add-to-calendar.html">进一步了解“添加到日历”</a>。</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/zh/blog/salesforce-add-to-calendar-month-view.png" alt="MultiDatePick 中的 Salesforce 预订日历月视图，刚提交咨询申请：11 月日历上方显示一条“已保存。添加到您的日历”提示栏和“添加到日历”按钮" loading="lazy" decoding="async" width="700" height="776" data-zoomable>
+                    <figcaption>申请提交后立即“添加到日历”，一键完成。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">哪些行业用这种方式预约</h2>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>理财顾问</strong><span>在固定时间进行客户回顾，每位顾问有自己的工作时间，公司其他客户只显示为忙碌。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>诊所和治疗师</strong><span>按每位从业者的接诊时间安排固定 50 分钟的疗程，并要求提前一天预约。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>美发沙龙和水疗馆</strong><span>每位发型师自己的开始时间，整理座位的缓冲时间，以及每位客户未完成预约的数量上限。</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>咨询顾问</strong><span>每天四个固定时间的初次沟通电话，从公开页面预约，由团队确认。</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>服务团队</strong><span>上午和下午时段的安装与维修上门服务，由调度员在 Salesforce 中预约。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>大学</strong><span>在每位导师公布的办公时间内预约学业咨询和辅导，前一天由 Flow 发送提醒。</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">决定其行为的设置</h2>
+                <p>每一项都是设置向导中的一个步骤，也是 Lightning App Builder、Experience Builder 和 Flow Builder 中 Resource Booking 组件的一个属性。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">设置项</th><th>作用</th></tr></thead>
+                    <tbody>
+                    <tr><td>Only These Times</td><td>可选择的开始时间，仅限这些，使用 24 小时制：<code translate="no">09:00,10:30,13:00,14:30,16:00</code>。留空则按每个时间间隔提供。</td></tr>
+                    <tr><td>Only These Times Field</td><td>顾问上的一个文本字段，保存该顾问自己的开始时间。顾问的该字段为空时，使用上面的列表。</td></tr>
+                    <tr><td>Booking Length (Minutes)<code translate="no">bookingLength</code></td><td>每个预约的时长。一键即可预约整段时间。</td></tr>
+                    <tr><td>Business Hours Start and End Field</td><td>顾问上的时间字段，表示其一天的开始和结束时间。</td></tr>
+                    <tr><td>Show Other People's Bookings As<code translate="no">bookingPrivacy</code></td><td>显示详情、对站点访客显示忙碌，或对所有人显示忙碌。</td></tr>
+                    <tr><td>Minimum Notice (Hours)<code translate="no">minNoticeHours</code></td><td>下一个预约最早可以在多久之后开始。</td></tr>
+                    <tr><td>Book Up To (Days Ahead)<code translate="no">maxDaysAhead</code></td><td>客户最多可以提前多久预约。</td></tr>
+                    <tr><td>Limit per Person<code translate="no">limitPerPerson</code></td><td>一位客户可持有的未来预约数量，按 Client Field 计数。</td></tr>
+                    <tr><td>Selectable Statuses<code translate="no">selectableStatuses</code></td><td>新预约保存时的状态，例如公开页面上的 Requested。</td></tr>
+                    <tr><td>Record Details Pop-up</td><td>保存前请客户填写姓名、电子邮件和其他字段。</td></tr>
+                    <tr><td>保存后显示“添加到日历”（Show Add to Calendar After Saving）<code translate="no">showAddToCalendar</code></td><td>每次保存后显示“添加到日历”按钮。</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>每个预约，六种查看方式。</strong>同样的预约会显示在月日历、时间轴、周、使用率、日程和地图视图中，前台、顾问和经理各自都能获得所需的视图。<a href="/zh/blog/salesforce-calendar-views.html">查看全部六种视图</a>。</div>
+
+                <h2 style="margin-top:44px;">常见问题</h2>
+                <div class="tl-faq">
+                    <details><summary>如何不写代码在 Salesforce 中管理预约？</summary><p>把 MultiDatePick 的 Resource Booking 日历添加到记录页面、应用程序页面、屏幕 Flow（Screen Flow）或 Experience Cloud 站点，并指向您自己的预约对象和顾问。然后在设置向导中选择您提供的开始时间、预约时长、最短提前通知、每位客户的上限和关闭日。员工在 Salesforce 内预约，客户在您的网站上预约，每个预约都是您自己对象上的一条记录。</p></details>
+                    <details><summary>能否只提供固定的预约时间，例如 9:00 和 10:30？</summary><p>能。在设置向导中选择“仅这些时间”，然后添加每个开始时间，例如 9:00、10:30、13:00、14:30 和 16:00。时间网格只显示这些开始时间，每个时段持续 Booking Length（预约时长）。列表中的时间如果已被预约、处于关闭状态或时间太近，会显示为灰色。</p></details>
+                    <details><summary>每位顾问能有自己的预约时间吗？</summary><p>能。在顾问对象上添加一个文本字段，用 24 小时制输入每位顾问的开始时间，例如 08:00,09:30,11:00，然后把 Only These Times Field 设为该字段。客户选择这位顾问时，网格就显示这位顾问的时间。每位顾问的工作时间也可以来自其记录上的两个时间字段。</p></details>
+                    <details><summary>客户不登录也能在 Experience Cloud 站点上预约吗？</summary><p>能。日历可以在面向访客的公开 Experience Cloud 页面上使用。保存预约前，弹窗会请访客填写姓名、电子邮件和其他信息，所有上限、提前通知期和冲突检查都在服务器端执行。</p></details>
+                    <details><summary>客户能看到其他客户的预约吗？</summary><p>选择 Busy 就看不到。把 Show Other People's Bookings As 设为 Busy for site guests（对站点访客显示忙碌）或 Busy for everyone（对所有人显示忙碌），其他预约就会显示为带斜线的“不可用”色块，没有姓名、没有详情、没有链接。姓名在服务器端就被移除，因此根本不会到达浏览器。</p></details>
+                    <details><summary>在 Salesforce 中预约需要 Salesforce Scheduler 吗？</summary><p>不需要。Salesforce Scheduler 是一个附加许可证，有自己的数据模型。MultiDatePick 在您已有的对象上预约，无论自定义对象还是标准对象，每用户每月 $20，包含全部功能。<a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">查看两者对比</a>。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>您的时间。您的顾问。您的对象。</h2>
+                    <p>在在线演示中提交一个咨询申请，或从 <a href="/zh/configlibrary.html">Config Library</a> 中的现成预约配置开始。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-appointment-scheduling" class="btn btn-demo" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-primary">上线时通知我</a> <a href="/zh/gettingstarted.html" class="btn btn-secondary">入门指南</a>
+                    </div>
+                    <ul class="check-list"><li>$20/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>100% Salesforce 原生</li><li>无需 Apex</li><li>已通过 Salesforce 安全审查</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>相关阅读</h3>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">在 Experience Cloud 上搭建公开预订页面</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">适用于任何资源的 Salesforce 预订日历</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-time-slot-picker.html">在 Salesforce 中只显示空闲时间段</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler 及无代码替代方案</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">在 Salesforce 中安排面试</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>Salesforce 上可定制程度最高的日历组件套件。</p>
+                </div>
+                <div class="footer-links">
+                    <h2>产品</h2>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">六种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>解决方案</h2>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-calendar-interview-scheduling.html">面试安排</a></li>
+                        <li><a href="/zh/salesforce-class-scheduling.html">课程排期</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日历</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>文档</h2>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                    <h2>面向开发者</h2>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar-developer-guide.html">开发者指南</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>公司</h2>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="/zh/custom-config.html">免费定制配置</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <!-- consent:footer --><div class="footer-social footer-legal"><a href="/zh/privacy.html">隐私政策</a><a href="/zh/privacy.html#cookie-settings" data-mdp-consent="open">Cookie 设置</a></div><!-- /consent:footer -->
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/blog/salesforce-appointment-scheduling.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-terminplanung-termine-buchen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/agendar-citas-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/prise-de-rendez-vous-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/prenotazione-appuntamenti-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/agendamento-de-consultas-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-appointment-scheduling.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-appointment-scheduling.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/blog/salesforce-appointment-scheduling.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p><p data-k="prev-image">上一张图片</p><p data-k="next-image">下一张图片</p><p data-k="image-viewer">图片查看器</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

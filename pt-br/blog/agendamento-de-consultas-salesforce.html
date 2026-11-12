@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!-- consent:head ft -->
+  <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    (function(){var c=null;try{c=JSON.parse(localStorage.getItem('mdp_consent'));if(!c||c.v!==1||!(Date.now()-c.ts<31536000000))c=null;}catch(e){c=null;}window.mdpConsent=c;
+    if(c&&c.analytics)gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.mdpFirstTouch=function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}};if(c&&c.attribution)window.mdpFirstTouch();})();
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script defer src="/js/consent.js"></script>
+  <!-- /consent:head -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar consultas no Salesforce: horários por consultor</title>
+    <meta name="description" content="Agendamento de consultas no Salesforce sem código: só os horários que você escolher, horários por consultor, clientes protegidos e agendamento no seu site.">
+    <link rel="canonical" href="https://multidatepick.com/pt-br/blog/agendamento-de-consultas-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Appointment scheduling post: same look as the Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <meta property="og:title" content="Agendar consultas no Salesforce: horários por consultor">
+    <meta property="og:description" content="Agendamento de consultas no Salesforce sem código: só os horários que você escolher, horários por consultor, clientes protegidos e agendamento no seu site.">
+    <meta property="og:image" content="https://multidatepick.com/images/pt-br/blog/agendamento-consultas-salesforce-cover.png">
+    <meta property="og:url" content="https://multidatepick.com/pt-br/blog/agendamento-de-consultas-salesforce.html">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="pt_BR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Agendar consultas no Salesforce: horários por consultor">
+    <meta name="twitter:description" content="Agendamento de consultas no Salesforce sem código: só os horários que você escolher, horários por consultor, clientes protegidos e agendamento no seu site.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/pt-br/blog/agendamento-consultas-salesforce-cover.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-terminplanung-termine-buchen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/agendar-citas-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/prise-de-rendez-vous-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/prenotazione-appuntamenti-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/agendamento-de-consultas-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-appointment-scheduling.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- consent:ui -->
+    <div class="mdp-cc-bar" id="mdpConsentBar" role="region" aria-label="Escolhas de cookies" hidden>
+        <p>Usamos cookies de análise só com a sua permissão. <span class="mdp-cc-wide">Nada é vendido nem usado para anúncios.</span> <a href="/pt-br/politica-de-privacidade.html">Política de privacidade</a></p>
+        <div class="mdp-cc-btns">
+            <button type="button" class="mdp-cc-btn mdp-cc-btn--text" data-mdp-consent="settings">Configurações</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="reject">Rejeitar todos</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="accept">Aceitar todos</button>
+        </div>
+    </div>
+    <dialog class="mdp-cc-dialog" id="mdpConsentDialog" aria-labelledby="mdpConsentTitle" aria-describedby="mdpConsentIntro">
+        <div class="mdp-cc-in">
+            <h2 id="mdpConsentTitle">Configurações de cookies</h2>
+            <button type="button" class="mdp-cc-x" data-mdp-consent="close" aria-label="Fechar">&times;</button>
+            <p class="mdp-cc-intro" id="mdpConsentIntro">Escolha o que este site pode guardar no seu navegador. Você pode mudar a qualquer momento em Configurações de cookies, no rodapé de todas as páginas.</p>
+            <div class="mdp-cc-opt">
+                <span class="mdp-cc-name">Necessários para o site funcionar</span> <span class="mdp-cc-desc">Só guardam a sua escolha de cookies.</span> <span class="mdp-cc-always">Sempre ativos</span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAnalytics">Análise</label> <span class="mdp-cc-desc" id="mdpConsentAnalyticsDesc">O Google Analytics conta visitas e páginas para podermos melhorar o site.</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAnalytics" aria-describedby="mdpConsentAnalyticsDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAttribution">De onde você veio</label> <span class="mdp-cc-desc" id="mdpConsentAttributionDesc">Guarda o link ou a campanha que trouxe você aqui pela primeira vez e envia essa informação com os nossos formulários.</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAttribution" aria-describedby="mdpConsentAttributionDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-btns">
+                <button type="button" class="mdp-cc-btn mdp-cc-btn--line" data-mdp-consent="reject">Rejeitar todos</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="save">Salvar escolhas</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- /consent:ui -->
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Em breve no Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Fechar aviso" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/pt-br/" class="logo"><img src="/images/logo.png" alt="Logotipo do MultiDatePick: calendário de várias datas e reserva de recursos para Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Abrir ou fechar o menu"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">Dates</a></li>
+                        <li><a href="/pt-br/seletor-de-data-e-hora-salesforce.html">Dates &amp; Times</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">Resource Booking</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Seis visualizações de calendário</a></li>
+                        <li><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a></li>
+                        <li><a href="/pt-br/confianca-e-seguranca.html">Confiança e segurança</a></li>
+                        <li><a href="/pt-br/acessibilidade-vpat.html">Acessibilidade (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">Soluções <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/calendario-salesforce.html">Calendário Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas</a></li>
+                        <li><a href="/pt-br/agendamento-de-aulas-e-cursos-salesforce.html">Agendamento de aulas e cursos</a></li>
+                        <li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html">Reserva de salas de reunião</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html">Calendário de campanhas</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">Governo / Section 508</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pt-br/precos.html">Preços</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentação <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/pt-br/blog/calendario-salesforce-sem-codigo.html">Configuração sem código</a></li>
+                        <li><a href="/pt-br/primeiros-passos.html">Primeiros passos</a></li>
+                        <li><a href="/pt-br/guia-do-usuario.html">Guia do usuário</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">Guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html">Páginas de aplicativo, iniciais e do Experience Cloud</a></li>
+                        <li><a href="/pt-br/solucao-de-problemas.html">Solução de problemas</a></li>
+                        <li><a href="/pt-br/perguntas-frequentes.html">Perguntas frequentes</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pt-br/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/pt-BR/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Experimente a demo ao vivo</a></li>
+                <li><a href="/pt-br/avise-me-no-lancamento.html" class="nav-cta">Avise-me no lançamento</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Agendamento de consultas no Salesforce: horários para cada consultor, sem código",
+                "description": "Agendamento de consultas no Salesforce sem código: só os horários que você escolher, horários por consultor, clientes protegidos e agendamento no seu site.",
+                "datePublished": "2026-11-12",
+                "dateModified": "2026-11-12",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/pt-br/blog/agendamento-de-consultas-salesforce.html",
+                "image": "https://multidatepick.com/images/pt-br/blog/agendamento-consultas-salesforce-cover.png",
+                "inLanguage": "pt-BR"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Como agendar consultas no Salesforce sem código?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Adicione o calendário Resource Booking do MultiDatePick a uma página de registro, uma página de aplicativo, um fluxo de tela (Screen Flow) ou um site do Experience Cloud e aponte-o para o seu próprio objeto de agendamentos e para os seus consultores. Depois, no Assistente de Configuração, escolha os horários de início que você oferece, a duração da consulta, a antecedência mínima, o limite por cliente e os dias fechados. A equipe agenda dentro do Salesforce, os clientes agendam no seu site, e cada consulta é um registro no seu próprio objeto."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Posso oferecer só horários fixos, como 9:00 e 10:30?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. Escolha Somente estes horários no Assistente de Configuração e adicione cada horário de início, por exemplo 9:00, 10:30, 13:00, 14:30 e 16:00. A grade de horários mostra só esses inícios, cada um com a duração definida em Booking Length. Um horário da lista que já está ocupado, fechado ou próximo demais aparece em cinza."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Cada consultor pode ter os próprios horários de atendimento?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. Adicione um campo de texto ao seu objeto de consultores, digite os horários de início de cada consultor no formato 24 horas, como 08:00,09:30,11:00, e defina Only These Times Field com esse campo. Quando um cliente escolhe esse consultor, a grade mostra os horários dele. O expediente de cada consultor também pode vir de dois campos de hora no registro dele."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Os clientes podem agendar consultas em um site do Experience Cloud sem fazer login?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim. O calendário funciona em páginas públicas do Experience Cloud para convidados. Uma janela pede nome, e-mail e outros dados antes de salvar o agendamento, e todos os limites, prazos de antecedência e verificações de conflito são executados no servidor."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Um cliente pode ver os agendamentos de outros clientes?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Não, se você escolher Ocupado. Defina Show Other People's Bookings As como Ocupado para convidados do site, ou Ocupado para todos, e os outros agendamentos aparecem como um bloco hachurado Indisponível, sem nome, sem detalhes e sem link. Os nomes são removidos no servidor, então nunca chegam ao navegador."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Preciso do Salesforce Scheduler para agendar consultas no Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Não. O Salesforce Scheduler é uma licença adicional com modelo de dados próprio. O MultiDatePick agenda consultas nos objetos que você já tem, personalizados ou padrão, por $20 por usuário por mês, com todos os recursos incluídos. Veja como os dois se comparam."
+                        }
+                    }
+                ],
+                "inLanguage": "pt-BR"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/pt-br/blog/agendamento-consultas-salesforce-horarios-fixos.webp",
+                "caption": "Demo animada de agendamento de consultas no Salesforce com o MultiDatePick: em uma página pública de agendamento, um consultor é escolhido, a grade mostra só os horários de início da lista desse consultor (9:00, 10:30, 13:00, 14:30 e 16:00) com os já reservados como ocupados, um horário é escolhido e Solicitar agendamento é pressionado",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/pt-br/marketing/salesforce-formulario-agendamento-visitantes.webp",
+                "caption": "Demo animada de uma reserva feita por um convidado em um site do Salesforce Experience Cloud com o MultiDatePick: um consultor e um horário livre escolhidos, Solicitar agendamento abre um formulário de nome, e-mail, tipo de reunião e assunto, e a reserva é salva",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/pt-br/salesforce-calendario-de-reservas-cores-de-status.png",
+                "caption": "Calendário de reservas do MultiDatePick no Salesforce mostrando o mês de um consultor: uma barra colorida por status sob cada dia reservado (Requested, Confirmed, Met, No-Show, Cancelled), barras divididas nos dias com status mistos e um seletor das visualizações Calendário, Linha do tempo, Semana, Ocupação e Agenda",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/pt-br/views/calendario-salesforce-botoes-personalizados.png",
+                "caption": "Calendário de agendamentos do Salesforce com botões personalizados em cada agendamento: o cartão ao passar o mouse de um dia cheio mostra dois atendimentos de clientes, cada um com um botão Enviar lembrete, e a janela que ele abre executa o Flow escolhido no Assistente de Configuração",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/pt-br/blog/salesforce-adicionar-ao-calendario-visualizacao-mensal.png",
+                "caption": "Calendário de reservas do MultiDatePick no Salesforce, visualização mensal, logo após o pedido de uma consulta: uma barra com a mensagem Salvo. Adicione ao seu calendário, com um botão Adicionar ao calendário acima do calendário de novembro",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/pt-br/blog/agendamento-consultas-salesforce-cover.png",
+                "caption": "Agendamento de consultas no Salesforce: horários para cada consultor (imagem de capa do artigo)",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Agendamento de consultas no Salesforce: horários para cada consultor, sem código</h1>
+                <p class="subtitle">Ofereça exatamente os horários de atendimento que você escolher, dê a cada consultor os próprios horários e deixe a equipe ou os clientes agendarem, dentro do Salesforce ou no seu site do Experience Cloud.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Publicado em 12 de novembro de 2026 &middot; MultiDatePick</p>
+                <div class="sc-answer"><p class="sc-answer__q">Como agendar consultas no Salesforce sem código?</p><p>Adicione o calendário Resource Booking do MultiDatePick a uma página de registro, uma página de aplicativo, um fluxo de tela (Screen Flow) ou um site do Experience Cloud e aponte-o para o seu próprio objeto de agendamentos e para os seus consultores. Depois, no Assistente de Configuração, escolha os horários de início que você oferece, a duração da consulta, a antecedência mínima, o limite por cliente e os dias fechados. A equipe agenda dentro do Salesforce, os clientes agendam no seu site, e cada consulta é um registro no seu próprio objeto.</p></div>
+
+                <p class="sc-lead">"Como os clientes agendam uma consulta conosco no Salesforce?" "Cada consultor pode definir os próprios horários?" "Como evito que alguém agende às 9:17?" "Um cliente consegue ver quem mais está agendado?" Um agendamento parece simples até uma empresa de verdade depender dele, e aí cada uma dessas perguntas precisa de resposta.</p>
+
+                <p>O MultiDatePick responde a todas elas nos objetos que você já tem. Escolha um consultor, veja <strong>só os horários de início que esse consultor oferece</strong>, escolha um e agende. A consulta é salva como registro no seu próprio objeto, com status, cliente e duração, e nenhum outro cliente vê um nome sequer. <strong>Sem código, sem Apex, sem licença adicional.</strong></p>
+
+                <figure class="sc-shot" style="max-width:800px;margin:24px auto;">
+                    <img src="/images/pt-br/blog/agendamento-consultas-salesforce-horarios-fixos-poster.png" data-gif="/images/pt-br/blog/agendamento-consultas-salesforce-horarios-fixos.webp" alt="Demo animada de agendamento de consultas no Salesforce com o MultiDatePick: em uma página pública de agendamento, um consultor é escolhido, a grade mostra só os horários de início da lista desse consultor (9:00, 10:30, 13:00, 14:30 e 16:00) com os já reservados como ocupados, um horário é escolhido e Solicitar agendamento é pressionado" loading="lazy" decoding="async" width="800" height="1090" data-zoomable>
+                    <figcaption>Escolha um consultor, veja só os horários da lista dele, escolha um e agende.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Do que o agendamento de consultas precisa, e o que você recebe</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>Somente estes horários</h3><p>Liste os horários de início que você oferece, como 9:00, 10:30, 13:00, 14:30 e 16:00. A grade mostra esses e nenhum outro.</p></div>
+                    <div class="tl-feat"><h3>Horários próprios de cada consultor</h3><p>Um campo de texto no consultor guarda a lista dele. Escolha o consultor e a grade segue essa lista.</p></div>
+                    <div class="tl-feat"><h3>A duração certa</h3><p>Uma consulta de 30, 45 ou 60 minutos é agendada com um clique, com intervalo depois de cada uma, se você quiser.</p></div>
+                    <div class="tl-feat"><h3>Só Ocupado</h3><p>As consultas de outros clientes aparecem como Ocupado, sem nome, sem detalhes e sem link, com a regra aplicada no servidor.</p></div>
+                    <div class="tl-feat"><h3>Regras que protegem o dia</h3><p>Antecedência mínima, até quando agendar, limite por cliente e dias fechados, verificados de novo a cada gravação.</p></div>
+                    <div class="tl-feat"><h3>Depois do agendamento</h3><p>Status de Requested a Confirmed, um botão de fluxo para lembretes e Adicionar ao calendário para o cliente.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Ofereça só os horários de atendimento que você escolher</h2>
+                <p>A maioria dos calendários divide o dia em blocos iguais: a cada 15 ou 30 minutos, da abertura ao fechamento. Isso serve para uma sala de reunião. Não serve para um consultório que atende clientes às 9:00, 10:30, 13:00, 14:30 e 16:00, com os intervalos reservados para anotações, ligações e almoço.</p>
+                <p><strong>Somente estes horários</strong> resolve isso. No Assistente de Configuração, escolha Somente estes horários e adicione cada horário de início. A grade de horários passa a oferecer só esses inícios, em todos os dias e em todas as visualizações. Cada um dura o tempo definido em <strong>Booking Length</strong>, então com 60 minutos o horário das 10:30 vira uma consulta das 10:30 às 11:30 com um clique.</p>
+                <p>Todo o resto continua protegendo um horário da lista. Um horário já reservado, fechado no dia, próximo demais para a sua antecedência mínima, fora do expediente do consultor ou colado na próxima consulta aparece em cinza, então o cliente vê que o horário existe e está ocupado, em vez de um buraco que ele não entende.</p>
+
+                <h2 style="margin-top:44px;">Cada consultor com os próprios horários e expediente</h2>
+                <p>Um consultor trabalha de manhã, outro atende clientes às 8:00 antes de o escritório abrir, um terceiro reserva as sextas para revisões. Adicione um campo de texto ao seu objeto de consultores, como <strong>Available Times</strong>, e digite os horários de início de cada consultor no formato 24 horas:<code translate="no">08:00,09:30,11:00</code>. Aponte <strong>Only These Times Field</strong> para esse campo (no Assistente de Configuração, <strong>Horários próprios de cada recurso</strong>) e, quando um cliente escolher esse consultor, a grade mostra os horários dele. Um consultor com o campo em branco usa a lista do próprio calendário.</p>
+                <p>O expediente também vem do consultor: <strong>Business Hours Start Field</strong> e <strong>Business Hours End Field</strong> leem dois campos de hora no registro do consultor. Uma folga, uma tarde de treinamento ou o escritório fechado entram no seu objeto de fechamentos com um consultor opcional, então o dia fecha para um consultor ou para todos e pode mostrar o motivo no calendário. Quando uma consulta precisa de duas pessoas, como um consultor e um especialista, só aparecem os horários que os dois oferecem.</p>
+
+                <h2 style="margin-top:44px;">Agendado pela equipe no Salesforce ou pelos clientes no seu site</h2>
+                <p>O mesmo calendário funciona nos dois lugares. A <strong>equipe</strong> agenda a partir de uma página de registro, uma página de aplicativo ou um fluxo de tela, com todos os detalhes visíveis: quem está agendado, para quê e com qual status. Os <strong>clientes</strong> agendam em uma página pública do Experience Cloud sem fazer login. A <strong>Janela de detalhes do registro</strong> pede nome, e-mail, tipo de reunião e uma observação antes de salvar a consulta.</p>
+                <figure class="sc-shot" style="max-width:800px;margin:24px auto;">
+                    <img src="/images/pt-br/marketing/salesforce-formulario-agendamento-visitantes-poster.png" data-gif="/images/pt-br/marketing/salesforce-formulario-agendamento-visitantes.webp" alt="Demo animada de uma reserva feita por um convidado em um site do Salesforce Experience Cloud com o MultiDatePick: um consultor e um horário livre escolhidos, Solicitar agendamento abre um formulário de nome, e-mail, tipo de reunião e assunto, e a reserva é salva" loading="lazy" decoding="async" width="800" height="960" data-zoomable>
+                    <figcaption>Em um site público, o cliente informa os dados em uma janela antes de a consulta ser salva.</figcaption>
+                </figure>
+                <p>Nessa página pública, as consultas de outros clientes aparecem como <strong>Ocupado</strong>. Defina <strong>Show Other People's Bookings As</strong> como Ocupado para convidados do site: a equipe continua vendo todos os nomes, enquanto os visitantes veem um bloco hachurado Indisponível, sem nome, sem cartão ao passar o mouse e sem link. Os nomes são removidos no servidor, então nunca chegam ao navegador do visitante. <a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Veja como criar uma página pública de agendamento no Experience Cloud</a>.</p>
+
+                <h2 style="margin-top:44px;">Regras que mantêm a agenda em ordem</h2>
+                <p>Cada regra é uma configuração, e cada uma é verificada de novo no servidor quando a consulta é salva, então recarregar a página nunca a contorna.</p>
+                <div style="overflow-x:auto;">
+                <table class="bp-grid">
+                    <tr><th style="width:30%;">A regra</th><th>O que ela faz pelas consultas</th></tr>
+                    <tr><td>Antecedência mínima</td><td><strong>Minimum Notice (Hours)</strong>: 24 exige um dia inteiro de antecedência. Os dias anteriores ficam em cinza e, no dia limite, os horários mais cedo fecham.</td></tr>
+                    <tr><td>Até quando agendar</td><td><strong>Book Up To (Days Ahead)</strong>: 60 mantém a agenda aberta por dois meses e avança a cada dia.</td></tr>
+                    <tr><td>Limite por cliente</td><td><strong>Limit per Person</strong>: quantas consultas futuras um cliente pode ter, contadas pelo e-mail ou contato dele em <strong>Limit per Person Client Field</strong>. A equipe pode passar do limite depois de uma confirmação; os visitantes do site, não.</td></tr>
+                    <tr><td>Por dia</td><td><strong>Max Bookings per Day</strong>: quantas consultas separadas uma pessoa pode escolher em um mesmo dia.</td></tr>
+                    <tr><td>Dias fechados</td><td>Feriados, fechamentos do escritório e folgas, para o escritório todo ou para um consultor, no dia inteiro ou em parte dele, com o motivo à vista.</td></tr>
+                    <tr><td>Um respiro</td><td><strong>Buffer Between Bookings (Minutes)</strong>: 15 deixa quinze minutos livres depois de cada consulta.</td></tr>
+                    <tr><td>Sem reserva dupla</td><td>Um horário ocupado fica em cinza antes de qualquer clique, e a gravação verifica de novo. <a href="/pt-br/blog/evitar-reservas-duplicadas-salesforce.html">Como funcionam conflitos e capacidade</a>.</td></tr>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">Confirmações e status</h2>
+                <p>Uma consulta tem um ciclo de vida: solicitada, confirmada, realizada, às vezes cancelada ou perdida. Aponte <strong>Status Field</strong> para o seu campo de lista de opções de status, e cada status ganha a própria cor. <strong>Selectable Statuses</strong> define como um agendamento pode ser salvo: defina Requested na página pública, e cada pedido de cliente chega como Requested para a sua equipe confirmar. Adicione Cancelled a <strong>Ignored Statuses</strong>, e uma consulta cancelada libera o horário na hora.</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/pt-br/salesforce-calendario-de-reservas-cores-de-status.png" alt="Calendário de reservas do MultiDatePick no Salesforce mostrando o mês de um consultor: uma barra colorida por status sob cada dia reservado (Requested, Confirmed, Met, No-Show, Cancelled), barras divididas nos dias com status mistos e um seletor das visualizações Calendário, Linha do tempo, Semana, Ocupação e Agenda" loading="lazy" decoding="async" width="1362" height="1690" data-zoomable>
+                    <figcaption>O mês de um consultor, colorido por status: Requested, Confirmed, Met, No-Show e Cancelled.</figcaption>
+                </figure>
+                <p>O cliente recebe uma confirmação no momento em que agenda: ative <strong>Show In-Component Toast</strong> e escreva sua própria mensagem em <strong>Success Toast Message</strong>, como "Obrigado. Confirmaremos sua consulta em até um dia útil."</p>
+
+                <h2 style="margin-top:44px;">Lembretes e acompanhamentos com um botão de fluxo</h2>
+                <p>Os botões personalizados do Assistente de Configuração executam um dos seus próprios fluxos. Coloque um botão <strong>Enviar lembrete</strong> em cada consulta, e a equipe envia o lembrete pelo calendário com um clique. Um botão pode aparecer só em certos status, como Confirmed, agir sobre várias consultas escolhidas no Modo de Edição ou rodar sozinho depois de cada gravação, para que um fluxo envie o e-mail de confirmação sem ninguém apertar nada.</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/pt-br/views/calendario-salesforce-botoes-personalizados.png" alt="Calendário de agendamentos do Salesforce com botões personalizados em cada agendamento: o cartão ao passar o mouse de um dia cheio mostra dois atendimentos de clientes, cada um com um botão Enviar lembrete, e a janela que ele abre executa o Flow escolhido no Assistente de Configuração" loading="lazy" decoding="async" width="1644" height="1618" data-zoomable>
+                    <figcaption>Um botão Enviar lembrete em cada consulta executa o fluxo que o administrador escolheu.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Adicionar ao calendário para o cliente</h2>
+                <p>Ative <strong>Show Add to Calendar After Saving</strong>, e o cliente sai com a consulta no Outlook, Google Agenda ou Apple Calendar: data e hora certas, nome do consultor no título. É um arquivo de calendário gerado no navegador, então os convidados de um site público também recebem, e nada sai do Salesforce até que eles o baixem. <a href="/pt-br/blog/adicionar-ao-calendario-salesforce.html">Mais sobre Adicionar ao calendário</a>.</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/pt-br/blog/salesforce-adicionar-ao-calendario-visualizacao-mensal.png" alt="Calendário de reservas do MultiDatePick no Salesforce, visualização mensal, logo após o pedido de uma consulta: uma barra com a mensagem Salvo. Adicione ao seu calendário, com um botão Adicionar ao calendário acima do calendário de novembro" loading="lazy" decoding="async" width="700" height="813" data-zoomable>
+                    <figcaption>Logo depois do pedido: Adicionar ao calendário, com um clique.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Quem agenda consultas assim</h2>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Consultores financeiros</strong><span>Revisões com clientes em horários fixos, cada consultor com o próprio expediente e os outros clientes da empresa mostrados só como Ocupado.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Clínicas e terapeutas</strong><span>Sessões fixas de 50 minutos nos horários de cada profissional, com um dia de antecedência obrigatório.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Salões e spas</strong><span>Horários de início de cada profissional, um intervalo para preparar a cadeira e um limite de agendamentos em aberto por cliente.</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Consultorias</strong><span>Reuniões de descoberta em quatro horários fixos por dia, agendadas em uma página pública e confirmadas pela equipe.</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>Equipes de serviço</strong><span>Visitas de instalação e reparo em janelas de manhã e de tarde, agendadas pelo despachante no Salesforce.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>Universidades</strong><span>Atendimentos de orientação e monitoria nos horários que cada orientador publica, com um fluxo de lembrete na véspera.</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">As configurações que a definem</h2>
+                <p>Cada uma é uma etapa do Assistente de Configuração e uma propriedade do componente Resource Booking no Lightning App Builder, no Experience Builder e no Flow Builder.</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">Configuração</th><th>O que faz</th></tr></thead>
+                    <tbody>
+                    <tr><td>Only These Times (Somente estes horários)</td><td>Os únicos horários de início que as pessoas podem escolher, no formato 24 horas:<code translate="no">09:00,10:30,13:00,14:30,16:00</code>. Deixe em branco para todos os intervalos.</td></tr>
+                    <tr><td>Only These Times Field (Horários próprios de cada recurso)</td><td>Um campo de texto no consultor com os horários de início dele. Em branco em um consultor, vale a lista acima.</td></tr>
+                    <tr><td>Booking Length (Minutes)<code translate="no">bookingLength</code></td><td>Quanto tempo dura cada consulta. Um clique reserva o bloco inteiro.</td></tr>
+                    <tr><td>Business Hours Start and End Field (Campos de início e fim do horário comercial)</td><td>Campos de hora no consultor que marcam quando o dia dele começa e termina.</td></tr>
+                    <tr><td>Show Other People's Bookings As (Mostrar as reservas de outras pessoas como)<code translate="no">bookingPrivacy</code></td><td>Detalhes, Ocupado para convidados do site ou Ocupado para todos.</td></tr>
+                    <tr><td>Minimum Notice (Hours)<code translate="no">minNoticeHours</code></td><td>Com quanta antecedência a próxima consulta pode começar.</td></tr>
+                    <tr><td>Book Up To (Days Ahead)<code translate="no">maxDaysAhead</code></td><td>Até quantos dias à frente os clientes podem agendar.</td></tr>
+                    <tr><td>Limit per Person<code translate="no">limitPerPerson</code></td><td>Consultas futuras que um cliente pode ter, contadas pelo Client Field.</td></tr>
+                    <tr><td>Selectable Statuses<code translate="no">selectableStatuses</code></td><td>O status com que uma nova consulta é salva, como Requested em uma página pública.</td></tr>
+                    <tr><td>Janela de detalhes do registro (Record Details Pop-up)</td><td>Pede nome, e-mail e outros campos do cliente antes de salvar.</td></tr>
+                    <tr><td>Show Add to Calendar After Saving<code translate="no">showAddToCalendar</code></td><td>Um botão Adicionar ao calendário depois de cada gravação.</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Cada consulta, seis formas de ver.</strong> As mesmas consultas aparecem no Calendário mensal, na Linha do tempo, na Semana, na Ocupação, na Agenda e no Mapa, para que a recepção, o consultor e o gestor tenham cada um a visualização de que precisam. <a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Veja as seis visualizações</a>.</div>
+
+                <h2 style="margin-top:44px;">Perguntas frequentes</h2>
+                <div class="tl-faq">
+                    <details><summary>Como agendar consultas no Salesforce sem código?</summary><p>Adicione o calendário Resource Booking do MultiDatePick a uma página de registro, uma página de aplicativo, um fluxo de tela (Screen Flow) ou um site do Experience Cloud e aponte-o para o seu próprio objeto de agendamentos e para os seus consultores. Depois, no Assistente de Configuração, escolha os horários de início que você oferece, a duração da consulta, a antecedência mínima, o limite por cliente e os dias fechados. A equipe agenda dentro do Salesforce, os clientes agendam no seu site, e cada consulta é um registro no seu próprio objeto.</p></details>
+                    <details><summary>Posso oferecer só horários fixos, como 9:00 e 10:30?</summary><p>Sim. Escolha Somente estes horários no Assistente de Configuração e adicione cada horário de início, por exemplo 9:00, 10:30, 13:00, 14:30 e 16:00. A grade de horários mostra só esses inícios, cada um com a duração definida em Booking Length. Um horário da lista que já está ocupado, fechado ou próximo demais aparece em cinza.</p></details>
+                    <details><summary>Cada consultor pode ter os próprios horários de atendimento?</summary><p>Sim. Adicione um campo de texto ao seu objeto de consultores, digite os horários de início de cada consultor no formato 24 horas, como 08:00,09:30,11:00, e defina Only These Times Field com esse campo. Quando um cliente escolhe esse consultor, a grade mostra os horários dele. O expediente de cada consultor também pode vir de dois campos de hora no registro dele.</p></details>
+                    <details><summary>Os clientes podem agendar consultas em um site do Experience Cloud sem fazer login?</summary><p>Sim. O calendário funciona em páginas públicas do Experience Cloud para convidados. Uma janela pede nome, e-mail e outros dados antes de salvar o agendamento, e todos os limites, prazos de antecedência e verificações de conflito são executados no servidor.</p></details>
+                    <details><summary>Um cliente pode ver os agendamentos de outros clientes?</summary><p>Não, se você escolher Ocupado. Defina Show Other People's Bookings As como Ocupado para convidados do site, ou Ocupado para todos, e os outros agendamentos aparecem como um bloco hachurado Indisponível, sem nome, sem detalhes e sem link. Os nomes são removidos no servidor, então nunca chegam ao navegador.</p></details>
+                    <details><summary>Preciso do Salesforce Scheduler para agendar consultas no Salesforce?</summary><p>Não. O Salesforce Scheduler é uma licença adicional com modelo de dados próprio. O MultiDatePick agenda consultas nos objetos que você já tem, personalizados ou padrão, por $20 por usuário por mês, com todos os recursos incluídos. <a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">Veja como os dois se comparam</a>.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Seus horários. Seus consultores. Seus objetos.</h2>
+                    <p>Solicite uma consulta na demo ao vivo ou comece com uma configuração de agendamento pronta na <a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a>.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/pt-BR/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-appointment-scheduling" class="btn btn-demo" target="_blank" rel="noopener">Experimente a demo ao vivo</a> <a href="/pt-br/avise-me-no-lancamento.html" class="btn btn-primary">Avise-me no lançamento</a> <a href="/pt-br/primeiros-passos.html" class="btn btn-secondary">Primeiros passos</a>
+                    </div>
+                    <ul class="check-list"><li>$20/usuário/mês, todos os recursos</li><li>Teste grátis de 30 dias, sem cartão</li><li>100% nativo do Salesforce</li><li>Sem Apex</li><li>Aprovado no Security Review do Salesforce</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Leia também</h3>
+                    <ul>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Crie uma página pública de reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">O calendário de reservas do Salesforce para qualquer recurso</a></li>
+                        <li><a href="/pt-br/blog/seletor-de-horarios-calendario-salesforce.html">Mostre só os horários livres no Salesforce</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">Lightning Scheduler e uma alternativa sem código</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas no Salesforce</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/pt-br/" class="logo">
+                        <img src="/images/logo.png" alt="Logotipo do MultiDatePick: calendário de várias datas e reserva de recursos para Salesforce" width="180" height="45">
+                    </a>
+                    <p>O pacote de componentes de calendário mais personalizável para Salesforce.</p>
+                </div>
+                <div class="footer-links">
+                    <h2>Produto</h2>
+                    <ul>
+                        <li><a href="/pt-br/seletor-de-varias-datas-salesforce.html">Dates</a></li>
+                        <li><a href="/pt-br/seletor-de-data-e-hora-salesforce.html">Dates &amp; Times</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-salesforce.html">Resource Booking</a></li>
+                        <li><a href="/pt-br/blog/visualizacoes-de-calendario-salesforce.html">Seis visualizações de calendário</a></li>
+                        <li><a href="/pt-br/biblioteca-de-configuracoes-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Soluções</h2>
+                    <ul>
+                        <li><a href="/pt-br/calendario-salesforce.html">Calendário Salesforce</a></li>
+                        <li><a href="/pt-br/calendario-salesforce-staffing-e-recrutamento.html">Staffing e recrutamento</a></li>
+                        <li><a href="/pt-br/agendamento-de-entrevistas-salesforce.html">Agendamento de entrevistas</a></li>
+                        <li><a href="/pt-br/agendamento-de-aulas-e-cursos-salesforce.html">Agendamento de aulas e cursos</a></li>
+                        <li><a href="/pt-br/reserva-de-salas-de-reuniao-salesforce.html">Reserva de salas de reunião</a></li>
+                        <li><a href="/pt-br/calendario-de-reservas-experience-cloud-salesforce.html">Reservas no Experience Cloud</a></li>
+                        <li><a href="/pt-br/blog/varias-datas-campanha-salesforce.html">Calendário de campanhas</a></li>
+                        <li><a href="/pt-br/blog/calendario-salesforce-section-508-setor-publico.html">Governo / Section 508</a></li>
+                        <li><a href="/pt-br/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Documentação</h2>
+                    <ul>
+                        <li><a href="/pt-br/primeiros-passos.html">Primeiros passos</a></li>
+                        <li><a href="/pt-br/guia-do-usuario.html">Guia do usuário</a></li>
+                        <li><a href="/pt-br/guia-fluxo-de-tela-salesforce.html">Guia de fluxo de tela</a></li>
+                        <li><a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html">Páginas de aplicativo, iniciais e do Experience Cloud</a></li>
+                        <li><a href="/pt-br/solucao-de-problemas.html">Solução de problemas</a></li>
+                        <li><a href="/pt-br/perguntas-frequentes.html">Perguntas frequentes</a></li>
+                    </ul>
+                    <h2>Para desenvolvedores</h2>
+                    <ul>
+                        <li><a href="/pt-br/guia-do-desenvolvedor-calendario-salesforce.html">Guia do desenvolvedor</a></li>
+                        <li><a href="/pt-br/implantar-fluxo-vs-code.html">Implantar um fluxo (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Empresa</h2>
+                    <ul>
+                        <li><a href="/pt-br/precos.html">Preços</a></li>
+                        <li><a href="/pt-br/blog/">Blog</a></li>
+                        <li><a href="/pt-br/confianca-e-seguranca.html">Confiança e segurança</a></li>
+                        <li><a href="/pt-br/acessibilidade-vpat.html">Acessibilidade</a></li>
+                        <li><a href="/pt-br/avise-me-no-lancamento.html">Avise-me no lançamento</a></li>
+                        <li><a href="/pt-br/configuracao-personalizada-calendario-salesforce-gratis.html">Configuração personalizada grátis</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Suporte</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Todos os direitos reservados.</span>
+                <!-- consent:footer --><div class="footer-social footer-legal"><a href="/pt-br/politica-de-privacidade.html">Política de privacidade</a><a href="/pt-br/politica-de-privacidade.html#cookie-settings" data-mdp-consent="open">Configurações de cookies</a></div><!-- /consent:footer -->
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Idioma" translate="no"><ul><li><a href="/blog/salesforce-appointment-scheduling.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-terminplanung-termine-buchen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/agendar-citas-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/prise-de-rendez-vous-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/prenotazione-appuntamenti-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/agendamento-de-consultas-salesforce.html" hreflang="pt-BR" lang="pt-BR" aria-current="page">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-appointment-scheduling.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-appointment-scheduling.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-appointment-scheduling.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ampliar imagem</p><p data-k="expand-diagram">Ampliar diagrama</p><p data-k="close">Fechar</p><p data-k="prev-image">Imagem anterior</p><p data-k="next-image">Próxima imagem</p><p data-k="image-viewer">Visualizador de imagens</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

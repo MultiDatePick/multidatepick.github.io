@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- consent:head ft -->
+  <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    (function(){var c=null;try{c=JSON.parse(localStorage.getItem('mdp_consent'));if(!c||c.v!==1||!(Date.now()-c.ts<31536000000))c=null;}catch(e){c=null;}window.mdpConsent=c;
+    if(c&&c.analytics)gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.mdpFirstTouch=function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}};if(c&&c.attribution)window.mdpFirstTouch();})();
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script defer src="/js/consent.js"></script>
+  <!-- /consent:head -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 予約管理: アドバイザーごとに予約時間を設定</title>
+    <meta name="description" content="コード不要の Salesforce 予約管理。指定した時刻だけを提示し、アドバイザーごとに予約時間を設定。顧客の情報は非公開のまま、自社サイトからアポイント予約を受け付けられます。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/salesforce-appointment-scheduling.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Appointment scheduling post: same look as the Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .tl-feats, .tl-uses { grid-template-columns: 1fr; } }
+            /* Blog post kit (2026-10-21): short-rail headings, grid-line check tables, figure pairs, rail cards, FAQ, end CTA. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-no::before { content: "\2717"; color: #DC2626; font-weight: 700; margin-right: 7px; }
+        .bp-yes::before { content: "\2713"; color: #16A34A; font-weight: 700; margin-right: 7px; }
+        .bp-yes { color: #0F2D52 !important; font-weight: 500; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+        .bp-card { position: relative; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px 14px 20px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); }
+        .bp-card::before { content: ""; position: absolute; left: 0; top: 18px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: var(--c, #F97316); }
+        .bp-card h3 { margin: 0 0 4px; font-size: 1.02rem; color: #0F2D52; }
+        .bp-card p { margin: 0; color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .bp-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .bp-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .bp-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .bp-list { list-style: none; padding: 0; margin: 16px 0; } .bp-list li { position: relative; padding: 7px 0 7px 26px; border-bottom: 1px solid #F1F5F9; color: #374151; } .bp-list li:last-child { border-bottom: none; } .bp-list li::before { content: "\2713"; position: absolute; left: 2px; color: #16A34A; font-weight: 700; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        @media (max-width: 640px) {
+            .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <meta property="og:title" content="Salesforce 予約管理: アドバイザーごとに予約時間を設定">
+    <meta property="og:description" content="コード不要の Salesforce 予約管理。指定した時刻だけを提示し、アドバイザーごとに予約時間を設定。顧客の情報は非公開のまま、自社サイトからアポイント予約を受け付けられます。">
+    <meta property="og:image" content="https://multidatepick.com/images/ja/blog/salesforce-appointment-scheduling-cover.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/salesforce-appointment-scheduling.html">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 予約管理: アドバイザーごとに予約時間を設定">
+    <meta name="twitter:description" content="コード不要の Salesforce 予約管理。指定した時刻だけを提示し、アドバイザーごとに予約時間を設定。顧客の情報は非公開のまま、自社サイトからアポイント予約を受け付けられます。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/ja/blog/salesforce-appointment-scheduling-cover.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-terminplanung-termine-buchen.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/agendar-citas-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/prise-de-rendez-vous-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/prenotazione-appuntamenti-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/agendamento-de-consultas-salesforce.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-appointment-scheduling.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-appointment-scheduling.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- consent:ui -->
+    <div class="mdp-cc-bar" id="mdpConsentBar" role="region" aria-label="Cookieの選択" hidden>
+        <p>同意いただいた場合のみ、アクセス解析にCookieを使用します。<span class="mdp-cc-wide">データの販売や広告利用は一切ありません。</span> <a href="/ja/privacy.html">プライバシーポリシー</a></p>
+        <div class="mdp-cc-btns">
+            <button type="button" class="mdp-cc-btn mdp-cc-btn--text" data-mdp-consent="settings">設定</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="reject">すべて拒否</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="accept">すべて許可</button>
+        </div>
+    </div>
+    <dialog class="mdp-cc-dialog" id="mdpConsentDialog" aria-labelledby="mdpConsentTitle" aria-describedby="mdpConsentIntro">
+        <div class="mdp-cc-in">
+            <h2 id="mdpConsentTitle">Cookie設定</h2>
+            <button type="button" class="mdp-cc-x" data-mdp-consent="close" aria-label="閉じる">&times;</button>
+            <p class="mdp-cc-intro" id="mdpConsentIntro">このサイトがブラウザに保存してよい内容を選んでください。各ページ下部の「Cookie設定」からいつでも変更できます。</p>
+            <div class="mdp-cc-opt">
+                <span class="mdp-cc-name">サイトの動作に必要</span> <span class="mdp-cc-desc">Cookieの選択内容だけを記憶します。</span> <span class="mdp-cc-always">常に有効</span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAnalytics">アクセス解析</label> <span class="mdp-cc-desc" id="mdpConsentAnalyticsDesc">サイト改善のため、Google Analyticsで訪問数と閲覧ページを集計します。</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAnalytics" aria-describedby="mdpConsentAnalyticsDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAttribution">流入元</label> <span class="mdp-cc-desc" id="mdpConsentAttributionDesc">最初にこのサイトへ来るきっかけになったリンクやキャンペーンを記憶し、フォーム送信時に一緒に送ります。</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAttribution" aria-describedby="mdpConsentAttributionDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-btns">
+                <button type="button" class="mdp-cc-btn mdp-cc-btn--line" data-mdp-consent="reject">すべて拒否</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="save">選択を保存</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- /consent:ui -->
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">6 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-class-scheduling.html">クラス・講座スケジュール</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンカレンダー</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/blog/no-code-salesforce-calendar.html">ノーコード設定</a></li>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Article",
+                "headline": "Salesforce の予約管理: アドバイザーごとに予約時間を設定、コード不要",
+                "description": "コード不要の Salesforce 予約管理。指定した時刻だけを提示し、アドバイザーごとに予約時間を設定。顧客の情報は非公開のまま、自社サイトからアポイント予約を受け付けられます。",
+                "datePublished": "2026-11-12",
+                "dateModified": "2026-11-12",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/salesforce-appointment-scheduling.html",
+                "image": "https://multidatepick.com/images/ja/blog/salesforce-appointment-scheduling-cover.png",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "コードを書かずに Salesforce で予約管理をするには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "MultiDatePick の Resource Booking カレンダーをレコードページ、アプリケーションページ、画面フロー (Screen Flow)、または Experience Cloud サイトに配置し、自社の予約オブジェクトとアドバイザーを指定します。あとはセットアップウィザードで、提示する開始時刻、予約の長さ、最低事前通知、顧客ごとの上限、休業日を選ぶだけです。スタッフは Salesforce 内で、顧客は自社サイトで予約し、すべての予約が自社オブジェクトのレコードとして保存されます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "9:00 や 10:30 のように、決まった予約時間だけを提示できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。セットアップウィザードで「これらの時刻のみ」を選び、9:00、10:30、13:00、14:30、16:00 のように開始時刻を追加します。時間グリッドにはその開始時刻だけが表示され、それぞれ Booking Length (予約の長さ) の分だけ続きます。リストにある時刻でも、予約済み、休業、または直前すぎる場合はグレー表示になります。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "アドバイザーごとに予約時間を変えられますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。アドバイザーのオブジェクトにテキスト項目を追加し、各アドバイザーの開始時刻を 08:00,09:30,11:00 のように 24 時間表記で入力して、Only These Times Field にその項目を設定します。顧客がそのアドバイザーを選ぶと、グリッドにはそのアドバイザーの時刻が表示されます。各アドバイザーの勤務時間も、レコード上の 2 つの時間項目から取得できます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Experience Cloud サイトで、顧客がログインせずに予約できますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。カレンダーはゲスト向けの公開 Experience Cloud ページで動作します。予約を保存する前にポップアップで名前、メールアドレスなどの情報を入力してもらい、上限、事前通知期間、重複のチェックはすべてサーバー側で実行されます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "顧客にほかの顧客の予約が見えてしまいませんか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Busy を選べば見えません。Show Other People's Bookings As を Busy for site guests (サイトゲストには予定ありで表示) または Busy for everyone (全員に予定ありで表示) に設定すると、ほかの予約は名前も詳細もリンクもない斜線の「利用不可」ブロックとして表示されます。名前はサーバー側で取り除かれるため、ブラウザーに届くことはありません。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce で予約管理をするのに Salesforce Scheduler は必要ですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。Salesforce Scheduler は独自のデータモデルを持つ追加ライセンスです。MultiDatePick は、カスタムでも標準でも既存のオブジェクトに予約を登録でき、全機能込みで 1 ユーザーあたり月額 $20 です。両者の比較をご覧ください。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-appointment-scheduling-only-these-times.webp",
+                "caption": "MultiDatePick による Salesforce 予約管理のアニメーションデモ: 公開予約ページでアドバイザーを選ぶと、時間グリッドにはそのアドバイザーのリストにある開始時刻 (9:00、10:30、13:00、14:30、16:00) だけが表示され、予約済みの時刻は予定ありと表示される。時刻を 1 つ選び、予約リクエストのボタンを押す",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/marketing/salesforce-booking-details-popup.webp",
+                "caption": "MultiDatePick を使った Salesforce Experience Cloud サイトでのゲスト予約のアニメーションデモ: アドバイザーと空いている時刻を選び、予約リクエストのボタンを押すと名前、メールアドレス、面談の種類、相談内容の入力フォームが開き、予約が保存される",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/salesforce-booking-calendar-status-colors.png",
+                "caption": "アドバイザー 1 名の 1 か月を表示した MultiDatePick の Salesforce 予約カレンダー: 予約のある日の下に状況の色のバー (Requested、Confirmed、Met、No-Show、Cancelled)、状況が混在する日は分割バー、カレンダー・タイムライン・週・稼働率・予定一覧の表示切り替え",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/views/salesforce-calendar-custom-buttons.png",
+                "caption": "カスタムボタン付きの Salesforce 予約カレンダー: 予定の多い日のホバーカードに 2 件のクライアント予約が並び、それぞれに「リマインダーを送信」ボタンがある。押すとポップアップが開き、セットアップウィザードで選んだフローを実行する",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-add-to-calendar-month-view.png",
+                "caption": "MultiDatePick の Salesforce 予約カレンダーの月表示。相談をリクエストした直後で、11 月のカレンダーの上に「保存しました。カレンダーに追加してください」というバーと「カレンダーに追加」ボタンが表示されている",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-appointment-scheduling-cover.png",
+                "caption": "Salesforce の予約管理: アドバイザーごとに予約時間を設定 (記事のカバー画像)",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce の予約管理: アドバイザーごとに予約時間を設定、コード不要</h1>
+                <p class="subtitle">提示する予約時間を自分で決め、アドバイザーごとに独自の時間を設定。スタッフも顧客も、Salesforce 内や Experience Cloud サイトから予約できます。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日: 2026 年 11 月 12 日 &middot; MultiDatePick</p>
+                <div class="sc-answer"><p class="sc-answer__q">コードを書かずに Salesforce で予約管理をするには?</p><p>MultiDatePick の Resource Booking カレンダーをレコードページ、アプリケーションページ、画面フロー (Screen Flow)、または Experience Cloud サイトに配置し、自社の予約オブジェクトとアドバイザーを指定します。あとはセットアップウィザードで、提示する開始時刻、予約の長さ、最低事前通知、顧客ごとの上限、休業日を選ぶだけです。スタッフは Salesforce 内で、顧客は自社サイトで予約し、すべての予約が自社オブジェクトのレコードとして保存されます。</p></div>
+
+                <p class="sc-lead">「顧客は Salesforce でどうやって予約するの?」「アドバイザーごとに予約時間を決められる?」「9:17 のような半端な時間に予約されないようにするには?」「ほかに誰が予約しているか顧客に見えてしまわない?」。予約はシンプルなものですが、実際の業務で使い始めると、こうした疑問すべてに答えが必要になります。</p>
+
+                <p>MultiDatePick は、既存のオブジェクトのままでこれらすべてに答えます。アドバイザーを選ぶと<strong>そのアドバイザーが提示する開始時刻だけ</strong>が表示され、1 つ選んで予約するだけ。予約は状況、顧客、長さを持つレコードとして自社のオブジェクトに保存され、ほかの顧客に名前が見えることはありません。<strong>コードも Apex も追加ライセンスも不要です。</strong></p>
+
+                <figure class="sc-shot" style="max-width:800px;margin:24px auto;">
+                    <img src="/images/ja/blog/salesforce-appointment-scheduling-only-these-times-poster.png" data-gif="/images/ja/blog/salesforce-appointment-scheduling-only-these-times.webp" alt="MultiDatePick による Salesforce 予約管理のアニメーションデモ: 公開予約ページでアドバイザーを選ぶと、時間グリッドにはそのアドバイザーのリストにある開始時刻 (9:00、10:30、13:00、14:30、16:00) だけが表示され、予約済みの時刻は予定ありと表示される。時刻を 1 つ選び、予約リクエストのボタンを押す" loading="lazy" decoding="async" width="800" height="1090" data-zoomable>
+                    <figcaption>アドバイザーを選び、リストにある時刻だけを見て、1 つ選んで予約。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">予約管理に必要なことと、MultiDatePick でできること</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>これらの時刻のみ</h3><p>9:00、10:30、13:00、14:30、16:00 のように、提示する開始時刻を並べます。グリッドにはそれ以外の時刻は表示されません。</p></div>
+                    <div class="tl-feat"><h3>アドバイザーごとの時刻</h3><p>アドバイザーのテキスト項目 1 つに、その人だけの時刻リストを保存。アドバイザーを選べば、グリッドがそれに合わせて切り替わります。</p></div>
+                    <div class="tl-feat"><h3>ちょうどいい長さ</h3><p>30 分、45 分、60 分の予約を 1 クリックで登録。必要なら予約ごとにバッファーも確保できます。</p></div>
+                    <div class="tl-feat"><h3>予定ありだけを表示</h3><p>ほかの顧客の予約は名前も詳細もリンクもなく「予定あり」とだけ表示され、サーバー側で徹底されます。</p></div>
+                    <div class="tl-feat"><h3>1 日の予定を守るルール</h3><p>最低事前通知、何日先まで予約できるか、顧客ごとの上限、休業日。保存のたびに改めてチェックされます。</p></div>
+                    <div class="tl-feat"><h3>予約のあとも</h3><p>Requested から Confirmed までの状況、リマインダー用のフローボタン、そして顧客向けの「カレンダーに追加」。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">指定した予約時間だけを提示する</h2>
+                <p>多くのカレンダーは 1 日を均等な枠に区切ります。開店から閉店まで 15 分ごと、30 分ごとといった具合です。会議室ならそれで十分ですが、9:00、10:30、13:00、14:30、16:00 に顧客と会い、その合間をメモ、電話、昼休みに充てる事務所には合いません。</p>
+                <p><strong>これらの時刻のみ</strong> がこれを解決します。セットアップウィザードで「これらの時刻のみ」を選び、開始時刻を 1 つずつ追加します。すると時間グリッドには、どの日もどの表示でも、その開始時刻だけが表示されます。各予約は <strong>Booking Length</strong> (予約の長さ) の分だけ続くため、長さを 60 分にすれば、10:30 を 1 クリックするだけで 10:30 から 11:30 の予約になります。</p>
+                <p>リストにある時刻にも、ほかのルールはすべて適用されます。予約済み、その日が休業、事前通知期間に満たない、アドバイザーの勤務時間外、次の予約に近すぎる時刻はグレー表示になるため、顧客には理由のわからない空白ではなく、その時刻が存在していて埋まっていることが伝わります。</p>
+
+                <h2 style="margin-top:44px;">アドバイザーごとに、独自の時刻と勤務時間</h2>
+                <p>午前中だけ勤務するアドバイザーもいれば、事務所が開く前の 8:00 に顧客と会うアドバイザー、金曜日をレビューに充てるアドバイザーもいます。アドバイザーのオブジェクトに <strong>Available Times</strong> のようなテキスト項目を追加し、各アドバイザーの開始時刻を 24 時間表記で入力します:<code translate="no">08:00,09:30,11:00</code>。<strong>Only These Times Field</strong> にこの項目を指定すると (セットアップウィザードでは <strong>各リソース独自の時刻</strong>)、顧客がそのアドバイザーを選んだとき、グリッドにそのアドバイザーの時刻が表示されます。項目が空欄のアドバイザーには、カレンダー共通のリストが使われます。</p>
+                <p>勤務時間もアドバイザーから取得します。<strong>Business Hours Start Field</strong> と <strong>Business Hours End Field</strong> が、アドバイザーのレコード上の 2 つの時間項目を読み取ります。休日、研修の午後、事務所の休業は、アドバイザーを任意で指定できる休業日のオブジェクトに登録すれば、1 人のアドバイザーだけ、または全員の予定を閉じられ、理由をカレンダーに表示することもできます。アドバイザーとスペシャリストのように 1 件の予約に 2 人が必要な場合は、2 人とも提示している時刻だけが表示されます。</p>
+
+                <h2 style="margin-top:44px;">スタッフは Salesforce 内で、顧客は自社サイトで予約</h2>
+                <p>同じカレンダーがどちらの場所でも使えます。<strong>スタッフ</strong>はレコードページ、アプリケーションページ、画面フローから、誰が何の予約をどの状況で入れているかをすべて確認しながら予約できます。<strong>顧客</strong>はログインせずに公開 Experience Cloud ページから予約します。予約を保存する前に、<strong>レコード詳細のポップアップ</strong>で名前、メールアドレス、面談の種類、メモを入力してもらいます。</p>
+                <figure class="sc-shot" style="max-width:800px;margin:24px auto;">
+                    <img src="/images/ja/marketing/salesforce-booking-details-popup-poster.png" data-gif="/images/ja/marketing/salesforce-booking-details-popup.webp" alt="MultiDatePick を使った Salesforce Experience Cloud サイトでのゲスト予約のアニメーションデモ: アドバイザーと空いている時刻を選び、予約リクエストのボタンを押すと名前、メールアドレス、面談の種類、相談内容の入力フォームが開き、予約が保存される" loading="lazy" decoding="async" width="800" height="960" data-zoomable>
+                    <figcaption>公開サイトでは、予約を保存する前に顧客がポップアップで情報を入力します。</figcaption>
+                </figure>
+                <p>その公開ページでは、ほかの顧客の予約は<strong>予定あり</strong>と表示されます。<strong>Show Other People's Bookings As</strong> を Busy for site guests に設定すると、スタッフにはすべての名前が見える一方、訪問者には名前もホバーカードもリンクもない斜線の「利用不可」ブロックが表示されます。名前はサーバー側で取り除かれるため、訪問者のブラウザーに届くことはありません。<a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud で公開予約ページを作る方法はこちら</a>。</p>
+
+                <h2 style="margin-top:44px;">予約台帳を健全に保つルール</h2>
+                <p>どのルールも設定 1 つで、予約の保存時にサーバー側で改めてチェックされるため、ページを再読み込みしても回避できません。</p>
+                <div style="overflow-x:auto;">
+                <table class="bp-grid">
+                    <tr><th style="width:30%;">ルール</th><th>予約での働き</th></tr>
+                    <tr><td>最低事前通知</td><td><strong>Minimum Notice (Hours)</strong>: 24 にすると丸 1 日前までの予約が必要になります。それより前の日はグレー表示になり、締め切り当日は早い時刻が閉じられます。</td></tr>
+                    <tr><td>何日先まで</td><td><strong>Book Up To (Days Ahead)</strong>: 60 にすると 2 か月先まで予約を受け付け、受付期間は毎日前に進みます。</td></tr>
+                    <tr><td>顧客ごとの上限</td><td><strong>Limit per Person</strong>: 1 人の顧客が持てる今後の予約の件数。<strong>Limit per Person Client Field</strong> のメールアドレスまたは取引先責任者で数えます。スタッフは確認のうえ上限を超えて予約できますが、サイト訪問者はできません。</td></tr>
+                    <tr><td>1 日あたり</td><td><strong>Max Bookings per Day</strong>: 1 人が 1 日に選べる別々の予約の件数。</td></tr>
+                    <tr><td>休業日</td><td>祝日、事務所の休業、休暇を、事務所全体またはアドバイザー 1 人に、終日または一部の時間だけ設定でき、理由も表示されます。</td></tr>
+                    <tr><td>ゆとりの時間</td><td><strong>Buffer Between Bookings (Minutes)</strong>: 15 にすると、予約のあとに 15 分の空きを確保します。</td></tr>
+                    <tr><td>ダブルブッキングなし</td><td>埋まった時刻はクリックする前からグレー表示になり、保存時にも改めてチェックされます。<a href="/ja/blog/prevent-double-booking-in-salesforce.html">重複と定員の仕組み</a>。</td></tr>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">確認と状況</h2>
+                <p>予約には流れがあります。リクエスト、確定、面談済み、ときにはキャンセルや無断欠席。<strong>Status Field</strong> を状況の選択リストに指定すると、状況ごとに色が付きます。<strong>Selectable Statuses</strong> は予約をどの状況で保存できるかを決めます。公開ページで Requested に設定すれば、顧客からのリクエストはすべて Requested で届き、チームが確定します。<strong>Ignored Statuses</strong> に Cancelled を加えれば、キャンセルされた予約の時刻はすぐに空きます。</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/ja/salesforce-booking-calendar-status-colors.png" alt="アドバイザー 1 名の 1 か月を表示した MultiDatePick の Salesforce 予約カレンダー: 予約のある日の下に状況の色のバー (Requested、Confirmed、Met、No-Show、Cancelled)、状況が混在する日は分割バー、カレンダー・タイムライン・週・稼働率・予定一覧の表示切り替え" loading="lazy" decoding="async" width="1362" height="1616" data-zoomable>
+                    <figcaption>1 人のアドバイザーの 1 か月を状況別に色分け: Requested、Confirmed、Met、No-Show、Cancelled。</figcaption>
+                </figure>
+                <p>顧客は予約した瞬間に確認メッセージを受け取ります。<strong>Show In-Component Toast</strong> をオンにして、<strong>Success Toast Message</strong> に「ありがとうございます。1 営業日以内に予約を確定いたします。」のような独自の文面を入力してください。</p>
+
+                <h2 style="margin-top:44px;">フローボタンでリマインダーとフォローアップ</h2>
+                <p>セットアップウィザードのカスタムボタンは、自社のフローを実行します。すべての予約に<strong>リマインダーを送信</strong>ボタンを置けば、スタッフはカレンダーから 1 クリックでリマインダーを送れます。ボタンは Confirmed など特定の状況のときだけ表示したり、編集モードで選んだ複数の予約に一括で実行したり、保存のたびに自動で実行したりできるので、誰もボタンを押さなくても、フローが確認メールを送れます。</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/ja/views/salesforce-calendar-custom-buttons.png" alt="カスタムボタン付きの Salesforce 予約カレンダー: 予定の多い日のホバーカードに 2 件のクライアント予約が並び、それぞれに「リマインダーを送信」ボタンがある。押すとポップアップが開き、セットアップウィザードで選んだフローを実行する" loading="lazy" decoding="async" width="1644" height="1618" data-zoomable>
+                    <figcaption>各予約の「リマインダーを送信」ボタンが、管理者が選んだフローを実行します。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">顧客向けの「カレンダーに追加」</h2>
+                <p><strong>Show Add to Calendar After Saving</strong> をオンにすると、顧客は予約を Outlook、Google、Apple のカレンダーに入れて帰れます。日付と時刻は正確で、タイトルにはアドバイザーの名前が入ります。カレンダーファイルはブラウザー内で作成されるため、公開サイトのゲストも使え、ダウンロードするまで何も Salesforce の外に出ません。<a href="/ja/blog/salesforce-add-to-calendar.html">「カレンダーに追加」について詳しく</a>。</p>
+                <figure class="sc-shot" style="max-width:700px;margin:24px auto;">
+                    <img src="/images/ja/blog/salesforce-add-to-calendar-month-view.png" alt="MultiDatePick の Salesforce 予約カレンダーの月表示。相談をリクエストした直後で、11 月のカレンダーの上に「保存しました。カレンダーに追加してください」というバーと「カレンダーに追加」ボタンが表示されている" loading="lazy" decoding="async" width="700" height="813" data-zoomable>
+                    <figcaption>リクエストの直後に「カレンダーに追加」、1 クリックで。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">この方法で予約を受け付けている業種</h2>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>ファイナンシャルアドバイザー</strong><span>決まった時刻での顧客面談。アドバイザーごとに独自の勤務時間を設定し、事務所のほかの顧客は「予定あり」とだけ表示。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>クリニックとセラピスト</strong><span>各担当者の診療時間に合わせた 50 分固定のセッション。前日までの予約が必須。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>美容室とスパ</strong><span>スタイリストごとの開始時刻、席を整えるためのバッファー、顧客 1 人あたりの予約件数の上限。</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>コンサルタント</strong><span>1 日 4 回の決まった時刻に初回相談。公開ページから予約を受け、チームが確定。</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>サービスチーム</strong><span>設置や修理の訪問を午前・午後の時間帯で。ディスパッチャーが Salesforce 内で予約。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>大学</strong><span>各アドバイザーが公開するオフィスアワーで履修相談や個別指導の予約。前日にはリマインダーのフローを実行。</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">動作を決める設定</h2>
+                <p>いずれもセットアップウィザードの 1 ステップであり、Lightning アプリケーションビルダー、Experience Builder、Flow Builder の Resource Booking コンポーネントのプロパティでもあります。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:34%;">設定</th><th>機能</th></tr></thead>
+                    <tbody>
+                    <tr><td>Only These Times</td><td>選択できる開始時刻のみを 24 時間表記で:<code translate="no">09:00,10:30,13:00,14:30,16:00</code>。空欄にすると、すべての間隔が対象になります。</td></tr>
+                    <tr><td>Only These Times Field</td><td>そのアドバイザー独自の開始時刻を保存する、アドバイザー上のテキスト項目。空欄のアドバイザーには上のリストが使われます。</td></tr>
+                    <tr><td>Booking Length (Minutes)<code translate="no">bookingLength</code></td><td>各予約の長さ。1 クリックでその時間全体が予約されます。</td></tr>
+                    <tr><td>Business Hours Start and End Field</td><td>アドバイザーの 1 日の開始時刻と終了時刻を表す、アドバイザー上の時間項目。</td></tr>
+                    <tr><td>Show Other People's Bookings As<code translate="no">bookingPrivacy</code></td><td>詳細を表示、サイトゲストには予定ありで表示、または全員に予定ありで表示。</td></tr>
+                    <tr><td>Minimum Notice (Hours)<code translate="no">minNoticeHours</code></td><td>次の予約をどれだけ先から受け付けるか。</td></tr>
+                    <tr><td>Book Up To (Days Ahead)<code translate="no">maxDaysAhead</code></td><td>顧客が何日先まで予約できるか。</td></tr>
+                    <tr><td>Limit per Person<code translate="no">limitPerPerson</code></td><td>1 人の顧客が持てる今後の予約の件数。Client Field で数えます。</td></tr>
+                    <tr><td>Selectable Statuses<code translate="no">selectableStatuses</code></td><td>新しい予約を保存するときの状況。公開ページでの Requested など。</td></tr>
+                    <tr><td>Record Details Pop-up</td><td>保存前に顧客の名前、メールアドレス、その他の項目を入力してもらいます。</td></tr>
+                    <tr><td>保存後に「カレンダーに追加」を表示（Show Add to Calendar After Saving）<code translate="no">showAddToCalendar</code></td><td>保存のたびに表示される「カレンダーに追加」ボタン。</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>すべての予約を、6 つの表示で。</strong> 同じ予約がカレンダー (月表示)、タイムライン、週、稼働率、予定一覧、地図に表示されるため、受付、アドバイザー、マネージャーがそれぞれ必要な表示を使えます。<a href="/ja/blog/salesforce-calendar-views.html">6 つの表示をすべて見る</a>。</div>
+
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="tl-faq">
+                    <details><summary>コードを書かずに Salesforce で予約管理をするには?</summary><p>MultiDatePick の Resource Booking カレンダーをレコードページ、アプリケーションページ、画面フロー (Screen Flow)、または Experience Cloud サイトに配置し、自社の予約オブジェクトとアドバイザーを指定します。あとはセットアップウィザードで、提示する開始時刻、予約の長さ、最低事前通知、顧客ごとの上限、休業日を選ぶだけです。スタッフは Salesforce 内で、顧客は自社サイトで予約し、すべての予約が自社オブジェクトのレコードとして保存されます。</p></details>
+                    <details><summary>9:00 や 10:30 のように、決まった予約時間だけを提示できますか?</summary><p>はい。セットアップウィザードで「これらの時刻のみ」を選び、9:00、10:30、13:00、14:30、16:00 のように開始時刻を追加します。時間グリッドにはその開始時刻だけが表示され、それぞれ Booking Length (予約の長さ) の分だけ続きます。リストにある時刻でも、予約済み、休業、または直前すぎる場合はグレー表示になります。</p></details>
+                    <details><summary>アドバイザーごとに予約時間を変えられますか?</summary><p>はい。アドバイザーのオブジェクトにテキスト項目を追加し、各アドバイザーの開始時刻を 08:00,09:30,11:00 のように 24 時間表記で入力して、Only These Times Field にその項目を設定します。顧客がそのアドバイザーを選ぶと、グリッドにはそのアドバイザーの時刻が表示されます。各アドバイザーの勤務時間も、レコード上の 2 つの時間項目から取得できます。</p></details>
+                    <details><summary>Experience Cloud サイトで、顧客がログインせずに予約できますか?</summary><p>はい。カレンダーはゲスト向けの公開 Experience Cloud ページで動作します。予約を保存する前にポップアップで名前、メールアドレスなどの情報を入力してもらい、上限、事前通知期間、重複のチェックはすべてサーバー側で実行されます。</p></details>
+                    <details><summary>顧客にほかの顧客の予約が見えてしまいませんか?</summary><p>Busy を選べば見えません。Show Other People's Bookings As を Busy for site guests (サイトゲストには予定ありで表示) または Busy for everyone (全員に予定ありで表示) に設定すると、ほかの予約は名前も詳細もリンクもない斜線の「利用不可」ブロックとして表示されます。名前はサーバー側で取り除かれるため、ブラウザーに届くことはありません。</p></details>
+                    <details><summary>Salesforce で予約管理をするのに Salesforce Scheduler は必要ですか?</summary><p>いいえ。Salesforce Scheduler は独自のデータモデルを持つ追加ライセンスです。MultiDatePick は、カスタムでも標準でも既存のオブジェクトに予約を登録でき、全機能込みで 1 ユーザーあたり月額 $20 です。<a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">両者の比較を見る</a>。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>自社の時間。自社のアドバイザー。自社のオブジェクト。</h2>
+                    <p>ライブデモで相談をリクエストしてみるか、<a href="/ja/configlibrary.html">Config Library</a> の既製の予約設定から始めましょう。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-appointment-scheduling" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/gettingstarted.html" class="btn btn-secondary">はじめに</a>
+                    </div>
+                    <ul class="check-list"><li>$20/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>100% Salesforce ネイティブ</li><li>Apex 不要</li><li>Salesforce セキュリティレビューに合格</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud で公開予約ページを作る</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">あらゆるリソースに使える Salesforce 予約カレンダー</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-time-slot-picker.html">Salesforce で空いている時間枠だけを表示する</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler とノーコードの代替</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">Salesforce での面接日程調整</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>Salesforce で最も自由にカスタマイズできるカレンダーコンポーネントスイート。</p>
+                </div>
+                <div class="footer-links">
+                    <h2>製品</h2>
+                    <ul>
+                        <li><a href="/ja/multidatepickdates.html">Dates</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">Dates &amp; Times</a></li>
+                        <li><a href="/ja/salesforce-booking-calendar.html">Resource Booking</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">6 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>ソリューション</h2>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-calendar-interview-scheduling.html">面接日程調整</a></li>
+                        <li><a href="/ja/salesforce-class-scheduling.html">クラス・講座スケジュール</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンカレンダー</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>ドキュメント</h2>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                    <h2>開発者向け</h2>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar-developer-guide.html">開発者ガイド</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>会社情報</h2>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="/ja/custom-config.html">無料カスタム設定</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <!-- consent:footer --><div class="footer-social footer-legal"><a href="/ja/privacy.html">プライバシーポリシー</a><a href="/ja/privacy.html#cookie-settings" data-mdp-consent="open">Cookie設定</a></div><!-- /consent:footer -->
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/salesforce-appointment-scheduling.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-terminplanung-termine-buchen.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/agendar-citas-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/prise-de-rendez-vous-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/prenotazione-appuntamenti-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/agendamento-de-consultas-salesforce.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-appointment-scheduling.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/salesforce-appointment-scheduling.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-appointment-scheduling.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p><p data-k="prev-image">前の画像</p><p data-k="next-image">次の画像</p><p data-k="image-viewer">画像ビューアー</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>
