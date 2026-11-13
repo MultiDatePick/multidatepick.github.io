@@ -82,6 +82,10 @@
                     "Ansichten Ressourcen-Zeitachse, Wochenraster, Auslastungs-Heatmap und Agenda",
                     "Termine auf der Zeitachse per Ziehen verschieben",
                     "Self-Service-Buchung auf Experience Cloud-Sites",
+                    "Nur diese Startzeiten, pro Kalender oder als eigene Liste je Ressource",
+                    "Buchungsdauer, Buchungen pro Tag und ein auf dem Server geprüftes Limit pro Kunde",
+                    "Buchungen anderer Personen nur als belegt anzeigen, für alle oder nur für Gastbenutzer der Site",
+                    "Gantt-Ansicht, mit Aufgaben nach Ressource gruppiert, wenn keine Phase festgelegt ist",
                     "Hat das Salesforce AppExchange Security Review bestanden",
                     "100 % nativ in Salesforce: Ihre Daten bleiben in Ihrer Org"
                 ]
@@ -673,6 +677,8 @@
                         <tr><td>Buffer Between Bookings (Puffer zwischen Buchungen)</td><td>Minuten für Reinigung oder Umrüstung, die nach jeder Buchung frei bleiben, pro Ressource. Zeitfensterraster, Kapazitätsanzeige, Ziehen in der Woche und die Prüfung beim Speichern berücksichtigen sie</td></tr>
                         <tr><td>Book Up To (Days Ahead)</td><td>Ein gleitendes Fenster: buchbar ab heute plus N Tage, jeden Tag einen Tag weiter</td></tr>
                         <tr><td>Minimum Notice (Hours)</td><td>Keine Buchung, die früher als in N Stunden beginnt, beim Speichern erneut geprüft</td></tr>
+                        <tr><td>Booking Length (Minutes)</td><td>Ein Klick bucht den ganzen Termin, nur wenn er vollständig frei ist</td></tr>
+                        <tr><td>Limit per Person</td><td>Anstehende Buchungen pro Kunde, gezählt über eine E-Mail-Adresse oder ein Nachschlagefeld auf Kontakt, Lead, Account oder Benutzer, bei jedem Speichern auf dem Server geprüft. Mitarbeitende können das Limit nach einer Bestätigung überschreiten</td></tr>
                     </tbody>
                 </table>
                 </div>
@@ -720,6 +726,7 @@
                             <li>Zum Kalender hinzufügen: eine .ics-Datei für Outlook, Google oder Apple</li>
                             <li>Ein fester Status für sie, Statusauswahl ausgeblendet</li>
                             <li>Ein Formular, das Name, E-Mail und alles Weitere abfragt, was Sie brauchen</li>
+                            <li>Buchungen anderer Personen nur als belegt, ohne Namen</li>
                         </ul>
                     </div>
                     <div class="gs-card sf">
@@ -731,6 +738,7 @@
                             <li>Der Berechtigungssatz MultiDatePick - Guest für den Gastbenutzer der Site</li>
                             <li>Freigaberegeln für Gäste auf Ihren Buchungs- und Ressourcenobjekten</li>
                             <li>Die Felder für das Pop-up für Datensatzdetails, festgelegt im Einrichtungsassistenten</li>
+                            <li>Show Other People&rsquo;s Bookings As: Busy for site guests</li>
                         </ul>
                     </div>
                 </div>
@@ -944,14 +952,21 @@
                         <thead><tr><th>Einstellung</th><th>API-Name</th><th>Standard</th><th>Funktion</th></tr></thead>
                         <tbody>
                             <tr id="prop-configName"><td>Konfigurationsname (Config Name)</td><td><code>configName</code></td><td></td><td>Lädt jede Einstellung aus einer gespeicherten Konfiguration des Einrichtungsassistenten</td></tr>
-                            <tr id="prop-view"><td>Ansicht (View)</td><td><code>view</code></td><td>calendar</td><td>Startansicht: calendar, timeline, week, utilization oder agenda. Utilization und agenda sind schreibgeschützt</td></tr>
-                            <tr id="prop-availableViews"><td>Verfügbare Ansichten (Available Views)</td><td><code>availableViews</code></td><td>Kalender, Zeitachse, Woche, Auslastung, Agenda</td><td>Welche Ansichten der Umschalter anbietet. Ergänzen Sie <code>map</code> für die Kartenansicht. Die Standardansicht ist immer enthalten</td></tr>
+                            <tr id="prop-view"><td>Ansicht (View)</td><td><code>view</code></td><td>calendar</td><td>Startansicht: calendar, timeline, week, utilization, agenda, map oder gantt. Utilization, agenda und map sind schreibgeschützt</td></tr>
+                            <tr id="prop-availableViews"><td>Verfügbare Ansichten (Available Views)</td><td><code>availableViews</code></td><td>Kalender, Zeitachse, Woche, Auslastung, Agenda</td><td>Welche Ansichten der Umschalter anbietet. Ergänzen Sie <code>map</code> oder <code>gantt</code> für die Karten- oder Gantt-Ansicht. Die Standardansicht ist immer enthalten</td></tr>
                             <tr id="prop-timelineWindowDays"><td>Zeitachsenfenster in Tagen (Timeline Window (Days))</td><td><code>timelineWindowDays</code></td><td>14</td><td>Wie viele Tage die Zeitachse auf einmal zeigt. 0 für den ganzen Monat</td></tr>
                             <tr id="prop-timelineZoom"><td>Zeitachsen-Zoom (Timeline Zoom)</td><td><code>timelineZoom</code></td><td>week</td><td>Anfangszoom: day, week oder month. Benutzer können wechseln</td></tr>
                             <tr id="prop-timelineGroupByField"><td>Timeline Group By Field</td><td><code>timelineGroupByField</code></td><td></td><td>Gruppiert die Zeilen der Zeitachse unter Überschriften, z. B. nach Gebäude, jeweils mit Kapazitätsleiste</td></tr>
-                            <tr id="prop-maxViewResources"><td>Max. Ressourcen in der Ansicht (Max View Resources)</td><td><code>maxViewResources</code></td><td></td><td>Maximale Zahl an Ressourcenzeilen in Zeitachse und Auslastung, die meistgebuchten zuerst. Begrenzt die gezeichneten Zeilen, nicht die gezählten</td></tr>
+                            <tr id="prop-maxViewResources"><td>Max. Ressourcen in der Ansicht (Max View Resources)</td><td><code>maxViewResources</code></td><td>5</td><td>Maximale Zahl an Ressourcenzeilen in Zeitachse und Auslastung, die meistgebuchten zuerst; 999 zeichnet jede Ressource. Begrenzt die gezeichneten Zeilen, nicht die gezählten</td></tr>
                             <tr id="prop-resourceViewFilter"><td>Ressourcenzeilen (Resource Rows)</td><td><code>resourceViewFilter</code></td><td>all</td><td>all, oder booked, um nur Ressourcen mit einer Buchung im Zeitraum zu zeigen</td></tr>
                             <tr id="prop-agendaFields"><td>Agenda Fields</td><td><code>agendaFields</code></td><td></td><td>Zusätzliche Felder in jeder Agenda-Zeile. Leer übernimmt die Hover Popover Fields</td></tr>
+                            <tr id="prop-ganttPhaseField"><td>Gantt Phase Field</td><td><code>ganttPhaseField</code></td><td></td><td>Gantt-Ansicht: eine Auswahlliste, ein Textfeld oder ein Nachschlagefeld, das Aufgaben in Phasen gruppiert. Leer gruppiert sie nach Ressource</td></tr>
+                            <tr id="prop-ganttDependsOnField"><td>Gantt Waits On Field</td><td><code>ganttDependsOnField</code></td><td></td><td>Gantt-Ansicht: ein Nachschlagefeld auf die Aufgabe, die zuerst enden muss. Ein Verknüpfungsobjekt, im Einrichtungsassistenten festgelegt, ermöglicht mehrere Verknüpfungen pro Aufgabe, Verknüpfungstypen und Verzögerung</td></tr>
+                            <tr id="prop-ganttProgressField"><td>Gantt Percent Done Field</td><td><code>ganttProgressField</code></td><td></td><td>Gantt-Ansicht: eine Zahl von 0 bis 100, die jeden Balken füllt</td></tr>
+                            <tr id="prop-ganttMilestoneField"><td>Gantt Milestone Field</td><td><code>ganttMilestoneField</code></td><td></td><td>Gantt-Ansicht: ein Kontrollkästchen; angehakte Aufgaben erscheinen als Meilensteinpunkt</td></tr>
+                            <tr id="prop-ganttDependencyMode"><td>Gantt Dependency Mode</td><td><code>ganttDependencyMode</code></td><td>push</td><td>push verschiebt die Aufgaben mit, die auf eine verschobene Aufgabe warten; lines zeichnet nur die Verknüpfungen</td></tr>
+                            <tr id="prop-ganttSkipWeekends"><td>Gantt Skip Weekends</td><td><code>ganttSkipWeekends</code></td><td>true</td><td>Verschiebungen, Verzögerung und Tageszählung überspringen Samstag und Sonntag</td></tr>
+                            <tr id="prop-ganttColumns"><td>Gantt Columns</td><td><code>ganttColumns</code></td><td></td><td>Bis zu sechs Spalten, etwa {Start},{End},{Days},{Progress}, oder API-Namen von Feldern</td></tr>
                         </tbody>
                     </table></div>
 
@@ -962,6 +977,7 @@
                             <tr id="prop-label"><td>Button Label</td><td><code>label</code></td><td>Ressource buchen (Book Resource)</td><td>Text auf der Schaltfläche, die den Kalender öffnet</td></tr>
                             <tr id="prop-modalTitle"><td>Calendar Title</td><td><code>modalTitle</code></td><td>Ressource buchen (Book Resource)</td><td>Titel oben im Kalender</td></tr>
                             <tr id="prop-showInline"><td>Show Inline (Always Visible)</td><td><code>showInline</code></td><td>false</td><td>Kalender immer auf der Seite sichtbar, kein Pop-up</td></tr>
+                            <tr id="prop-displayOnly"><td>Display Only</td><td><code>displayOnly</code></td><td>false</td><td>Ein Kalender nur zum Ansehen: ohne Auswählen, Speichern, Bearbeitungsmodus und Ziehen. Ansichten, Hover-Karten und das Öffnen eines Datensatzes funktionieren weiterhin</td></tr>
                             <tr id="prop-showDoneButtonInline"><td>Show Done Button in Inline Mode</td><td><code>showDoneButtonInline</code></td><td>true</td><td>Fertig klappt den eingebetteten Kalender zu einer Zusammenfassungskarte ein; Klick öffnet ihn wieder</td></tr>
                             <tr id="prop-twoMonthView"><td>Two-Month View</td><td><code>twoMonthView</code></td><td>false</td><td>Zwei Monate nebeneinander</td></tr>
                             <tr id="prop-calendarSize"><td>Kalendergröße (Calendar Size)</td><td><code>calendarSize</code></td><td>full</td><td>tiny, xsmall (Very Small), small, medium, large oder full (Full Width). Tiny und Very Small passen in Utility-Leisten, Seitenleisten und Dashboard-Kacheln.</td></tr>
@@ -979,6 +995,7 @@
                         <tbody>
                             <tr id="prop-resourceObjectApiName"><td>Resource Object API Name</td><td><code>resourceObjectApiName</code></td><td></td><td>Das Objekt mit dem, was gebucht wird. Jedes Objekt, auch User</td></tr>
                             <tr id="prop-resourceNameField"><td>Resource Name Field</td><td><code>resourceNameField</code></td><td>Name</td><td>Name, der in der Ressourcenauswahl erscheint</td></tr>
+                            <tr id="prop-resourcePickerLabel"><td>Resource Picker Label</td><td><code>resourcePickerLabel</code></td><td></td><td>Das Wort über der Ressourcenauswahl, etwa Berater oder Raum. Leer verwendet die Bezeichnung des Objekts</td></tr>
                             <tr id="prop-businessHoursStartField"><td>Business Hours Start Field</td><td><code>businessHoursStartField</code></td><td></td><td>Zeitfeld: wann jede Ressource öffnet</td></tr>
                             <tr id="prop-businessHoursEndField"><td>Business Hours End Field</td><td><code>businessHoursEndField</code></td><td></td><td>Zeitfeld: wann jede Ressource schließt</td></tr>
                             <tr id="prop-capacityField"><td>Kapazitätsfeld (Capacity Field)</td><td><code>capacityField</code></td><td></td><td>Erlaubte Buchungen pro Zeitfenster. Schaltet den Kapazitätsmodus und die Prozentwerte der Auslastung ein</td></tr>
@@ -1014,10 +1031,16 @@
                         <thead><tr><th>Einstellung</th><th>API-Name</th><th>Standard</th><th>Funktion</th></tr></thead>
                         <tbody>
                             <tr id="prop-timeInterval"><td>Time Slot Interval (Minutes)</td><td><code>timeInterval</code></td><td>30</td><td>Länge eines Zeitfensters, beliebig viele Minuten</td></tr>
+                            <tr id="prop-availableTimes"><td>Only These Times</td><td><code>availableTimes</code></td><td></td><td>Die einzigen Startzeiten, die wählbar sind, zum Beispiel 09:00,10:30,13:00</td></tr>
+                            <tr id="prop-availableTimesField"><td>Only These Times Field</td><td><code>availableTimesField</code></td><td></td><td>Ein Textfeld an der Ressource mit ihren eigenen Startzeiten, sodass jeder Berater seine eigenen anbietet</td></tr>
+                            <tr id="prop-bookingLength"><td>Booking Length (Minutes)</td><td><code>bookingLength</code></td><td></td><td>Ein Klick auf eine Startzeit bucht einen Block dieser Länge, wenn der ganze Block frei ist</td></tr>
                             <tr id="prop-disableTimeSlotGrid"><td>Disable Time Slot Grid (Full-Day Mode)</td><td><code>disableTimeSlotGrid</code></td><td>false</td><td>Buchungen nur nach Datum, z. B. Hotelnächte</td></tr>
                             <tr id="prop-allowDifferentTimes"><td>Unterschiedliche Zeiten pro Datum zulassen</td><td><code>allowDifferentTimes</code></td><td>false</td><td>Jeder Tag bekommt sein eigenes Zeitfensterraster</td></tr>
                             <tr id="prop-groupTimeSlotsByPeriod"><td>Group Time Slots by Period</td><td><code>groupTimeSlotsByPeriod</code></td><td>false</td><td>Gruppen für Vormittag, Nachmittag und Abend</td></tr>
                             <tr id="prop-maxTimeSlotSelection"><td>Max Time Slots</td><td><code>maxTimeSlotSelection</code></td><td>0</td><td>Maximale Zahl an Zeitfenstern, die ein Benutzer insgesamt wählen kann. 0 = unbegrenzt</td></tr>
+                            <tr id="prop-maxBookingsPerDay"><td>Max Bookings per Day</td><td><code>maxBookingsPerDay</code></td><td>0</td><td>Einzelne Buchungen, die eine Person an einem Tag wählen kann; direkt aufeinanderfolgende Zeiten zählen als eine. 0 = kein Limit</td></tr>
+                            <tr id="prop-limitPerPerson"><td>Limit per Person</td><td><code>limitPerPerson</code></td><td>0</td><td>Anstehende Buchungen, die ein Kunde haben kann, bei jedem Speichern auf dem Server geprüft. Mitarbeitende können das Limit nach einer Bestätigung überschreiten. 0 = kein Limit</td></tr>
+                            <tr id="prop-limitPerPersonClientField"><td>Limit per Person Client Field</td><td><code>limitPerPersonClientField</code></td><td></td><td>Für wen die Buchung ist: ein E-Mail- oder Textfeld oder ein Nachschlagefeld auf Kontakt, Lead, Account oder Benutzer</td></tr>
                             <tr id="prop-allowWholeDayNoTimes"><td>Allow Whole-Day (No Times)</td><td><code>allowWholeDayNoTimes</code></td><td>false</td><td>Ein Tag ohne gewählte Zeitfenster wird als ganztägiger Datensatz gespeichert</td></tr>
                             <tr id="prop-timeGridOnly"><td>Nur Zeitraster (Time Grid Only)</td><td><code>timeGridOnly</code></td><td>false</td><td>Blendet den Kalender aus; zeigt nur das Zeitfensterraster für ein vorgegebenes Datum</td></tr>
                             <tr id="prop-timeGridDate"><td>Time Grid Date</td><td><code>timeGridDate</code></td><td></td><td>Festes Datum (YYYY-MM-DD) für Time Grid Only</td></tr>
@@ -1049,6 +1072,7 @@
                             <tr id="prop-secondStatusFieldLabel"><td>Second Picklist Label</td><td><code>secondStatusFieldLabel</code></td><td></td><td>Bezeichnung der zweiten Auswahlliste</td></tr>
                             <tr id="prop-selectableSecondStatuses"><td>Selectable Second-Picklist Values</td><td><code>selectableSecondStatuses</code></td><td></td><td>Erlaubte Werte der zweiten Auswahlliste</td></tr>
                             <tr id="prop-hoverFields"><td>Felder im Hover-Popover (Hover Popover Fields)</td><td><code>hoverFields</code></td><td></td><td>Felder, die beim Hover über eine Buchung erscheinen</td></tr>
+                            <tr id="prop-bookingPrivacy"><td>Show Other People&rsquo;s Bookings As</td><td><code>bookingPrivacy</code></td><td>Details</td><td>Details, Busy (für alle ein schraffierter Block „Nicht verfügbar“ ohne Namen) oder Busy for site guests. Namen werden auf dem Server entfernt</td></tr>
                             <tr id="prop-showSuccessToast"><td>Show In-Component Toast</td><td><code>showSuccessToast</code></td><td>false</td><td>Bestätigung, die in der Komponente selbst angezeigt wird. Erforderlich in Experience Cloud</td></tr>
 <tr id="prop-showAddToCalendar"><td>Show Add to Calendar After Saving</td><td><code>showAddToCalendar</code></td><td>false</td><td>Nach dem Speichern eine .ics-Datei mit allen soeben angelegten Buchungen, für Outlook, Google oder Apple</td></tr>
 <tr id="prop-calendarLocationField"><td>Calendar File Location Field</td><td><code>calendarLocationField</code></td><td>leer</td><td>Ein Feld an der Ressource, etwa die Adresse eines Raums, das den Ort jedes Termins in der Kalenderdatei füllt. Leer lassen, wenn Sie Personen buchen: Sie stehen bereits im Titel des Termins</td></tr>

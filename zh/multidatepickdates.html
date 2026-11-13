@@ -64,6 +64,8 @@
                     "编辑模式：更改状态，移动或删除已保存的日期",
                     "可从任意对象读取屏蔽日期，可设最早和最晚可选日期及最多可选日期数",
                     "双月视图",
+                    "用于项目计划的甘特图视图：阶段、里程碑、任务依赖关系和关键路径",
+                    "在日历之外所做的更改，无需刷新页面即可显示",
                     "已通过 Salesforce AppExchange 安全审查",
                     "100% Salesforce 原生：数据始终留在您的组织中",
                     "日历、时间轴、周、使用率和日程视图",
@@ -759,6 +761,7 @@
                     </div>
                 </div>
                 <ul class="hm-also" aria-label="同样包含">
+                    <li><a href="/zh/salesforce-gantt-chart.html">用于项目计划的甘特图</a></li>
                     <li>悬停弹出框显示您的字段</li>
                     <li>屏蔽日期可来自任意对象</li>
                     <li>最早和最晚日期</li>
@@ -878,7 +881,7 @@
                     <div class="dp-use"><h3>带薪休假与假期申请</h3><p>周一到周五保存为一个范围。Pending、Approved、Denied 一目了然。</p><ul><li>日期范围</li><li>状态颜色</li><li>循环</li></ul></div>
                     <div class="dp-use"><h3>值班轮换</h3><p>一个季度内隔周的周一，单击两次即可。Primary、Backup、Swapped。</p><ul><li>每 N 周</li><li>第 1 个到最后一个</li><li>加载已有记录</li></ul></div>
                     <div class="dp-use"><h3>活动出席与报名回复</h3><p>每个活动日期一条报名记录。已保存的报名会显示出来，避免重复。</p><ul><li>每个日期一条</li><li>加载已有记录</li><li>状态颜色</li></ul></div>
-                    <div class="dp-use"><h3>项目里程碑与截止日期</h3><p>项目记录上的里程碑和评审日期，每个都带标签。</p><ul><li>双月视图</li><li>记录名称</li></ul></div>
+                    <div class="dp-use"><h3>项目里程碑与截止日期</h3><p>项目记录上的里程碑和评审日期，每个都带标签。如需关联任务，请打开<a href="/zh/salesforce-gantt-chart.html">甘特图视图</a>。</p><ul><li>双月视图</li><li>记录名称</li></ul></div>
                     <div class="dp-use"><h3>设施禁用日期</h3><p>标记节假日和关闭日。其他日历会自动将其置灰。</p><ul><li>屏蔽日期</li><li>任意对象</li></ul></div>
                     <div class="dp-use"><h3>内容发布日历</h3><p>每周二和周四，一个模式搞定。移动日期即可改期。</p><ul><li>循环</li><li>悬停弹出框</li><li>编辑模式</li></ul></div>
                     <div class="dp-use"><h3>现场服务多日工作</h3><p>拖动选中周一到周五，生成一条工作记录。已有工作会显示出来，防止重叠。</p><ul><li>日期范围</li><li>加载已有记录</li><li>状态颜色</li></ul></div>
@@ -1060,11 +1063,18 @@
 
                         <h3>视图</h3>
                         <div class="hm-scroll"><table class="gs-table"><tbody>
-                        <tr id="prop-view"><td>视图（View）</td><td><code>view</code></td><td>打开时的布局：<code>calendar</code>（默认）、<code>timeline</code>、<code>week</code>、<code>utilization</code>、<code>agenda</code>。</td></tr>
-                        <tr id="prop-availableViews"><td>可用视图（Available Views）</td><td><code>availableViews</code></td><td>切换器中的视图，例如 <code>calendar,timeline,agenda</code>。留空则提供日历、时间轴、周、使用率和日程；加上 <code>map</code> 即可启用地图视图。</td></tr>
+                        <tr id="prop-view"><td>视图（View）</td><td><code>view</code></td><td>打开时的布局：<code>calendar</code>（默认）、<code>timeline</code>、<code>week</code>、<code>utilization</code>、<code>agenda</code>、<code>map</code>、<code>gantt</code>。</td></tr>
+                        <tr id="prop-availableViews"><td>可用视图（Available Views）</td><td><code>availableViews</code></td><td>切换器中的视图，例如 <code>calendar,timeline,agenda</code>。留空则提供日历、时间轴、周、使用率和日程；加上 <code>map</code> 或 <code>gantt</code> 即可启用地图或甘特图视图。</td></tr>
                         <tr id="prop-timelineWindowDays"><td>时间轴窗口（天）（Timeline Window (Days)）</td><td><code>timelineWindowDays</code></td><td>时间轴同时显示的天数。默认 14；设为 0 显示整月。</td></tr>
                         <tr id="prop-timelineZoom"><td>时间轴缩放（Timeline Zoom）</td><td><code>timelineZoom</code></td><td>初始缩放：<code>day</code>、<code>week</code>（默认）或 <code>month</code>。</td></tr>
                         <tr id="prop-agendaFields"><td>Agenda Fields</td><td><code>agendaFields</code></td><td>每个日程行上显示的额外字段。留空则沿用 Hover Popover Fields。</td></tr>
+                        <tr id="prop-ganttPhaseField"><td>Gantt Phase Field</td><td><code>ganttPhaseField</code></td><td>甘特图视图：用于将任务分组为阶段的选项列表、文本或查找字段。</td></tr>
+                        <tr id="prop-ganttDependsOnField"><td>Gantt Waits On Field</td><td><code>ganttDependsOnField</code></td><td>甘特图视图：指向必须先结束的任务的查找字段。在设置向导中设置链接对象后，每个任务可以有多个链接，并支持链接类型和滞后。</td></tr>
+                        <tr id="prop-ganttProgressField"><td>Gantt Percent Done Field</td><td><code>ganttProgressField</code></td><td>甘特图视图：0 到 100 之间的数字，用于填充每个横条。</td></tr>
+                        <tr id="prop-ganttMilestoneField"><td>Gantt Milestone Field</td><td><code>ganttMilestoneField</code></td><td>甘特图视图：复选框；勾选的任务显示为里程碑圆点。</td></tr>
+                        <tr id="prop-ganttDependencyMode"><td>Gantt Dependency Mode</td><td><code>ganttDependencyMode</code></td><td>push：移动某个任务时，等待它的任务也随之移动；lines：仅绘制链接。</td></tr>
+                        <tr id="prop-ganttSkipWeekends"><td>Gantt Skip Weekends</td><td><code>ganttSkipWeekends</code></td><td>顺延、滞后和天数计算都会跳过周六和周日。</td></tr>
+                        <tr id="prop-ganttColumns"><td>Gantt Columns</td><td><code>ganttColumns</code></td><td>最多六列，例如 {Start},{End},{Days},{Progress}，或字段 API 名称。</td></tr>
                         </tbody></table></div>
 
                         <h3>显示</h3>
@@ -1072,6 +1082,7 @@
                         <tr id="prop-label"><td>Button Label <span class="dp-tag">Flow</span></td><td><code>label</code></td><td>打开选择器的按钮上的文字。默认为“选择日期”。</td></tr>
                         <tr id="prop-modalTitle"><td>Calendar Title</td><td><code>modalTitle</code></td><td>日历顶部的标题。默认为“选择日期”。</td></tr>
                         <tr id="prop-showInline"><td>Show Inline</td><td><code>showInline</code></td><td>日历始终可见，不显示按钮。在页面上默认开启，在 Flow 中默认关闭。</td></tr>
+                        <tr id="prop-displayOnly"><td>Display Only</td><td><code>displayOnly</code></td><td>只用于查看的日历：不能选择、保存、使用编辑模式或拖动。视图、悬停卡片和打开记录仍然可用。</td></tr>
                         <tr id="prop-twoMonthView"><td>Two-Month View</td><td><code>twoMonthView</code></td><td>两个月并排显示。</td></tr>
                         <tr id="prop-calendarSize"><td>日历大小（Calendar Size）</td><td><code>calendarSize</code></td><td><code>tiny</code>、<code>xsmall</code>（Very Small）、<code>small</code>、<code>medium</code>、<code>large</code> 或 <code>full</code>（Full Width，默认）。Tiny 和 Very Small 适合实用工具栏、侧边栏和仪表板磁贴。</td></tr>
                         <tr id="prop-dayHeaderFormat"><td>Day Header Format</td><td><code>dayHeaderFormat</code></td><td><code>3</code> = SUN MON，<code>2</code> = SU MO，<code>1</code> = S M。</td></tr>
@@ -1108,6 +1119,7 @@
                         <tr id="prop-secondStatusFieldLabel"><td>Second Picklist Label</td><td><code>secondStatusFieldLabel</code></td><td>第二个选项列表的标签。</td></tr>
                         <tr id="prop-selectableSecondStatuses"><td>Selectable Second-Picklist Values</td><td><code>selectableSecondStatuses</code></td><td>允许的值。只有一个值时会自动应用并隐藏。</td></tr>
                         <tr id="prop-hoverFields"><td>悬停弹出框字段</td><td><code>hoverFields</code></td><td>悬停卡片中的字段，例如 <code>Name,Status__c</code>。</td></tr>
+                        <tr id="prop-bookingPrivacy"><td>Show Other People&rsquo;s Bookings As</td><td><code>bookingPrivacy</code></td><td>Details、Busy（对所有人显示为带斜线的“不可用”色块，不显示姓名）或 Busy for site guests（仅对站点访客这样显示）。姓名在服务器端移除。</td></tr>
                         <tr id="prop-showSuccessToast"><td>Show In-Component Toast</td><td><code>showSuccessToast</code></td><td>在组件内部显示保存消息。适用于 Experience Cloud。</td></tr>
 <tr id="prop-showAddToCalendar"><td>Show Add to Calendar After Saving</td><td><code>showAddToCalendar</code></td><td>保存后提供一个 .ics 文件，每个日期一个全天事件，可用于 Outlook、Google 或 Apple 日历。</td></tr>
                         <tr id="prop-successToastMessage"><td>Success Toast Message (optional)</td><td><code>successToastMessage</code></td><td>自定义保存消息。</td></tr>

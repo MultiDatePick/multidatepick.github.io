@@ -82,6 +82,10 @@
                     "Visualizações linha do tempo de recursos, grade semanal, mapa de calor de ocupação e agenda",
                     "Arraste para reagendar na linha do tempo",
                     "Reservas de autoatendimento em sites do Experience Cloud",
+                    "Somente os horários de início escolhidos, por calendário ou com a lista própria de cada recurso",
+                    "Duração da reserva, reservas por dia e um limite por cliente verificado no servidor",
+                    "Mostre as reservas de outras pessoas como Ocupado, para todos ou só para convidados do site",
+                    "Visualização de Gantt, com as tarefas agrupadas por recurso quando não há fase definida",
                     "Aprovado na revisão de segurança do Salesforce AppExchange",
                     "100% nativo do Salesforce: os dados ficam na sua org"
                 ]
@@ -673,6 +677,8 @@
                         <tr><td>Buffer Between Bookings</td><td>Minutos de limpeza ou preparação mantidos livres depois de cada reserva, por recurso. A grade de horários, os selos de capacidade, o arraste na Semana e a verificação ao salvar respeitam esse intervalo</td></tr>
                         <tr><td>Book Up To (Days Ahead)</td><td>Uma janela móvel: as reservas ficam abertas de hoje até N dias à frente, avançando todos os dias</td></tr>
                         <tr><td>Minimum Notice (Hours)</td><td>Nenhuma reserva que comece em menos de N horas a partir de agora, verificado de novo ao salvar</td></tr>
+                        <tr><td>Booking Length (Minutes)</td><td>Um clique reserva o agendamento inteiro, só quando ele está todo livre</td></tr>
+                        <tr><td>Limit per Person</td><td>Reservas futuras por cliente, contadas por um e-mail ou por um campo de pesquisa de Contato, Lead, Conta ou Usuário, verificadas no servidor a cada gravação. A equipe pode passar do limite depois de uma confirmação</td></tr>
                     </tbody>
                 </table>
                 </div>
@@ -720,6 +726,7 @@
                             <li>Adicionar ao calendário: um arquivo .ics para Outlook, Google ou Apple</li>
                             <li>Um status definido para eles, com o seletor oculto</li>
                             <li>Um formulário que pede nome, e-mail e tudo o mais que você precisar</li>
+                            <li>Reservas de outras pessoas exibidas como Ocupado, sem nomes</li>
                         </ul>
                     </div>
                     <div class="gs-card sf">
@@ -731,6 +738,7 @@
                             <li>O conjunto de permissões MultiDatePick - Guest no usuário convidado do site</li>
                             <li>Regras de compartilhamento de convidados para os seus objetos de reserva e de recurso</li>
                             <li>Os campos que a janela de detalhes do registro pede, no Assistente de Configuração</li>
+                            <li>Show Other People&rsquo;s Bookings As: Ocupado para convidados do site</li>
                         </ul>
                     </div>
                 </div>
@@ -944,14 +952,21 @@
                         <thead><tr><th>Configuração</th><th>Nome da API</th><th>Padrão</th><th>O que faz</th></tr></thead>
                         <tbody>
                             <tr id="prop-configName"><td>Nome da Configuração (Config Name)</td><td><code>configName</code></td><td></td><td>Carrega todas as configurações de uma configuração salva no Assistente de Configuração</td></tr>
-                            <tr id="prop-view"><td>Exibição (View)</td><td><code>view</code></td><td>calendar</td><td>Layout inicial: calendário, linha do tempo, semana, ocupação ou agenda. Ocupação e agenda são somente leitura</td></tr>
-                            <tr id="prop-availableViews"><td>Visualizações Disponíveis (Available Views)</td><td><code>availableViews</code></td><td>Calendário, Linha do tempo, Semana, Ocupação, Agenda</td><td>Quais visualizações o seletor oferece. Adicione <code>map</code> para a visualização Mapa. A visualização padrão é sempre incluída</td></tr>
+                            <tr id="prop-view"><td>Exibição (View)</td><td><code>view</code></td><td>calendar</td><td>Layout inicial: calendário, linha do tempo, semana, ocupação, agenda, mapa ou Gantt. Ocupação, agenda e mapa são somente leitura</td></tr>
+                            <tr id="prop-availableViews"><td>Visualizações Disponíveis (Available Views)</td><td><code>availableViews</code></td><td>Calendário, Linha do tempo, Semana, Ocupação, Agenda</td><td>Quais visualizações o seletor oferece. Adicione <code>map</code> ou <code>gantt</code> para a visualização Mapa ou a de Gantt. A visualização padrão é sempre incluída</td></tr>
                             <tr id="prop-timelineWindowDays"><td>Janela da Linha do Tempo (Dias) (Timeline Window (Days))</td><td><code>timelineWindowDays</code></td><td>14</td><td>Quantos dias a linha do tempo mostra de uma vez. 0 para o mês inteiro</td></tr>
                             <tr id="prop-timelineZoom"><td>Zoom da linha do tempo (Timeline Zoom)</td><td><code>timelineZoom</code></td><td>week</td><td>Zoom inicial: dia, semana ou mês. Os usuários podem trocar</td></tr>
                             <tr id="prop-timelineGroupByField"><td>Timeline Group By Field</td><td><code>timelineGroupByField</code></td><td></td><td>Agrupa as linhas da linha do tempo sob cabeçalhos, por exemplo por prédio, cada um com uma faixa de capacidade</td></tr>
-                            <tr id="prop-maxViewResources"><td>Máx. de Recursos na Visualização (Max View Resources)</td><td><code>maxViewResources</code></td><td></td><td>Máximo de linhas de recursos que a Linha do tempo e a Ocupação desenham, das mais ocupadas para as menos. Limita as linhas desenhadas, não as contadas</td></tr>
+                            <tr id="prop-maxViewResources"><td>Máx. de Recursos na Visualização (Max View Resources)</td><td><code>maxViewResources</code></td><td>5</td><td>Máximo de linhas de recursos que a Linha do tempo e a Ocupação desenham, das mais ocupadas para as menos; 999 desenha todos os recursos. Limita as linhas desenhadas, não as contadas</td></tr>
                             <tr id="prop-resourceViewFilter"><td>Linhas de Recursos (Resource Rows)</td><td><code>resourceViewFilter</code></td><td>all</td><td>all, ou booked para desenhar só os recursos com alguma reserva no período</td></tr>
                             <tr id="prop-agendaFields"><td>Agenda Fields</td><td><code>agendaFields</code></td><td></td><td>Campos extras em cada linha da agenda. Em branco, reutiliza os Hover Popover Fields</td></tr>
+                            <tr id="prop-ganttPhaseField"><td>Gantt Phase Field</td><td><code>ganttPhaseField</code></td><td></td><td>Visualização de Gantt: uma lista de opções, um texto ou um campo de pesquisa que agrupa as tarefas em fases. Em branco, agrupa por recurso</td></tr>
+                            <tr id="prop-ganttDependsOnField"><td>Gantt Waits On Field</td><td><code>ganttDependsOnField</code></td><td></td><td>Visualização de Gantt: um campo de pesquisa para a tarefa que precisa terminar antes. Um objeto de vínculo, definido no Assistente de Configuração, permite vários vínculos por tarefa, tipos de vínculo e defasagem</td></tr>
+                            <tr id="prop-ganttProgressField"><td>Gantt Percent Done Field</td><td><code>ganttProgressField</code></td><td></td><td>Visualização de Gantt: um número de 0 a 100 que preenche cada barra</td></tr>
+                            <tr id="prop-ganttMilestoneField"><td>Gantt Milestone Field</td><td><code>ganttMilestoneField</code></td><td></td><td>Visualização de Gantt: uma caixa de seleção; as tarefas marcadas aparecem como um ponto de marco</td></tr>
+                            <tr id="prop-ganttDependencyMode"><td>Gantt Dependency Mode</td><td><code>ganttDependencyMode</code></td><td>push</td><td>push move as tarefas que aguardam uma tarefa movida; lines apenas desenha os vínculos</td></tr>
+                            <tr id="prop-ganttSkipWeekends"><td>Gantt Skip Weekends</td><td><code>ganttSkipWeekends</code></td><td>true</td><td>Os deslocamentos, a defasagem e a contagem de dias pulam sábado e domingo</td></tr>
+                            <tr id="prop-ganttColumns"><td>Gantt Columns</td><td><code>ganttColumns</code></td><td></td><td>Até seis colunas, como {Start},{End},{Days},{Progress}, ou nomes de API de campos</td></tr>
                         </tbody>
                     </table></div>
 
@@ -962,6 +977,7 @@
                             <tr id="prop-label"><td>Button Label</td><td><code>label</code></td><td>Reservar Recurso (Book Resource)</td><td>Texto do botão que abre o calendário</td></tr>
                             <tr id="prop-modalTitle"><td>Calendar Title</td><td><code>modalTitle</code></td><td>Reservar Recurso (Book Resource)</td><td>Título no topo do calendário</td></tr>
                             <tr id="prop-showInline"><td>Show Inline (Always Visible)</td><td><code>showInline</code></td><td>false</td><td>Calendário sempre visível na página, sem janela pop-up</td></tr>
+                            <tr id="prop-displayOnly"><td>Display Only</td><td><code>displayOnly</code></td><td>false</td><td>Um calendário só para consulta: sem seleção, sem salvar, sem Modo de Edição e sem arrastar. As visualizações, os cartões ao passar o mouse e a abertura de registros continuam funcionando</td></tr>
                             <tr id="prop-showDoneButtonInline"><td>Show Done Button in Inline Mode</td><td><code>showDoneButtonInline</code></td><td>true</td><td>Concluído recolhe o calendário em um cartão de resumo; clique para reabrir</td></tr>
                             <tr id="prop-twoMonthView"><td>Two-Month View</td><td><code>twoMonthView</code></td><td>false</td><td>Dois meses lado a lado</td></tr>
                             <tr id="prop-calendarSize"><td>Tamanho do Calendário (Calendar Size)</td><td><code>calendarSize</code></td><td>full</td><td>tiny, xsmall (Very Small), small, medium, large ou full (Full Width). Tiny e Very Small cabem em barras de utilitários, barras laterais e blocos de painel.</td></tr>
@@ -979,6 +995,7 @@
                         <tbody>
                             <tr id="prop-resourceObjectApiName"><td>Resource Object API Name</td><td><code>resourceObjectApiName</code></td><td></td><td>O objeto que guarda o que é reservado. Qualquer objeto, inclusive User</td></tr>
                             <tr id="prop-resourceNameField"><td>Resource Name Field</td><td><code>resourceNameField</code></td><td>Name</td><td>Nome exibido no seletor de recursos</td></tr>
+                            <tr id="prop-resourcePickerLabel"><td>Resource Picker Label</td><td><code>resourcePickerLabel</code></td><td></td><td>A palavra acima do seletor de recursos, como Consultor ou Sala. Em branco, usa o rótulo do objeto</td></tr>
                             <tr id="prop-businessHoursStartField"><td>Business Hours Start Field</td><td><code>businessHoursStartField</code></td><td></td><td>Campo de hora: quando cada recurso abre</td></tr>
                             <tr id="prop-businessHoursEndField"><td>Business Hours End Field</td><td><code>businessHoursEndField</code></td><td></td><td>Campo de hora: quando cada recurso fecha</td></tr>
                             <tr id="prop-capacityField"><td>Campo de Capacidade (Capacity Field)</td><td><code>capacityField</code></td><td></td><td>Reservas permitidas por horário. Ativa o modo de capacidade e as porcentagens da Ocupação</td></tr>
@@ -1014,10 +1031,16 @@
                         <thead><tr><th>Configuração</th><th>Nome da API</th><th>Padrão</th><th>O que faz</th></tr></thead>
                         <tbody>
                             <tr id="prop-timeInterval"><td>Time Slot Interval (Minutes)</td><td><code>timeInterval</code></td><td>30</td><td>Duração do horário, em qualquer número de minutos</td></tr>
+                            <tr id="prop-availableTimes"><td>Only These Times</td><td><code>availableTimes</code></td><td></td><td>Os únicos horários de início que as pessoas podem escolher, por exemplo 09:00,10:30,13:00</td></tr>
+                            <tr id="prop-availableTimesField"><td>Only These Times Field</td><td><code>availableTimesField</code></td><td></td><td>Um campo de texto no recurso com os próprios horários de início, para que cada consultor ofereça os seus</td></tr>
+                            <tr id="prop-bookingLength"><td>Booking Length (Minutes)</td><td><code>bookingLength</code></td><td></td><td>Um clique em um horário de início reserva um bloco com essa duração, quando o bloco inteiro está livre</td></tr>
                             <tr id="prop-disableTimeSlotGrid"><td>Disable Time Slot Grid (Full-Day Mode)</td><td><code>disableTimeSlotGrid</code></td><td>false</td><td>Reservas só com data, por exemplo diárias de hotel</td></tr>
                             <tr id="prop-allowDifferentTimes"><td>Permitir Horários Diferentes por Data (Allow Different Times Per Date)</td><td><code>allowDifferentTimes</code></td><td>false</td><td>Cada data ganha a própria grade de horários</td></tr>
                             <tr id="prop-groupTimeSlotsByPeriod"><td>Group Time Slots by Period</td><td><code>groupTimeSlotsByPeriod</code></td><td>false</td><td>Grupos Manhã, Tarde e Noite</td></tr>
                             <tr id="prop-maxTimeSlotSelection"><td>Max Time Slots</td><td><code>maxTimeSlotSelection</code></td><td>0</td><td>Máximo de horários que um usuário pode escolher no total. 0 = ilimitado</td></tr>
+                            <tr id="prop-maxBookingsPerDay"><td>Max Bookings per Day</td><td><code>maxBookingsPerDay</code></td><td>0</td><td>Reservas separadas que uma pessoa pode escolher em um dia; horários vizinhos contam como uma. 0 = sem limite</td></tr>
+                            <tr id="prop-limitPerPerson"><td>Limit per Person</td><td><code>limitPerPerson</code></td><td>0</td><td>Reservas futuras que um cliente pode ter, verificadas no servidor a cada gravação. A equipe pode passar do limite depois de uma confirmação. 0 = sem limite</td></tr>
+                            <tr id="prop-limitPerPersonClientField"><td>Limit per Person Client Field</td><td><code>limitPerPersonClientField</code></td><td></td><td>Para quem é a reserva: um campo de e-mail ou de texto, ou um campo de pesquisa de Contato, Lead, Conta ou Usuário</td></tr>
                             <tr id="prop-allowWholeDayNoTimes"><td>Allow Whole-Day (No Times)</td><td><code>allowWholeDayNoTimes</code></td><td>false</td><td>Uma data escolhida sem horários é salva como registro de dia inteiro</td></tr>
                             <tr id="prop-timeGridOnly"><td>Somente grade de horários (Time Grid Only)</td><td><code>timeGridOnly</code></td><td>false</td><td>Oculta o calendário; mostra só a grade de horários de uma data implícita</td></tr>
                             <tr id="prop-timeGridDate"><td>Time Grid Date</td><td><code>timeGridDate</code></td><td></td><td>Data explícita (YYYY-MM-DD) para o Time Grid Only</td></tr>
@@ -1049,6 +1072,7 @@
                             <tr id="prop-secondStatusFieldLabel"><td>Second Picklist Label</td><td><code>secondStatusFieldLabel</code></td><td></td><td>Rótulo da segunda lista de opções</td></tr>
                             <tr id="prop-selectableSecondStatuses"><td>Selectable Second-Picklist Values</td><td><code>selectableSecondStatuses</code></td><td></td><td>Valores permitidos na segunda lista de opções</td></tr>
                             <tr id="prop-hoverFields"><td>Campos do Popover ao Passar o Mouse (Hover Popover Fields)</td><td><code>hoverFields</code></td><td></td><td>Campos exibidos ao passar o mouse sobre uma reserva</td></tr>
+                            <tr id="prop-bookingPrivacy"><td>Show Other People&rsquo;s Bookings As</td><td><code>bookingPrivacy</code></td><td>Details</td><td>Details, Busy (para todos, um bloco hachurado Indisponível, sem nome) ou Busy só para convidados do site. Os nomes são removidos no servidor</td></tr>
                             <tr id="prop-showSuccessToast"><td>Show In-Component Toast</td><td><code>showSuccessToast</code></td><td>false</td><td>Confirmação exibida dentro do componente. Necessária no Experience Cloud</td></tr>
 <tr id="prop-showAddToCalendar"><td>Show Add to Calendar After Saving</td><td><code>showAddToCalendar</code></td><td>false</td><td>Depois de salvar, um arquivo .ics com todas as reservas recém-feitas, para Outlook, Google ou Apple</td></tr>
 <tr id="prop-calendarLocationField"><td>Calendar File Location Field</td><td><code>calendarLocationField</code></td><td>em branco</td><td>Um campo do recurso, como o endereço de uma sala, que preenche o Local de cada evento no arquivo de calendário. Deixe em branco quando reservar pessoas: elas já aparecem no título do evento</td></tr>

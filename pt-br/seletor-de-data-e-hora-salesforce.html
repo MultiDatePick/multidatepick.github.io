@@ -68,6 +68,8 @@
                     "Cores de status no calendário e na grade de horários",
                     "Períodos consolidados com registros de sub-bloco para os intervalos",
                     "Modo Somente grade de horários para uma única data implícita",
+                    "Somente estes horários de início: ofereça só os horários da sua lista",
+                    "Duração da reserva, reservas por dia e um limite por cliente verificado no servidor",
                     "Visualizações Semana, Calendário e Agenda",
                     "Aprovado na revisão de segurança do Salesforce AppExchange",
                     "100% nativo do Salesforce: os dados ficam na sua org",
@@ -536,7 +538,10 @@
                     <div class="dt-feat"><b>Registros de dia inteiro</b>Uma data sem horários é salva como o dia todo.<span class="lbl">Allow Whole-Day (No Times)</span></div>
                     <div class="dt-feat"><b>Padrões recorrentes</b>Toda terça e quinta durante oito semanas, em dois cliques.<span class="lbl">Show Recurring Pattern Button</span></div>
                     <div class="dt-feat"><b>Edição no lugar</b>Mude a data, o horário ou o status de um registro salvo, ou exclua-o, sem sair do calendário.<span class="lbl">Enable Edit Mode</span></div>
-                    <div class="dt-feat"><b>Limites</b>Limite quantas datas ou horários uma pessoa pode pegar.<span class="lbl">Max Dates Allowed, Max Time Slots</span></div>
+                    <div class="dt-feat"><b>Limites</b>Limite quantas datas, horários ou reservas separadas por dia uma pessoa pode pegar.<span class="lbl">Max Dates Allowed, Max Time Slots, Max Bookings per Day</span></div>
+                    <div class="dt-feat"><b>Somente estes horários</b>Ofereça 9:00, 10:30 e 13:00, e nada entre eles.<span class="lbl">Only These Times</span></div>
+                    <div class="dt-feat"><b>Um clique, o agendamento inteiro</b>Um clique em um horário de início reserva a duração completa, quando ela está toda livre.<span class="lbl">Booking Length (Minutes)</span></div>
+                    <div class="dt-feat"><b>Um limite por cliente</b>Cada cliente tem um número definido de reservas futuras, verificado no servidor.<span class="lbl">Limit per Person</span></div>
                 </div>
                 <ul class="hm-also" aria-label="Também inclui">
                     <li>Detalhes ao passar o mouse</li><li>Segunda lista de opções</li><li>Visualização de dois meses</li><li>Datas bloqueadas</li><li>Registros com nome automático</li><li>Notificação no componente</li><li>9 idiomas</li>
@@ -756,7 +761,7 @@
                     <h3>Configuração</h3>
                     <table class="gs-table"><thead><tr><th>Configuração</th><th>Padrão</th><th>O que faz</th></tr></thead><tbody>
                         <tr id="prop-configName"><td>Config Name<small><code>configName</code></small></td><td>-</td><td>Carrega todas as definições de uma configuração salva no Assistente de Configuração.</td></tr>
-                        <tr id="prop-view"><td>View<small><code>view</code></small></td><td>calendar</td><td>Layout inicial: calendar, week, agenda, timeline ou utilization.</td></tr>
+                        <tr id="prop-view"><td>View<small><code>view</code></small></td><td>calendar</td><td>Layout inicial: calendar, week, agenda, timeline, utilization, map ou gantt.</td></tr>
                         <tr id="prop-availableViews"><td>Available Views<small><code>availableViews</code></small></td><td>all</td><td>Visualizações oferecidas no seletor, separadas por vírgula.</td></tr>
                         <tr id="prop-agendaFields"><td>Agenda Fields<small><code>agendaFields</code></small></td><td>-</td><td>Campos extras em cada linha da Agenda. Em branco, reutiliza os Hover Popover Fields.</td></tr>
                     </tbody></table>
@@ -778,12 +783,17 @@
                     <table class="gs-table"><thead><tr><th>Configuração</th><th>Padrão</th><th>O que faz</th></tr></thead><tbody>
                         <tr id="prop-timeDisplayMode"><td>Time Display Mode<small><code>timeDisplayMode</code></small></td><td>grid</td><td>grid: horários clicáveis que você pode arrastar. dropdown: seletores de hora inicial e final.</td></tr>
                         <tr id="prop-timeInterval"><td>Time Interval (Minutes)<small><code>timeInterval</code></small></td><td>30</td><td>Tamanho do horário em minutos. Qualquer intervalo; 15, 30 ou 60 são os mais comuns.</td></tr>
+                        <tr id="prop-availableTimes"><td>Only These Times<small><code>availableTimes</code></small></td><td>-</td><td>Os únicos horários de início que as pessoas podem escolher, por exemplo 09:00,10:30,13:00.</td></tr>
+                        <tr id="prop-bookingLength"><td>Booking Length (Minutes)<small><code>bookingLength</code></small></td><td>-</td><td>Um clique em um horário de início reserva um bloco com essa duração, quando o bloco inteiro está livre.</td></tr>
                         <tr id="prop-minTime"><td>Earliest Time<small><code>minTime</code></small></td><td>08:00</td><td>Primeiro horário, formato 24 horas HH:mm.</td></tr>
                         <tr id="prop-maxTime"><td>Latest Time<small><code>maxTime</code></small></td><td>18:00</td><td>Início do último horário, formato 24 horas HH:mm: com horários de 30 minutos, 16:30 termina às 17:00.</td></tr>
                         <tr id="prop-allowDifferentTimes"><td>Allow Different Times Per Date<small><code>allowDifferentTimes</code></small></td><td>false</td><td>Cada data ganha sua própria grade ou lista suspensa, em vez de um conjunto único de horários.</td></tr>
                         <tr id="prop-enableEndTime"><td>Enable End Time<small><code>enableEndTime</code></small></td><td>true</td><td>Registra uma hora final além da inicial.</td></tr>
                         <tr id="prop-groupTimeSlotsByPeriod"><td>Group Time Slots by Period<small><code>groupTimeSlotsByPeriod</code></small></td><td>false</td><td>Seções Manhã, Tarde e Noite.</td></tr>
                         <tr id="prop-maxTimeSlotSelection"><td>Max Time Slots<small><code>maxTimeSlotSelection</code></small></td><td>0</td><td>Total de horários que um usuário pode escolher em todas as datas. 0 = ilimitado.</td></tr>
+                        <tr id="prop-maxBookingsPerDay"><td>Max Bookings per Day<small><code>maxBookingsPerDay</code></small></td><td>0</td><td>Reservas separadas que uma pessoa pode escolher em um dia; horários vizinhos contam como uma. 0 = sem limite.</td></tr>
+                        <tr id="prop-limitPerPerson"><td>Limit per Person<small><code>limitPerPerson</code></small></td><td>0</td><td>Reservas futuras que um cliente pode ter, verificadas no servidor a cada gravação. A equipe pode passar do limite depois de uma confirmação. 0 = sem limite.</td></tr>
+                        <tr id="prop-limitPerPersonClientField"><td>Limit per Person Client Field<small><code>limitPerPersonClientField</code></small></td><td>-</td><td>Para quem é a reserva: um campo de e-mail ou de texto, ou um campo de pesquisa de Contato, Lead, Conta ou Usuário.</td></tr>
                         <tr id="prop-allowWholeDayNoTimes"><td>Allow Whole-Day (No Times)<small><code>allowWholeDayNoTimes</code></small></td><td>false</td><td>Uma data sem horários é salva como registro de dia inteiro.</td></tr>
                         <tr id="prop-startTimeField"><td>Start Time Field<small><code>startTimeField</code></small></td><td>-</td><td>Campo de hora para o início.</td></tr>
                         <tr id="prop-endTimeField"><td>End Time Field<small><code>endTimeField</code></small></td><td>-</td><td>Campo de hora para o fim.</td></tr>

@@ -68,6 +68,8 @@
                     "カレンダーと時間グリッドに状況の色を表示",
                     "時間範囲をまとめ、空き時間はサブブロックレコードとして保存",
                     "日付が 1 つに決まっている場合のタイムグリッドのみモード",
+                    "指定した開始時刻のみ: リストにある時刻だけを提示",
+                    "予約の長さ、1 日あたりの予約数、サーバー側でチェックする顧客ごとの上限",
                     "週、カレンダー、予定一覧の各表示",
                     "Salesforce AppExchange セキュリティレビューに合格",
                     "100% Salesforce ネイティブ: データは組織内にとどまります",
@@ -536,7 +538,10 @@
                     <div class="dt-feat"><b>終日レコード</b>時間枠を選ばない日付は終日として保存。<span class="lbl">Allow Whole-Day (No Times)</span></div>
                     <div class="dt-feat"><b>繰り返しパターン</b>8 週間にわたる毎週火曜と木曜も 2 クリックで。<span class="lbl">Show Recurring Pattern Button</span></div>
                     <div class="dt-feat"><b>その場で編集</b>保存済みの日付、時刻、状況の変更や削除を、カレンダーを離れずに。<span class="lbl">Enable Edit Mode</span>（編集モードを有効化）</div>
-                    <div class="dt-feat"><b>上限</b>1 人が選べる日付数や時間枠数に上限を設定。<span class="lbl">Max Dates Allowed, Max Time Slots（最大時間枠数）</span></div>
+                    <div class="dt-feat"><b>上限</b>1 人が選べる日付数、時間枠数、1 日あたりの個別の予約数に上限を設定。<span class="lbl">Max Dates Allowed, Max Time Slots（最大時間枠数）, Max Bookings per Day（1 日の最大予約数）</span></div>
+                    <div class="dt-feat"><b>指定した時刻のみ</b>9:00、10:30、13:00 だけを提示し、その間の時刻は出さない。<span class="lbl">Only These Times（これらの時刻のみ）</span></div>
+                    <div class="dt-feat"><b>1 クリックで予約全体</b>開始時刻をクリックするだけで、全体が空いていれば予約の長さ分をまとめて確保。<span class="lbl">Booking Length (Minutes)（予約の長さ）</span></div>
+                    <div class="dt-feat"><b>顧客ごとの上限</b>顧客ごとに今後の予約の件数を決め、サーバー側でチェック。<span class="lbl">Limit per Person（1 人あたりの上限）</span></div>
                 </div>
                 <ul class="hm-also" aria-label="そのほかの機能">
                     <li>ホバー時の詳細</li><li>2 つ目の選択リスト</li><li>2 か月表示</li><li>ブロック日付</li><li>レコード名を自動設定</li><li>コンポーネント内トースト</li><li>9 言語</li>
@@ -756,7 +761,7 @@
                     <h3>設定</h3>
                     <table class="gs-table"><thead><tr><th>設定</th><th>デフォルト</th><th>機能</th></tr></thead><tbody>
                         <tr id="prop-configName"><td>Config Name<small><code>configName</code></small></td><td>-</td><td>保存済みのセットアップウィザードの設定から、すべての設定を読み込みます。</td></tr>
-                        <tr id="prop-view"><td>View<small><code>view</code></small></td><td>calendar</td><td>最初に開くレイアウト: calendar、week、agenda、timeline、utilization。</td></tr>
+                        <tr id="prop-view"><td>View<small><code>view</code></small></td><td>calendar</td><td>最初に開くレイアウト: calendar、week、agenda、timeline、utilization、map、gantt。</td></tr>
                         <tr id="prop-availableViews"><td>Available Views<small><code>availableViews</code></small></td><td>all</td><td>切り替えで選べる表示をカンマ区切りで指定。</td></tr>
                         <tr id="prop-agendaFields"><td>Agenda Fields<small><code>agendaFields</code></small></td><td>-</td><td>予定一覧の各行に追加する項目。空欄なら Hover Popover Fields を使用。</td></tr>
                     </tbody></table>
@@ -778,12 +783,17 @@
                     <table class="gs-table"><thead><tr><th>設定</th><th>デフォルト</th><th>機能</th></tr></thead><tbody>
                         <tr id="prop-timeDisplayMode"><td>Time Display Mode<small><code>timeDisplayMode</code></small></td><td>grid</td><td>grid: ドラッグで選べるクリック式の時間枠。dropdown: 開始時刻と終了時刻のピッカー。</td></tr>
                         <tr id="prop-timeInterval"><td>Time Interval (Minutes)<small><code>timeInterval</code></small></td><td>30</td><td>時間枠の長さ (分)。任意の間隔を指定でき、15、30、60 分が一般的です。</td></tr>
+                        <tr id="prop-availableTimes"><td>Only These Times<small><code>availableTimes</code></small></td><td>-</td><td>選べる開始時刻をこれだけに限定します。例: 09:00,10:30,13:00。</td></tr>
+                        <tr id="prop-bookingLength"><td>Booking Length (Minutes)<small><code>bookingLength</code></small></td><td>-</td><td>開始時刻を 1 回クリックすると、この長さの枠をまとめて予約します (枠全体が空いている場合)。</td></tr>
                         <tr id="prop-minTime"><td>Earliest Time<small><code>minTime</code></small></td><td>08:00</td><td>最初の時間枠。24 時間制の HH:mm。</td></tr>
                         <tr id="prop-maxTime"><td>Latest Time<small><code>maxTime</code></small></td><td>18:00</td><td>最後の枠の開始時刻（24 時間形式 HH:mm）。30 分の時間枠なら 16:30 で 17:00 に終わります。</td></tr>
                         <tr id="prop-allowDifferentTimes"><td>Allow Different Times Per Date<small><code>allowDifferentTimes</code></small></td><td>false</td><td>共通の時刻 1 セットではなく、日付ごとに専用のグリッドまたはドロップダウンを表示。</td></tr>
                         <tr id="prop-enableEndTime"><td>Enable End Time<small><code>enableEndTime</code></small></td><td>true</td><td>開始時刻に加えて終了時刻も記録します。</td></tr>
                         <tr id="prop-groupTimeSlotsByPeriod"><td>Group Time Slots by Period<small><code>groupTimeSlotsByPeriod</code></small></td><td>false</td><td>午前、午後、夕方のセクションに分けて表示。</td></tr>
                         <tr id="prop-maxTimeSlotSelection"><td>Max Time Slots<small><code>maxTimeSlotSelection</code></small></td><td>0</td><td>1 人のユーザーが全日付を通じて選べる時間枠の合計。0 = 無制限。</td></tr>
+                        <tr id="prop-maxBookingsPerDay"><td>Max Bookings per Day<small><code>maxBookingsPerDay</code></small></td><td>0</td><td>1 人が 1 日に選べる個別の予約の数。隣り合う時間は 1 件と数えます。0 = 無制限。</td></tr>
+                        <tr id="prop-limitPerPerson"><td>Limit per Person<small><code>limitPerPerson</code></small></td><td>0</td><td>1 人の顧客が持てる今後の予約の数。保存のたびにサーバー側でチェックします。スタッフは確認のうえで上限を超えて予約できます。0 = 無制限。</td></tr>
+                        <tr id="prop-limitPerPersonClientField"><td>Limit per Person Client Field<small><code>limitPerPersonClientField</code></small></td><td>-</td><td>予約の対象者を示す項目。メールアドレスかテキストの項目、または取引先責任者、リード、取引先、ユーザーへの参照項目。</td></tr>
                         <tr id="prop-allowWholeDayNoTimes"><td>Allow Whole-Day (No Times)<small><code>allowWholeDayNoTimes</code></small></td><td>false</td><td>時間枠を選ばない日付は終日レコードとして保存。</td></tr>
                         <tr id="prop-startTimeField"><td>Start Time Field<small><code>startTimeField</code></small></td><td>-</td><td>開始時刻を保存する時刻項目。</td></tr>
                         <tr id="prop-endTimeField"><td>End Time Field<small><code>endTimeField</code></small></td><td>-</td><td>終了時刻を保存する時刻項目。</td></tr>

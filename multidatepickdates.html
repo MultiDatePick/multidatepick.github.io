@@ -63,6 +63,8 @@
             "Edit mode: change status, move or delete saved dates",
             "Blocked dates from any object, earliest and latest selectable date, max dates allowed",
             "Two-month view",
+            "Gantt view for project plans: phases, milestones, task dependencies and a critical path",
+            "Changes made outside the calendar show without a page reload",
             "Passed the Salesforce AppExchange Security Review",
             "100% native Salesforce: data stays in your org",
             "Calendar, Timeline, Week, Utilization and Agenda views",
@@ -767,6 +769,7 @@
                     </div>
                 </div>
                 <ul class="hm-also" aria-label="Also included">
+                    <li><a href="/salesforce-gantt-chart.html">Gantt chart for project plans</a></li>
                     <li>Hover popovers with your fields</li>
                     <li>Blocked dates from any object</li>
                     <li>Earliest and latest date</li>
@@ -891,7 +894,7 @@
                     <div class="dp-use"><h3>PTO and vacation requests</h3><p>Mon to Fri saves as one range. Pending, Approved, Denied at a glance.</p><ul><li>Date range</li><li>Status colors</li><li>Recurring</li></ul></div>
                     <div class="dp-use"><h3>On-call rotation</h3><p>Every other Monday for a quarter in two clicks. Primary, Backup, Swapped.</p><ul><li>Every N weeks</li><li>1st to last</li><li>Load existing</li></ul></div>
                     <div class="dp-use"><h3>Event attendance and RSVP</h3><p>One RSVP record per event date. Saved RSVPs show, so no duplicates.</p><ul><li>One per date</li><li>Load existing</li><li>Status colors</li></ul></div>
-                    <div class="dp-use"><h3>Project milestones and deadlines</h3><p>Milestones and review dates on the project record, each with a label.</p><ul><li>Two-month view</li><li>Record name</li></ul></div>
+                    <div class="dp-use"><h3>Project milestones and deadlines</h3><p>Milestones and review dates on the project record, each with a label. For linked tasks, open the <a href="/salesforce-gantt-chart.html">Gantt view</a>.</p><ul><li>Two-month view</li><li>Record name</li></ul></div>
                     <div class="dp-use"><h3>Facility blackout dates</h3><p>Mark holidays and closures. Other calendars gray them out automatically.</p><ul><li>Blocked dates</li><li>Any object</li></ul></div>
                     <div class="dp-use"><h3>Content publishing calendar</h3><p>Every Tuesday and Thursday in one pattern. Reschedule by moving dates.</p><ul><li>Recurring</li><li>Hover popovers</li><li>Edit mode</li></ul></div>
                     <div class="dp-use"><h3>Field service multi-day jobs</h3><p>Drag Mon to Fri for one job record. Existing jobs show to prevent overlap.</p><ul><li>Date range</li><li>Load existing</li><li>Status colors</li></ul></div>
@@ -1073,11 +1076,18 @@
 
                         <h3>Views</h3>
                         <div class="hm-scroll"><table class="gs-table"><tbody>
-                        <tr id="prop-view"><td>View</td><td><code>view</code></td><td>Opening layout: <code>calendar</code> (default), <code>timeline</code>, <code>week</code>, <code>utilization</code>, <code>agenda</code>.</td></tr>
-                        <tr id="prop-availableViews"><td>Available Views</td><td><code>availableViews</code></td><td>Views in the switcher, e.g. <code>calendar,timeline,agenda</code>. Blank offers Calendar, Timeline, Week, Utilization and Agenda; add <code>map</code> for the Map view.</td></tr>
+                        <tr id="prop-view"><td>View</td><td><code>view</code></td><td>Opening layout: <code>calendar</code> (default), <code>timeline</code>, <code>week</code>, <code>utilization</code>, <code>agenda</code>, <code>map</code>, <code>gantt</code>.</td></tr>
+                        <tr id="prop-availableViews"><td>Available Views</td><td><code>availableViews</code></td><td>Views in the switcher, e.g. <code>calendar,timeline,agenda</code>. Blank offers Calendar, Timeline, Week, Utilization and Agenda; add <code>map</code> or <code>gantt</code> for the Map or Gantt view.</td></tr>
                         <tr id="prop-timelineWindowDays"><td>Timeline Window (Days)</td><td><code>timelineWindowDays</code></td><td>Days Timeline shows at once. Default 14; 0 for the full month.</td></tr>
                         <tr id="prop-timelineZoom"><td>Timeline Zoom</td><td><code>timelineZoom</code></td><td>Starting zoom: <code>day</code>, <code>week</code> (default) or <code>month</code>.</td></tr>
                         <tr id="prop-agendaFields"><td>Agenda Fields</td><td><code>agendaFields</code></td><td>Extra fields on each Agenda row. Blank reuses Hover Popover Fields.</td></tr>
+                        <tr id="prop-ganttPhaseField"><td>Gantt Phase Field</td><td><code>ganttPhaseField</code></td><td>Gantt view: a picklist, text or lookup that groups tasks into phases.</td></tr>
+                        <tr id="prop-ganttDependsOnField"><td>Gantt Waits On Field</td><td><code>ganttDependsOnField</code></td><td>Gantt view: a lookup to the task that must end first. A link object, set in the Setup Wizard, adds several links per task, link types and lag.</td></tr>
+                        <tr id="prop-ganttProgressField"><td>Gantt Percent Done Field</td><td><code>ganttProgressField</code></td><td>Gantt view: a number from 0 to 100 that fills each bar.</td></tr>
+                        <tr id="prop-ganttMilestoneField"><td>Gantt Milestone Field</td><td><code>ganttMilestoneField</code></td><td>Gantt view: a checkbox; checked tasks show as a milestone dot.</td></tr>
+                        <tr id="prop-ganttDependencyMode"><td>Gantt Dependency Mode</td><td><code>ganttDependencyMode</code></td><td>push moves the tasks that wait on a moved task; lines only draws the links.</td></tr>
+                        <tr id="prop-ganttSkipWeekends"><td>Gantt Skip Weekends</td><td><code>ganttSkipWeekends</code></td><td>Pushes, lag and day counts skip Saturday and Sunday.</td></tr>
+                        <tr id="prop-ganttColumns"><td>Gantt Columns</td><td><code>ganttColumns</code></td><td>Up to six columns, such as {Start},{End},{Days},{Progress}, or field API names.</td></tr>
                         </tbody></table></div>
 
                         <h3>Display</h3>
@@ -1085,6 +1095,7 @@
                         <tr id="prop-label"><td>Button Label <span class="dp-tag">Flow</span></td><td><code>label</code></td><td>Text on the button that opens the picker. Default "Select Dates".</td></tr>
                         <tr id="prop-modalTitle"><td>Calendar Title</td><td><code>modalTitle</code></td><td>Title at the top of the calendar. Default "Select Dates".</td></tr>
                         <tr id="prop-showInline"><td>Show Inline</td><td><code>showInline</code></td><td>Calendar always visible, no button. On by default on pages, off in Flow.</td></tr>
+                        <tr id="prop-displayOnly"><td>Display Only</td><td><code>displayOnly</code></td><td>A calendar for looking only: no picking, saving, Edit Mode or dragging. Views, hover cards and opening a record still work.</td></tr>
                         <tr id="prop-twoMonthView"><td>Two-Month View</td><td><code>twoMonthView</code></td><td>Two months side by side.</td></tr>
                         <tr id="prop-calendarSize"><td>Calendar Size</td><td><code>calendarSize</code></td><td><code>tiny</code>, <code>xsmall</code> (Very Small), <code>small</code>, <code>medium</code>, <code>large</code> or <code>full</code> (Full Width, the default). Tiny and Very Small fit utility bars, sidebars and dashboard tiles.</td></tr>
                         <tr id="prop-dayHeaderFormat"><td>Day Header Format</td><td><code>dayHeaderFormat</code></td><td><code>3</code> = SUN MON, <code>2</code> = SU MO, <code>1</code> = S M.</td></tr>
@@ -1121,6 +1132,7 @@
                         <tr id="prop-secondStatusFieldLabel"><td>Second Picklist Label</td><td><code>secondStatusFieldLabel</code></td><td>Label for the second picklist.</td></tr>
                         <tr id="prop-selectableSecondStatuses"><td>Selectable Second-Picklist Values</td><td><code>selectableSecondStatuses</code></td><td>Allowed values. One value is auto-applied and hidden.</td></tr>
                         <tr id="prop-hoverFields"><td>Hover Popover Fields</td><td><code>hoverFields</code></td><td>Fields in the hover card, e.g. <code>Name,Status__c</code>.</td></tr>
+                        <tr id="prop-bookingPrivacy"><td>Show Other People&rsquo;s Bookings As</td><td><code>bookingPrivacy</code></td><td>Details, Busy (a hatched Unavailable block with no name for everyone) or Busy for site guests. Names are removed on the server.</td></tr>
                         <tr id="prop-showSuccessToast"><td>Show In-Component Toast</td><td><code>showSuccessToast</code></td><td>Save message drawn inside the component. Use on Experience Cloud.</td></tr>
 <tr id="prop-showAddToCalendar"><td>Show Add to Calendar After Saving</td><td><code>showAddToCalendar</code></td><td>After Save, one .ics file with an all-day event per date, for Outlook, Google or Apple.</td></tr>
                         <tr id="prop-successToastMessage"><td>Success Toast Message (optional)</td><td><code>successToastMessage</code></td><td>Custom save message.</td></tr>
