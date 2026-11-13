@@ -165,7 +165,7 @@ Guide to placing MultiDatePick on App Pages, Home Pages and Experience Sites usi
 - The Save button appears only when all four are set: parent record (recordId, or Static Parent Record Id), Child Object API Name, Date Field API Name and Relationship Field API Name. A Config Name from the Setup Wizard supplies the last three.
 - App and Home Pages are built in Lightning App Builder; Experience Sites in Experience Builder. Internal users need the MultiDatePick - User permission set.
 - Static Parent Record Id points everyone at the same parent (public booking page, one org-wide calendar, fixed dashboard anchor). When the parent is chosen at runtime (Get Records on $User.Id, a ?id= URL parameter, or pick-first), use a Screen Flow and bind Parent Record Id. On guest sites $User does not apply.
-- Public guest site checklist: (1) guest Read and Create on each object, never Edit or Delete; (2) field-level security, Read on shown fields and Edit on written fields; (3) a guest Read sharing rule, external org-wide default Private, Recalculate after a metadata deploy; (4) Apex class access to MultiDatePickController; (5) publish and activate. Also a default record owner for guest records, and guest Read on referenced resource or parent records (prefer custom objects over Contact/Account).
+- Public guest site checklist: (1) guest Read and Create on each object, never Edit or Delete; (2) field-level security, Read on shown fields and Edit on written fields; (3) a guest Read sharing rule, external org-wide default Private, Recalculate after a metadata deploy; (4) the MultiDatePick - Guest permission set on the guest user; (5) Show Other People's Bookings As set to Busy for site guests, so visitors see taken times without names; (6) publish and activate. Also a default record owner for guest records, and guest Read on referenced resource or parent records (prefer custom objects over Contact/Account).
 - Six patterns: internal booking hub, customer self-service scheduling, personal availability, event and cohort registration, volunteer and shift sign-up, project milestones.
 - Existing Dates Mode = readonly turns a Home Page widget into a read-only view.
 
@@ -175,7 +175,7 @@ The Config Name path: save a config in the Setup Wizard (or import one from the 
 
 ## User Guide (https://multidatepick.com/user-guide.html)
 
-Admin guide to MultiDatePick. Three components: Dates, Dates & Times and Resource Booking (in App Builder: MultiDatePick - Dates, MultiDatePick - Dates & Times and MultiDatePick - Resource Booking). The Setup Wizard has two start paths (Walk me through it, Configure all properties) plus Existing Configurations and Import / Export tabs, and five steps: Name & Type, Object & Fields, Time Fields, Status & Display, Review & Save. It names six record shapes: one record per date, per date range, per time block, parent plus sub-blocks, single resource, multiple resources. Permission sets: MultiDatePick - Setup (admins; includes the Setup Wizard), MultiDatePick - User (everyone who uses calendars), MultiDatePick - All Access (both); users also need object, field and record access to your own objects. Click to Save needs Child Object API Name, Date Field API Name, Relationship Field API Name and a parent (Parent Record Id in a Flow, Static Parent Record Id on App, Home and Experience pages). In a Screen Flow set Config Name; every checkbox comes from the config. Six views: Calendar, Timeline, Week, Utilization (read only), Agenda (read only) and the optional Map. Time Interval (Minutes) accepts any interval; 15, 30 or 60 minutes are typical. Capacity needs both booking time fields. Closures block whole days, hours or one resource. Guest pages need object permissions, field security, a guest sharing rule (external default Private, Recalculate after a metadata deploy), Apex class access to MultiDatePickController on the guest profile, and an activated site. Flow recipes are no-code (Parse Date Entries from JSON, Roll-Up Summary or a Record-Triggered Flow). Includes a searchable reference of 100+ properties by label and API name.
+Admin guide to MultiDatePick. Three components: Dates, Dates & Times and Resource Booking (in App Builder: MultiDatePick - Dates, MultiDatePick - Dates & Times and MultiDatePick - Resource Booking). The Setup Wizard has two start paths (Walk me through it, Configure all properties) plus Existing Configurations and Import / Export tabs, and four steps: Where it lives, Shape, Jump start, Review. It names six record shapes: one record per date, per date range, per time block, parent plus sub-blocks, single resource, multiple resources. Permission sets: MultiDatePick - Setup (admins; includes the Setup Wizard), MultiDatePick - User (everyone who uses calendars), MultiDatePick - All Access (both); users also need object, field and record access to your own objects. Click to Save needs Child Object API Name, Date Field API Name, Relationship Field API Name and a parent (Parent Record Id in a Flow, Static Parent Record Id on App, Home and Experience pages). In a Screen Flow set Config Name; every checkbox comes from the config. Six views: Calendar, Timeline, Week, Utilization (read only), Agenda (read only) and the optional Map. Time Interval (Minutes) accepts any interval; 15, 30 or 60 minutes are typical. Capacity needs both booking time fields. Closures block whole days, hours or one resource. Guest pages need object permissions, field security, a guest sharing rule (external default Private, Recalculate after a metadata deploy), the MultiDatePick - Guest permission set on the guest user, Show Other People's Bookings As set to Busy for site guests so visitors never see other people's names, and an activated site. Flow recipes are no-code (Parse Date Entries from JSON, Roll-Up Summary or a Record-Triggered Flow). Includes a searchable reference of 100+ properties by label and API name.
 
 ## Accessibility & VPAT 2.5 | MultiDatePick (https://multidatepick.com/accessibility.html)
 
@@ -527,13 +527,14 @@ Meeting room and desk booking inside Salesforce with the MultiDatePick Resource 
 
 Self-service booking on public (guest) and member Experience Cloud sites with the MultiDatePick Resource Booking component.
 
-- The public live demo (ACME Financial) is itself an Experience Cloud guest site: four Resource Booking components on one page (request a consultation in Week view, block a time, advisor appointments in Agenda, wealth advisory engagements in Timeline). No login; resets every hour.
+- The public live demo (ACME Financial) is itself an Experience Cloud guest site: nine scenario pages, one calendar each, using all three components: Book, Branches, Block time, Manage, Team view and Buttons on Resource Booking, Days off on Dates, Workshops and Contractor on Dates & Times. No login; resets every hour.
 - What people self-book: appointments, their own availability, shared spaces (rooms, desks, courts, equipment) against live capacity, and sessions that close when full.
 - Versus an external scheduler: bookings save as records in the org on click, free slots are read live, conflict and capacity checks run on save, data never leaves the org, Flows and reports work on day one.
 - Setup in five steps: build a Resource Booking config in the Setup Wizard, drag Resource Booking onto the page in Experience Builder, set Config Name and Static Parent Record Id, grant guest access, publish and activate. Static Parent Record Id gives the page a parent so existing bookings and blocked times load.
+- Keep other clients' names private: set Show Other People's Bookings As to Busy for site guests. Visitors see other bookings as a hatched Unavailable block with no name, no hover card and no link (removed on the server); staff still see every name. Left at Details, the default, every visitor sees who booked.
 - Recommended public-page settings: Conflict Behavior block, Capacity Field, Business Hours Start/End Field, Existing Dates Mode readonly, Enable Edit Mode off for guests, Week or Calendar view.
 - Guest users can read and create but never edit or delete (a Salesforce guest rule); MultiDatePick shows a guest a clear message instead of a failed move. Edit, cancel and per-person calendars belong on a member site or in a Screen Flow (Parent Record Id).
-- Guest records go to a default record owner set in Experience Workspaces; the full five-step guest checklist is on /home-app-experience.html#guest-sites.
+- Guest records go to a default record owner set in Experience Workspaces; the full six-step guest checklist is on /home-app-experience.html#guest-sites.
 - FAQ: guest booking without login, guest edit or cancel, member sites, no Apex or external tool, where data is stored.
 
 ## Lightning Scheduler: What It Does, and an Alternative (https://multidatepick.com/salesforce-calendar-vs-lightning-scheduler.html)
@@ -767,48 +768,50 @@ The same applies to consolidation. If your recurring selection produces Monday t
 
 ## Configure a Salesforce Calendar Without Code (https://multidatepick.com/blog/salesforce-calendar-setup-wizard.html)
 
-100+ properties sounds like a project. It is a Setup Wizard, three questions about your records, and a live preview that renders the real Salesforce calendar.
+100+ properties sounds like a project. It is a wizard of four steps that fills in the likely choices for you, with a live preview before you save anything.
 
-100+ properties sounds like a project. It is a wizard, three questions, and a live preview that shows you the calendar before you save anything.
-Most Salesforce components with real depth make you learn them twice: once to understand the properties, once to remember which combination you picked last time. The Setup Wizard exists so you do neither. It asks what you are scheduling, writes the configuration as metadata, and hands you a name you can use anywhere.
+Most Salesforce components with real depth make you learn them twice: once to understand the properties, once to remember which combination you picked last time. The Setup Wizard exists so you do neither. It asks where the calendar goes and what each pick should save, fills in the fields it can work out, writes the configuration as metadata, and hands you a name you can use anywhere.
 
-### Two ways in, plus two shortcuts
-The Create New tab opens on two paths. Two more tabs sit beside it for configs you already have.
-- **Walk me through it**
-Three questions about what you are scheduling. Best for first-time setup.
-- **Configure all properties**
-Every property visible, with a live preview. Best when you know exactly what you want.
+### One way in, plus two shortcuts
+The Create New tab opens on the guided setup. Two more tabs sit beside it for configs you already have.
+- **The guided setup**
+Where the calendar goes, what each pick saves, then the likely fields filled in. Best for most setups.
+- **Every setting on one page**
+All 100+ settings on one page, with a live preview. Best when you know exactly what you want.
 - **Existing Configurations**
 Your saved configs with their component type. Open one to edit or clone it.
 - **Import**
 Paste a config from the Config Library or another org.
 
-### Five steps, start to finish
+### Four steps, start to finish
+1. Where it lives: a record page of any object, an app or Home page, a Screen Flow or a public site, and the calendar size.
+2. Shape: what each pick saves: one record per day, per range, per time block, one with breaks, or a booking of one resource or several.
+3. Jump start: the saved object, with the link, date, title, status, times and resource fields filled in for you. Tabs for rules, closed days, views, hover card, status and every other setting.
+4. Review: every section with a Change link and a live preview, then save. The wizard shows the Config Name to paste.
 
-### The three questions that decide everything
-The guided path asks about the shape of the records you want, rather than about properties. Every answer combination is valid, and together they decide what the component writes:
-- Do you need times, or just dates? Dates alone, a time on each date, or a parent block with sub-blocks for the gaps inside it.
-- Are you booking a resource? None, one at a time, or several at once.
-- Should consecutive dates collapse into a range? One record per date, or one record with a start and an end.
-The answers are independent, so they describe the whole grid of possibilities rather than a menu of presets. Monday through Friday for six weeks can be thirty records or six. You choose that here, on purpose, before any data exists.
+### The shape decides everything
+The guided setup asks about the shape of the records you want, rather than about properties. Six cards, each with a small picture of what people pick and what lands in Salesforce:
+- One record per day, or per range? Monday through Friday for six weeks can be thirty records or six.
+- One record per time block, or one with breaks inside? A training day with a lunch break can be two records or one plus a break.
+- Booking a room or person? One at a time, several at once, or add one to a range, a time block or a day with breaks.
+You choose that here, on purpose, before any data exists. The shape also picks the right component, so there is nothing else to decide.
 
 ### A live preview, before anything is saved
-The preview pane renders a working calendar underneath the form as you change properties. Turn on two-month view and it appears. Add status colors and the cells fill. It is the actual component, so what you approve is what you deploy.
-The expensive mistakes in scheduling configuration are shape decisions you cannot see until real records exist. Seeing the calendar respond while you are still deciding removes most of that risk.
+The preview on the Review step renders a working calendar from your choices. Turn on two-month view and it appears. Add status colors and the cells fill. It is the actual component, so what you approve is what you deploy.
 
-### Inside the steps: Object & Fields, Time Fields, Status & Display
-Two steps do most of the heavy lifting on a booking or scheduling config. Time Fields maps the start time, end time and interval your calendar needs. Status & Display is where the visual polish lives, from status-driven cell colors to which fields show on hover.
-On Status & Display, pick a status field, map a color to each value, and choose whether the color paints the calendar cell, the time slot grid, or both. Add hover fields so pointing at a booking previews the details.
+### Inside the jump start: Fields, Times, Status
+Pick the saved object and the link, date and title are filled in. Every list is filtered to the field types that fit. Times sets the hours people can book, the slot length, the gap after a booking and the notice, and maps the start and end time fields. Status sets a color for each status, the statuses to hide, and the ones people may pick. Other settings holds the Header box: your logo, your name, your band and button colors and a banner photo.
 
 ### What it actually writes
 Saving deploys a Custom Metadata record. Three things follow:
 - It is deployable. Custom Metadata moves through your normal release pipeline, sandbox to production, like any other component.
 - It is reusable. Put the name in Config Name on any component and it picks up the whole configuration. One config, many placements.
 - It stays in your org. Nothing is stored on a vendor server, so the configuration is yours and it is visible in Setup.
+Custom Metadata deploys are asynchronous: the wizard waits about two minutes, then shows the deploy id and a link to Deployment Status if the record has not appeared. Assign MultiDatePick - Setup to admins who build configs.
 
 ### Import, export, and the mapping step people miss
 The Import / Export tab takes a JSON configuration and turns it into a saved config. That is how the Config Library works: 40+ ready-made configurations covering time-off requests, room booking, hot-desking, interview scheduling, fleet reservation and more.
-The step that saves the most time is Smart Field Mapping. Library configs reference the demo objects; your org has its own. The wizard scans every reference the moment you paste, flags each one your org does not have, and puts a dropdown next to it sourced live from the object's real field list. Remap in the wizard, click Apply, and it deploys with the rewritten JSON. No text editor, no hunt and replace, no re-uploads.
+The step that saves the most time is Smart Field Mapping. Library configs reference the demo objects; your org has its own. The wizard scans every reference the moment you paste, flags each one your org does not have, and puts a dropdown next to it sourced live from the object's real field list. Remap in the wizard, click Apply, and it deploys with the rewritten JSON.
 Export works the same way in reverse, which makes configurations shareable. A config that works in one org is a paste away from working in another.
 
 ### Using the config once it exists
