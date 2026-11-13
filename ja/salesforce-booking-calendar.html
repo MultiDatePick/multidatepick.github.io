@@ -82,6 +82,10 @@
                     "リソースタイムライン、週グリッド、稼働率ヒートマップ、予定一覧の各表示",
                     "タイムライン上のドラッグで予定を変更",
                     "Experience Cloud サイトでのセルフサービス予約",
+                    "指定した開始時刻のみ。カレンダー共通、またはリソースごとの独自のリスト",
+                    "予約の長さ、1 日あたりの予約数、サーバー側でチェックする顧客ごとの上限",
+                    "ほかの人の予約を「予約済み」とだけ表示。全員に適用、またはサイトのゲストユーザーのみに適用",
+                    "ガントビュー。フェーズを設定していなければ、タスクをリソースごとにまとめて表示",
                     "Salesforce AppExchange セキュリティレビューに合格",
                     "100% Salesforce ネイティブ: データは組織内にとどまります"
                 ]
@@ -674,6 +678,8 @@
                         <tr><td>予約間のバッファー（Buffer Between Bookings）</td><td>リソースごとに、各予約の後に空けておく片付けや準備の時間 (分)。時間枠グリッド、定員バッジ、週表示でのドラッグ、保存時のチェックのすべてに反映されます</td></tr>
                         <tr><td>Book Up To (Days Ahead)</td><td>移動する受付期間: 今日から N 日先まで予約を受け付け、毎日前に進みます</td></tr>
                         <tr><td>Minimum Notice (Hours)</td><td>現在から N 時間以内に始まる予約は不可。保存時にも再チェック</td></tr>
+                        <tr><td>予約の長さ（Booking Length (Minutes)）</td><td>1 回のクリックで予約全体を確保。全体が空いているときだけ予約できます</td></tr>
+                        <tr><td>1 人あたりの上限（Limit per Person）</td><td>顧客ごとの今後の予約数。メールアドレス、または取引先責任者、リード、取引先、ユーザーへの参照項目で数え、保存のたびにサーバー側でチェックします。スタッフは確認のうえで上限を超えて予約できます</td></tr>
                     </tbody>
                 </table>
                 </div>
@@ -721,6 +727,7 @@
                             <li>カレンダーに追加: Outlook、Google、Apple 用の .ics ファイル</li>
                             <li>状況は自動で 1 つに設定され、選択欄は非表示</li>
                             <li>名前やメールアドレスなど、必要な情報を尋ねる詳細フォーム</li>
+                            <li>ほかの人の予約は名前なしの「予約済み」として表示</li>
                         </ul>
                     </div>
                     <div class="gs-card sf">
@@ -732,6 +739,7 @@
                             <li>サイトのゲストユーザーに MultiDatePick - Guest 権限セット</li>
                             <li>予約オブジェクトとリソースオブジェクトのゲスト共有ルール</li>
                             <li>セットアップウィザードで、レコード詳細のポップアップに表示する項目</li>
+                            <li>Show Other People&rsquo;s Bookings As を Busy for site guests に設定</li>
                         </ul>
                     </div>
                 </div>
@@ -945,14 +953,21 @@
                         <thead><tr><th>設定</th><th>API 参照名</th><th>デフォルト</th><th>機能</th></tr></thead>
                         <tbody>
                             <tr id="prop-configName"><td>設定名（Config Name）</td><td><code>configName</code></td><td></td><td>保存済みのセットアップウィザードの設定からすべての設定を読み込みます</td></tr>
-                            <tr id="prop-view"><td>表示</td><td><code>view</code></td><td>calendar</td><td>最初に開くレイアウト: calendar、timeline、week、utilization、agenda。utilization と agenda は読み取り専用</td></tr>
+                            <tr id="prop-view"><td>表示</td><td><code>view</code></td><td>calendar</td><td>最初に開くレイアウト: calendar、timeline、week、utilization、agenda、map、gantt。utilization、agenda、map は読み取り専用</td></tr>
                             <tr id="prop-availableViews"><td>利用可能な表示（Available Views）</td><td><code>availableViews</code></td><td>カレンダー、タイムライン、週、稼働率、予定一覧</td><td>切り替えで選べる表示。地図ビューやガントビューを加えるには <code>map</code> または <code>gantt</code> を追加。デフォルトの表示は常に含まれます</td></tr>
                             <tr id="prop-timelineWindowDays"><td>タイムラインの表示期間 (日)（Timeline Window (Days)）</td><td><code>timelineWindowDays</code></td><td>14</td><td>タイムラインに一度に表示する日数。0 で 1 か月全体</td></tr>
                             <tr id="prop-timelineZoom"><td>タイムラインのズーム（Timeline Zoom）</td><td><code>timelineZoom</code></td><td>week</td><td>最初のズーム: day、week、month。ユーザーが切り替え可能</td></tr>
                             <tr id="prop-timelineGroupByField"><td>Timeline Group By Field</td><td><code>timelineGroupByField</code></td><td></td><td>タイムラインの行を見出しの下にグループ化 (例: 建物ごと)。各グループに定員バー付き</td></tr>
-                            <tr id="prop-maxViewResources"><td>ビューのリソース最大数（Max View Resources）</td><td><code>maxViewResources</code></td><td></td><td>タイムラインと稼働率に描画するリソース行の最大数。予約の多い順。描画する行数を制限するだけで、集計対象は制限しません</td></tr>
+                            <tr id="prop-maxViewResources"><td>ビューのリソース最大数（Max View Resources）</td><td><code>maxViewResources</code></td><td>5</td><td>タイムラインと稼働率に描画するリソース行の最大数。予約の多い順。999 ですべてのリソースを描画。描画する行数を制限するだけで、集計対象は制限しません</td></tr>
                             <tr id="prop-resourceViewFilter"><td>リソース行（Resource Rows）</td><td><code>resourceViewFilter</code></td><td>all</td><td>all、または表示期間内に予約のあるリソースだけを描画する booked</td></tr>
                             <tr id="prop-agendaFields"><td>Agenda Fields</td><td><code>agendaFields</code></td><td></td><td>予定一覧の各行に追加する項目。空欄なら Hover Popover Fields を流用</td></tr>
+                            <tr id="prop-ganttPhaseField"><td>Gantt Phase Field</td><td><code>ganttPhaseField</code></td><td></td><td>ガントビュー: タスクをフェーズにまとめる選択リスト、テキスト、または参照項目。空欄ならリソースごとにまとめます</td></tr>
+                            <tr id="prop-ganttDependsOnField"><td>Gantt Waits On Field</td><td><code>ganttDependsOnField</code></td><td></td><td>ガントビュー: 先に終わる必要があるタスクへの参照項目。セットアップウィザードでリンクオブジェクトを設定すると、1 つのタスクに複数のリンク、リンクの種類、ラグを持たせられます</td></tr>
+                            <tr id="prop-ganttProgressField"><td>Gantt Percent Done Field</td><td><code>ganttProgressField</code></td><td></td><td>ガントビュー: 各バーを塗りつぶす 0 から 100 の数値</td></tr>
+                            <tr id="prop-ganttMilestoneField"><td>Gantt Milestone Field</td><td><code>ganttMilestoneField</code></td><td></td><td>ガントビュー: チェックボックス。チェックしたタスクはマイルストーンの点で表示されます</td></tr>
+                            <tr id="prop-ganttDependencyMode"><td>Gantt Dependency Mode</td><td><code>ganttDependencyMode</code></td><td>push</td><td>push は移動したタスクを待つ後続タスクも移動し、lines はリンクの線だけを表示します</td></tr>
+                            <tr id="prop-ganttSkipWeekends"><td>Gantt Skip Weekends</td><td><code>ganttSkipWeekends</code></td><td>true</td><td>後続タスクの移動、ラグ、日数の計算で土曜日と日曜日を飛ばします</td></tr>
+                            <tr id="prop-ganttColumns"><td>Gantt Columns</td><td><code>ganttColumns</code></td><td></td><td>最大 6 列。{Start},{End},{Days},{Progress} のような組み込みの列、または項目の API 名を指定します</td></tr>
                         </tbody>
                     </table></div>
 
@@ -963,6 +978,7 @@
                             <tr id="prop-label"><td>Button Label</td><td><code>label</code></td><td>Book Resource</td><td>カレンダーを開くボタンの文言</td></tr>
                             <tr id="prop-modalTitle"><td>Calendar Title</td><td><code>modalTitle</code></td><td>Book Resource</td><td>カレンダー上部のタイトル</td></tr>
                             <tr id="prop-showInline"><td>Show Inline (Always Visible)</td><td><code>showInline</code></td><td>false</td><td>ポップアップなしで、カレンダーを常にページに表示</td></tr>
+                            <tr id="prop-displayOnly"><td>Display Only</td><td><code>displayOnly</code></td><td>false</td><td>閲覧専用のカレンダー。選択、保存、編集モード、ドラッグはできません。表示の切り替え、ホバーカード、レコードを開く操作は引き続き使えます</td></tr>
                             <tr id="prop-showDoneButtonInline"><td>Show Done Button in Inline Mode</td><td><code>showDoneButtonInline</code></td><td>true</td><td>[完了] でインラインのカレンダーを概要カードに折りたたみ、クリックで再表示</td></tr>
                             <tr id="prop-twoMonthView"><td>Two-Month View</td><td><code>twoMonthView</code></td><td>false</td><td>2 か月を並べて表示</td></tr>
                             <tr id="prop-calendarSize"><td>カレンダーサイズ（Calendar Size）</td><td><code>calendarSize</code></td><td>full</td><td>tiny、xsmall (Very Small)、small、medium、large、full (Full Width)。Tiny と Very Small はユーティリティバー、サイドバー、ダッシュボードのタイルに収まります。</td></tr>
@@ -980,6 +996,7 @@
                         <tbody>
                             <tr id="prop-resourceObjectApiName"><td>Resource Object API Name</td><td><code>resourceObjectApiName</code></td><td></td><td>予約される対象を保持するオブジェクト。ユーザーを含む任意のオブジェクト</td></tr>
                             <tr id="prop-resourceNameField"><td>Resource Name Field</td><td><code>resourceNameField</code></td><td>Name</td><td>リソースの選択欄に表示する名前</td></tr>
+                            <tr id="prop-resourcePickerLabel"><td>Resource Picker Label</td><td><code>resourcePickerLabel</code></td><td></td><td>リソースの選択欄の上に表示する言葉 (「アドバイザー」や「会議室」など)。空欄ならオブジェクトの表示ラベルを使用</td></tr>
                             <tr id="prop-businessHoursStartField"><td>Business Hours Start Field</td><td><code>businessHoursStartField</code></td><td></td><td>時間項目: 各リソースの受付開始時刻</td></tr>
                             <tr id="prop-businessHoursEndField"><td>Business Hours End Field</td><td><code>businessHoursEndField</code></td><td></td><td>時間項目: 各リソースの受付終了時刻</td></tr>
                             <tr id="prop-capacityField"><td>定員項目（Capacity Field）</td><td><code>capacityField</code></td><td></td><td>時間枠あたりの予約可能数。定員モードと稼働率のパーセント表示を有効化</td></tr>
@@ -1015,10 +1032,16 @@
                         <thead><tr><th>設定</th><th>API 参照名</th><th>デフォルト</th><th>機能</th></tr></thead>
                         <tbody>
                             <tr id="prop-timeInterval"><td>Time Slot Interval (Minutes)</td><td><code>timeInterval</code></td><td>30</td><td>時間枠の長さ。何分でも可</td></tr>
+                            <tr id="prop-availableTimes"><td>Only These Times</td><td><code>availableTimes</code></td><td></td><td>選べる開始時刻をこれだけに限定します。例: 09:00,10:30,13:00</td></tr>
+                            <tr id="prop-availableTimesField"><td>Only These Times Field</td><td><code>availableTimesField</code></td><td></td><td>リソース側で独自の開始時刻を持つテキスト項目。アドバイザーごとに別の時刻を提示できます</td></tr>
+                            <tr id="prop-bookingLength"><td>予約の長さ（Booking Length (Minutes)）</td><td><code>bookingLength</code></td><td></td><td>開始時刻を 1 回クリックすると、この長さの枠をまとめて予約します (枠全体が空いている場合)</td></tr>
                             <tr id="prop-disableTimeSlotGrid"><td>Disable Time Slot Grid (Full-Day Mode)</td><td><code>disableTimeSlotGrid</code></td><td>false</td><td>日付のみの予約 (例: ホテルの宿泊)</td></tr>
                             <tr id="prop-allowDifferentTimes"><td>Allow Different Times Per Date</td><td><code>allowDifferentTimes</code></td><td>false</td><td>日付ごとに個別の時間枠グリッド</td></tr>
                             <tr id="prop-groupTimeSlotsByPeriod"><td>Group Time Slots by Period</td><td><code>groupTimeSlotsByPeriod</code></td><td>false</td><td>午前、午後、夕方でグループ化</td></tr>
                             <tr id="prop-maxTimeSlotSelection"><td>Max Time Slots</td><td><code>maxTimeSlotSelection</code></td><td>0</td><td>1 人のユーザーが選べる時間枠の合計の上限。0 = 無制限</td></tr>
+                            <tr id="prop-maxBookingsPerDay"><td>Max Bookings per Day</td><td><code>maxBookingsPerDay</code></td><td>0</td><td>1 人が 1 日に選べる個別の予約の数。隣り合う時間は 1 件と数えます。0 = 無制限</td></tr>
+                            <tr id="prop-limitPerPerson"><td>1 人あたりの上限（Limit per Person）</td><td><code>limitPerPerson</code></td><td>0</td><td>1 人の顧客が持てる今後の予約の数。保存のたびにサーバー側でチェックします。スタッフは確認のうえで上限を超えて予約できます。0 = 無制限</td></tr>
+                            <tr id="prop-limitPerPersonClientField"><td>Limit per Person Client Field</td><td><code>limitPerPersonClientField</code></td><td></td><td>予約の対象者を示す項目。メールアドレスかテキストの項目、または取引先責任者、リード、取引先、ユーザーへの参照項目</td></tr>
                             <tr id="prop-allowWholeDayNoTimes"><td>Allow Whole-Day (No Times)</td><td><code>allowWholeDayNoTimes</code></td><td>false</td><td>時間枠を選ばずに選んだ日付は終日のレコードとして保存</td></tr>
                             <tr id="prop-timeGridOnly"><td>タイムグリッドのみ（Time Grid Only）</td><td><code>timeGridOnly</code></td><td>false</td><td>カレンダーを非表示にし、暗黙の 1 日分の時間枠グリッドだけを表示</td></tr>
                             <tr id="prop-timeGridDate"><td>Time Grid Date</td><td><code>timeGridDate</code></td><td></td><td>Time Grid Only（タイムグリッドのみ） 用の明示的な日付 (YYYY-MM-DD)</td></tr>
@@ -1050,6 +1073,7 @@
                             <tr id="prop-secondStatusFieldLabel"><td>Second Picklist Label</td><td><code>secondStatusFieldLabel</code></td><td></td><td>2 つ目の選択リストのラベル</td></tr>
                             <tr id="prop-selectableSecondStatuses"><td>Selectable Second-Picklist Values</td><td><code>selectableSecondStatuses</code></td><td></td><td>2 つ目の選択リストで選べる値</td></tr>
                             <tr id="prop-hoverFields"><td>ホバーポップオーバー項目（Hover Popover Fields）</td><td><code>hoverFields</code></td><td></td><td>予約にカーソルを合わせたときに表示する項目</td></tr>
+                            <tr id="prop-bookingPrivacy"><td>Show Other People&rsquo;s Bookings As</td><td><code>bookingPrivacy</code></td><td>Details</td><td>Details、Busy (全員に対して名前のない斜線の「利用不可」ブロックで表示)、または Busy for site guests。名前はサーバー側で取り除かれます</td></tr>
                             <tr id="prop-showSuccessToast"><td>Show In-Component Toast</td><td><code>showSuccessToast</code></td><td>false</td><td>コンポーネント内に描画される確認メッセージ。Experience Cloud では必須</td></tr>
 <tr id="prop-showAddToCalendar"><td>Show Add to Calendar After Saving</td><td><code>showAddToCalendar</code></td><td>false</td><td>保存後、作成したすべての予約を含む 1 つの .ics ファイルを Outlook、Google、Apple 用に提供</td></tr>
 <tr id="prop-calendarLocationField"><td>Calendar File Location Field</td><td><code>calendarLocationField</code></td><td>空欄</td><td>会議室の住所など、リソースの項目で、カレンダーファイルの各予定の場所に入ります。人を予約する場合は空欄にしてください。予定のタイトルにすでに名前が入っています</td></tr>

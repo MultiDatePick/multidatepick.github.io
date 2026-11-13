@@ -64,6 +64,8 @@
                     "Mode édition : changer le statut, déplacer ou supprimer des dates enregistrées",
                     "Dates bloquées depuis n'importe quel objet, première et dernière date sélectionnables, nombre maximal de dates",
                     "Vue sur deux mois",
+                    "Vue Gantt pour les plannings de projet : phases, jalons, dépendances entre tâches et chemin critique",
+                    "Les modifications faites hors du calendrier s'affichent sans recharger la page",
                     "Validé par la revue de sécurité Salesforce AppExchange",
                     "100 % natif Salesforce : les données restent dans votre org",
                     "Vues Calendrier, Chronologie, Semaine, Occupation et Agenda",
@@ -759,6 +761,7 @@
                     </div>
                 </div>
                 <ul class="hm-also" aria-label="Également inclus">
+                    <li><a href="/fr/diagramme-gantt-salesforce.html">Diagramme de Gantt pour les plannings de projet</a></li>
                     <li>Fenêtres au survol avec vos champs</li>
                     <li>Dates bloquées depuis n'importe quel objet</li>
                     <li>Date au plus tôt et au plus tard</li>
@@ -887,7 +890,7 @@
                     <div class="dp-use"><h3>Demandes de congés et de vacances</h3><p>Du lundi au vendredi s'enregistre en une seule plage. Pending, Approved, Denied d'un coup d'œil.</p><ul><li>Plage de dates</li><li>Couleurs de statut</li><li>Récurrence</li></ul></div>
                     <div class="dp-use"><h3>Planning d'astreinte</h3><p>Un lundi sur deux pendant un trimestre en deux clics. Primary, Backup, Swapped.</p><ul><li>Toutes les N semaines</li><li>Du 1er au dernier</li><li>Chargement de l'existant</li></ul></div>
                     <div class="dp-use"><h3>Participation aux événements et inscriptions</h3><p>Une réponse par date d'événement. Les réponses enregistrées s'affichent : pas de doublons.</p><ul><li>Un par date</li><li>Chargement de l'existant</li><li>Couleurs de statut</li></ul></div>
-                    <div class="dp-use"><h3>Jalons et échéances de projet</h3><p>Jalons et dates de revue sur l'enregistrement du projet, chacun avec un libellé.</p><ul><li>Vue sur deux mois</li><li>Nom de l'enregistrement</li></ul></div>
+                    <div class="dp-use"><h3>Jalons et échéances de projet</h3><p>Jalons et dates de revue sur l'enregistrement du projet, chacun avec un libellé. Pour des tâches liées, ouvrez la <a href="/fr/diagramme-gantt-salesforce.html">vue Gantt</a>.</p><ul><li>Vue sur deux mois</li><li>Nom de l'enregistrement</li></ul></div>
                     <div class="dp-use"><h3>Dates de fermeture des sites</h3><p>Marquez les jours fériés et les fermetures. Les autres calendriers les grisent automatiquement.</p><ul><li>Dates bloquées</li><li>N'importe quel objet</li></ul></div>
                     <div class="dp-use"><h3>Calendrier éditorial</h3><p>Tous les mardis et jeudis en une seule récurrence. Replanifiez en déplaçant les dates.</p><ul><li>Récurrence</li><li>Fenêtres au survol</li><li>Mode édition</li></ul></div>
                     <div class="dp-use"><h3>Interventions terrain sur plusieurs jours</h3><p>Faites glisser du lundi au vendredi pour un seul enregistrement d'intervention. Les interventions existantes s'affichent pour éviter les chevauchements.</p><ul><li>Plage de dates</li><li>Chargement de l'existant</li><li>Couleurs de statut</li></ul></div>
@@ -1069,11 +1072,18 @@
 
                         <h3>Vues</h3>
                         <div class="hm-scroll"><table class="gs-table"><tbody>
-                        <tr id="prop-view"><td>Vue (View)</td><td><code>view</code></td><td>Vue d'ouverture : <code>calendar</code> (par défaut), <code>timeline</code>, <code>week</code>, <code>utilization</code>, <code>agenda</code>.</td></tr>
+                        <tr id="prop-view"><td>Vue (View)</td><td><code>view</code></td><td>Vue d'ouverture : <code>calendar</code> (par défaut), <code>timeline</code>, <code>week</code>, <code>utilization</code>, <code>agenda</code>, <code>map</code>, <code>gantt</code>.</td></tr>
                         <tr id="prop-availableViews"><td>Vues disponibles (Available Views)</td><td><code>availableViews</code></td><td>Vues proposées dans le sélecteur, par ex. <code>calendar,timeline,agenda</code>. Vide : Calendrier, Chronologie, Semaine, Occupation et Agenda ; ajoutez <code>map</code> ou <code>gantt</code> pour les vues Carte et Gantt.</td></tr>
                         <tr id="prop-timelineWindowDays"><td>Fenêtre de la chronologie, en jours (Timeline Window (Days))</td><td><code>timelineWindowDays</code></td><td>Nombre de jours affichés à la fois par la chronologie. 14 par défaut ; 0 pour le mois complet.</td></tr>
                         <tr id="prop-timelineZoom"><td>Zoom de la chronologie (Timeline Zoom)</td><td><code>timelineZoom</code></td><td>Zoom de départ : <code>day</code>, <code>week</code> (par défaut) ou <code>month</code>.</td></tr>
                         <tr id="prop-agendaFields"><td>Agenda Fields</td><td><code>agendaFields</code></td><td>Champs supplémentaires sur chaque ligne de l'agenda. Vide : reprend Hover Popover Fields.</td></tr>
+                        <tr id="prop-ganttPhaseField"><td>Gantt Phase Field</td><td><code>ganttPhaseField</code></td><td>Vue Gantt : une liste de sélection, un champ texte ou un champ de référence qui regroupe les tâches en phases.</td></tr>
+                        <tr id="prop-ganttDependsOnField"><td>Gantt Waits On Field</td><td><code>ganttDependsOnField</code></td><td>Vue Gantt : un champ de référence vers la tâche qui doit se terminer avant. Un objet de lien, défini dans l'assistant de configuration, permet plusieurs liens par tâche, des types de lien et un décalage.</td></tr>
+                        <tr id="prop-ganttProgressField"><td>Gantt Percent Done Field</td><td><code>ganttProgressField</code></td><td>Vue Gantt : un nombre de 0 à 100 qui remplit chaque barre.</td></tr>
+                        <tr id="prop-ganttMilestoneField"><td>Gantt Milestone Field</td><td><code>ganttMilestoneField</code></td><td>Vue Gantt : une case à cocher ; les tâches cochées apparaissent comme un point de jalon.</td></tr>
+                        <tr id="prop-ganttDependencyMode"><td>Gantt Dependency Mode</td><td><code>ganttDependencyMode</code></td><td>push déplace les tâches qui attendent une tâche déplacée ; lines dessine seulement les liens.</td></tr>
+                        <tr id="prop-ganttSkipWeekends"><td>Gantt Skip Weekends</td><td><code>ganttSkipWeekends</code></td><td>Les tâches repoussées, le décalage et le décompte des jours sautent le samedi et le dimanche.</td></tr>
+                        <tr id="prop-ganttColumns"><td>Gantt Columns</td><td><code>ganttColumns</code></td><td>Jusqu'à six colonnes, par ex. {Start},{End},{Days},{Progress}, ou des noms d'API de champs.</td></tr>
                         </tbody></table></div>
 
                         <h3>Affichage</h3>
@@ -1081,6 +1091,7 @@
                         <tr id="prop-label"><td>Button Label <span class="dp-tag">Flow</span></td><td><code>label</code></td><td>Texte du bouton qui ouvre le sélecteur. Par défaut « Sélectionner les dates ».</td></tr>
                         <tr id="prop-modalTitle"><td>Calendar Title</td><td><code>modalTitle</code></td><td>Titre en haut du calendrier. Par défaut « Sélectionner les dates ».</td></tr>
                         <tr id="prop-showInline"><td>Show Inline</td><td><code>showInline</code></td><td>Calendrier toujours visible, sans bouton. Activé par défaut sur les pages, désactivé dans un flux.</td></tr>
+                        <tr id="prop-displayOnly"><td>Display Only</td><td><code>displayOnly</code></td><td>Un calendrier en consultation seule : ni sélection, ni enregistrement, ni mode édition, ni glisser-déposer. Les vues, les cartes au survol et l'ouverture d'un enregistrement fonctionnent toujours.</td></tr>
                         <tr id="prop-twoMonthView"><td>Two-Month View</td><td><code>twoMonthView</code></td><td>Deux mois côte à côte.</td></tr>
                         <tr id="prop-calendarSize"><td>Taille du calendrier (Calendar Size)</td><td><code>calendarSize</code></td><td><code>tiny</code>, <code>xsmall</code> (très petit), <code>small</code>, <code>medium</code>, <code>large</code> ou <code>full</code> (pleine largeur, par défaut). Tiny et très petit conviennent aux barres d'utilitaires, aux barres latérales et aux vignettes de tableau de bord.</td></tr>
                         <tr id="prop-dayHeaderFormat"><td>Day Header Format</td><td><code>dayHeaderFormat</code></td><td><code>3</code> = DIM LUN, <code>2</code> = DI LU, <code>1</code> = D L.</td></tr>
@@ -1117,6 +1128,7 @@
                         <tr id="prop-secondStatusFieldLabel"><td>Second Picklist Label</td><td><code>secondStatusFieldLabel</code></td><td>Libellé de la deuxième liste de sélection.</td></tr>
                         <tr id="prop-selectableSecondStatuses"><td>Selectable Second-Picklist Values</td><td><code>selectableSecondStatuses</code></td><td>Valeurs autorisées. Une seule valeur est appliquée automatiquement et masquée.</td></tr>
                         <tr id="prop-hoverFields"><td>Champs de la fenêtre au survol (Hover Popover Fields)</td><td><code>hoverFields</code></td><td>Champs de la carte au survol, par ex. <code>Name,Status__c</code>.</td></tr>
+                        <tr id="prop-bookingPrivacy"><td>Show Other People&rsquo;s Bookings As</td><td><code>bookingPrivacy</code></td><td>Details, Busy (un bloc hachuré Indisponible, sans nom, pour tout le monde) ou Busy for site guests. Les noms sont retirés sur le serveur.</td></tr>
                         <tr id="prop-showSuccessToast"><td>Show In-Component Toast</td><td><code>showSuccessToast</code></td><td>Message d'enregistrement affiché dans le composant. À utiliser sur Experience Cloud.</td></tr>
 <tr id="prop-showAddToCalendar"><td>Show Add to Calendar After Saving</td><td><code>showAddToCalendar</code></td><td>Après l'enregistrement, un fichier .ics avec un événement « journée entière » par date, pour Outlook, Google ou Apple.</td></tr>
                         <tr id="prop-successToastMessage"><td>Success Toast Message (optional)</td><td><code>successToastMessage</code></td><td>Message d'enregistrement personnalisé.</td></tr>
