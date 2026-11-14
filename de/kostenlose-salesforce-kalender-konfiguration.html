@@ -144,6 +144,9 @@
     .cc-btn:focus-visible{outline:3px solid #0F2D52;outline-offset:2px;}
     .cc-fine{color:#6B7280;font-size:.84rem;margin-top:12px;text-align:center;line-height:1.45;}
     .cc-hp{position:absolute !important;left:-9999px !important;top:-9999px !important;width:1px;height:1px;overflow:hidden;}
+    .cc-btn:disabled{opacity:.75;cursor:wait;}
+    .form-error{font-size:.9rem;color:#991B1B;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 12px;margin:12px 0 0;line-height:1.45;}
+    .form-error a{color:#991B1B;font-weight:600;}
     .cc-faq{margin-top:40px;}
     .cc-faq h2{color:#0F2D52;font-size:1.5rem;margin:0 0 14px;text-align:center;}
     .cc-faq details{background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px 18px;margin-bottom:10px;}
@@ -401,10 +404,13 @@
 
             <!-- Honeypot: hidden from humans; bots fill it and we block the submit -->
             <div class="cc-hp" aria-hidden="true"><label>Bitte nicht ausfüllen<input id="mdp_hp_field" name="mdp_hp_field" type="text" tabindex="-1" autocomplete="off"></label></div>
+            <!-- Honeypot for the email service: a person never sees it; a bot that ticks it sends nothing -->
+            <input type="checkbox" name="botcheck" class="cc-hp" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
 
             <p class="cc-count" id="ccCount"><span id="ccN">0</span> von 32.000 Zeichen verwendet</p>
             <p class="cc-over" id="ccOver" role="status" hidden>Ihre Antworten überschreiten das Limit, daher werden die längsten beim Senden gekürzt.</p>
             <button type="submit" class="cc-btn">Kostenlose Konfiguration anfordern</button>
+            <p class="form-error" role="alert" hidden>Das hat gerade leider nicht geklappt. Bitte versuchen Sie es noch einmal oder schreiben Sie uns an <a href="mailto:support@multidatepick.com">support@multidatepick.com</a>.</p>
             <p class="cc-fine">Kostenlos und unverbindlich. Wir verwenden Ihre Angaben nur, um auf diese Anfrage zu antworten.</p>
         </form>
 
@@ -505,6 +511,7 @@
 <!-- /i18n:langnav -->
 </footer>
     <script src="/js/main.js"></script>
+    <script src="/js/lead-form.js"></script>
     <script>
     // Custom config request: every answer goes into ONE plain-text block in the Lead's Description, so
     // the alert email can be pasted straight into a build session. Labels in the block stay in English
@@ -560,10 +567,11 @@
         }
         // The form posts every line break as CR LF, so each one counts twice against the field's limit.
         var size = function (s) { return s.length + (s.match(/\n/g) || []).length; };
+        // The block for the Lead, and the answers in it (shortened the same way) for the email.
         function build() {
             var a = answers();
             var text = block(a, false);
-            if (size(text) <= LIMIT) return text;
+            if (size(text) <= LIMIT) return { text: text, a: a };
             // Over the limit: cut the longest free-text answer, again and again, until the block fits.
             var marker = '\n[trimmed]';
             for (var guard = 0; guard < 20 && size(block(a, true)) > LIMIT; guard++) {
@@ -575,7 +583,7 @@
                 a[longest] = a[longest].replace(/\n\[trimmed\]$/, '').slice(0, keep) + marker;
             }
             text = block(a, true);
-            return size(text) > LIMIT ? text.slice(0, LIMIT - 20) + marker : text;
+            return { text: size(text) > LIMIT ? text.slice(0, LIMIT - 20) + marker : text, a: a };
         }
         function update() {
             var n = size(block(answers(), false));
@@ -613,19 +621,27 @@
         fillSource();
 
         form.addEventListener('submit', function (e) {
-            if (document.getElementById('mdp_hp_field').value) { e.preventDefault(); return; }
+            // Sent by /js/lead-form.js (Salesforce and an email to us), so the browser never posts the form itself.
+            e.preventDefault();
+            if (form.mdpSending || window.mdpLeadIsBot(form)) return;
             fillSource();
             // A value of only spaces passes "required", so trim first and let the browser's own check
             // (in the visitor's language) stop the submit if a required field is now empty.
             form.querySelectorAll('input[type="text"], input[type="email"], textarea:not([hidden])').forEach(function (el) {
                 if (el.id !== 'mdp_hp_field') el.value = el.value.trim();
             });
-            if (!form.checkValidity()) { e.preventDefault(); form.reportValidity(); return; }
-            desc.value = build();
+            if (!form.checkValidity()) { form.reportValidity(); return; }
+            var req = build();
+            desc.value = req.text;
             try { gtag('event', 'contact_submit', { form: 'custom-config' }); } catch (_) {}
+            // The email gets every answered question under its English label, in the form's order.
+            var fields = [];
+            SECTIONS.forEach(function (s) { s[1].forEach(function (q) { fields.push([q[0], req.a[q[0]]]); }); });
+            window.mdpSendLead(form, { subject: 'MultiDatePick: custom config request', replyTo: val('email'), fields: fields });
         });
     })();
     </script>
+    <div class="mdp-strings" hidden><p data-k="form-sending">Wird gesendet...</p></div>
 <!-- i18n:jsstrings -->
     <div class="mdp-strings" hidden><p data-k="expand-image">Bild vergrößern</p><p data-k="expand-diagram">Diagramm vergrößern</p><p data-k="close">Schließen</p><p data-k="prev-image">Vorheriges Bild</p><p data-k="next-image">Nächstes Bild</p><p data-k="image-viewer">Bildansicht</p></div>
     <!-- /i18n:jsstrings -->

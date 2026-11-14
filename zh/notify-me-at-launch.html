@@ -77,6 +77,9 @@
     .lead-btn:hover{background:#ea6a0c;}
     .lead-fine{color:#777;font-size:.82rem;margin-top:14px;text-align:center;line-height:1.4;}
     .lead-hp{position:absolute !important;left:-9999px !important;top:-9999px !important;width:1px;height:1px;overflow:hidden;}
+    .lead-btn:disabled{opacity:.75;cursor:wait;}
+    .form-error{font-size:.9rem;color:#991B1B;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 12px;margin:12px 0 0;line-height:1.45;}
+    .form-error a{color:#991B1B;font-weight:600;}
     @media(max-width:560px){.lead-row{flex-direction:column;gap:0;}}
   </style>
 <!-- i18n:alternates -->
@@ -200,9 +203,12 @@
                 <input type="hidden" id="00Nam000019R2b9" name="00Nam000019R2b9" value=""><!-- First Touch Referrer -->
                 <input type="hidden" id="00Nam000019R2b8" name="00Nam000019R2b8" value=""><!-- First Touch Landing Page -->
                 <input type="hidden" id="00Nam000019R2b7" name="00Nam000019R2b7" value=""><!-- First Touch Date -->
+                <!-- Honeypot for the email service: a person never sees it; a bot that ticks it sends nothing -->
+                <input type="checkbox" name="botcheck" class="lead-hp" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
                 <!-- Honeypot: hidden from humans; bots fill it and we block the submit -->
                 <div class="lead-hp" aria-hidden="true"><label>请勿填写此项<input id="mdp_hp_field" name="mdp_hp_field" type="text" tabindex="-1" autocomplete="off"></label></div>
                 <button type="submit" class="lead-btn">上线时通知我</button>
+                <p class="form-error" role="alert" hidden>抱歉，暂时无法发送。请重试，或发送邮件至 <a href="mailto:support@multidatepick.com">support@multidatepick.com</a>。</p>
                 <p class="lead-fine">您的邮箱仅用于发送 MultiDatePick 动态。绝无垃圾邮件，可随时退订。</p>
             </form>
         </div>
@@ -296,6 +302,7 @@
 <!-- /i18n:langnav -->
 </footer>
     <script src="/js/main.js"></script>
+    <script src="/js/lead-form.js"></script>
     <script>
     // Poster first, then swap in the GIF as it nears the viewport.
     (function () {
@@ -342,18 +349,27 @@
         }
         fillSource();
         form.addEventListener('submit', function(e){
-            if (document.getElementById('mdp_hp_field').value) { e.preventDefault(); return; }
+            // Sent by /js/lead-form.js (Salesforce and an email to us), so the browser never posts the form itself.
+            e.preventDefault();
+            if (form.mdpSending || window.mdpLeadIsBot(form)) return;
             fillSource();
             // A name of only spaces passes "required", so trim the visible fields first and then let
             // the browser's own check (in the visitor's language) stop the submit if one is now empty.
             form.querySelectorAll('input[type="text"], input[type="email"]').forEach(function(el){
                 if (el.id !== 'mdp_hp_field') el.value = el.value.trim();
             });
-            if (!form.checkValidity()) { e.preventDefault(); form.reportValidity(); return; }
+            if (!form.checkValidity()) { form.reportValidity(); return; }
             try { gtag('event', 'contact_submit', { form: 'get-started' }); } catch(_){}
+            var v = function (id) { return document.getElementById(id).value; };
+            window.mdpSendLead(form, {
+                subject: 'MultiDatePick: notify me at launch',
+                replyTo: v('email'),
+                fields: [['First name', v('first_name')], ['Last name', v('last_name')], ['Email', v('email')], ['Company', v('company')]]
+            });
         });
     })();
     </script>
+    <div class="mdp-strings" hidden><p data-k="form-sending">正在发送...</p></div>
 <!-- i18n:jsstrings -->
     <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p><p data-k="prev-image">上一张图片</p><p data-k="next-image">下一张图片</p><p data-k="image-viewer">图片查看器</p></div>
     <!-- /i18n:jsstrings -->
