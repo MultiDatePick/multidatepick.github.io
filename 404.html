@@ -1,6 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- redirect:fallback  An old URL with no stub of its own: try the old-page map (MAP is written by
+       tools/site/redirect-stubs.js from tools/site/redirects.json in the dev repo), then case, trailing
+       slash and .htm variants, then an English slug under a language folder (the English page's hreflang
+       names that language's page). No match: this page stays as it is. -->
+  <script>
+  (function () {
+    var MAP = {"/appexchange-data-shapes.html":"/","/campaigns.html":"/blog/salesforce-campaign-multiple-dates.html","/index-classic.html":"/","/multidatepickbooking.html":"/salesforce-booking-calendar.html"};
+    var HREFLANG = { de: 'de', es: 'es', fr: 'fr', it: 'it', 'pt-br': 'pt-BR', ja: 'ja', zh: 'zh-Hans', hi: 'hi' };
+    var here = location.pathname, tail = location.search + location.hash;
+    try { here = decodeURIComponent(here); } catch (e) {}
+    if (/\.(png|jpe?g|gif|webp|svg|ico|css|js|json|txt|xml|zip)$/i.test(here)) return;
+    var go = function (u) { if (u && u !== here) location.replace(u + tail); };
+    var p = here.toLowerCase().replace(/\/index\.html?$/, '/').replace(/\.htm$/, '.html');
+    if (p.length > 1 && p.charAt(p.length - 1) === '/') p = p.slice(0, -1);
+    if (MAP[p] || MAP[p + '.html']) return go(MAP[p] || MAP[p + '.html']);
+    var seg = p.split('/'), lang = HREFLANG[seg[1]] ? seg[1] : '';
+    var rest = lang ? '/' + seg.slice(2).join('/') : p;
+    var tries = /\.html$/.test(p) ? [p] : [p + '.html', p + '/'];
+    var exists = function (u) { return fetch(u, { method: 'HEAD' }).then(function (r) { return r.ok; }, function () { return false; }); };
+    var first = function (i) {
+      if (i >= tries.length) return Promise.resolve('');
+      return tries[i] === here ? first(i + 1) : exists(tries[i]).then(function (ok) { return ok ? tries[i] : first(i + 1); });
+    };
+    first(0).then(function (u) {
+      if (u || !lang || rest === '/') return go(u);
+      var en = MAP[rest] || MAP[rest + '.html'] || (/\.html$/.test(rest) ? rest : rest + '.html');
+      return fetch(en).then(function (r) { return r.ok ? r.text() : ''; }).then(function (html) {
+        var m = new RegExp('hreflang="' + HREFLANG[lang] + '" href="https://multidatepick\\.com([^"]+)"').exec(html);
+        go(m ? m[1] : '');
+      });
+    }).catch(function () {});
+  })();
+  </script>
+  <!-- /redirect:fallback -->
   <!-- consent:head ft -->
   <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
   <script>
