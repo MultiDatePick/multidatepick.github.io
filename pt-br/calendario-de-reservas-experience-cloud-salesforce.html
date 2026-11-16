@@ -80,6 +80,14 @@
                     },
                     {
                         "@type": "Question",
+                        "name": "Uma reserva de convidado pode ser vinculada a um Contato ou Lead no Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sim, sem código. No Assistente de configuração, ative \"Quem reserva\" e escolha Contato ou Lead e o campo de pesquisa que recebe a pessoa. O convidado digita nome e e-mail ao reservar. O MultiDatePick encontra o Contato (ou Lead) com esse e-mail e vincula a reserva a ele, ou cria um se a pessoa for nova. O convidado nunca vê os dados de ninguém, e Limite por pessoa pode contar por esse campo."
+                        }
+                    },
+                    {
+                        "@type": "Question",
                         "name": "Um usuário convidado pode editar ou cancelar uma reserva?",
                         "acceptedAnswer": {
                             "@type": "Answer",
@@ -492,7 +500,8 @@
                             <tr><td>Config Name<small>configName</small></td><td>Sua configuração do Assistente de Configuração. Preenche os objetos e os campos.</td></tr>
                             <tr><td>Static Parent Record Id<small>staticRecordId</small></td><td>Um registro pai. A página não tem um, então este carrega as reservas existentes e os horários bloqueados.</td></tr>
                             <tr><td>Show Other People's Bookings As<small>bookingPrivacy</small></td><td>Ocupado para convidados do site, para que os visitantes nunca vejam o nome de outro cliente.</td></tr>
-                            <tr><td>Limit per Person<small>limitPerPerson, limitPerPersonClientField</small></td><td>1 dá a cada visitante uma reserva futura, contada pelo e-mail que ele informa no formulário de reserva. Verificado no servidor.</td></tr>
+                            <tr><td>Quem reserva<small>Assistente de configuração, etapa Campos</small></td><td>O convidado digita nome e e-mail; a reserva é vinculada ao Contato ou Lead com esse e-mail, ou a um novo.</td></tr>
+                            <tr><td>Limit per Person<small>limitPerPerson, limitPerPersonClientField</small></td><td>1 dá a cada visitante uma reserva futura, contada pelo e-mail digitado no formulário de reserva ou pelo Contato que "Quem reserva" vincula. Verificado no servidor.</td></tr>
                             <tr><td>Only These Times<small>availableTimes</small></td><td>Ofereça só os horários de início que você escolher, como 9:00, 10:30 e 13:00.</td></tr>
                             <tr><td>Conflict Behavior<small>conflictBehavior</small></td><td>Block (o padrão). Um choque de horários nunca é salvo.</td></tr>
                             <tr><td>Capacity Field<small>capacityField</small></td><td>Uma sessão com 20 vagas fecha em 20.</td></tr>
@@ -522,6 +531,7 @@
                         <tr><td>Ver horários livres e quais horários estão ocupados</td><td class="c"><span class="y" aria-label="Sim">&#10003;</span></td><td class="c"><span class="y" aria-label="Sim">&#10003;</span></td></tr>
                         <tr><td>Reservar (criar um registro)</td><td class="c"><span class="y" aria-label="Sim">&#10003;</span></td><td class="c"><span class="y" aria-label="Sim">&#10003;</span></td></tr>
                         <tr><td>Adicionar a reserva ao Outlook, ao Google Agenda ou ao Calendário da Apple</td><td class="c"><span class="y" aria-label="Sim">&#10003;</span><small><a href="/pt-br/blog/adicionar-ao-calendario-salesforce.html">.ics depois de salvar</a></small></td><td class="c"><span class="y" aria-label="Sim">&#10003;</span></td></tr>
+                        <tr><td>Vinculado ao próprio Contato ou Lead</td><td class="c"><span class="y" aria-label="Sim">&#10003;</span><small>pelo e-mail, <a href="#who-is-booking">Quem reserva</a></small></td><td class="c"><span class="y" aria-label="Sim">&#10003;</span></td></tr>
                         <tr><td>Mover ou editar uma reserva</td><td class="c"><span class="n" aria-label="Não">&#10007;</span><small>limite do Salesforce para convidados</small></td><td class="c"><span class="y" aria-label="Sim">&#10003;</span><small>com permissão</small></td></tr>
                         <tr><td>Cancelar ou excluir</td><td class="c"><span class="n" aria-label="Não">&#10007;</span><small>limite do Salesforce para convidados</small></td><td class="c"><span class="y" aria-label="Sim">&#10003;</span><small>com permissão</small></td></tr>
                         <tr><td>Um calendário pessoal de &ldquo;minhas reservas&rdquo;</td><td class="c"><span class="n" aria-label="Não">&#10007;</span><small>todos os convidados compartilham um usuário</small></td><td class="c"><span class="y" aria-label="Sim">&#10003;</span><small>por um fluxo de tela</small></td></tr>
@@ -532,6 +542,7 @@
                     <div class="gs-card"><b>Acesso de convidado, uma vez por site</b><p>Atribua o conjunto de permissões <b>MultiDatePick - Guest</b> ao usuário convidado do site; ele traz o acesso ao componente e os direitos de leitura e criação permitidos a convidados. Adicione leitura e criação em todos os seus próprios objetos, uma regra de compartilhamento de convidados, e então publique e ative.</p></div>
                     <div class="gs-card sf"><b>Proprietário padrão dos registros</b><p>Convidados não podem ser proprietários de registros, então o Salesforce atribui cada reserva de convidado a um proprietário padrão. Defina-o em Espaços de trabalho do Experience, Administração, Preferências.</p></div>
                 </div>
+                <p class="gs-note" id="who-is-booking"><b>Saiba quem reservou.</b> Ative <b>Quem reserva</b> no Assistente de configuração (etapa Campos) e escolha Contato ou Lead. Cada convidado digita nome e e-mail; a reserva é vinculada ao Contato com esse e-mail, ou a um novo, então as duas reservas de jane@example.com aparecem no Contato da Jane. A busca roda no servidor e o convidado recebe só "reservado". Dê ao usuário convidado a permissão de criar Contato (ou Lead) e acesso ao campo de pesquisa; nenhuma regra de compartilhamento é necessária.</p>
                 <p class="gs-note"><b>Um convidado tenta mover uma reserva?</b> O MultiDatePick diz por que não é possível, em vez de mostrar um erro sem explicação. O checklist completo de seis passos para convidados está em <a href="/pt-br/paginas-de-aplicativo-inicial-experience-cloud.html#guest-sites">Páginas de aplicativo, iniciais e do Experience Cloud</a>.</p>
             </div>
         </section>
@@ -618,6 +629,10 @@
                 <details>
                     <summary>Posso limitar as vagas por sessão em reservas públicas?</summary>
                     <p>Sim. Dê ao recurso uma capacidade, como 12 vagas, e cada horário mostra um selo ao vivo como 3/12. Um horário lotado não pode ser escolhido, então uma sessão pública nunca recebe mais reservas do que tem vagas. Antecedência mínima, intervalos entre reservas e fechamentos também valem para os convidados.</p>
+                </details>
+                <details>
+                    <summary>Uma reserva de convidado pode ser vinculada a um Contato ou Lead no Salesforce?</summary>
+                    <p>Sim, sem código. No Assistente de configuração, ative "Quem reserva" e escolha Contato ou Lead e o campo de pesquisa que recebe a pessoa. O convidado digita nome e e-mail ao reservar. O MultiDatePick encontra o Contato (ou Lead) com esse e-mail e vincula a reserva a ele, ou cria um se a pessoa for nova. O convidado nunca vê os dados de ninguém, e Limite por pessoa pode contar por esse campo.</p>
                 </details>
                 <details>
                     <summary>Um usuário convidado pode editar ou cancelar uma reserva?</summary>

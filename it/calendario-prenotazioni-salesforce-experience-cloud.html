@@ -80,6 +80,14 @@
                     },
                     {
                         "@type": "Question",
+                        "name": "Una prenotazione di un ospite può essere collegata a un Contatto o Lead in Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sì, senza codice. Nella procedura guidata di configurazione attiva \"Chi prenota\" e scegli Contatto o Lead e il campo di ricerca che riceve la persona. L'ospite inserisce nome ed email quando prenota. MultiDatePick trova il Contatto (o Lead) con quell'email e vi collega la prenotazione, oppure lo crea se la persona è nuova. L'ospite non vede mai i dati di nessuno, e Limite per persona può contare in base a quel campo."
+                        }
+                    },
+                    {
+                        "@type": "Question",
                         "name": "Un utente guest può modificare o annullare una prenotazione?",
                         "acceptedAnswer": {
                             "@type": "Answer",
@@ -492,7 +500,8 @@
                             <tr><td>Config Name<small>configName</small></td><td>La tua configurazione della configurazione guidata. Compila oggetti e campi.</td></tr>
                             <tr><td>Static Parent Record Id<small>staticRecordId</small></td><td>Un unico record padre. La pagina non ne ha uno, quindi questo carica le prenotazioni esistenti e gli orari bloccati.</td></tr>
                             <tr><td>Show Other People's Bookings As<small>bookingPrivacy</small></td><td>Busy per i guest del sito, così i visitatori non vedono mai il nome di un altro cliente.</td></tr>
-                            <tr><td>Limit per Person<small>limitPerPerson, limitPerPersonClientField</small></td><td>Con 1, ogni visitatore ha una sola prenotazione futura, contata in base all'email che inserisce nel modulo di prenotazione. Controllato sul server.</td></tr>
+                            <tr><td>Chi prenota<small>Procedura guidata, passaggio Campi</small></td><td>L'ospite inserisce nome ed email; la prenotazione viene collegata al Contatto o Lead con quell'email, oppure a uno nuovo.</td></tr>
+                            <tr><td>Limit per Person<small>limitPerPerson, limitPerPersonClientField</small></td><td>1 dà a ogni visitatore una prenotazione futura, contata in base all'email inserita nel modulo di prenotazione o al Contatto collegato da "Chi prenota". Verificato sul server.</td></tr>
                             <tr><td>Only These Times<small>availableTimes</small></td><td>Offri solo gli orari di inizio che scegli, come 9:00, 10:30 e 13:00.</td></tr>
                             <tr><td>Conflict Behavior<small>conflictBehavior</small></td><td>Block (predefinito). Una sovrapposizione non viene mai salvata.</td></tr>
                             <tr><td>Capacity Field<small>capacityField</small></td><td>Una sessione con 20 posti si chiude a 20.</td></tr>
@@ -522,6 +531,7 @@
                         <tr><td>Vedere le fasce libere e gli orari già occupati</td><td class="c"><span class="y" aria-label="Sì">&#10003;</span></td><td class="c"><span class="y" aria-label="Sì">&#10003;</span></td></tr>
                         <tr><td>Prenotare (creare un record)</td><td class="c"><span class="y" aria-label="Sì">&#10003;</span></td><td class="c"><span class="y" aria-label="Sì">&#10003;</span></td></tr>
                         <tr><td>Aggiungere la prenotazione a Outlook, Google o Apple Calendar</td><td class="c"><span class="y" aria-label="Sì">&#10003;</span><small><a href="/it/blog/aggiungi-al-calendario-salesforce.html">.ics dopo il salvataggio</a></small></td><td class="c"><span class="y" aria-label="Sì">&#10003;</span></td></tr>
+                        <tr><td>Collegato al proprio Contatto o Lead</td><td class="c"><span class="y" aria-label="Sì">&#10003;</span><small>tramite email, <a href="#who-is-booking">Chi prenota</a></small></td><td class="c"><span class="y" aria-label="Sì">&#10003;</span></td></tr>
                         <tr><td>Spostare o modificare una prenotazione</td><td class="c"><span class="n" aria-label="No">&#10007;</span><small>limite guest di Salesforce</small></td><td class="c"><span class="y" aria-label="Sì">&#10003;</span><small>con autorizzazione</small></td></tr>
                         <tr><td>Annullare o eliminare</td><td class="c"><span class="n" aria-label="No">&#10007;</span><small>limite guest di Salesforce</small></td><td class="c"><span class="y" aria-label="Sì">&#10003;</span><small>con autorizzazione</small></td></tr>
                         <tr><td>Un calendario personale &ldquo;le mie prenotazioni&rdquo;</td><td class="c"><span class="n" aria-label="No">&#10007;</span><small>tutti i guest condividono un solo utente</small></td><td class="c"><span class="y" aria-label="Sì">&#10003;</span><small>tramite un flusso su schermo</small></td></tr>
@@ -532,6 +542,7 @@
                     <div class="gs-card"><b>Accesso guest, una volta per sito</b><p>Assegna il set di autorizzazioni <b>MultiDatePick - Guest</b> all'utente guest del sito: include l'accesso al componente e i diritti di lettura e creazione consentiti ai guest. Aggiungi lettura e creazione sui tuoi oggetti, una regola di condivisione guest, poi pubblica e attiva.</p></div>
                     <div class="gs-card sf"><b>Proprietario predefinito dei record</b><p>I guest non possono essere proprietari di record, quindi Salesforce assegna ogni prenotazione guest a un proprietario predefinito. Impostalo in Aree di lavoro di Experience, Amministrazione, Preferenze.</p></div>
                 </div>
+                <p class="gs-note" id="who-is-booking"><b>Sapere chi ha prenotato.</b> Attiva <b>Chi prenota</b> nella procedura guidata di configurazione (passaggio Campi) e scegli Contatto o Lead. Ogni ospite inserisce nome ed email; la prenotazione viene collegata al Contatto con quell'email, o a uno nuovo, così le due prenotazioni di jane@example.com compaiono sul Contatto di Jane. La ricerca avviene sul server e l'ospite riceve solo "prenotato". Concedi all'utente ospite la creazione su Contatto (o Lead) e l'accesso al campo di ricerca; non serve alcuna regola di condivisione.</p>
                 <p class="gs-note"><b>Un guest prova a spostare una prenotazione?</b> MultiDatePick spiega perché non può farlo, invece di mostrare un errore incomprensibile. La checklist guest completa in sei passaggi è in <a href="/it/pagine-app-home-experience.html#guest-sites">Pagine app, iniziali ed Experience</a>.</p>
             </div>
         </section>
@@ -618,6 +629,10 @@
                 <details>
                     <summary>Posso limitare i posti per sessione nelle prenotazioni pubbliche?</summary>
                     <p>Sì. Dai alla risorsa una capacità, ad esempio 12 posti, e ogni fascia oraria mostra un badge in tempo reale come 3/12. Una fascia piena non si può scegliere, quindi una sessione pubblica non riceve mai più prenotazioni dei posti che ha. Preavviso minimo, margini e chiusure valgono anche per i guest.</p>
+                </details>
+                <details>
+                    <summary>Una prenotazione di un ospite può essere collegata a un Contatto o Lead in Salesforce?</summary>
+                    <p>Sì, senza codice. Nella procedura guidata di configurazione attiva "Chi prenota" e scegli Contatto o Lead e il campo di ricerca che riceve la persona. L'ospite inserisce nome ed email quando prenota. MultiDatePick trova il Contatto (o Lead) con quell'email e vi collega la prenotazione, oppure lo crea se la persona è nuova. L'ospite non vede mai i dati di nessuno, e Limite per persona può contare in base a quel campo.</p>
                 </details>
                 <details>
                     <summary>Un utente guest può modificare o annullare una prenotazione?</summary>
