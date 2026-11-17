@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ── Image Lightbox / Expand ── */
     // One overlay per page. A zoomed image shows its caption under it: a carousel slide's caption, otherwise the
-    // figcaption of the figure it sits in. Inside a carousel, previous and next (buttons, Left and Right arrow keys, a
+    // figcaption of the figure it sits in, or a "no code" band step's text. Inside a carousel, previous and next (buttons, Left and Right arrow keys, a
     // swipe) step to the neighbouring slide's image without closing, and closing leaves the carousel on that slide.
     // Escape closes, Tab stays inside the overlay, and focus goes back to the slide's zoom button. Button names come
     // from the page's .mdp-strings (mdpText), so every language gets its own.
@@ -123,7 +123,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function lbCaptionOf(img) {
         const slide = img.closest('.mdp-carousel__slide');
         const fig = img.closest('figure');
-        const cap = slide ? slide.querySelector('.mdp-carousel__caption') : (fig ? fig.querySelector('figcaption') : null);
+        // A "no code" band step has no figure: its step text is the caption.
+        const step = img.closest('.nc-step');
+        const cap = slide ? slide.querySelector('.mdp-carousel__caption') : (fig ? fig.querySelector('figcaption') : (step ? step.querySelector('.nc-body p') : null));
         return cap ? cap.innerHTML.trim() : '';
     }
     function lbShow(i) {
