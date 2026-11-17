@@ -46,7 +46,7 @@
         "description": "MultiDatePick 可直接导入的 JSON 配置。MultiDatePick 是 Salesforce 上可定制程度最高的无代码日历。涵盖人力资源、教育、医疗、房地产、营销、建筑施工、运营等领域的日期选择、时间安排、资源预订和甘特图项目计划场景。",
         "mainEntity": {
             "@type": "ItemList",
-            "numberOfItems": 46
+            "numberOfItems": 47
         },
         "inLanguage": "zh-Hans"
     }
@@ -427,6 +427,7 @@
                         <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
                         <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
                         <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-timesheet-calendar.html">工时表</a></li>
                         <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日历</a></li>
                         <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
                         <li><a href="/zh/salesforce-class-scheduling.html">课程排期</a></li>
@@ -458,7 +459,7 @@
         <section class="guide-hero">
             <div class="container">
                 <h1>Config Library</h1>
-                <p class="subtitle"><strong>46 个可直接导入的配置</strong>，覆盖所有常见排期场景，每个都已选好视图。复制到设置向导，然后在 Lightning 页面、Experience 站点或 Flow 屏幕上按 Config Name（配置名称）使用。字段名称一键即可映射到您的组织。</p>
+                <p class="subtitle"><strong>47 个可直接导入的配置</strong>，覆盖所有常见排期场景，每个都已选好视图。复制到设置向导，然后在 Lightning 页面、Experience 站点或 Flow 屏幕上按 Config Name（配置名称）使用。字段名称一键即可映射到您的组织。</p>
                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
                     <a href="#shape-filter-section" class="btn btn-cta">查找配置</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=configlibrary" class="btn btn-secondary" target="_blank" rel="noopener">试用在线演示</a>
                 </div>
@@ -583,7 +584,7 @@
                         </div>
                     </div>
                     <div class="qa-filter-footer">
-                        <div class="qa-filter-status">显示 <strong id="qaVisibleCount">46</strong> / <span id="qaTotalCount">46</span> 个配置</div>
+                        <div class="qa-filter-status">显示 <strong id="qaVisibleCount">47</strong> / <span id="qaTotalCount">47</span> 个配置</div>
                         <button type="button" class="qa-clear-btn" id="qaClearBtn">清除所有筛选条件</button>
                     </div>
                 </div>
@@ -891,6 +892,36 @@
                     <p>适用于 Dates &amp; Times 组件的配置：选择日期，并为每个日期分配时间。最适合预约、班次、课程，以及任何需要开始/结束时间的场景。</p>
                 </div>
                 <div class="config-grid">
+                    <!-- Weekly Time Sheet: internal first -->
+                    <div class="config-card" id="weekly-time-sheet" data-config-file="Weekly_Time_Sheet.json" data-shape="per-block">
+                        <span class="config-badge badge-datetime">Dates &amp; Times</span>
+                        <h3>每周工时表</h3>
+                        <p class="config-desc">员工在自己的工时表记录上登记一周工时：选择日期，拖选时间，每个时间块都保存为一条关联到项目的工时记录。登记时选择可计费或不可计费。新记录以草稿开始，“提交本周”按钮负责提交，经理在编辑模式中一次批准多条。</p>
+                        <div class="config-note">
+                            <strong>合计与按钮：</strong>在工时记录上添加一个<b>工时</b>公式字段 <code>(End_Time__c - Start_Time__c) / 3600000</code>，并在工时表上（主-详细信息关系）添加累计汇总字段，分别统计总工时、已批准工时、可计费工时和不可计费工时。“提交本周”和“标记为不可计费”按钮运行名为 <code>Submit_Week</code> 和 <code>Mark_Non_Billable</code> 的 Flow，它们接收所选记录的 <code>recordIds</code>。请参阅<a href="/zh/blog/salesforce-timesheet-time-tracking.html">Salesforce 工时管理</a>。</div>
+                        <div class="config-props">
+                            <span class="kp-h">关键设置</span>
+                            <ul>
+                                <li><b>Time Interval (Minutes)</b>（时间间隔（分钟））30 分钟 <code class="api">timeInterval</code></li>
+                                <li><b>Earliest Time（最早时间）</b> 07:00 / <b>Latest Time（最晚时间）</b> 20:00 <code class="api">minTime, maxTime</code></li>
+                                <li><b>Status Colors（状态颜色）</b> Draft/Submitted/Approved/Rejected <code class="api">statusColors</code></li>
+                                <li><b>Selectable Statuses (Status Picker)（可选状态）</b> 仅Draft <code class="api">selectableStatuses</code></li>
+                                <li><b>Second Picklist Field（第二个选项列表字段）</b> Billable__c，标签为“计费” <code class="api">secondStatusField</code></li>
+                                <li><b>Record Details Pop-up（记录详情弹窗）</b> 项目，必填 <code class="api">recordForm</code></li>
+                                <li><b>Show Recurring Pattern Button</b> <code class="api">showRecurringPattern</code></li>
+                                <li><b>Week Starts on Monday</b> <code class="api">weekStartsOnMonday</code></li>
+                                <li><b>Custom Actions（自定义操作）</b> 提交本周、标记为不可计费（编辑模式，草稿记录） <code class="api">Custom_Actions__c</code></li>
+                                <li><b>Hover Popover Fields（悬停弹出框字段）</b> 项目、工时、计费、状态 <code class="api">hoverFields</code></li>
+                                <li><b>Show Record Names in Each Day (在每天显示记录名称)</b> <code class="api">monthShowNames</code></li>
+                            </ul>
+                        </div>
+                        <div class="config-views">
+                            <strong>视图：</strong> <span class="vbadge vbadge-week vbadge-default">周（默认）</span> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-agenda">日程</span>
+                        </div>
+                        <div class="config-btn-group">
+                            <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
+                        </div>
+                    </div>
                     <!-- 1 -->
                     <div class="config-card" id="shift-scheduling" data-config-file="Shift_Scheduling.json" data-shape="per-block">
                         <span class="config-badge badge-datetime">Dates &amp; Times</span>
@@ -2202,6 +2233,7 @@
                         <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
                         <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
                         <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-timesheet-calendar.html">工时表</a></li>
                         <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日历</a></li>
                         <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
                         <li><a href="/zh/salesforce-class-scheduling.html">课程排期</a></li>

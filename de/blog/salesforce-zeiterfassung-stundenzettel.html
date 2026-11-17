@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <!-- consent:head ft -->
+  <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    (function(){var c=null;try{c=JSON.parse(localStorage.getItem('mdp_consent'));if(!c||c.v!==1||!(Date.now()-c.ts<31536000000))c=null;}catch(e){c=null;}window.mdpConsent=c;
+    if(c&&c.analytics)gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.mdpFirstTouch=function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}};if(c&&c.attribution)window.mdpFirstTouch();})();
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script defer src="/js/consent.js"></script>
+  <!-- /consent:head -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeiterfassung in Salesforce: Stundenzettel im Kalender</title>
+    <meta name="description" content="Zeiterfassung in Salesforce im Kalender: Stunden je Projekt buchen, die Woche auf einmal speichern, per Rollup summieren, gesammelt genehmigen. Ohne Code.">
+    <link rel="canonical" href="https://multidatepick.com/de/blog/salesforce-zeiterfassung-stundenzettel.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Timesheet post: same look as the Tasks, Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.ts-narrow { max-width: 640px; margin-left: auto; margin-right: auto; }
+        .section ul li { margin: 6px 0; line-height: 1.6; color: #374151; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <meta property="og:title" content="Zeiterfassung in Salesforce: Stundenzettel im Kalender">
+    <meta property="og:description" content="Zeiterfassung in Salesforce im Kalender: Stunden je Projekt buchen, die Woche auf einmal speichern, per Rollup summieren, gesammelt genehmigen. Ohne Code.">
+    <meta property="og:image" content="https://multidatepick.com/images/de/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/de/blog/salesforce-zeiterfassung-stundenzettel.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="de_DE">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Zeiterfassung in Salesforce: Stundenzettel im Kalender">
+    <meta name="twitter:description" content="Zeiterfassung in Salesforce im Kalender: Stunden je Projekt buchen, die Woche auf einmal speichern, per Rollup summieren, gesammelt genehmigen. Ohne Code.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/de/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-timesheet-time-tracking.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-zeiterfassung-stundenzettel.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/registro-de-horas-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/suivi-du-temps-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/rilevazione-ore-timesheet-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/controle-de-horas-salesforce-timesheet.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-timesheet-time-tracking.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-timesheet-time-tracking.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-timesheet-time-tracking.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-timesheet-time-tracking.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- consent:ui -->
+    <div class="mdp-cc-bar" id="mdpConsentBar" role="region" aria-label="Cookie-Auswahl" hidden>
+        <p>Cookies für Statistik nur mit Ihrer Zustimmung. <span class="mdp-cc-wide">Kein Verkauf, keine Werbung.</span> <a href="/de/datenschutz.html">Datenschutzerklärung</a></p>
+        <div class="mdp-cc-btns">
+            <button type="button" class="mdp-cc-btn mdp-cc-btn--text" data-mdp-consent="settings">Einstellungen</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="reject">Alle ablehnen</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="accept">Alle akzeptieren</button>
+        </div>
+    </div>
+    <dialog class="mdp-cc-dialog" id="mdpConsentDialog" aria-labelledby="mdpConsentTitle" aria-describedby="mdpConsentIntro">
+        <div class="mdp-cc-in">
+            <h2 id="mdpConsentTitle">Cookie-Einstellungen</h2>
+            <button type="button" class="mdp-cc-x" data-mdp-consent="close" aria-label="Schließen">&times;</button>
+            <p class="mdp-cc-intro" id="mdpConsentIntro">Legen Sie fest, was diese Website in Ihrem Browser speichern darf. Sie können das jederzeit über Cookie-Einstellungen unten auf jeder Seite ändern.</p>
+            <div class="mdp-cc-opt">
+                <span class="mdp-cc-name">Technisch notwendig</span> <span class="mdp-cc-desc">Speichert nur Ihre Cookie-Auswahl.</span> <span class="mdp-cc-always">Immer aktiv</span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAnalytics">Statistik</label> <span class="mdp-cc-desc" id="mdpConsentAnalyticsDesc">Google Analytics zählt Besuche und Seitenaufrufe, damit wir die Website verbessern können.</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAnalytics" aria-describedby="mdpConsentAnalyticsDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAttribution">Woher Sie kommen</label> <span class="mdp-cc-desc" id="mdpConsentAttributionDesc">Merkt sich den Link oder die Kampagne, über die Sie zuerst zu uns gekommen sind, und sendet diese Angabe mit unseren Formularen.</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAttribution" aria-describedby="mdpConsentAttributionDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-btns">
+                <button type="button" class="mdp-cc-btn mdp-cc-btn--line" data-mdp-consent="reject">Alle ablehnen</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="save">Auswahl speichern</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- /consent:ui -->
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Demnächst auf der Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Banner schließen" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/de/" class="logo"><img src="/images/logo.png" alt="MultiDatePick-Logo: Salesforce-Kalender für mehrere Termine und Ressourcenbuchung" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Navigation ein-/ausblenden"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Produkt <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/salesforce-mehrfach-datumsauswahl.html">Viele Termine wählen</a></li>
+                        <li><a href="/de/salesforce-datum-zeitfenster-auswahl.html">Termine und Uhrzeiten wählen</a></li>
+                        <li><a href="/de/salesforce-buchungskalender.html">Räume und Personen buchen</a></li>
+                        <li><a href="/de/salesforce-gantt-diagramm.html">Planen mit Gantt-Diagramm</a></li>
+                        <li><a href="/de/blog/salesforce-kalenderansichten.html">Sieben Kalenderansichten</a></li>
+                        <li><a href="/de/salesforce-kalender-konfigurationen.html">Config Library</a></li>
+                        <li><a href="/de/vertrauen-sicherheit.html">Vertrauen &amp; Sicherheit</a></li>
+                        <li><a href="/de/barrierefreiheit-vpat.html">Barrierefreiheit (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Lösungen <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/salesforce-kalender.html">Salesforce-Kalender</a></li>
+                        <li><a href="/de/salesforce-besprechungsraum-buchung.html">Besprechungsraum-Buchung</a></li>
+                        <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Personaldienstleistung &amp; Recruiting</a></li>
+                        <li><a href="/de/salesforce-stundenzettel-kalender.html">Zeiterfassung</a></li>
+                        <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Kampagnenkalender</a></li>
+                        <li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html">Behörden / Section 508</a></li>
+                        <li><a href="/de/salesforce-kursplanung-schulungen.html">Kurs- &amp; Schulungsplanung</a></li>
+                        <li><a href="/de/salesforce-experience-cloud-buchungskalender.html">Buchung in Experience Cloud</a></li>
+                        <li><a href="/de/salesforce-lightning-scheduler-alternative.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/de/preise.html">Preise</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Doku <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/de/blog/no-code-salesforce-kalender.html">No-Code-Einrichtung</a></li>
+                        <li><a href="/de/erste-schritte.html">Erste Schritte</a></li>
+                        <li><a href="/de/benutzerhandbuch.html">Benutzerhandbuch</a></li>
+                        <li><a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a></li>
+                        <li><a href="/de/app-start-experience-seiten.html">App-, Start- &amp; Experience-Seiten</a></li>
+                        <li><a href="/de/fehlerbehebung.html">Fehlerbehebung</a></li>
+                        <li><a href="/de/haeufige-fragen.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/de/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/de/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Live-Demo testen</a></li>
+                <li><a href="/de/zum-start-benachrichtigen.html" class="nav-cta">Zum Start benachrichtigen</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "BlogPosting",
+                "headline": "Zeiterfassung in Salesforce: Stundenzettel im Kalender",
+                "description": "Zeiterfassung in Salesforce im Kalender: Stunden je Projekt buchen, die Woche auf einmal speichern, per Rollup summieren, gesammelt genehmigen. Ohne Code.",
+                "datePublished": "2026-11-17",
+                "dateModified": "2026-11-17",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/de/blog/salesforce-zeiterfassung-stundenzettel.html",
+                "image": "https://multidatepick.com/images/de/blog/salesforce-stundenzettel-zeiterfassung-demo-poster.png",
+                "keywords": "Zeiterfassung Salesforce, Salesforce Stundenzettel, Salesforce Timesheet, Zeiteinträge in Salesforce, abrechenbare Stunden Salesforce, Stundenzettel genehmigen in Salesforce",
+                "inLanguage": "de"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Gibt es in Salesforce einen Stundenzettel?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Nicht für die tägliche Zeiterfassung in Sales Cloud oder Service Cloud. Die meisten Teams legen ein benutzerdefiniertes Objekt für Zeiteinträge an, mit Datum, Startzeit, Endzeit und einer Verknüpfung zu einem wöchentlichen Stundenzettel. MultiDatePick setzt einen Kalender auf diesen Stundenzettel: Mitarbeitende erfassen ihre Woche, indem sie Tage anklicken und Stunden ziehen, und jeder Block wird als Zeiteintrag-Datensatz gespeichert."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Wie erfasse ich in Salesforce dieselben Stunden an mehreren Tagen?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Klicken Sie in der MultiDatePick-Komponente Dates & Times die Tage an und ziehen Sie die Stunden einmal, zum Beispiel 9:00 bis 12:00 und 13:00 bis 17:00 Uhr. Jeder gewählte Tag bekommt dieselben Stunden, und jeder Block wird als eigener Datensatz gespeichert. Für eine ganze Woche wählt „Wiederholungsmuster hinzufügen“ jeden Tag von Montag bis Freitag bis zu einem Enddatum aus. Aktivieren Sie Allow Different Times Per Date, wenn jeder Tag eigene Stunden braucht."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Wie summiere ich die Stunden auf einem Stundenzettel in Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Legen Sie am Zeiteintrag ein Formelfeld Stunden an, (End_Time__c - Start_Time__c) / 3600000, und summieren Sie es mit einem Rollup-Summenfeld über eine Master-Detail-Beziehung auf dem wöchentlichen Stundenzettel. Gefilterte Rollups liefern „Genehmigte Stunden“, „Abrechenbare Stunden“ und „Nicht abrechenbare Stunden“. Das sind alles Salesforce-Felder, per Mausklick angelegt, die sich beim Speichern der Einträge aktualisieren."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Wie erfasse ich abrechenbare und nicht abrechenbare Stunden in Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Fügen Sie dem Zeiteintrag eine Auswahlliste Abrechnung mit den Werten Abrechenbar und Nicht abrechenbar hinzu und legen Sie sie als Second Picklist Field des Kalenders fest. Beim Erfassen wählen die Mitarbeitenden den Wert direkt neben der Tätigkeit, Abrechenbar ist vorbelegt, und der Wert erscheint auf der Hover-Karte und in der Agenda. Zwei gefilterte Rollups auf dem Stundenzettel summieren jede Art, und eine Schaltfläche „Als nicht abrechenbar markieren“ im Bearbeitungsmodus ändert viele Einträge auf einmal."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Kann ein Manager Stundenzettel in Salesforce gesammelt genehmigen?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Ja. Auf einer Seite Teamzeiten, die alle Einträge zeigt, aktiviert der Manager den Bearbeitungsmodus, wählt die Tage und setzt mit „Status ändern in“ den Status Genehmigt für alle aufgelisteten Einträge auf einmal. Eigene Schaltflächen, die einen Flow starten, etwa „Woche einreichen“ für die Person, die ihre Zeit erfasst, erscheinen ebenfalls im Bearbeitungsmodus und wirken nur auf die Status, für die sie eingerichtet sind."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Kann jemand an einem Tag zwei getrennte Schichten erfassen?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Ja. Wählen Sie einen Tag, an dem schon Zeit erfasst ist, und seine Blöcke erscheinen im Zeitraster als belegt. Ziehen Sie einen neuen Block, etwa eine Abendbereitschaft, und er wird als weiterer Eintrag gespeichert. Max Bookings per Day legt fest, wie viele getrennte Blöcke eine Person an einem Tag wählen kann, 0 bedeutet kein Limit."
+                        }
+                    }
+                ],
+                "inLanguage": "de"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/blog/salesforce-stundenzettel-zeiterfassung-demo.webp",
+                "caption": "Animierte Demo eines Stundenzettel-Kalenders in Salesforce: Mittwoch bis Freitag gewählt, 9 bis 12 und 13 bis 17 Uhr einmal gezogen, das Projekt im Pop-up gewählt, sechs Zeiteinträge gespeichert und in der Wochenansicht angezeigt",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/blog/salesforce-stundenzettel-wochenansicht-stunden.png",
+                "caption": "Wochenansicht eines Salesforce-Stundenzettels: Stunden gesamt, Genehmigte, Abrechenbare und Nicht abrechenbare Stunden aus Rollup-Feldern über einer Woche Zeiteinträge in ihren Genehmigungsfarben",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/blog/salesforce-stundenzettel-woche-einreichen.png",
+                "caption": "Salesforce-Stundenzettel im Bearbeitungsmodus mit drei gewählten Tagen: jeder Zeiteintrag mit Stunden und Abrechnung, dazu die Schaltflächen Woche einreichen und Als nicht abrechenbar markieren, die einen Flow starten",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/blog/salesforce-stundenzettel-sammelgenehmigung.png",
+                "caption": "Stundenzettel in Salesforce gesammelt genehmigen: Der Bearbeitungsmodus des Managers listet die Zeiteinträge des ganzen Teams vom Montag mit Mitarbeiter, Stunden und Abrechnung, dazu Status ändern in Genehmigt",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/blog/salesforce-stundenzettel-zweite-schicht.png",
+                "caption": "Zeiterfassung im Salesforce-Kalender, zweite Schicht hinzufügen: Ein Tag mit zwei erfassten Blöcken zeigt sie im Zeitraster als belegt, daneben wird ein Block für die Abendbereitschaft gewählt",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/de/marketing/salesforce-kalender-wiederkehrend-wochentage.png",
+                "caption": "Wiederholungsmuster Wochentage im Salesforce-Kalender: jeder Montag bis Freitag in einem Zeitraum ausgewählt",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Zeiterfassung in Salesforce: Stundenzettel im Kalender</h1>
+                <p class="subtitle">Stunden als Blöcke in der Woche erfassen, jeden Block einem Projekt zuordnen, per Rollup summieren und die Zeiten des Teams gesammelt genehmigen. Jeder Eintrag ist ein Salesforce-Datensatz, eingerichtet per Mausklick.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Veröffentlicht am 17. November 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">„Wie erfasse ich Zeiten in Salesforce?“ „Gibt es in Salesforce einen Stundenzettel?“ „Wie trage ich dieselben Stunden an mehreren Tagen ein?“ Ein Zeiteintrag in Salesforce ist ein Datensatz mit einem Datumsfeld. Eine Woche zu erfassen heißt, für jeden Block an jedem Tag das Formular „Neu“ zu öffnen, und nichts auf dem Bildschirm zeigt die Woche als Woche.</p>
+
+                <p>MultiDatePick setzt einen <strong>Kalender für Zeiteinträge</strong> auf den wöchentlichen Stundenzettel. Tage anklicken, Stunden einmal ziehen, speichern: <strong>ein Zeiteintrag-Datensatz pro Block</strong>, verknüpft mit dem Stundenzettel und seinem Projekt. Status steuern die Genehmigung, eine Auswahlliste Abrechnung trennt abrechenbare von nicht abrechenbarer Zeit, und zwei Standardfelder von Salesforce addieren die Stunden. <strong>Kein Apex.</strong></p>
+
+                <figure class="sc-shot ts-narrow">
+                    <img src="/images/de/blog/salesforce-stundenzettel-zeiterfassung-demo-poster.png" data-gif="/images/de/blog/salesforce-stundenzettel-zeiterfassung-demo.webp" alt="Animierte Demo eines Stundenzettel-Kalenders in Salesforce: Mittwoch bis Freitag gewählt, 9 bis 12 und 13 bis 17 Uhr einmal gezogen, das Projekt im Pop-up gewählt, sechs Zeiteinträge gespeichert und in der Wochenansicht angezeigt" loading="lazy" decoding="async" width="1047" height="1401" data-zoomable>
+                    <figcaption>Drei Tage, zwei Blöcke, einmal speichern: sechs Zeiteinträge in Priyas Woche.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Was Sie bekommen</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>Gleiche Stunden, viele Tage</h3><p>Tage wählen und die Stunden einmal ziehen. Jeder gewählte Tag bekommt sie, oder jeder Tag bekommt eigene.</p></div>
+                    <div class="tl-feat"><h3>Ein Datensatz pro Block</h3><p>9 bis 12 und 13 bis 17 Uhr werden als zwei Zeiteinträge gespeichert, jeder mit eigenem Beginn, Ende und Projekt.</p></div>
+                    <div class="tl-feat"><h3>Abrechenbar oder nicht</h3><p>Die Auswahlliste Abrechnung steht neben der Tätigkeit. Abrechenbare und nicht abrechenbare Stunden werden getrennt summiert.</p></div>
+                    <div class="tl-feat"><h3>Genehmigungsstatus</h3><p>Entwurf, Eingereicht, Genehmigt und Abgelehnt, jeder Status in eigener Farbe, mit einem Filter-Pill für jeden.</p></div>
+                    <div class="tl-feat"><h3>Woche, Kalender, Agenda</h3><p>Die Woche nach Stunden, der Monat auf einen Blick oder eine Liste der Einträge mit Stunden und Abrechnung.</p></div>
+                    <div class="tl-feat"><h3>Gesammelt genehmigen</h3><p>Der Bearbeitungsmodus genehmigt alle Einträge des Teams für einen ganzen Tag auf einmal, und eine Schaltfläche Woche einreichen startet einen Flow.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Eine ganze Woche mit einmal Speichern erfassen</h2>
+                <p>Der Kalender sitzt auf dem wöchentlichen Stundenzettel der Person und öffnet sich in der Wochenansicht, mit der bereits erfassten Zeit in ihren Statusfarben. Den Rest der Woche füllen Sie in fünf Schritten:</p>
+                <ol class="cp-steps">
+                    <li><strong>Tage wählen.</strong> Klicken Sie Mittwoch, Donnerstag und Freitag an, oder nutzen Sie „Wiederholungsmuster hinzufügen“ für jeden Tag von Montag bis Freitag bis zu einem Datum.</li>
+                    <li><strong>Stunden ziehen.</strong> Ziehen Sie im Zeitraster 9:00 bis 12:00, dann 13:00 bis 17:00 Uhr. Jeder gewählte Tag bekommt dieselben Stunden.</li>
+                    <li><strong>Tätigkeit benennen.</strong> Geben Sie ein, wofür die Zeit war, etwa Kunden-Workshop. Abrechnung steht zunächst auf Abrechenbar; für interne Arbeit stellen Sie es um.</li>
+                    <li><strong>Projekt wählen.</strong> „Zeit speichern“ öffnet ein kurzes Pop-up, das nach dem Projekt fragt, damit jeder Eintrag einem Projekt zugeordnet ist.</li>
+                    <li><strong>Speichern.</strong> Jeder Block wird zu einem Zeiteintrag im Status Entwurf, verknüpft mit dem Stundenzettel. Die Wochenansicht zeigt die Einträge sofort.</li>
+                </ol>
+                <p>Fahren Sie mit der Maus über einen Block, um Projekt, Stunden und Abrechnung zu sehen, und öffnen Sie von dort den Datensatz. Hat jeder Tag andere Stunden, aktivieren Sie <strong>Allow Different Times Per Date</strong>: Dann bekommt jeder gewählte Tag ein eigenes Zeitraster, nach Wochen gruppiert.</p>
+                <figure class="sc-shot ts-narrow">
+                    <img src="/images/de/marketing/salesforce-kalender-wiederkehrend-wochentage.png" alt="Wiederholungsmuster Wochentage im Salesforce-Kalender: jeder Montag bis Freitag in einem Zeitraum ausgewählt" loading="lazy" width="1362" height="2338" data-zoomable>
+                    <figcaption>„Wiederholungsmuster hinzufügen“ wählt jeden Tag von Montag bis Freitag bis zu einem Enddatum: „Montag bis Freitag, 9 bis 17 Uhr“ in zwei Schritten.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Stunden mit zwei Salesforce-Feldern summieren</h2>
+                <p>Die Summen kommen aus Feldern, die jeder Salesforce-Admin bereits nutzt, und erscheinen deshalb auf dem Datensatz, in Listenansichten und in Berichten. Zwei Schritte im Objekt-Manager:</p>
+                <ol class="cp-steps">
+                    <li><strong>Eine Formel Stunden am Zeiteintrag.</strong> Eine Zahlenformel, <code>(End_Time__c - Start_Time__c) / 3600000</code>, macht aus jedem Block Stunden: 9:00 bis 12:00 ergibt 3.</li>
+                    <li><strong>Rollups auf dem wöchentlichen Stundenzettel.</strong> Steht der Zeiteintrag in einer Master-Detail-Beziehung zum Stundenzettel, summiert ein Rollup-Summenfeld die Stunden in <strong>Stunden gesamt</strong>. Gefilterte Kopien liefern <strong>Genehmigte Stunden</strong> (Status gleich Genehmigt), <strong>Abrechenbare Stunden</strong> und <strong>Nicht abrechenbare Stunden</strong>.</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/de/blog/salesforce-stundenzettel-wochenansicht-stunden.png" alt="Wochenansicht eines Salesforce-Stundenzettels: Stunden gesamt, Genehmigte, Abrechenbare und Nicht abrechenbare Stunden aus Rollup-Feldern über einer Woche Zeiteinträge in ihren Genehmigungsfarben" loading="lazy" width="1316" height="1965" data-zoomable>
+                    <figcaption>Die Wochensummen stehen auf dem Stundenzettel-Datensatz, direkt über dem Kalender, aus dem sie stammen.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Abrechenbare und nicht abrechenbare Zeit</h2>
+                <p>Fügen Sie dem Zeiteintrag eine Auswahlliste <strong>Abrechnung</strong> mit zwei Werten hinzu, Abrechenbar und Nicht abrechenbar, und machen Sie Abrechenbar zum Standardwert. Legen Sie sie als <strong>Second Picklist Field</strong> des Kalenders fest: Dann erscheint sie neben dem Feld für die Tätigkeit, die Person wählt den Wert beim Erfassen, und jedes Speichern übernimmt ihn. Danach:</p>
+                <ul>
+                    <li><strong>Auf jedem Eintrag sehen.</strong> Nehmen Sie das Feld in Hover Popover Fields und Agenda Fields auf, dann zeigen die Hover-Karte und die Agenda-Liste Abrechenbar oder Nicht abrechenbar neben den Stunden.</li>
+                    <li><strong>Viele auf einmal ändern.</strong> Eine Schaltfläche <strong>Als nicht abrechenbar markieren</strong> im Bearbeitungsmodus startet einen Flow für alle gewählten Einträge im Status Entwurf, etwa für den Vormittag, der sich als interne Schulung herausgestellt hat.</li>
+                    <li><strong>Jede Art summieren.</strong> Die Rollups Abrechenbare Stunden und Nicht abrechenbare Stunden filtern auf Abrechnung. Zeiteinträge sind ganz normale Datensätze, daher kann ein Standardbericht sie auch nach Abrechnung und Projekt gruppieren.</li>
+                </ul>
+                <p>Die Genehmigung behält die Statusfarben, die Abrechnung hat ihr eigenes Feld: So erscheinen beide zusammen auf jedem Eintrag.</p>
+
+                <h2 style="margin-top:44px;">Einreichen, genehmigen, ablehnen</h2>
+                <p>Das <strong>Status Field</strong> trägt die Genehmigung: Entwurf, Eingereicht, Genehmigt und Abgelehnt, jeder Status mit eigener Farbe und einem Pill über dem Kalender, das ihn aus- oder einblendet. Steht <strong>Selectable Statuses</strong> auf Entwurf, beginnen neue Einträge einer Person immer als Entwurf.</p>
+                <p>Ist die Woche fertig, aktiviert die Person den <strong>Bearbeitungsmodus</strong>, wählt die Tage und klickt auf <strong>Woche einreichen</strong>. Das ist eine eigene Aktion, die einen Flow startet, und sie berücksichtigt unter den gewählten Einträgen nur die im Status Entwurf.</p>
+                <figure class="sc-shot ts-narrow">
+                    <img src="/images/de/blog/salesforce-stundenzettel-woche-einreichen.png" alt="Salesforce-Stundenzettel im Bearbeitungsmodus mit drei gewählten Tagen: jeder Zeiteintrag mit Stunden und Abrechnung, dazu die Schaltflächen Woche einreichen und Als nicht abrechenbar markieren, die einen Flow starten" loading="lazy" width="1248" height="738" data-zoomable>
+                    <figcaption>Sechs Einträge im Entwurf gewählt: Woche einreichen sendet sie alle ab, Als nicht abrechenbar markieren stellt ihre Abrechnung um.</figcaption>
+                </figure>
+                <p>Der Manager arbeitet auf einer Seite <strong>Teamzeiten</strong>: derselbe Kalender auf einer App-Seite mit aktiviertem Show All Records, sodass die Einträge aller Personen da sind, jeweils mit dem Namen des Mitarbeiters. Der Bearbeitungsmodus listet die Einträge eines Tages für das ganze Team; mit <strong>Status ändern in</strong> Genehmigt und „Änderungen anwenden“ sind sie in einem Schritt genehmigt. Abgelehnt funktioniert genauso, und die Person sieht den grauen Block Abgelehnt in ihrer eigenen Woche.</p>
+                <figure class="sc-shot">
+                    <img src="/images/de/blog/salesforce-stundenzettel-sammelgenehmigung.png" alt="Stundenzettel in Salesforce gesammelt genehmigen: Der Bearbeitungsmodus des Managers listet die Zeiteinträge des ganzen Teams vom Montag mit Mitarbeiter, Stunden und Abrechnung, dazu Status ändern in Genehmigt" loading="lazy" width="1895" height="666" data-zoomable>
+                    <figcaption>Elf Einträge von fünf Personen, genehmigt mit einem Klick auf „Änderungen anwenden“.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Geteilte Schicht, Abendbereitschaft, ein zusätzlicher Tag</h2>
+                <p>Pläne ändern sich, nachdem die Woche erfasst ist. Wählen Sie einen Tag, an dem schon Zeit steht, und seine Blöcke erscheinen im Zeitraster als belegt; ziehen Sie daneben einen neuen Block, etwa eine Abendbereitschaft von 18:00 bis 19:30 Uhr, und er wird als weiterer Eintrag gespeichert. Zusätzliche Tage funktionieren genauso: anklicken und speichern. <strong>Max Bookings per Day</strong> legt fest, wie viele getrennte Blöcke eine Person an einem Tag wählen kann, 0 bedeutet kein Limit.</p>
+                <figure class="sc-shot">
+                    <img src="/images/de/blog/salesforce-stundenzettel-zweite-schicht.png" alt="Zeiterfassung im Salesforce-Kalender, zweite Schicht hinzufügen: Ein Tag mit zwei erfassten Blöcken zeigt sie im Zeitraster als belegt, daneben wird ein Block für die Abendbereitschaft gewählt" loading="lazy" width="1273" height="741" data-zoomable>
+                    <figcaption>Die zwei Blöcke des Tages bleiben belegt; die Abendbereitschaft kommt daneben dazu.</figcaption>
+                </figure>
+                <p>Erfassen Sie Schichten lieber in einem Bildschirm-Flow (Screen Flow)? Der kostenlose <a href="/de/blog/salesforce-flow-schleife-mehrere-datensaetze.html">Vorlagen-Flow Add Shifts</a> durchläuft die gewählten Blöcke und legt für jeden einen Datensatz an.</p>
+
+                <h2 style="margin-top:44px;">Standard-Salesforce oder ein Stundenzettel-Kalender</h2>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">Aufgabe</th><th>Salesforce-Standard</th><th>Mit MultiDatePick</th></tr></thead>
+                    <tbody>
+                    <tr><td>9 bis 12 und 13 bis 17 Uhr an drei Tagen erfassen</td><td>Sechsmal durch das Formular „Neu“</td><td>Drei Tage wählen, zwei Blöcke ziehen, einmal speichern</td></tr>
+                    <tr><td>Montag bis Freitag, 9 bis 17 Uhr</td><td>Ein Datensatz nach dem anderen</td><td>Wiederholungsmuster hinzufügen, dann die Stunden</td></tr>
+                    <tr><td>Die Woche sehen</td><td>Eine Listenansicht, nach Datum sortiert</td><td>Wochenansicht nach Stunden, in Statusfarben</td></tr>
+                    <tr><td>Abrechenbar oder nicht</td><td>Ein Feld auf jedem Datensatz</td><td>Beim Erfassen gewählt, auf jedem Block sichtbar</td></tr>
+                    <tr><td>Einen Tag für das Team genehmigen</td><td>Jeden Datensatz einzeln bearbeiten</td><td>Bearbeitungsmodus: Status ändern in Genehmigt</td></tr>
+                    <tr><td>Geteilte Schicht hinzufügen</td><td>Noch ein Formular</td><td>Tag wählen, neuen Block ziehen</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">Wer Zeit so erfasst</h2>
+                <p>Teams, deren Mitarbeitende ohnehin den ganzen Tag in Salesforce arbeiten:</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>Beratung und Professional Services</strong><span>Beraterinnen und Berater erfassen Kundenstunden je Projekt, trennen abrechenbare von interner Zeit, und Manager genehmigen die Woche.</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>IT- und Implementierungsteams</strong><span>Stunden für Rollout, Tests und Support je Projekt, Abendbereitschaften werden erfasst, sobald sie anfallen.</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>Agenturen</strong><span>Zeiten für Kreation und Kundenberatung auf dem Projekt jedes Kunden erfasst, bereit für die Monatsrechnung.</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>Customer Success</strong><span>Onboarding- und Schulungsstunden je Kunde, damit der Account-Datensatz die aufgewendete Zeit zeigt.</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>Gemeinnützige Organisationen</strong><span>Arbeitszeit nach Förderprojekt oder Programm, genehmigte Stunden per Rollup summiert für die Berichte an Förderer.</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>Außendienst- und Serviceteams</strong><span>Schichten, geteilte Schichten und Reisezeiten, erfasst von den Leuten, die die Arbeit machen.</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Die Einstellungen dahinter</h2>
+                <p>Jede Einstellung ist ein Feld im Einrichtungsassistenten und eine Eigenschaft der Komponente Dates &amp; Times. Die <a href="/de/salesforce-kalender-konfigurationen.html#weekly-time-sheet">Konfiguration Wöchentlicher Stundenzettel</a> setzt sie alle:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Einstellung</th><th>Was sie für den Stundenzettel tut</th><th style="width:22%;">API-Name</th></tr></thead>
+                    <tbody>
+                    <tr><td>Child Object API Name und Relationship Field API Name</td><td>Time_Entry__c, unter dem wöchentlichen Stundenzettel gespeichert über Time_Sheet__c.</td><td><code>relatedObjectApiName</code>, <code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>Felder für Date, Start Time und End Time</td><td>Entry_Date__c, Start_Time__c und End_Time__c: Tag und Uhrzeiten jedes Blocks.</td><td><code>dateFieldApiName</code>, <code>startTimeField</code>, <code>endTimeField</code></td></tr>
+                    <tr><td>Status Field, Status Colors, Selectable Statuses</td><td>Entwurf, Eingereicht, Genehmigt und Abgelehnt in Farbe; neue Einträge beginnen als Entwurf.</td><td><code>statusField</code>, <code>statusColors</code>, <code>selectableStatuses</code></td></tr>
+                    <tr><td>Second Picklist Field</td><td>Abrechnung: Abrechenbar oder Nicht abrechenbar, beim Erfassen gewählt.</td><td><code>secondStatusField</code></td></tr>
+                    <tr><td>Record Details Pop-up</td><td>Fragt beim Klick auf „Zeit speichern“ nach dem Projekt.</td><td><code>recordForm</code></td></tr>
+                    <tr><td>Schaltfläche für Wiederholungsmuster anzeigen (Show Recurring Pattern Button)</td><td>Jeder Tag von Montag bis Freitag oder ausgewählte Wochentage, bis zu einem Enddatum.</td><td><code>showRecurringPattern</code></td></tr>
+                    <tr><td>Unterschiedliche Zeiten pro Datum zulassen</td><td>Jeder gewählte Tag bekommt eigene Stunden statt einer gemeinsamen Zeitspanne.</td><td><code>allowDifferentTimes</code></td></tr>
+                    <tr><td>Max Bookings per Day</td><td>Wie viele getrennte Blöcke eine Person an einem Tag wählen kann. 0 = kein Limit.</td><td><code>maxBookingsPerDay</code></td></tr>
+                    <tr><td>Enable Edit Mode und Custom Actions</td><td>Viele Einträge auf einmal ändern; Woche einreichen und Als nicht abrechenbar markieren starten einen Flow.</td><td><code>enableEditMode</code>, <code>Custom_Actions__c</code></td></tr>
+                    <tr><td>View und Available Views</td><td>Öffnet in der Wochenansicht, Kalender und Agenda sind einen Klick entfernt.</td><td><code>view</code>, <code>availableViews</code></td></tr>
+                    <tr><td>Show All Records</td><td>Die Seite Teamzeiten des Managers: die Einträge aller Personen in einem Kalender.</td><td><code>showAllRecords</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Mehr als eine Sicht auf die Woche.</strong> Woche, Kalender und Agenda sind drei von sieben Ansichten. <a href="/de/blog/salesforce-kalenderansichten.html">Alle sieben Ansichten ansehen</a>, oder die Seite <a href="/de/salesforce-stundenzettel-kalender.html">Stundenzettel-Kalender für Salesforce</a> für die Einrichtung auf einen Blick.</div>
+
+                <h2 style="margin-top:44px;">Häufige Fragen</h2>
+                <div class="tl-faq">
+                    <details><summary>Gibt es in Salesforce einen Stundenzettel?</summary><p>Nicht für die tägliche Zeiterfassung in Sales Cloud oder Service Cloud. Die meisten Teams legen ein benutzerdefiniertes Objekt für Zeiteinträge an, mit Datum, Startzeit, Endzeit und einer Verknüpfung zu einem wöchentlichen Stundenzettel. MultiDatePick setzt einen Kalender auf diesen Stundenzettel: Mitarbeitende erfassen ihre Woche, indem sie Tage anklicken und Stunden ziehen, und jeder Block wird als Zeiteintrag-Datensatz gespeichert.</p></details>
+                    <details><summary>Wie erfasse ich in Salesforce dieselben Stunden an mehreren Tagen?</summary><p>Klicken Sie in der MultiDatePick-Komponente Dates &amp; Times die Tage an und ziehen Sie die Stunden einmal, zum Beispiel 9:00 bis 12:00 und 13:00 bis 17:00 Uhr. Jeder gewählte Tag bekommt dieselben Stunden, und jeder Block wird als eigener Datensatz gespeichert. Für eine ganze Woche wählt „Wiederholungsmuster hinzufügen“ jeden Tag von Montag bis Freitag bis zu einem Enddatum aus. Aktivieren Sie Allow Different Times Per Date, wenn jeder Tag eigene Stunden braucht.</p></details>
+                    <details><summary>Wie summiere ich die Stunden auf einem Stundenzettel in Salesforce?</summary><p>Legen Sie am Zeiteintrag ein Formelfeld Stunden an, (End_Time__c - Start_Time__c) / 3600000, und summieren Sie es mit einem Rollup-Summenfeld über eine Master-Detail-Beziehung auf dem wöchentlichen Stundenzettel. Gefilterte Rollups liefern „Genehmigte Stunden“, „Abrechenbare Stunden“ und „Nicht abrechenbare Stunden“. Das sind alles Salesforce-Felder, per Mausklick angelegt, die sich beim Speichern der Einträge aktualisieren.</p></details>
+                    <details><summary>Wie erfasse ich abrechenbare und nicht abrechenbare Stunden in Salesforce?</summary><p>Fügen Sie dem Zeiteintrag eine Auswahlliste Abrechnung mit den Werten Abrechenbar und Nicht abrechenbar hinzu und legen Sie sie als Second Picklist Field des Kalenders fest. Beim Erfassen wählen die Mitarbeitenden den Wert direkt neben der Tätigkeit, Abrechenbar ist vorbelegt, und der Wert erscheint auf der Hover-Karte und in der Agenda. Zwei gefilterte Rollups auf dem Stundenzettel summieren jede Art, und eine Schaltfläche „Als nicht abrechenbar markieren“ im Bearbeitungsmodus ändert viele Einträge auf einmal.</p></details>
+                    <details><summary>Kann ein Manager Stundenzettel in Salesforce gesammelt genehmigen?</summary><p>Ja. Auf einer Seite Teamzeiten, die alle Einträge zeigt, aktiviert der Manager den Bearbeitungsmodus, wählt die Tage und setzt mit „Status ändern in“ den Status Genehmigt für alle aufgelisteten Einträge auf einmal. Eigene Schaltflächen, die einen Flow starten, etwa „Woche einreichen“ für die Person, die ihre Zeit erfasst, erscheinen ebenfalls im Bearbeitungsmodus und wirken nur auf die Status, für die sie eingerichtet sind.</p></details>
+                    <details><summary>Kann jemand an einem Tag zwei getrennte Schichten erfassen?</summary><p>Ja. Wählen Sie einen Tag, an dem schon Zeit erfasst ist, und seine Blöcke erscheinen im Zeitraster als belegt. Ziehen Sie einen neuen Block, etwa eine Abendbereitschaft, und er wird als weiterer Eintrag gespeichert. Max Bookings per Day legt fest, wie viele getrennte Blöcke eine Person an einem Tag wählen kann, 0 bedeutet kein Limit.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Woche erfassen. Woche genehmigen.</h2>
+                    <p>Starten Sie mit der <a href="/de/salesforce-kalender-konfigurationen.html#weekly-time-sheet">Konfiguration Wöchentlicher Stundenzettel</a>, oder klicken Sie sich durch die Live-Demo.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/de/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-timesheet-time-tracking" class="btn btn-demo" target="_blank" rel="noopener">Live-Demo testen</a> <a href="/de/zum-start-benachrichtigen.html" class="btn btn-primary">Zum Start benachrichtigen</a> <a href="/de/salesforce-stundenzettel-kalender.html" class="btn btn-secondary">Stundenzettel-Kalender</a>
+                    </div>
+                    <ul class="check-list"><li>$25/Benutzer/Monat, alle Funktionen</li><li>30 Tage kostenlos, ohne Kreditkarte</li><li>Ohne Apex</li><li>Per Mausklick eingerichtet</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Weiterführende Artikel</h3>
+                    <ul>
+                        <li><a href="/de/salesforce-stundenzettel-kalender.html">Der Stundenzettel-Kalender für Salesforce, die Einrichtung auf einen Blick</a></li>
+                        <li><a href="/de/blog/salesforce-wiederkehrende-termine.html">Wiederkehrende Termine in Salesforce</a></li>
+                        <li><a href="/de/blog/salesforce-flow-schleife-mehrere-datensaetze.html">Viele Datensätze aus einem Bildschirm-Flow erstellen</a></li>
+                        <li><a href="/de/blog/salesforce-kalender-zeitfenster-auswahl.html">Die Zeitfenster-Auswahl für Salesforce</a></li>
+                        <li><a href="/de/salesforce-datum-zeitfenster-auswahl.html">Der Kalender Dates &amp; Times</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/de/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick-Logo: Salesforce-Kalender für mehrere Termine und Ressourcenbuchung" width="180" height="45">
+                    </a>
+                    <p>Kalender, Buchungen und Gantt-Diagramme für jedes Salesforce-Objekt. Ohne Code.</p>
+                </div>
+                <div class="footer-links">
+                    <h2>Produkt</h2>
+                    <ul>
+                        <li><a href="/de/salesforce-mehrfach-datumsauswahl.html">Viele Termine wählen</a></li>
+                        <li><a href="/de/salesforce-datum-zeitfenster-auswahl.html">Termine und Uhrzeiten wählen</a></li>
+                        <li><a href="/de/salesforce-buchungskalender.html">Räume und Personen buchen</a></li>
+                        <li><a href="/de/salesforce-gantt-diagramm.html">Planen mit Gantt-Diagramm</a></li>
+                        <li><a href="/de/blog/salesforce-kalenderansichten.html">Sieben Kalenderansichten</a></li>
+                        <li><a href="/de/salesforce-kalender-konfigurationen.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Lösungen</h2>
+                    <ul>
+                        <li><a href="/de/salesforce-kalender.html">Salesforce-Kalender</a></li>
+                        <li><a href="/de/salesforce-besprechungsraum-buchung.html">Besprechungsraum-Buchung</a></li>
+                        <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Personaldienstleistung &amp; Recruiting</a></li>
+                        <li><a href="/de/salesforce-stundenzettel-kalender.html">Zeiterfassung</a></li>
+                        <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Kampagnenkalender</a></li>
+                        <li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html">Behörden / Section 508</a></li>
+                        <li><a href="/de/salesforce-kursplanung-schulungen.html">Kurs- &amp; Schulungsplanung</a></li>
+                        <li><a href="/de/salesforce-experience-cloud-buchungskalender.html">Buchung in Experience Cloud</a></li>
+                        <li><a href="/de/salesforce-lightning-scheduler-alternative.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Doku</h2>
+                    <ul>
+                        <li><a href="/de/erste-schritte.html">Erste Schritte</a></li>
+                        <li><a href="/de/benutzerhandbuch.html">Benutzerhandbuch</a></li>
+                        <li><a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a></li>
+                        <li><a href="/de/app-start-experience-seiten.html">App-, Start- &amp; Experience-Seiten</a></li>
+                        <li><a href="/de/fehlerbehebung.html">Fehlerbehebung</a></li>
+                        <li><a href="/de/haeufige-fragen.html">FAQ</a></li>
+                    </ul>
+                    <h2>Für Entwickler</h2>
+                    <ul>
+                        <li><a href="/de/salesforce-kalender-entwickler-leitfaden.html">Entwicklerhandbuch</a></li>
+                        <li><a href="/de/flow-mit-vs-code-bereitstellen.html">Flow bereitstellen (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Unternehmen</h2>
+                    <ul>
+                        <li><a href="/de/preise.html">Preise</a></li>
+                        <li><a href="/de/blog/">Blog</a></li>
+                        <li><a href="/de/vertrauen-sicherheit.html">Vertrauen &amp; Sicherheit</a></li>
+                        <li><a href="/de/barrierefreiheit-vpat.html">Barrierefreiheit</a></li>
+                        <li><a href="/de/zum-start-benachrichtigen.html">Zum Start benachrichtigen</a></li>
+                        <li><a href="/de/kostenlose-salesforce-kalender-konfiguration.html">Kostenlose individuelle Konfiguration</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Alle Rechte vorbehalten.</span>
+                <!-- consent:footer --><div class="footer-social footer-legal"><a href="/de/datenschutz.html">Datenschutzerklärung</a><a href="/de/datenschutz.html#cookie-settings" data-mdp-consent="open">Cookie-Einstellungen</a></div><!-- /consent:footer -->
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Sprache" translate="no"><ul><li><a href="/blog/salesforce-timesheet-time-tracking.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-zeiterfassung-stundenzettel.html" hreflang="de" lang="de" aria-current="page">Deutsch</a></li><li><a href="/es/blog/registro-de-horas-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/suivi-du-temps-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/rilevazione-ore-timesheet-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/controle-de-horas-salesforce-timesheet.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-timesheet-time-tracking.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-timesheet-time-tracking.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-timesheet-time-tracking.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Bild vergrößern</p><p data-k="expand-diagram">Diagramm vergrößern</p><p data-k="close">Schließen</p><p data-k="prev-image">Vorheriges Bild</p><p data-k="next-image">Nächstes Bild</p><p data-k="image-viewer">Bildansicht</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

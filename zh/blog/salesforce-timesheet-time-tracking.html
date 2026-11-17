@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- consent:head ft -->
+  <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    (function(){var c=null;try{c=JSON.parse(localStorage.getItem('mdp_consent'));if(!c||c.v!==1||!(Date.now()-c.ts<31536000000))c=null;}catch(e){c=null;}window.mdpConsent=c;
+    if(c&&c.analytics)gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.mdpFirstTouch=function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}};if(c&&c.attribution)window.mdpFirstTouch();})();
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script defer src="/js/consent.js"></script>
+  <!-- /consent:head -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 工时管理：在日历上填写工时表</title>
+    <meta name="description" content="在 Salesforce 日历上记录工时：按项目登记工时，一次保存填满一周，用累计汇总字段合计，并批量审批工时表。无需代码。">
+    <link rel="canonical" href="https://multidatepick.com/zh/blog/salesforce-timesheet-time-tracking.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Timesheet post: same look as the Tasks, Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.ts-narrow { max-width: 640px; margin-left: auto; margin-right: auto; }
+        .section ul li { margin: 6px 0; line-height: 1.6; color: #374151; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <meta property="og:title" content="Salesforce 工时管理：在日历上填写工时表">
+    <meta property="og:description" content="在 Salesforce 日历上记录工时：按项目登记工时，一次保存填满一周，用累计汇总字段合计，并批量审批工时表。无需代码。">
+    <meta property="og:image" content="https://multidatepick.com/images/zh/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/blog/salesforce-timesheet-time-tracking.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 工时管理：在日历上填写工时表">
+    <meta name="twitter:description" content="在 Salesforce 日历上记录工时：按项目登记工时，一次保存填满一周，用累计汇总字段合计，并批量审批工时表。无需代码。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/zh/multidatepick-twitter-card.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-timesheet-time-tracking.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/salesforce-zeiterfassung-stundenzettel.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/registro-de-horas-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/suivi-du-temps-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/rilevazione-ore-timesheet-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/controle-de-horas-salesforce-timesheet.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-timesheet-time-tracking.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-timesheet-time-tracking.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-timesheet-time-tracking.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-timesheet-time-tracking.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- consent:ui -->
+    <div class="mdp-cc-bar" id="mdpConsentBar" role="region" aria-label="Cookie 选择" hidden>
+        <p>仅在您同意后，我们才使用 Cookie 进行分析。<span class="mdp-cc-wide">数据绝不出售，也不用于广告。</span> <a href="/zh/privacy.html">隐私政策</a></p>
+        <div class="mdp-cc-btns">
+            <button type="button" class="mdp-cc-btn mdp-cc-btn--text" data-mdp-consent="settings">设置</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="reject">全部拒绝</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="accept">全部接受</button>
+        </div>
+    </div>
+    <dialog class="mdp-cc-dialog" id="mdpConsentDialog" aria-labelledby="mdpConsentTitle" aria-describedby="mdpConsentIntro">
+        <div class="mdp-cc-in">
+            <h2 id="mdpConsentTitle">Cookie 设置</h2>
+            <button type="button" class="mdp-cc-x" data-mdp-consent="close" aria-label="关闭">&times;</button>
+            <p class="mdp-cc-intro" id="mdpConsentIntro">选择本网站可以在您的浏览器中存储哪些内容。您可以随时通过每个页面底部的“Cookie 设置”进行更改。</p>
+            <div class="mdp-cc-opt">
+                <span class="mdp-cc-name">网站运行所必需</span> <span class="mdp-cc-desc">仅记住您的 Cookie 选择。</span> <span class="mdp-cc-always">始终开启</span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAnalytics">分析</label> <span class="mdp-cc-desc" id="mdpConsentAnalyticsDesc">Google Analytics 统计访问量和浏览的页面，帮助我们改进网站。</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAnalytics" aria-describedby="mdpConsentAnalyticsDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAttribution">访问来源</label> <span class="mdp-cc-desc" id="mdpConsentAttributionDesc">记住最初将您带到本网站的链接或推广活动，并随表单一起发送。</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAttribution" aria-describedby="mdpConsentAttributionDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-btns">
+                <button type="button" class="mdp-cc-btn mdp-cc-btn--line" data-mdp-consent="reject">全部拒绝</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="save">保存选择</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- /consent:ui -->
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/multidatepickdates.html">选择多个日期</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">选择日期和时间</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">预订会议室和人员</a></li>
+                        <li><a href="/zh/salesforce-gantt-chart.html">用甘特图规划项目</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">七种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-timesheet-calendar.html">工时表</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日历</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-class-scheduling.html">课程排期</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/blog/no-code-salesforce-calendar.html">无代码设置</a></li>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "BlogPosting",
+                "headline": "Salesforce 工时管理：在日历上填写工时表",
+                "description": "在 Salesforce 日历上记录工时：按项目登记工时，一次保存填满一周，用累计汇总字段合计，并批量审批工时表。无需代码。",
+                "datePublished": "2026-11-17",
+                "dateModified": "2026-11-17",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/zh/blog/salesforce-timesheet-time-tracking.html",
+                "image": "https://multidatepick.com/images/zh/blog/salesforce-timesheet-calendar-poster.png",
+                "keywords": "Salesforce 工时表, Salesforce 工时管理, Salesforce 工时记录, Salesforce 工时日历, Salesforce 可计费工时, Salesforce 工时审批",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce 有工时表功能吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sales Cloud 和 Service Cloud 中没有用于日常工时记录的工时表。大多数团队会建一个“工时记录”（Time Entry）自定义对象，包含日期、开始时间和结束时间，并关联到每周的“工时表”（Time Sheet）。MultiDatePick 在工时表上放一个日历，员工单击日期、拖选时间即可登记一周工时，每个时间块都保存为一条工时记录。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "如何在 Salesforce 中为多天记录相同的工时？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "使用 MultiDatePick 的 Dates & Times 组件，先单击日期，再拖选一次时间，例如 9:00 至 12:00 和 13:00 至 17:00。每个选中的日期都会得到相同的时间，每个时间块各自保存为一条记录。要填满一整周，用“添加循环模式”选中截至结束日期的每个工作日。如果每天的时间不同，请开启 Allow Different Times Per Date（允许每个日期使用不同时间）。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "如何合计 Salesforce 工时表上的工时？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "在工时记录上添加一个“工时”公式字段：(End_Time__c - Start_Time__c) / 3600000，再通过主-详细信息关系，用累计汇总字段把它汇总到每周工时表上。再添加几个带筛选条件的累计汇总字段，分别得到已批准工时、可计费工时和不可计费工时。这些都是在 Salesforce 中点选即可创建的字段，记录保存时自动更新。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "如何在 Salesforce 中跟踪可计费和不可计费工时？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "在工时记录上添加一个“计费”选项列表，包含“可计费”和“不可计费”两个值，并将其设为日历的 Second Picklist Field（第二个选项列表字段）。员工登记工时时在工作内容旁边选择它，默认值为“可计费”，并显示在悬停卡片和日程视图中。工时表上的两个带筛选条件的累计汇总字段分别合计两类工时，编辑模式中的“标记为不可计费”按钮可一次更改多条记录。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "经理能在 Salesforce 中批量审批工时表吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "能。在显示所有工时记录的“团队工时”页面上，经理开启编辑模式，选中日期，然后用“将状态更改为”把列出的所有记录一次设为“已批准”。运行 Flow 的自定义按钮（例如供员工使用的“提交本周”）也会出现在编辑模式中，并且只作用于为其设定的状态。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "一天可以记录两段分开的班次吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "可以。选中一个已有工时的日期，它的时间块会在时间网格中显示为已占用；再拖选一个新时间块，例如晚间值班，它就会另存为一条记录。Max Bookings per Day（每天最大预订数）设置一个人一天最多可选几个独立时间块，0 表示不限。"
+                        }
+                    }
+                ],
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-timesheet-calendar.webp",
+                "caption": "Salesforce 工时表日历动画演示：选中周三至周五，一次拖选 9 点至 12 点和 13 点至 17 点，在弹窗中选择项目，保存六条工时记录并显示在周视图中",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-timesheet-week-view.png",
+                "caption": "每周工时表记录上的 Salesforce 工时表周视图：累计汇总字段显示总工时、已批准工时、可计费工时和不可计费工时，下方是一周按审批状态着色的工时记录",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-timesheet-submit-week.png",
+                "caption": "选中三天的 Salesforce 工时表编辑模式：列出每条工时记录的工时和计费，以及运行 Flow 的“提交本周”和“标记为不可计费”按钮",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-timesheet-bulk-approve.png",
+                "caption": "Salesforce 工时批量审批：经理的编辑模式列出全团队周一的工时记录，包含员工、工时和计费，并将状态更改为“已批准”",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-timesheet-add-shift.png",
+                "caption": "Salesforce 工时记录日历添加第二段班次：已记录两个时间块的日期在时间网格中显示为已占用，旁边正在选择晚间值班时间块",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/marketing/salesforce-calendar-recurring-weekdays.png",
+                "caption": "Salesforce 日历的工作日循环模式：选中日期范围内每个周一至周五",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce 工时管理：在日历上填写工时表</h1>
+                <p class="subtitle">在一周的日历上按时间块记录工时，每块关联一个项目，用累计汇总字段合计，并批量审批团队工时。每条工时都是 Salesforce 记录，点几下即可设置。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">发布于 2026 年 11 月 17 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">“如何在 Salesforce 中记录工时？”“Salesforce 有工时表吗？”“如何为多天记录相同的工时？”在 Salesforce 中，一条工时记录就是带一个日期字段的记录。登记一周工时，意味着要为每一天的每个时间块打开一次“新建”表单，而屏幕上也看不到整周的全貌。</p>
+
+                <p>MultiDatePick 在每周工时表记录上放置一个<strong>工时记录日历</strong>。单击日期，拖选一次时间，然后保存：<strong>每个时间块生成一条工时记录</strong>，关联到工时表及其项目。状态驱动审批，“计费”选项列表区分可计费与不可计费工时，两个常规的 Salesforce 字段负责合计工时。<strong>无需 Apex。</strong></p>
+
+                <figure class="sc-shot ts-narrow">
+                    <img src="/images/zh/blog/salesforce-timesheet-calendar-poster.png" data-gif="/images/zh/blog/salesforce-timesheet-calendar.webp" alt="Salesforce 工时表日历动画演示：选中周三至周五，一次拖选 9 点至 12 点和 13 点至 17 点，在弹窗中选择项目，保存六条工时记录并显示在周视图中" loading="lazy" decoding="async" width="1047" height="1359" data-zoomable>
+                    <figcaption>三天、两个时间块、一次保存：Priya 的一周新增六条工时记录。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">能得到什么</h2>
+                <div class="tl-feats tl-wide">
+                    <div class="tl-feat"><h3>多天相同工时</h3><p>选好日期，拖选一次时间。所有选中的日期都用这段时间，也可以每天单独设置。</p></div>
+                    <div class="tl-feat"><h3>每个时间块一条记录</h3><p>9 点至 12 点和 13 点至 17 点保存为两条工时记录，各有自己的开始时间、结束时间和项目。</p></div>
+                    <div class="tl-feat"><h3>是否可计费</h3><p>“计费”选项列表就在工作内容旁边。可计费和不可计费工时分别合计。</p></div>
+                    <div class="tl-feat"><h3>审批状态</h3><p>草稿、已提交、已批准和已拒绝，各有自己的颜色，每种状态都有一个筛选标签。</p></div>
+                    <div class="tl-feat"><h3>周、日历、日程</h3><p>按小时查看一周，一眼看清整月，或以列表查看每条记录的工时和计费。</p></div>
+                    <div class="tl-feat"><h3>批量审批</h3><p>编辑模式可一次审批团队一整天的工时记录，“提交本周”按钮则运行一个 Flow。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">一次保存，登记一周工时</h2>
+                <p>日历放在员工每周的工时表上，打开即是周视图，已登记的工时按状态颜色显示。填完本周剩余工时只需五步：</p>
+                <ol class="cp-steps">
+                    <li><strong>选择日期。</strong>单击周三、周四和周五，或使用“添加循环模式”选中截至某个日期的每个工作日。</li>
+                    <li><strong>拖选时间。</strong>在时间网格上拖选 9:00 至 12:00，再拖选 13:00 至 17:00。所有选中的日期都会得到相同的时间。</li>
+                    <li><strong>填写工作内容。</strong>输入这段时间做了什么，例如“客户研讨会”。“计费”默认为“可计费”；内部工作请切换为“不可计费”。</li>
+                    <li><strong>选择项目。</strong>点击“保存工时”会弹出一个简短的窗口，要求选择项目，因此每条记录都关联到一个项目。</li>
+                    <li><strong>保存。</strong>每个时间块都成为一条状态为“草稿”的工时记录，关联到工时表。周视图会立即显示它们。</li>
+                </ol>
+                <p>将鼠标悬停在任意时间块上，即可查看其项目、工时和计费，并可从那里打开记录。如果每天的时间不同，请开启 <strong>Allow Different Times Per Date</strong>（允许每个日期使用不同时间）：每个选中的日期都会有自己的时间网格，按周分组。</p>
+                <figure class="sc-shot ts-narrow">
+                    <img src="/images/zh/marketing/salesforce-calendar-recurring-weekdays.png" alt="Salesforce 日历的工作日循环模式：选中日期范围内每个周一至周五" loading="lazy" width="1362" height="2338" data-zoomable>
+                    <figcaption>“添加循环模式”可选中截至结束日期的每个工作日：两步完成“每个工作日 9 点至 17 点”。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">用两个 Salesforce 字段合计工时</h2>
+                <p>合计来自每位 Salesforce 管理员都熟悉的字段，因此会显示在记录、列表视图和报表中。在对象管理器中只需两步：</p>
+                <ol class="cp-steps">
+                    <li><strong>工时记录上的“工时”公式字段。</strong>一个数字型公式 <code>(End_Time__c - Start_Time__c) / 3600000</code> 把每个时间块换算成小时数：9:00 至 12:00 即为 3。</li>
+                    <li><strong>每周工时表上的累计汇总字段。</strong>工时记录与工时表建立主-详细信息关系后，一个累计汇总字段把工时求和到<strong>总工时</strong>。再添加带筛选条件的副本，即可得到<strong>已批准工时</strong>（状态等于“已批准”）、<strong>可计费工时</strong>和<strong>不可计费工时</strong>。</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/zh/blog/salesforce-timesheet-week-view.png" alt="每周工时表记录上的 Salesforce 工时表周视图：累计汇总字段显示总工时、已批准工时、可计费工时和不可计费工时，下方是一周按审批状态着色的工时记录" loading="lazy" width="1313" height="1913" data-zoomable>
+                    <figcaption>本周合计显示在工时表记录上，就在为其提供数据的日历上方。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">可计费与不可计费工时</h2>
+                <p>在工时记录上添加一个<strong>计费</strong>选项列表，包含“可计费”和“不可计费”两个值，并把“可计费”设为默认值。将它设为日历的 <strong>Second Picklist Field</strong>（第二个选项列表字段）：它会出现在工作内容输入框旁边，员工登记工时时顺手选择，每次保存都会带上它。然后：</p>
+                <ul>
+                    <li><strong>每条记录上都能看到。</strong>把该字段加入 Hover Popover Fields（悬停弹出框字段）和 Agenda Fields（日程字段），悬停卡片和日程列表就会在工时旁显示“可计费”或“不可计费”。</li>
+                    <li><strong>一次更改多条。</strong>编辑模式中的<strong>标记为不可计费</strong>按钮会对每条选中的草稿记录运行一个 Flow，适合那个后来发现其实是内部培训的上午。</li>
+                    <li><strong>分别合计。</strong>可计费工时和不可计费工时两个累计汇总字段按“计费”筛选。工时记录都是普通记录，所以标准报表也能按计费和项目分组。</li>
+                </ul>
+                <p>审批沿用状态颜色，计费有自己的字段，所以两者会同时显示在每条记录上。</p>
+
+                <h2 style="margin-top:44px;">提交、批准、拒绝</h2>
+                <p><strong>Status Field</strong>（状态字段）承载审批：草稿、已提交、已批准和已拒绝，每种状态都有自己的颜色，日历上方还有对应的标签，可显示或隐藏该状态。把 <strong>Selectable Statuses</strong>（可选状态）设为“草稿”，员工新建的记录就始终以草稿开始。</p>
+                <p>一周结束后，员工开启<strong>编辑模式</strong>，选中日期，然后点击<strong>提交本周</strong>。这是一个运行 Flow 的自定义操作，只处理所选记录中的草稿记录。</p>
+                <figure class="sc-shot ts-narrow">
+                    <img src="/images/zh/blog/salesforce-timesheet-submit-week.png" alt="选中三天的 Salesforce 工时表编辑模式：列出每条工时记录的工时和计费，以及运行 Flow 的“提交本周”和“标记为不可计费”按钮" loading="lazy" width="1248" height="738" data-zoomable>
+                    <figcaption>选中六条草稿记录：“提交本周”一次全部提交，“标记为不可计费”切换它们的计费类型。</figcaption>
+                </figure>
+                <p>经理在<strong>团队工时</strong>页面上审批：同一个日历放在应用程序页面上，并开启 Show All Records（显示所有记录），所有人的工时记录都在其中，每条都带有员工姓名。编辑模式列出全团队某一天的记录；<strong>将状态更改为</strong>“已批准”并点击“应用更改”，一步完成审批。“已拒绝”的用法相同，员工会在自己的一周中看到灰色的已拒绝时间块。</p>
+                <figure class="sc-shot">
+                    <img src="/images/zh/blog/salesforce-timesheet-bulk-approve.png" alt="Salesforce 工时批量审批：经理的编辑模式列出全团队周一的工时记录，包含员工、工时和计费，并将状态更改为“已批准”" loading="lazy" width="1895" height="666" data-zoomable>
+                    <figcaption>五个人的十一条记录，一次“应用更改”全部批准。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">分段班次、晚间值班、多加一天</h2>
+                <p>一周登记完后，计划还常会变化。选中已有工时的日期，它的时间块会在时间网格中显示为已占用；在旁边拖选一个新时间块，例如 18:00 至 19:30 的晚间值班，它会另存为一条记录。额外的日期也一样：单击后保存即可。<strong>Max Bookings per Day</strong>（每天最大预订数）设置一个人一天最多可选几个独立时间块，0 表示不限。</p>
+                <figure class="sc-shot">
+                    <img src="/images/zh/blog/salesforce-timesheet-add-shift.png" alt="Salesforce 工时记录日历添加第二段班次：已记录两个时间块的日期在时间网格中显示为已占用，旁边正在选择晚间值班时间块" loading="lazy" width="1273" height="741" data-zoomable>
+                    <figcaption>当天的两个时间块保持已占用；晚间值班添加在旁边。</figcaption>
+                </figure>
+                <p>想改用屏幕 Flow 登记班次？免费的<a href="/zh/blog/salesforce-flow-loop-multiple-records.html">现成 Add Shifts Flow</a> 会循环处理所选时间块，为每个时间块创建一条记录。</p>
+
+                <h2 style="margin-top:44px;">标准 Salesforce 与工时表日历对比</h2>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">任务</th><th>标准 Salesforce</th><th>使用 MultiDatePick</th></tr></thead>
+                    <tbody>
+                    <tr><td>三天都记录 9 点至 12 点和 13 点至 17 点</td><td>打开六次“新建”表单</td><td>选三天，拖两个时间块，保存一次</td></tr>
+                    <tr><td>每个工作日 9 点至 17 点</td><td>一次只能建一条记录</td><td>添加循环模式，再拖选时间</td></tr>
+                    <tr><td>查看整周</td><td>按日期排序的列表视图</td><td>按小时显示的周视图，带状态颜色</td></tr>
+                    <tr><td>是否可计费</td><td>每条记录上的一个字段</td><td>登记时选择，每个时间块上都显示</td></tr>
+                    <tr><td>为团队审批一天的工时</td><td>逐条编辑记录</td><td>编辑模式：将状态更改为“已批准”</td></tr>
+                    <tr><td>添加分段班次</td><td>再填一张表单</td><td>选中当天，拖选新时间块</td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <h2 style="margin-top:44px;">哪些团队这样记录工时</h2>
+                <p>员工整天都在 Salesforce 中工作的团队：</p>
+                <div class="tl-uses tl-wide">
+                    <div class="tl-use" style="--c:#0176D3;"><div><strong>专业服务</strong><span>顾问按项目登记客户工时，区分可计费工时与内部工时，经理按周审批。</span></div></div>
+                    <div class="tl-use" style="--c:#F97316;"><div><strong>IT 与实施团队</strong><span>上线、测试和支持工时关联到各个项目，晚间值班随时补记。</span></div></div>
+                    <div class="tl-use" style="--c:#16A34A;"><div><strong>代理机构</strong><span>创意和客户服务工时记录到每个客户的项目上，为月度开票做好准备。</span></div></div>
+                    <div class="tl-use" style="--c:#7C3AED;"><div><strong>客户成功</strong><span>按客户记录入职引导和培训工时，客户记录上就能看到投入的时间。</span></div></div>
+                    <div class="tl-use" style="--c:#0F766E;"><div><strong>非营利组织</strong><span>按资助项目或计划记录员工工时，已批准工时汇总后用于资助方报告。</span></div></div>
+                    <div class="tl-use" style="--c:#E11D48;"><div><strong>现场与服务团队</strong><span>由实际干活的人记录班次、分段班次和差旅时间。</span></div></div>
+                </div>
+
+                <h2 style="margin-top:44px;">决定其行为的设置</h2>
+                <p>每一项都是设置向导中的一个字段，也是 Dates &amp; Times 组件上的一个属性。<a href="/zh/configlibrary.html#weekly-time-sheet">每周工时表配置</a>已全部设置好：</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">设置项</th><th>在工时表中的作用</th><th style="width:22%;">API 名称</th></tr></thead>
+                    <tbody>
+                    <tr><td>Child Object API Name 和 Relationship Field API Name</td><td>Time_Entry__c，通过 Time_Sheet__c 保存在每周工时表下。</td><td><code>relatedObjectApiName</code>, <code>relationshipFieldApiName</code></td></tr>
+                    <tr><td>Date、Start Time 和 End Time 字段</td><td>Entry_Date__c、Start_Time__c 和 End_Time__c：每个时间块的日期和时间。</td><td><code>dateFieldApiName</code>, <code>startTimeField</code>, <code>endTimeField</code></td></tr>
+                    <tr><td>Status Field、Status Colors、Selectable Statuses</td><td>草稿、已提交、已批准和已拒绝分色显示；新记录以草稿开始。</td><td><code>statusField</code>, <code>statusColors</code>, <code>selectableStatuses</code></td></tr>
+                    <tr><td>Second Picklist Field</td><td>计费：可计费或不可计费，在登记工时时选择。</td><td><code>secondStatusField</code></td></tr>
+                    <tr><td>Record Details Pop-up</td><td>点击“保存工时”时询问项目。</td><td><code>recordForm</code></td></tr>
+                    <tr><td>显示循环模式按钮（Show Recurring Pattern Button）</td><td>每个工作日或选定的星期几，直到结束日期。</td><td><code>showRecurringPattern</code></td></tr>
+                    <tr><td>Allow Different Times Per Date</td><td>每个选中的日期都有自己的时间，而不是共用一组。</td><td><code>allowDifferentTimes</code></td></tr>
+                    <tr><td>Max Bookings per Day</td><td>一个人一天最多可选几个独立时间块。0 = 不限。</td><td><code>maxBookingsPerDay</code></td></tr>
+                    <tr><td>Enable Edit Mode 和 Custom Actions</td><td>一次更改多条记录；“提交本周”和“标记为不可计费”运行 Flow。</td><td><code>enableEditMode</code>, <code>Custom_Actions__c</code></td></tr>
+                    <tr><td>View 和 Available Views</td><td>默认打开周视图，日历和日程视图一键切换。</td><td><code>view</code>, <code>availableViews</code></td></tr>
+                    <tr><td>Show All Records</td><td>经理的“团队工时”页面：所有人的工时记录都在一个日历上。</td><td><code>showAllRecords</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>查看一周的方式不止一种。</strong>周、日历和日程是七种视图中的三种。<a href="/zh/blog/salesforce-calendar-views.html">查看全部七种视图</a>，或访问 <a href="/zh/salesforce-timesheet-calendar.html">Salesforce 工时表日历</a>页面，快速了解设置。</div>
+
+                <h2 style="margin-top:44px;">常见问题</h2>
+                <div class="tl-faq">
+                    <details><summary>Salesforce 有工时表功能吗？</summary><p>Sales Cloud 和 Service Cloud 中没有用于日常工时记录的工时表。大多数团队会建一个“工时记录”（Time Entry）自定义对象，包含日期、开始时间和结束时间，并关联到每周的“工时表”（Time Sheet）。MultiDatePick 在工时表上放一个日历，员工单击日期、拖选时间即可登记一周工时，每个时间块都保存为一条工时记录。</p></details>
+                    <details><summary>如何在 Salesforce 中为多天记录相同的工时？</summary><p>使用 MultiDatePick 的 Dates &amp; Times 组件，先单击日期，再拖选一次时间，例如 9:00 至 12:00 和 13:00 至 17:00。每个选中的日期都会得到相同的时间，每个时间块各自保存为一条记录。要填满一整周，用“添加循环模式”选中截至结束日期的每个工作日。如果每天的时间不同，请开启 Allow Different Times Per Date（允许每个日期使用不同时间）。</p></details>
+                    <details><summary>如何合计 Salesforce 工时表上的工时？</summary><p>在工时记录上添加一个“工时”公式字段：(End_Time__c - Start_Time__c) / 3600000，再通过主-详细信息关系，用累计汇总字段把它汇总到每周工时表上。再添加几个带筛选条件的累计汇总字段，分别得到已批准工时、可计费工时和不可计费工时。这些都是在 Salesforce 中点选即可创建的字段，记录保存时自动更新。</p></details>
+                    <details><summary>如何在 Salesforce 中跟踪可计费和不可计费工时？</summary><p>在工时记录上添加一个“计费”选项列表，包含“可计费”和“不可计费”两个值，并将其设为日历的 Second Picklist Field（第二个选项列表字段）。员工登记工时时在工作内容旁边选择它，默认值为“可计费”，并显示在悬停卡片和日程视图中。工时表上的两个带筛选条件的累计汇总字段分别合计两类工时，编辑模式中的“标记为不可计费”按钮可一次更改多条记录。</p></details>
+                    <details><summary>经理能在 Salesforce 中批量审批工时表吗？</summary><p>能。在显示所有工时记录的“团队工时”页面上，经理开启编辑模式，选中日期，然后用“将状态更改为”把列出的所有记录一次设为“已批准”。运行 Flow 的自定义按钮（例如供员工使用的“提交本周”）也会出现在编辑模式中，并且只作用于为其设定的状态。</p></details>
+                    <details><summary>一天可以记录两段分开的班次吗？</summary><p>可以。选中一个已有工时的日期，它的时间块会在时间网格中显示为已占用；再拖选一个新时间块，例如晚间值班，它就会另存为一条记录。Max Bookings per Day（每天最大预订数）设置一个人一天最多可选几个独立时间块，0 表示不限。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>一周工时，登记和审批都在日历上。</h2>
+                    <p>从<a href="/zh/configlibrary.html#weekly-time-sheet">每周工时表配置</a>开始，或在在线演示中随意试用。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-timesheet-time-tracking" class="btn btn-demo" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-primary">上线时通知我</a> <a href="/zh/salesforce-timesheet-calendar.html" class="btn btn-secondary">工时表日历</a>
+                    </div>
+                    <ul class="check-list"><li>$25/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>无需 Apex</li><li>点几下即可设置</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>相关阅读</h3>
+                    <ul>
+                        <li><a href="/zh/salesforce-timesheet-calendar.html">Salesforce 工时表日历，设置一览</a></li>
+                        <li><a href="/zh/blog/recurring-date-patterns-in-salesforce.html">Salesforce 中的循环日期模式</a></li>
+                        <li><a href="/zh/blog/salesforce-flow-loop-multiple-records.html">用一个屏幕 Flow 创建多条记录</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-time-slot-picker.html">Salesforce 时间段选择器</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">Dates &amp; Times 日历</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>为任何 Salesforce 对象加上日历、预订和甘特图。无需代码。</p>
+                </div>
+                <div class="footer-links">
+                    <h2>产品</h2>
+                    <ul>
+                        <li><a href="/zh/multidatepickdates.html">选择多个日期</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">选择日期和时间</a></li>
+                        <li><a href="/zh/salesforce-booking-calendar.html">预订会议室和人员</a></li>
+                        <li><a href="/zh/salesforce-gantt-chart.html">用甘特图规划项目</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">七种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>解决方案</h2>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-timesheet-calendar.html">工时表</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日历</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-class-scheduling.html">课程排期</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>文档</h2>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                    <h2>面向开发者</h2>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar-developer-guide.html">开发者指南</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>公司</h2>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="/zh/custom-config.html">免费定制配置</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <!-- consent:footer --><div class="footer-social footer-legal"><a href="/zh/privacy.html">隐私政策</a><a href="/zh/privacy.html#cookie-settings" data-mdp-consent="open">Cookie 设置</a></div><!-- /consent:footer -->
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/blog/salesforce-timesheet-time-tracking.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/salesforce-zeiterfassung-stundenzettel.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/registro-de-horas-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/suivi-du-temps-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/rilevazione-ore-timesheet-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/controle-de-horas-salesforce-timesheet.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-timesheet-time-tracking.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-timesheet-time-tracking.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/blog/salesforce-timesheet-time-tracking.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p><p data-k="prev-image">上一张图片</p><p data-k="next-image">下一张图片</p><p data-k="image-viewer">图片查看器</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

@@ -46,7 +46,7 @@
         "description": "Salesforce で最もカスタマイズできるノーコードカレンダー、MultiDatePick のすぐにインポートできる JSON 設定集。人事、教育、医療、不動産、マーケティング、建設、オペレーションなど、日付の選択、時間の日程調整、リソース予約、ガントチャートによるプロジェクト計画の活用例を幅広く収録しています。",
         "mainEntity": {
             "@type": "ItemList",
-            "numberOfItems": 46
+            "numberOfItems": 47
         },
         "inLanguage": "ja"
     }
@@ -427,6 +427,7 @@
                         <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
                         <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
                         <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-timesheet-calendar.html">タイムシート</a></li>
                         <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンカレンダー</a></li>
                         <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
                         <li><a href="/ja/salesforce-class-scheduling.html">クラス・講座スケジュール</a></li>
@@ -458,7 +459,7 @@
         <section class="guide-hero">
             <div class="container">
                 <h1>Config Library</h1>
-                <p class="subtitle">よくある日程管理のシナリオをすべてカバーする、<strong>すぐにインポートできる 46 の設定</strong>。どれも表示があらかじめ選ばれています。セットアップウィザードにコピーしたら、Lightning ページ、Experience サイト、フロー画面で Config Name（設定名） を指定するだけで使えます。項目名はワンクリックで自社の組織に対応付けられます。</p>
+                <p class="subtitle">よくある日程管理のシナリオをすべてカバーする、<strong>すぐにインポートできる 47 の設定</strong>。どれも表示があらかじめ選ばれています。セットアップウィザードにコピーしたら、Lightning ページ、Experience サイト、フロー画面で Config Name（設定名） を指定するだけで使えます。項目名はワンクリックで自社の組織に対応付けられます。</p>
                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
                     <a href="#shape-filter-section" class="btn btn-cta">設定を探す</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=configlibrary" class="btn btn-secondary" target="_blank" rel="noopener">ライブデモを試す</a>
                 </div>
@@ -583,7 +584,7 @@
                         </div>
                     </div>
                     <div class="qa-filter-footer">
-                        <div class="qa-filter-status"><span id="qaTotalCount">46</span> 件中 <strong id="qaVisibleCount">46</strong> 件の設定を表示</div>
+                        <div class="qa-filter-status"><span id="qaTotalCount">47</span> 件中 <strong id="qaVisibleCount">47</strong> 件の設定を表示</div>
                         <button type="button" class="qa-clear-btn" id="qaClearBtn">すべての絞り込みをクリア</button>
                     </div>
                 </div>
@@ -891,6 +892,36 @@
                     <p>Dates &amp; Times 用の設定: 日付を選び、日付ごとに時刻を割り当てます。予定、シフト、セッションなど、開始・終了時刻が必要なものに最適です。</p>
                 </div>
                 <div class="config-grid">
+                    <!-- Weekly Time Sheet: internal first -->
+                    <div class="config-card" id="weekly-time-sheet" data-config-file="Weekly_Time_Sheet.json" data-shape="per-block">
+                        <span class="config-badge badge-datetime">Dates &amp; Times</span>
+                        <h3>週次タイムシート</h3>
+                        <p class="config-desc">各自が自分のタイムシートのレコードで 1 週間分を入力します。日を選んで時間をドラッグすると、各ブロックがプロジェクトに結び付いた工数エントリとして保存されます。請求可能か非請求かは入力時に選択。新しいエントリは「下書き」から始まり、「週を提出」ボタンで提出、マネージャーは編集モードで多数のエントリをまとめて承認します。</p>
+                        <div class="config-note">
+                            <strong>合計とボタン:</strong> 工数エントリに <b>時間</b> の数式項目 <code>(End_Time__c - Start_Time__c) / 3600000</code> を追加し、タイムシート (主従関係) に合計時間、承認済み時間、請求可能時間、非請求時間の積み上げ集計項目を追加します。「週を提出」と「非請求にする」ボタンは、選んだ <code>recordIds</code> を受け取る <code>Submit_Week</code> と <code>Mark_Non_Billable</code> という名前のフローを実行します。詳しくは<a href="/ja/blog/salesforce-timesheet-time-tracking.html">Salesforce の工数管理</a>をご覧ください。</div>
+                        <div class="config-props">
+                            <span class="kp-h">主な設定</span>
+                            <ul>
+                                <li><b>Time Interval (Minutes)</b> 30 分 <code class="api">timeInterval</code></li>
+                                <li><b>Earliest Time (最も早い時刻)</b> 07:00 / <b>Latest Time (最も遅い時刻)</b> 20:00 <code class="api">minTime, maxTime</code></li>
+                                <li><b>Status Colors (状況の色)</b> Draft/Submitted/Approved/Rejected <code class="api">statusColors</code></li>
+                                <li><b>Selectable Statuses (Status Picker)</b> Draftのみ <code class="api">selectableStatuses</code></li>
+                                <li><b>Second Picklist Field (2 つ目の選択リスト項目)</b> Billable__c、ラベルは「請求区分」 <code class="api">secondStatusField</code></li>
+                                <li><b>Record Details Pop-up (レコード詳細のポップアップ)</b> プロジェクト、必須 <code class="api">recordForm</code></li>
+                                <li><b>Show Recurring Pattern Button</b> <code class="api">showRecurringPattern</code></li>
+                                <li><b>Week Starts on Monday</b> <code class="api">weekStartsOnMonday</code></li>
+                                <li><b>Custom Actions (カスタムアクション)</b> 週を提出、非請求にする (編集モード、下書きのエントリ) <code class="api">Custom_Actions__c</code></li>
+                                <li><b>Hover Popover Fields (ホバーポップオーバー項目)</b> プロジェクト、時間、請求区分、状況 <code class="api">hoverFields</code></li>
+                                <li><b>Show Record Names in Each Day (各日にレコード名を表示)</b> <code class="api">monthShowNames</code></li>
+                            </ul>
+                        </div>
+                        <div class="config-views">
+                            <strong>表示:</strong> <span class="vbadge vbadge-week vbadge-default">週 (デフォルト)</span> <span class="vbadge vbadge-calendar">カレンダー</span> <span class="vbadge vbadge-agenda">予定一覧</span>
+                        </div>
+                        <div class="config-btn-group">
+                            <button class="btn btn-primary btn-sm btn-copy-json">セットアップウィザード用にコピー</button>
+                        </div>
+                    </div>
                     <!-- 1 -->
                     <div class="config-card" id="shift-scheduling" data-config-file="Shift_Scheduling.json" data-shape="per-block">
                         <span class="config-badge badge-datetime">Dates &amp; Times</span>
@@ -2202,6 +2233,7 @@
                         <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
                         <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
                         <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-timesheet-calendar.html">タイムシート</a></li>
                         <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンカレンダー</a></li>
                         <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
                         <li><a href="/ja/salesforce-class-scheduling.html">クラス・講座スケジュール</a></li>

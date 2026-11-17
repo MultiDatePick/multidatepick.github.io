@@ -46,7 +46,7 @@
         "description": "Fertige JSON-Konfigurationen zum Importieren für MultiDatePick, den am stärksten anpassbaren No-Code-Kalender für Salesforce. Für Terminauswahl, Zeitplanung, Ressourcenbuchung und Gantt-Projektpläne in HR, Bildung, Gesundheitswesen, Immobilien, Marketing, Bauwesen, Betrieb und vielem mehr.",
         "mainEntity": {
             "@type": "ItemList",
-            "numberOfItems": 46
+            "numberOfItems": 47
         },
         "inLanguage": "de"
     }
@@ -427,6 +427,7 @@
                         <li><a href="/de/salesforce-kalender.html">Salesforce-Kalender</a></li>
                         <li><a href="/de/salesforce-besprechungsraum-buchung.html">Besprechungsraum-Buchung</a></li>
                         <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Personaldienstleistung &amp; Recruiting</a></li>
+                        <li><a href="/de/salesforce-stundenzettel-kalender.html">Zeiterfassung</a></li>
                         <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Kampagnenkalender</a></li>
                         <li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html">Behörden / Section 508</a></li>
                         <li><a href="/de/salesforce-kursplanung-schulungen.html">Kurs- &amp; Schulungsplanung</a></li>
@@ -458,7 +459,7 @@
         <section class="guide-hero">
             <div class="container">
                 <h1>Config Library</h1>
-                <p class="subtitle"><strong>46 Konfigurationen zum Importieren</strong> für jedes gängige Planungsszenario, jeweils mit bereits gewählten Ansichten. Kopieren Sie eine in den Einrichtungsassistenten und nutzen Sie sie dann über ihren Config Name auf einer Lightning-Seite, einer Experience Cloud-Site oder in einem Flow-Bildschirm. Feldnamen ordnen Sie mit einem Klick Ihrer Org zu.</p>
+                <p class="subtitle"><strong>47 Konfigurationen zum Importieren</strong> für jedes gängige Planungsszenario, jeweils mit bereits gewählten Ansichten. Kopieren Sie eine in den Einrichtungsassistenten und nutzen Sie sie dann über ihren Config Name auf einer Lightning-Seite, einer Experience Cloud-Site oder in einem Flow-Bildschirm. Feldnamen ordnen Sie mit einem Klick Ihrer Org zu.</p>
                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
                     <a href="#shape-filter-section" class="btn btn-cta">Passende Konfiguration finden</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/de/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=configlibrary" class="btn btn-secondary" target="_blank" rel="noopener">Live-Demo testen</a>
                 </div>
@@ -583,7 +584,7 @@
                         </div>
                     </div>
                     <div class="qa-filter-footer">
-                        <div class="qa-filter-status"><strong id="qaVisibleCount">46</strong> von <span id="qaTotalCount">46</span> Konfigurationen</div>
+                        <div class="qa-filter-status"><strong id="qaVisibleCount">47</strong> von <span id="qaTotalCount">47</span> Konfigurationen</div>
                         <button type="button" class="qa-clear-btn" id="qaClearBtn">Alle Filter zurücksetzen</button>
                     </div>
                 </div>
@@ -891,6 +892,36 @@
                     <p>Konfigurationen für Dates &amp; Times: Datumsauswahl mit Uhrzeit pro Termin. Am besten für Termine, Schichten, Sitzungen und alles, was Start- und Endzeiten braucht.</p>
                 </div>
                 <div class="config-grid">
+                    <!-- Weekly Time Sheet: internal first -->
+                    <div class="config-card" id="weekly-time-sheet" data-config-file="Weekly_Time_Sheet.json" data-shape="per-block">
+                        <span class="config-badge badge-datetime">Dates &amp; Times</span>
+                        <h3>Wöchentlicher Stundenzettel</h3>
+                        <p class="config-desc">Mitarbeitende erfassen ihre Woche auf ihrem eigenen Stundenzettel-Datensatz: Tage wählen, Stunden ziehen, und jeder Block wird als Zeiteintrag gespeichert, der einem Projekt zugeordnet ist. Abrechenbar oder nicht abrechenbar wird beim Erfassen gewählt. Neue Einträge beginnen als Entwurf, eine Schaltfläche Woche einreichen sendet sie ab, und ein Manager genehmigt viele auf einmal im Bearbeitungsmodus.</p>
+                        <div class="config-note">
+                            <strong>Summen und Schaltflächen:</strong> Legen Sie am Zeiteintrag eine Formel <b>Stunden</b> an, <code>(End_Time__c - Start_Time__c) / 3600000</code>, und auf dem Stundenzettel (Master-Detail) Rollup-Summenfelder für Stunden gesamt, Genehmigte, Abrechenbare und Nicht abrechenbare Stunden. Die Schaltflächen Woche einreichen und Als nicht abrechenbar markieren starten die Flows <code>Submit_Week</code> und <code>Mark_Non_Billable</code>, die die gewählten <code>recordIds</code> übernehmen. Mehr dazu: <a href="/de/blog/salesforce-zeiterfassung-stundenzettel.html">Zeiterfassung in Salesforce</a>.</div>
+                        <div class="config-props">
+                            <span class="kp-h">Wichtige Einstellungen</span>
+                            <ul>
+                                <li><b>Time Interval (Minutes) / Zeitintervall (Minuten)</b> 30 Min. <code class="api">timeInterval</code></li>
+                                <li><b>Earliest Time (Früheste Uhrzeit)</b> 07:00 / <b>Latest Time (Späteste Uhrzeit)</b> 20:00 <code class="api">minTime, maxTime</code></li>
+                                <li><b>Status Colors (Statusfarben)</b> Draft/Submitted/Approved/Rejected <code class="api">statusColors</code></li>
+                                <li><b>Selectable Statuses (Status Picker) / Auswählbare Status (Statusauswahl)</b> nur Draft <code class="api">selectableStatuses</code></li>
+                                <li><b>Second Picklist Field (Zweites Auswahllistenfeld)</b> Billable__c, mit der Bezeichnung Abrechnung <code class="api">secondStatusField</code></li>
+                                <li><b>Record Details Pop-up (Pop-up für Datensatzdetails)</b> Projekt, Pflichtfeld <code class="api">recordForm</code></li>
+                                <li><b>Show Recurring Pattern Button (Schaltfläche für Wiederholungsmuster anzeigen)</b> <code class="api">showRecurringPattern</code></li>
+                                <li><b>Week Starts on Monday (Woche beginnt am Montag)</b> <code class="api">weekStartsOnMonday</code></li>
+                                <li><b>Custom Actions (Benutzerdefinierte Aktionen)</b> Woche einreichen, Als nicht abrechenbar markieren (Bearbeitungsmodus, Einträge im Entwurf) <code class="api">Custom_Actions__c</code></li>
+                                <li><b>Hover Popover Fields (Felder im Hover-Popover)</b> Projekt, Stunden, Abrechnung, Status <code class="api">hoverFields</code></li>
+                                <li><b>Show Record Names in Each Day (Datensatznamen an jedem Tag anzeigen)</b> <code class="api">monthShowNames</code></li>
+                            </ul>
+                        </div>
+                        <div class="config-views">
+                            <strong>Ansichten:</strong> <span class="vbadge vbadge-week vbadge-default">Woche (Standard)</span> <span class="vbadge vbadge-calendar">Kalender</span> <span class="vbadge vbadge-agenda">Agenda</span>
+                        </div>
+                        <div class="config-btn-group">
+                            <button class="btn btn-primary btn-sm btn-copy-json">Für den Einrichtungsassistenten kopieren</button>
+                        </div>
+                    </div>
                     <!-- 1 -->
                     <div class="config-card" id="shift-scheduling" data-config-file="Shift_Scheduling.json" data-shape="per-block">
                         <span class="config-badge badge-datetime">Dates &amp; Times</span>
@@ -2202,6 +2233,7 @@
                         <li><a href="/de/salesforce-kalender.html">Salesforce-Kalender</a></li>
                         <li><a href="/de/salesforce-besprechungsraum-buchung.html">Besprechungsraum-Buchung</a></li>
                         <li><a href="/de/salesforce-kalender-personaldienstleister-recruiting.html">Personaldienstleistung &amp; Recruiting</a></li>
+                        <li><a href="/de/salesforce-stundenzettel-kalender.html">Zeiterfassung</a></li>
                         <li><a href="/de/blog/salesforce-kampagne-mehrere-termine.html">Kampagnenkalender</a></li>
                         <li><a href="/de/blog/salesforce-barrierefreier-kalender-behoerden.html">Behörden / Section 508</a></li>
                         <li><a href="/de/salesforce-kursplanung-schulungen.html">Kurs- &amp; Schulungsplanung</a></li>

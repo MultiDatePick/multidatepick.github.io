@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- consent:head ft -->
+  <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    (function(){var c=null;try{c=JSON.parse(localStorage.getItem('mdp_consent'));if(!c||c.v!==1||!(Date.now()-c.ts<31536000000))c=null;}catch(e){c=null;}window.mdpConsent=c;
+    if(c&&c.analytics)gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.mdpFirstTouch=function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}};if(c&&c.attribution)window.mdpFirstTouch();})();
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script defer src="/js/consent.js"></script>
+  <!-- /consent:head -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoja de horas en Salesforce: registra horas por proyecto</title>
+    <meta name="description" content="Hoja de horas en Salesforce en un calendario: horas por proyecto, turnos partidos, horas facturables, totales de la semana y aprobación en bloque.">
+    <link rel="canonical" href="https://multidatepick.com/es/hoja-de-horas-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <link rel="preload" as="image" href="/images/es/blog/salesforce-hoja-de-horas-registro-demo-poster.png" fetchpriority="high">
+    <meta property="og:title" content="Hoja de horas en Salesforce: registra horas por proyecto">
+    <meta property="og:description" content="Hoja de horas en Salesforce en un calendario: horas por proyecto, turnos partidos, horas facturables, totales de la semana y aprobación en bloque.">
+    <meta property="og:image" content="https://multidatepick.com/images/es/multidatepick-og-image.png">
+    <meta property="og:url" content="https://multidatepick.com/es/hoja-de-horas-salesforce.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_ES">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Hoja de horas en Salesforce: registra horas por proyecto">
+    <meta name="twitter:description" content="Hoja de horas en Salesforce en un calendario: horas por proyecto, turnos partidos, horas facturables, totales de la semana y aprobación en bloque.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/es/multidatepick-twitter-card.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "name": "Hoja de horas en Salesforce con calendario",
+                "url": "https://multidatepick.com/es/hoja-de-horas-salesforce.html",
+                "description": "Una hoja de horas en Salesforce sobre el componente Dates & Times: cada persona registra horas por proyecto como registros de Entrada de tiempo en su Hoja de horas semanal, añade turnos partidos y días extra, marca las horas como facturables o no facturables, suma la semana con campos de fórmula y de resumen acumulado, y los responsables aprueban en bloque. Sin código.",
+                "isPartOf": {
+                    "@id": "https://multidatepick.com/es/#website"
+                },
+                "about": {
+                    "@id": "https://multidatepick.com/es/#software"
+                },
+                "primaryImageOfPage": "https://multidatepick.com/images/es/blog/salesforce-hoja-de-horas-registro-demo.webp",
+                "inLanguage": "es"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "¿Cómo creo una hoja de horas en Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Crea un objeto Hoja de horas semanal y un objeto Entrada de tiempo en relación principal-detalle con él, con una fecha, una hora de inicio, una hora de fin, un estado y un proyecto. Pon el calendario Dates & Times de MultiDatePick en la página de registro de la Hoja de horas con la configuración Hoja de horas semanal, y cada bloque de tiempo que una persona arrastre se guardará como una Entrada de tiempo bajo esa hoja."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Puedo añadir un segundo turno a un día que ya tiene horas registradas?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sí. Vuelve a elegir el día: sus bloques registrados aparecen como ocupados en la cuadrícula horaria, y un bloque nuevo, como una guardia de tarde, se guarda como una Entrada de tiempo más. Los días extra se añaden igual. Max Bookings per Day define cuántos bloques separados puede elegir una persona en un día."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Cómo sumo las horas de la hoja de horas en Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Añade a la Entrada de tiempo una fórmula Horas, (End_Time__c - Start_Time__c) / 3600000, y un campo de resumen de totales acumulados (Roll-Up Summary) en la Hoja de horas que la sume. Los resúmenes con filtro dan Horas aprobadas, Horas facturables y Horas no facturables."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Cómo separo las horas facturables de las no facturables?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Añade a la Entrada de tiempo una lista de selección Facturación y configúrala como Second Picklist Field del calendario. Cada persona elige Facturable o No facturable al registrar sus horas, se ve en cada entrada y dos resúmenes con filtro suman cada tipo."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Cuánto cuesta MultiDatePick?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "US$25 por usuario al mes por todos los componentes y funciones, con una prueba gratuita de 30 días y sin tarjeta."
+                        }
+                    }
+                ],
+                "inLanguage": "es"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/es/blog/salesforce-hoja-de-horas-registro-demo.webp",
+                "thumbnailUrl": "https://multidatepick.com/images/es/blog/salesforce-hoja-de-horas-registro-demo-poster.png",
+                "caption": "Demo animada de una hoja de horas en Salesforce: de miércoles a viernes elegidos, de 9 a 12 y de 13 a 17 arrastrados una vez, el proyecto elegido en una ventana emergente y seis entradas de tiempo guardadas en la vista Semana",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/es/blog/salesforce-hoja-de-horas-vista-semanal.png",
+                "caption": "Vista semanal de una hoja de horas en Salesforce en un registro Hoja de horas: horas totales, aprobadas, facturables y no facturables en campos de resumen sobre una semana de entradas de tiempo con sus colores de aprobación",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/es/blog/salesforce-hoja-de-horas-segundo-turno.png",
+                "caption": "Calendario de entradas de tiempo en Salesforce añadiendo un segundo turno: un día con dos bloques registrados los muestra ocupados en la cuadrícula horaria mientras se elige a su lado una guardia de tarde",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/es/blog/salesforce-hoja-de-horas-enviar-semana.png",
+                "caption": "Hoja de horas de Salesforce en Modo edición con tres días elegidos: cada entrada de tiempo con sus horas y su facturación, y los botones Enviar semana y Marcar como no facturable, que ejecutan un flujo",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/es/blog/salesforce-hoja-de-horas-aprobar-en-bloque.png",
+                "caption": "Aprobación de hojas de horas en bloque en Salesforce: el Modo edición del responsable lista las entradas de tiempo del lunes de todo el equipo con empleado, horas y facturación, y Cambiar estado a Aprobado",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            }
+        ]
+    }
+    </script>
+    <style>
+        .hm-wrap{max-width:1040px;margin:0 auto;padding:0 16px;}
+        .hm-hero{background:linear-gradient(170deg,var(--blue-50,#F0F9FF) 0%,#E0F2FE 60%,#fff 100%);padding:44px 0 40px;}
+        .bk-hero{display:grid;grid-template-columns:1.15fr 1fr;gap:32px;align-items:center;}
+        .hm-hero h1{font-size:2.35rem;font-weight:800;color:var(--blue-900,#0C4A6E);line-height:1.12;margin:0;}
+        .hm-hero h1 .pre{display:block;font-size:1rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#C2410C;margin-bottom:8px;}
+        .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+        .hm-hero .subtitle{font-size:1.08rem;color:var(--gray-600,#4b5563);margin:14px 0 0;max-width:560px;}
+        .hm-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}
+        .hm-ctas .btn-cta{background:#F97316;border:2px solid #F97316;color:#fff;box-shadow:0 6px 18px rgba(249,115,22,.3);}
+        .hm-ctas .btn-cta:hover{background:#EA580C;color:#fff;transform:translateY(-2px);}
+        .hm-demo-link{display:inline-block;margin-top:12px;font-size:.92rem;font-weight:600;}
+        .bk-hero .gs-fig{margin:0;max-width:400px;justify-self:center;width:100%;}
+        .hm-live{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;padding:26px 0;scroll-margin-top:80px;}
+        .hm-live .hm-wrap{display:flex;gap:18px 28px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+        .hm-live h2{color:#fff;font-size:1.3rem;margin:0 0 4px;}
+        .hm-live p{color:#cdd9e8;margin:0;font-size:.95rem;max-width:680px;}
+        .hm-live .tag{display:block;color:#FDBA74;font-size:.75rem;font-weight:800;letter-spacing:.12em;margin-bottom:8px;}
+        .hm-live .btn{background:#F97316;color:#fff;white-space:nowrap;}
+        .hm-live .btn:hover{background:#EA580C;color:#fff;}
+        .gs-sec{padding:56px 0;scroll-margin-top:80px;}
+        .gs-sec.alt{background:var(--blue-50,#F0F9FF);}
+        .gs-sec h2{font-size:1.6rem;color:var(--blue-900,#0C4A6E);margin:0 0 6px;padding-left:17px;position:relative;line-height:1.25;} .gs-sec h2::before{content:"";position:absolute;left:0;top:calc(.625em - 11px);width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-sec h3{font-size:1.15rem;color:var(--blue-900,#0C4A6E);margin:32px 0 6px;scroll-margin-top:80px;}
+        .gs-lead{color:var(--gray-600,#4b5563);margin:0 0 20px;font-size:1rem;max-width:760px;}
+        .gs-sec code{background:#f3f4f6;padding:1px 5px;border-radius:3px;color:#c2410c;font-size:.88em;word-break:break-word;}
+        .gs-fig{margin:18px 0 8px;}
+        .gs-fig img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #E5E7EB;box-shadow:0 4px 20px rgba(15,45,82,.08);background:#fff;}
+        .gs-fig figcaption{text-align:center;font-size:.88rem;color:var(--gray-500,#6b7280);margin-top:8px;}
+        .gs-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE3EC;border-radius:10px;overflow:hidden;font-size:.93rem;}
+        .gs-table th,.gs-table td{padding:11px 14px;border-bottom:1px solid #E8EDF3;border-right:1px solid #E8EDF3;text-align:left;vertical-align:top;}
+        .gs-table th:last-child,.gs-table td:last-child{border-right:none;}
+        .gs-table thead th{background:#0F2D52;color:#fff;font-weight:600;font-size:.85rem;}
+        .gs-table thead th.mdp{background:#C2410C;}
+        .gs-table tbody tr:last-child td{border-bottom:none;}
+        .gs-table td:first-child{font-weight:600;color:var(--blue-900,#0C4A6E);}
+        .gs-table .old{color:var(--gray-500,#6b7280);}
+        .gs-table .new{color:#065F46;font-weight:600;}
+        .gs-table small{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);font-weight:400;}
+        .hm-scroll{overflow-x:auto;}
+        .gs-chain{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-wrap:wrap;gap:8px 4px;align-items:center;font-size:.9rem;}
+        .gs-chain li{background:#fff;border:1px solid #BFDBFE;color:#1E3A8A;border-radius:999px;padding:5px 14px;font-weight:600;}
+        .gs-chain li b{color:#F97316;margin-right:4px;}
+        .gs-chain li.arr{background:none;border:none;color:#94A3B8;padding:0 2px;}
+        .gs-two{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+        .gs-two .gs-fig{margin-top:0;}
+        .bk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 0;}
+        .bk-tile{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:12px 14px 12px 18px;position:relative;} .bk-tile::before{content:"";position:absolute;left:0;top:13px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#10b981;}
+        .bk-tile b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;margin-bottom:3px;}
+        .bk-tile span{display:block;font-size:.85rem;color:var(--gray-600,#4b5563);}
+        .bk-tile .comp{display:inline-block;margin-top:8px;font-size:.72rem;font-weight:700;letter-spacing:.04em;color:#1E3A8A;background:#EFF6FF;border-radius:999px;padding:1px 9px;}
+        .gs-paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0;}
+        .gs-paths.three{grid-template-columns:repeat(3,1fr);}
+        .gs-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;font-size:.92rem;color:var(--gray-600,#4b5563);}
+        .gs-card b{display:block;color:var(--blue-900,#0C4A6E);font-size:1rem;margin-bottom:6px;}
+        .gs-card.bk,.gs-card.rs,.gs-card.sf{position:relative;padding-left:18px;} .gs-card.bk{--rail:#F97316;}
+        .gs-card.rs{--rail:#10b981;}
+        .gs-card.sf{--rail:#0176D3;} .gs-card.bk::before,.gs-card.rs::before,.gs-card.sf::before{content:"";position:absolute;left:0;top:15px;width:4px;height:22px;border-radius:0 3px 3px 0;background:var(--rail);}
+        .hm-checks{list-style:none;padding:0;margin:0;}
+        .hm-checks li{padding:5px 0 5px 24px;position:relative;border-bottom:1px solid #F1F5F9;}
+        .hm-checks li:last-child{border-bottom:none;}
+        .hm-checks li::before{content:"\2713";position:absolute;left:2px;color:#10b981;font-weight:700;}
+        .gs-note{margin:16px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 18px 14px 22px;font-size:.92rem;color:#7C2D12;position:relative;} .gs-note::before{content:"";position:absolute;left:0;top:14px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .gs-note b{color:#9A3412;}
+        .bk-views{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:8px;}
+        .bk-views .gs-fig{margin:0;}
+        .cf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 0;}
+        .cf-grid.two{grid-template-columns:1fr 1fr;}
+        .cf-card{background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px 12px 18px;position:relative;display:flex;flex-direction:column;} .cf-card::before{content:"";position:absolute;left:0;top:16px;width:4px;height:22px;border-radius:0 3px 3px 0;background:#F97316;}
+        .cf-card .cf-type{font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#C2410C;}
+        .cf-card h3{margin:2px 0 4px;font-size:1.05rem;}
+        .cf-card p{margin:0 0 10px;font-size:.86rem;color:var(--gray-600,#4b5563);}
+        .cf-set{list-style:none;padding:0;margin:0 0 12px;font-size:.85rem;}
+        .cf-set li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #F1F5F9;}
+        .cf-set li:last-child{border-bottom:none;}
+        .cf-set li span{color:var(--blue-900,#0C4A6E);font-weight:600;}
+        .cf-set li em{font-style:normal;color:#334155;text-align:right;}
+        .cf-links{margin-top:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:.86rem;font-weight:600;}
+        .gs-faq details{background:#fff;border:1px solid #DCE3EC;border-radius:10px;margin:0 0 10px;padding:0 18px;}
+        .gs-faq summary{cursor:pointer;font-weight:600;color:var(--blue-900,#0C4A6E);padding:14px 0;list-style-position:outside;}
+        .gs-faq details p{margin:0 0 14px;color:var(--gray-600,#4b5563);font-size:.93rem;}
+        .gs-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .gs-links a{display:block;background:#fff;border:1px solid #DCE3EC;border-radius:10px;padding:14px 16px;text-decoration:none;transition:border-color .15s ease;}
+        .gs-links a:hover{border-color:#F97316;}
+        .gs-links b{display:block;color:var(--blue-900,#0C4A6E);font-size:.95rem;}
+        .gs-links span{display:block;font-size:.8rem;color:var(--gray-500,#6b7280);}
+        .hm-final{background:linear-gradient(135deg,#0F2D52 0%,#13396b 100%);color:#fff;text-align:center;padding:56px 0;}
+        .hm-final h2{color:#fff;font-size:1.8rem;margin:0 0 8px;}
+        .hm-final p{color:#cdd9e8;margin:0 auto 22px;max-width:620px;}
+        .hm-final .hm-ctas{justify-content:center;}
+        .hm-final .btn-ghost{border:2px solid #fff;color:#fff;background:transparent;}
+        .hm-final .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .hm-final .contact{margin:20px auto 0;font-size:.9rem;color:#cdd9e8;}
+        @media (max-width:900px){
+            .bk-hero,.gs-two{grid-template-columns:1fr;}
+            .bk-grid{grid-template-columns:1fr 1fr;}
+            .gs-links,.gs-paths.three,.cf-grid{grid-template-columns:1fr 1fr;}
+        }
+        @media (max-width:600px){
+            .hm-hero{padding:30px 0 28px;}
+            .hm-hero h1{font-size:1.75rem;}
+            .bk-views,.gs-paths,.gs-paths.three,.gs-links,.cf-grid,.cf-grid.two{grid-template-columns:1fr;}
+            .gs-sec{padding:40px 0;}
+            .gs-sec h2{font-size:1.35rem;}
+            .gs-table{font-size:.86rem;}
+            .gs-table th,.gs-table td{padding:9px 8px;}
+            .hm-final h2{font-size:1.45rem;}
+        }
+    </style>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/salesforce-timesheet-calendar.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/salesforce-stundenzettel-kalender.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/hoja-de-horas-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/feuille-de-temps-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/calendario-timesheet-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/timesheet-salesforce-apontamento-de-horas.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/salesforce-timesheet-calendar.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/salesforce-timesheet-calendar.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/salesforce-timesheet-calendar.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/salesforce-timesheet-calendar.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- consent:ui -->
+    <div class="mdp-cc-bar" id="mdpConsentBar" role="region" aria-label="Preferencias de cookies" hidden>
+        <p>Usamos cookies de analítica solo si lo aceptas. <span class="mdp-cc-wide">Nada se vende ni se usa para anuncios.</span> <a href="/es/politica-de-privacidad.html">Política de privacidad</a></p>
+        <div class="mdp-cc-btns">
+            <button type="button" class="mdp-cc-btn mdp-cc-btn--text" data-mdp-consent="settings">Configurar</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="reject">Rechazar todo</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="accept">Aceptar todo</button>
+        </div>
+    </div>
+    <dialog class="mdp-cc-dialog" id="mdpConsentDialog" aria-labelledby="mdpConsentTitle" aria-describedby="mdpConsentIntro">
+        <div class="mdp-cc-in">
+            <h2 id="mdpConsentTitle">Configuración de cookies</h2>
+            <button type="button" class="mdp-cc-x" data-mdp-consent="close" aria-label="Cerrar">&times;</button>
+            <p class="mdp-cc-intro" id="mdpConsentIntro">Elige qué puede guardar este sitio en tu navegador. Puedes cambiarlo cuando quieras desde Configuración de cookies, al pie de cada página.</p>
+            <div class="mdp-cc-opt">
+                <span class="mdp-cc-name">Necesarias para que el sitio funcione</span> <span class="mdp-cc-desc">Solo recuerdan tu elección sobre las cookies.</span> <span class="mdp-cc-always">Siempre activas</span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAnalytics">Analítica</label> <span class="mdp-cc-desc" id="mdpConsentAnalyticsDesc">Google Analytics cuenta las visitas y las páginas vistas para que podamos mejorar el sitio.</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAnalytics" aria-describedby="mdpConsentAnalyticsDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAttribution">De dónde vienes</label> <span class="mdp-cc-desc" id="mdpConsentAttributionDesc">Recuerda el enlace o la campaña que te trajo aquí la primera vez y lo envía con nuestros formularios.</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAttribution" aria-describedby="mdpConsentAttributionDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-btns">
+                <button type="button" class="mdp-cc-btn mdp-cc-btn--line" data-mdp-consent="reject">Rechazar todo</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="save">Guardar preferencias</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- /consent:ui -->
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Próximamente en Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Cerrar aviso" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/es/" class="logo"><img src="/images/logo.png" alt="Logotipo de MultiDatePick: componente de calendario de varias fechas y reserva de recursos para Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Mostrar u ocultar navegación"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Producto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/selector-varias-fechas-salesforce.html">Elegir varias fechas</a></li>
+                        <li><a href="/es/selector-franjas-horarias-salesforce.html">Elegir fechas y horas</a></li>
+                        <li><a href="/es/calendario-reservas-salesforce.html">Reservar salas y personas</a></li>
+                        <li><a href="/es/diagrama-de-gantt-salesforce.html">Planificar con Gantt</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Siete vistas de calendario</a></li>
+                        <li><a href="/es/biblioteca-configuraciones-calendario-salesforce.html">Config Library</a></li>
+                        <li><a href="/es/confianza-y-seguridad.html">Confianza y seguridad</a></li>
+                        <li><a href="/es/accesibilidad-vpat.html">Accesibilidad (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle active" aria-expanded="false" aria-haspopup="true">Soluciones <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/calendario-salesforce.html">Calendario de Salesforce</a></li>
+                        <li><a href="/es/calendario-salesforce-reclutamiento-seleccion-personal.html">Reclutamiento y selección</a></li>
+                        <li><a href="/es/hoja-de-horas-salesforce.html" class="active">Hojas de horas</a></li>
+                        <li><a href="/es/programacion-clases-cursos-salesforce.html">Programación de clases y cursos</a></li>
+                        <li><a href="/es/reserva-salas-reuniones-salesforce.html">Reserva de salas de reuniones</a></li>
+                        <li><a href="/es/calendario-reservas-experience-cloud-salesforce.html">Reservas en Experience Cloud</a></li>
+                        <li><a href="/es/blog/fechas-de-campana-salesforce.html">Calendario de campañas</a></li>
+                        <li><a href="/es/blog/calendario-salesforce-accesible-sector-publico-section-508.html">Sector público / Section 508</a></li>
+                        <li><a href="/es/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/es/precios.html">Precios</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentación <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/blog/calendario-salesforce-sin-codigo.html">Configuración sin código</a></li>
+                        <li><a href="/es/primeros-pasos.html">Primeros pasos</a></li>
+                        <li><a href="/es/guia-del-usuario.html">Guía del usuario</a></li>
+                        <li><a href="/es/guia-flujos-de-pantalla-salesforce.html">Guía de flujos de pantalla</a></li>
+                        <li><a href="/es/paginas-aplicacion-inicio-experience-cloud.html">Páginas de aplicación, inicio y Experience</a></li>
+                        <li><a href="/es/solucion-de-problemas.html">Solución de problemas</a></li>
+                        <li><a href="/es/preguntas-frecuentes.html">Preguntas frecuentes</a></li>
+                    </ul>
+                </li>
+                <li><a href="/es/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/es/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Prueba la demo en vivo</a></li>
+                <li><a href="/es/avisame-en-el-lanzamiento.html" class="nav-cta">Avísame en el lanzamiento</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <section class="hm-hero">
+            <div class="hm-wrap bk-hero">
+                <div>
+                    <h1><span class="pre">Hoja de horas<span class="vh">:</span></span> registro de horas en Salesforce sobre un calendario</h1>
+                    <p class="subtitle">Registra las horas como bloques en una semana, por proyecto, facturables o no. Cada bloque es un registro de Entrada de tiempo, la semana se suma sola y los responsables aprueban en bloque.</p>
+                    <div class="hm-ctas">
+                        <a href="/es/avisame-en-el-lanzamiento.html" class="btn btn-cta">Avísame en el lanzamiento</a> <a href="/es/biblioteca-configuraciones-calendario-salesforce.html#weekly-time-sheet" class="btn btn-secondary">Configuración Hoja de horas semanal</a>
+                    </div>
+                    <a class="hm-demo-link" href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/es/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-timesheet-calendar" target="_blank" rel="noopener">O prueba ya la demo en vivo, sin iniciar sesión &rarr;</a>
+                </div>
+                <figure class="gs-fig">
+                    <img src="/images/es/blog/salesforce-hoja-de-horas-registro-demo-poster.png" data-gif="/images/es/blog/salesforce-hoja-de-horas-registro-demo.webp" alt="Demo animada de una hoja de horas en Salesforce: de miércoles a viernes elegidos, de 9 a 12 y de 13 a 17 arrastrados una vez, el proyecto elegido en una ventana emergente y seis entradas de tiempo guardadas en la vista Semana" title="Demo de la hoja de horas en Salesforce" width="1047" height="1401" fetchpriority="high" decoding="async" data-zoomable>
+                    <figcaption>Tres días, dos bloques, un solo guardado: seis entradas de tiempo.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ═══════════════ NO CODE: 3 STEPS ═══════════════ -->
+        <section class="nc-band" aria-labelledby="nc-title">
+            <div class="nc-in">
+                <h2 id="nc-title">3 pasos, 0 líneas de código</h2>
+                <p class="nc-lead">Sin desarrolladores, sin Apex, sin bucles de Flow. Un administrador lo configura con clics.</p>
+                <ol class="nc-steps">
+                    <li class="nc-step">
+                        <img src="/images/es/wizard/salesforce-calendario-asistente-de-configuracion-poster.png" width="1000" height="740" loading="lazy" alt="El asistente de configuración de MultiDatePick pregunta dónde estará el calendario">
+                        <div class="nc-body"><span class="nc-n" aria-hidden="true">1</span><h3>Importa la configuración</h3><p>Pega la configuración Hoja de horas semanal en el asistente de configuración y elige tus propios objetos y campos.</p><a class="nc-more" href="/es/guia-del-usuario.html#wizard">Cómo funciona el asistente &rarr;</a></div>
+                    </li>
+                    <li class="nc-step">
+                        <img src="/images/es/no-code/salesforce-app-builder-config-name-fechas-y-horas.png" width="1150" height="719" loading="lazy" alt="Lightning App Builder con el calendario Dates &amp; Times en la página y su Config Name rellenado">
+                        <div class="nc-body"><span class="nc-n" aria-hidden="true">2</span><h3>Colócalo en la Hoja de horas</h3><p>Añade el calendario Dates &amp; Times a la página de registro de la Hoja de horas y pega el Config Name.</p><a class="nc-more" href="/es/primeros-pasos.html#lightning-pages">Dónde se puede usar &rarr;</a></div>
+                    </li>
+                    <li class="nc-step">
+                        <img src="/images/es/no-code/salesforce-calendario-registros-guardados-fechas-y-horas.png" width="1194" height="746" loading="lazy" alt="Una página de registro de Salesforce con las horas que guardó el calendario Dates &amp; Times, listadas junto al calendario">
+                        <div class="nc-body"><span class="nc-n" aria-hidden="true">3</span><h3>Cada bloque es un registro</h3><p>Cada bloque de tiempo se guarda como una Entrada de tiempo en tu propio objeto, lista para los informes.</p><a class="nc-more" href="/es/guia-del-usuario.html#save-modes">Cómo se guarda &rarr;</a></div>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ═══════════════ LIVE DEMO ═══════════════ -->
+        <section class="hm-live" id="live-demo">
+            <div class="hm-wrap">
+                <div>
+                    <span class="tag">PRUÉBALO EN VIVO: SIN INSTALAR, SIN INICIAR SESIÓN</span>
+                    <h2>Elige días y arrastra horas en la demo en vivo</h2>
+                    <p>Los calendarios de la demo eligen días y horas igual que una hoja de horas: haz clic en los días, arrastra las horas y guarda.</p>
+                </div>
+                <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/es/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-timesheet-calendar" target="_blank" rel="noopener" class="btn">Abrir la demo en vivo &rarr;</a>
+            </div>
+        </section>
+
+        <!-- ═══════════════ OVERVIEW ═══════════════ -->
+        <section class="gs-sec" id="overview">
+            <div class="hm-wrap">
+                <h2>Un calendario de entradas de tiempo para quien vive en Salesforce</h2>
+                <p class="gs-lead">Una entrada de tiempo en Salesforce es un registro con un solo campo de fecha, así que registrar una semana significa un formulario Nuevo por bloque. MultiDatePick pone la semana en un calendario en la Hoja de horas semanal de cada persona.</p>
+                <div class="bk-grid">
+                    <div class="bk-tile"><b>Mismas horas, muchos días</b><span>Arrastra de 9 a 17 una vez para todos los días elegidos.</span><span class="comp">Dates &amp; Times</span></div>
+                    <div class="bk-tile"><b>Un registro por bloque</b><span>Cada bloque es una Entrada de tiempo con su proyecto.</span><span class="comp">Dates &amp; Times</span></div>
+                    <div class="bk-tile"><b>Facturable o no</b><span>Se elige al registrar y se suma en la hoja.</span><span class="comp">Dates &amp; Times</span></div>
+                    <div class="bk-tile"><b>Aprobación en bloque</b><span>Borrador, Enviado, Aprobado, Rechazado.</span><span class="comp">Dates &amp; Times</span></div>
+                </div>
+                <div class="gs-two" style="margin-top:26px;">
+                    <div class="hm-scroll">
+                    <table class="gs-table">
+                        <thead><tr><th>Tarea de la hoja de horas</th><th>Salesforce estándar</th><th class="mdp">Con MultiDatePick</th></tr></thead>
+                        <tbody>
+                            <tr><td>De 9 a 12 y de 13 a 17, tres días</td><td class="old">Seis formularios Nuevo</td><td class="new">Tres clics, dos arrastres, un solo guardado</td></tr>
+                            <tr><td>Todos los días laborables, de 9 a 17</td><td class="old">Un registro cada vez</td><td class="new">Patrón recurrente y luego las horas</td></tr>
+                            <tr><td>Ver la semana</td><td class="old">Una lista ordenada por fecha</td><td class="new">Vista Semana hora a hora</td></tr>
+                            <tr><td>Horas de la semana</td><td class="old">Sumadas a mano</td><td class="new">Resúmenes acumulados en la Hoja de horas</td></tr>
+                            <tr><td>Aprobar un día del equipo</td><td class="old">Editar cada registro</td><td class="new">Modo edición, un solo Aplicar</td></tr>
+                        </tbody>
+                    </table>
+                    </div>
+                    <figure class="gs-fig">
+                        <img src="/images/es/blog/salesforce-hoja-de-horas-vista-semanal.png" alt="Vista semanal de una hoja de horas en Salesforce en un registro Hoja de horas: horas totales, aprobadas, facturables y no facturables en campos de resumen sobre una semana de entradas de tiempo con sus colores de aprobación" title="Vista semanal de la hoja de horas en Salesforce" width="1313" height="1965" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>La semana hora a hora, con sus totales justo encima.</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ MORE SHIFTS ═══════════════ -->
+        <section class="gs-sec alt" id="more-shifts">
+            <div class="hm-wrap">
+                <h2>Más turnos cuando los necesites</h2>
+                <p class="gs-lead">Un turno partido, una guardia de tarde, un sábado imprevisto: añádelo a la semana en segundos, sin tocar las horas ya registradas.</p>
+                <div class="gs-two">
+                    <div>
+                        <div class="gs-card bk">
+                            <b>Añadir horas a una semana</b>
+                            <ul class="hm-checks">
+                                <li>Elige un día que ya tenga horas: sus bloques aparecen como ocupados en la cuadrícula horaria</li>
+                                <li>Arrastra un segundo bloque, como una guardia de 18:00 a 19:30, y guarda: una entrada más</li>
+                                <li>Haz clic en días extra y guárdalos con las mismas horas</li>
+                                <li>Añadir patrón recurrente: todos los días laborables hasta una fecha de fin</li>
+                                <li>Allow Different Times Per Date: cada día elegido tiene sus propias horas</li>
+                                <li>Max Bookings per Day: cuántos bloques separados puede elegir una persona en un día (0 = sin límite)</li>
+                            </ul>
+                        </div>
+                        <p class="gs-note"><b>¿Registras turnos desde un flujo de pantalla (Screen Flow)?</b> El <a href="/es/blog/bucle-flow-salesforce-varios-registros.html">flujo de ejemplo Add Shifts</a>, gratuito, toma los bloques elegidos y crea un registro por cada uno.</p>
+                    </div>
+                    <figure class="gs-fig">
+                        <img src="/images/es/blog/salesforce-hoja-de-horas-segundo-turno.png" alt="Calendario de entradas de tiempo en Salesforce añadiendo un segundo turno: un día con dos bloques registrados los muestra ocupados en la cuadrícula horaria mientras se elige a su lado una guardia de tarde" title="Añadir un segundo turno a un día en Salesforce" width="1273" height="741" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Dos bloques ya registrados; la guardia de tarde se añade a su lado.</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ BILLABLE AND TOTALS ═══════════════ -->
+        <section class="gs-sec" id="billable">
+            <div class="hm-wrap">
+                <h2>Horas facturables y no facturables, y los totales de la semana</h2>
+                <p class="gs-lead">Facturación es una lista de selección que la persona elige al registrar sus horas. Los totales son campos de fórmula y de resumen acumulado de Salesforce, añadidos con clics en el Gestor de objetos.</p>
+                <div class="hm-scroll">
+                <table class="gs-table">
+                    <thead><tr><th>Objeto</th><th>Campo</th><th>Tipo</th><th>Finalidad</th></tr></thead>
+                    <tbody>
+                        <tr><td>Entrada de tiempo</td><td>Facturación</td><td>Lista de selección: Facturable (predeterminado), No facturable</td><td>El Second Picklist Field del calendario: se elige junto a la tarea y se ve en la tarjeta al pasar el cursor y en la Agenda</td></tr>
+                        <tr><td>Entrada de tiempo</td><td>Horas</td><td>Fórmula (Número)</td><td><code>(End_Time__c - Start_Time__c) / 3600000</code>: de 9:00 a 12:00 son 3</td></tr>
+                        <tr><td>Hoja de horas</td><td>Horas totales</td><td>Resumen de totales acumulados (SUMA de Horas)</td><td>Todas las entradas de la hoja</td></tr>
+                        <tr><td>Hoja de horas</td><td>Horas aprobadas</td><td>Resumen de totales acumulados, con filtro</td><td>Estado igual a Aprobado</td></tr>
+                        <tr><td>Hoja de horas</td><td>Horas facturables</td><td>Resumen de totales acumulados, con filtro</td><td>Facturación igual a Facturable</td></tr>
+                        <tr><td>Hoja de horas</td><td>Horas no facturables</td><td>Resumen de totales acumulados, con filtro</td><td>Facturación igual a No facturable</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <div class="gs-two" style="margin-top:22px;">
+                    <div>
+                        <ul class="hm-checks">
+                            <li>La Entrada de tiempo está en relación principal-detalle con la Hoja de horas semanal, así que los resúmenes se actualizan al guardar las entradas</li>
+                            <li>Un botón <b>Marcar como no facturable</b> en Modo edición ejecuta un flujo sobre muchas entradas a la vez</li>
+                            <li>Un informe estándar agrupa las entradas por Facturación y Proyecto</li>
+                            <li>El estado de aprobación conserva sus colores, así que estado y facturación se ven juntos</li>
+                        </ul>
+                    </div>
+                    <figure class="gs-fig">
+                        <img src="/images/es/blog/salesforce-hoja-de-horas-enviar-semana.png" alt="Hoja de horas de Salesforce en Modo edición con tres días elegidos: cada entrada de tiempo con sus horas y su facturación, y los botones Enviar semana y Marcar como no facturable, que ejecutan un flujo" title="Enviar una semana de entradas de tiempo en Salesforce" width="1248" height="738" loading="lazy" decoding="async" data-zoomable>
+                        <figcaption>Horas y facturación en cada entrada; Enviar semana y Marcar como no facturable ejecutan un flujo.</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ APPROVALS ═══════════════ -->
+        <section class="gs-sec alt" id="approvals">
+            <div class="hm-wrap">
+                <h2>Enviar, aprobar, rechazar</h2>
+                <p class="gs-lead">La aprobación vive en tu propia lista de selección de estado, en color, con un botón de filtro por estado.</p>
+                <div class="gs-paths three">
+                    <div class="gs-card bk"><b>Quien registra las horas</b>Las entradas nuevas empiezan como Borrador (Selectable Statuses). Cuando termina la semana, Modo edición y Enviar semana envían todas las entradas en Borrador elegidas.</div>
+                    <div class="gs-card rs"><b>El responsable</b>Una página Horas del equipo muestra las entradas de todas las personas con el nombre del empleado. Modo edición, Cambiar estado a Aprobado, Aplicar cambios.</div>
+                    <div class="gs-card sf"><b>Horas rechazadas</b>Un bloque rechazado se queda en gris en la semana de la persona, así que está claro qué debe volver a registrar.</div>
+                </div>
+                <figure class="gs-fig" style="margin-top:22px;">
+                    <img src="/images/es/blog/salesforce-hoja-de-horas-aprobar-en-bloque.png" alt="Aprobación de hojas de horas en bloque en Salesforce: el Modo edición del responsable lista las entradas de tiempo del lunes de todo el equipo con empleado, horas y facturación, y Cambiar estado a Aprobado" title="Aprobar hojas de horas en Salesforce en bloque" width="1895" height="666" loading="lazy" decoding="async" data-zoomable>
+                    <figcaption>Once entradas de cinco personas, aprobadas con un solo Aplicar cambios.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ═══════════════ CONFIGS ═══════════════ -->
+        <section class="gs-sec" id="configuration">
+            <div class="hm-wrap">
+                <h2>Parte de una configuración</h2>
+                <p class="gs-lead">Importa la configuración Hoja de horas semanal en el asistente de configuración, asígnala a tus propios objetos y campos, y guarda.</p>
+                <div class="cf-grid">
+                    <div class="cf-card">
+                        <span class="cf-type">Dates &amp; Times</span>
+                        <h3>Hoja de horas semanal</h3>
+                        <p>Entradas de tiempo en la Hoja de horas semanal, por proyecto, facturables o no.</p>
+                        <ul class="cf-set">
+                            <li><span>View</span><em>Semana, con Calendario y Agenda</em></li>
+                            <li><span>Status Colors</span><em>Borrador, Enviado, Aprobado, Rechazado</em></li>
+                            <li><span>Second Picklist Field</span><em>Billable__c</em></li>
+                            <li><span>Show Recurring Pattern Button</span><em>Activado</em></li>
+                            <li><span>Record Details Pop-up</span><em>Proyecto</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/es/biblioteca-configuraciones-calendario-salesforce.html#weekly-time-sheet">Config Library &rarr;</a><a href="/downloads/configs/Weekly_Time_Sheet.json" download>JSON</a></div>
+                    </div>
+                    <div class="cf-card">
+                        <span class="cf-type">Dates &amp; Times</span>
+                        <h3>Planificación de turnos</h3>
+                        <p>Planifica los turnos antes de registrar las horas.</p>
+                        <ul class="cf-set">
+                            <li><span>Earliest / Latest Time</span><em>6:00 a 22:00</em></li>
+                            <li><span>Allow Different Times Per Date</span><em>Activado</em></li>
+                            <li><span>View</span><em>Semana</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/es/biblioteca-configuraciones-calendario-salesforce.html#shift-scheduling">Config Library &rarr;</a><a href="/downloads/configs/Shift_Scheduling.json" download>JSON</a></div>
+                    </div>
+                    <div class="cf-card">
+                        <span class="cf-type">Resource Booking</span>
+                        <h3>Planificación de la capacidad del equipo</h3>
+                        <p>Asigna trabajo y ve quién supera su capacidad.</p>
+                        <ul class="cf-set">
+                            <li><span>Resource</span><em>User, solo activos</em></li>
+                            <li><span>Available Views</span><em>Ocupación, Semana, Calendario</em></li>
+                        </ul>
+                        <div class="cf-links"><a href="/es/biblioteca-configuraciones-calendario-salesforce.html#team-capacity-planning">Config Library &rarr;</a><a href="/downloads/configs/Team_Capacity_Planning.json" download>JSON</a></div>
+                    </div>
+                </div>
+                <p class="gs-note"><b>Dos flujos que añadir.</b> Los botones Enviar semana y Marcar como no facturable de la configuración ejecutan flujos llamados Submit_Week y Mark_Non_Billable. Cada uno recibe los recordIds de las entradas elegidas y cambia un campo. Créalos en Flow Builder o quita los botones en el paso Acciones del asistente.</p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FAQ ═══════════════ -->
+        <section class="gs-sec alt" id="faq">
+            <div class="hm-wrap gs-faq">
+                <h2>Preguntas sobre la hoja de horas en Salesforce</h2>
+                <p class="gs-lead">Respuestas breves a lo que más se busca.</p>
+                <details>
+                    <summary>¿Cómo creo una hoja de horas en Salesforce?</summary>
+                    <p>Crea un objeto Hoja de horas semanal y un objeto Entrada de tiempo en relación principal-detalle con él, con una fecha, una hora de inicio, una hora de fin, un estado y un proyecto. Pon el calendario Dates &amp; Times de MultiDatePick en la página de registro de la Hoja de horas con la configuración Hoja de horas semanal, y cada bloque de tiempo que una persona arrastre se guardará como una Entrada de tiempo bajo esa hoja.</p>
+                </details>
+                <details>
+                    <summary>¿Puedo añadir un segundo turno a un día que ya tiene horas registradas?</summary>
+                    <p>Sí. Vuelve a elegir el día: sus bloques registrados aparecen como ocupados en la cuadrícula horaria, y un bloque nuevo, como una guardia de tarde, se guarda como una Entrada de tiempo más. Los días extra se añaden igual. Max Bookings per Day define cuántos bloques separados puede elegir una persona en un día.</p>
+                </details>
+                <details>
+                    <summary>¿Cómo sumo las horas de la hoja de horas en Salesforce?</summary>
+                    <p>Añade a la Entrada de tiempo una fórmula Horas, (End_Time__c - Start_Time__c) / 3600000, y un campo de resumen de totales acumulados (Roll-Up Summary) en la Hoja de horas que la sume. Los resúmenes con filtro dan Horas aprobadas, Horas facturables y Horas no facturables.</p>
+                </details>
+                <details>
+                    <summary>¿Cómo separo las horas facturables de las no facturables?</summary>
+                    <p>Añade a la Entrada de tiempo una lista de selección Facturación y configúrala como Second Picklist Field del calendario. Cada persona elige Facturable o No facturable al registrar sus horas, se ve en cada entrada y dos resúmenes con filtro suman cada tipo.</p>
+                </details>
+                <details>
+                    <summary>¿Cuánto cuesta MultiDatePick?</summary>
+                    <p>US$25 por usuario al mes por todos los componentes y funciones, con una prueba gratuita de 30 días y sin tarjeta.</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- ═══════════════ RELATED ═══════════════ -->
+        <section class="gs-sec" id="related">
+            <div class="hm-wrap">
+                <h2>Sigue explorando</h2>
+                <div class="gs-links" style="margin-top:16px;">
+                    <a href="/es/blog/registro-de-horas-salesforce.html"><b>Registro de horas en Salesforce</b><span>La guía completa, paso a paso</span></a> <a href="/es/selector-franjas-horarias-salesforce.html"><b>El componente Dates &amp; Times</b><span>Días y horas en un solo calendario</span></a> <a href="/es/calendario-salesforce-reclutamiento-seleccion-personal.html"><b>Reclutamiento y selección</b><span>Disponibilidad, turnos y colocaciones</span></a> <a href="/es/biblioteca-configuraciones-calendario-salesforce.html"><b>Config Library</b><span>47 configuraciones listas para importar</span></a> <a href="/es/precios.html"><b>Precios</b><span>US$25/usuario/mes, todas las funciones</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FINAL CTA ═══════════════ -->
+        <section class="hm-final">
+            <div class="hm-wrap">
+                <h2>Registra la semana en un calendario</h2>
+                <p>Prueba ya la demo en vivo o dinos dónde enviarte el aviso de lanzamiento.</p>
+                <div class="hm-ctas">
+                    <a href="/es/avisame-en-el-lanzamiento.html" class="btn btn-cta">Avísame en el lanzamiento</a> <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/es/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-timesheet-calendar" class="btn btn-ghost" target="_blank" rel="noopener">Prueba la demo en vivo</a> <a href="/es/primeros-pasos.html" class="btn btn-ghost">Primeros pasos</a>
+                </div>
+                <p class="contact">US$25/usuario/mes, prueba gratuita de 30 días, sin tarjeta.</p>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/es/" class="logo">
+                        <img src="/images/logo.png" alt="Logotipo de MultiDatePick: componente de calendario de varias fechas y reserva de recursos para Salesforce" width="180" height="45">
+                    </a>
+                    <p>Calendarios, reservas y diagramas de Gantt en cualquier objeto de Salesforce. Sin código.</p>
+                </div>
+                <div class="footer-links">
+                    <h2>Producto</h2>
+                    <ul>
+                        <li><a href="/es/selector-varias-fechas-salesforce.html">Elegir varias fechas</a></li>
+                        <li><a href="/es/selector-franjas-horarias-salesforce.html">Elegir fechas y horas</a></li>
+                        <li><a href="/es/calendario-reservas-salesforce.html">Reservar salas y personas</a></li>
+                        <li><a href="/es/diagrama-de-gantt-salesforce.html">Planificar con Gantt</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Siete vistas de calendario</a></li>
+                        <li><a href="/es/biblioteca-configuraciones-calendario-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Soluciones</h2>
+                    <ul>
+                        <li><a href="/es/calendario-salesforce.html">Calendario de Salesforce</a></li>
+                        <li><a href="/es/reserva-salas-reuniones-salesforce.html">Reserva de salas de reuniones</a></li>
+                        <li><a href="/es/calendario-salesforce-reclutamiento-seleccion-personal.html">Reclutamiento y selección</a></li>
+                        <li><a href="/es/hoja-de-horas-salesforce.html">Hojas de horas</a></li>
+                        <li><a href="/es/blog/fechas-de-campana-salesforce.html">Calendario de campañas</a></li>
+                        <li><a href="/es/blog/calendario-salesforce-accesible-sector-publico-section-508.html">Sector público / Section 508</a></li>
+                        <li><a href="/es/programacion-clases-cursos-salesforce.html">Programación de clases y cursos</a></li>
+                        <li><a href="/es/calendario-reservas-experience-cloud-salesforce.html">Reservas en Experience Cloud</a></li>
+                        <li><a href="/es/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Documentación</h2>
+                    <ul>
+                        <li><a href="/es/primeros-pasos.html">Primeros pasos</a></li>
+                        <li><a href="/es/guia-del-usuario.html">Guía del usuario</a></li>
+                        <li><a href="/es/guia-flujos-de-pantalla-salesforce.html">Guía de flujos de pantalla</a></li>
+                        <li><a href="/es/paginas-aplicacion-inicio-experience-cloud.html">Páginas de aplicación, inicio y Experience</a></li>
+                        <li><a href="/es/solucion-de-problemas.html">Solución de problemas</a></li>
+                        <li><a href="/es/preguntas-frecuentes.html">Preguntas frecuentes</a></li>
+                    </ul>
+                    <h2>Para desarrolladores</h2>
+                    <ul>
+                        <li><a href="/es/guia-desarrolladores-calendario-salesforce.html">Guía para desarrolladores</a></li>
+                        <li><a href="/es/implementar-flujo-vs-code.html">Implementar un flujo (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Empresa</h2>
+                    <ul>
+                        <li><a href="/es/precios.html">Precios</a></li>
+                        <li><a href="/es/blog/">Blog</a></li>
+                        <li><a href="/es/confianza-y-seguridad.html">Confianza y seguridad</a></li>
+                        <li><a href="/es/accesibilidad-vpat.html">Accesibilidad</a></li>
+                        <li><a href="/es/avisame-en-el-lanzamiento.html">Avísame en el lanzamiento</a></li>
+                        <li><a href="/es/configuracion-personalizada-calendario-salesforce-gratis.html">Configuración gratis a medida</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Soporte</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Todos los derechos reservados.</span>
+                <!-- consent:footer --><div class="footer-social footer-legal"><a href="/es/politica-de-privacidad.html">Política de privacidad</a><a href="/es/politica-de-privacidad.html#cookie-settings" data-mdp-consent="open">Configuración de cookies</a></div><!-- /consent:footer -->
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Idioma" translate="no"><ul><li><a href="/salesforce-timesheet-calendar.html" hreflang="en" lang="en">English</a></li><li><a href="/de/salesforce-stundenzettel-kalender.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/hoja-de-horas-salesforce.html" hreflang="es" lang="es" aria-current="page">Español</a></li><li><a href="/fr/feuille-de-temps-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/calendario-timesheet-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/timesheet-salesforce-apontamento-de-horas.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/salesforce-timesheet-calendar.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/salesforce-timesheet-calendar.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/salesforce-timesheet-calendar.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ampliar imagen</p><p data-k="expand-diagram">Ampliar diagrama</p><p data-k="close">Cerrar</p><p data-k="prev-image">Imagen anterior</p><p data-k="next-image">Imagen siguiente</p><p data-k="image-viewer">Visor de imágenes</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>
