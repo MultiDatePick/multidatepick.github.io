@@ -80,14 +80,6 @@
                     },
                     {
                         "@type": "Question",
-                        "name": "访客预订能否关联到 Salesforce 中的联系人或潜在客户？",
-                        "acceptedAnswer": {
-                            "@type": "Answer",
-                            "text": "可以，无需代码。在设置向导中开启“预订人”，选择联系人或潜在客户，以及接收此人的查找字段。访客在预订时输入姓名和电子邮件。MultiDatePick 查找具有该电子邮件的联系人（或潜在客户）并将预订关联到它；如果是新人，则新建一个。访客永远看不到任何人的信息，每人上限也可以按该查找字段计数。"
-                        }
-                    },
-                    {
-                        "@type": "Question",
                         "name": "其他时区的访客看到的是自己的时间吗？",
                         "acceptedAnswer": {
                             "@type": "Answer",
@@ -508,8 +500,7 @@
                             <tr><td>Config Name<small>configName</small></td><td>您在设置向导中建的配置，自动填入对象和字段。</td></tr>
                             <tr><td>Static Parent Record Id<small>staticRecordId</small></td><td>一条父记录。页面本身没有记录，所以由它加载现有预订和屏蔽时间。</td></tr>
                             <tr><td>Show Other People's Bookings As<small>bookingPrivacy</small></td><td>Busy for site guests，访客永远看不到其他客户的姓名。</td></tr>
-                            <tr><td>预订人<small>设置向导，字段步骤</small></td><td>访客输入姓名和电子邮件；预订会关联到具有该电子邮件的联系人或潜在客户，或关联到新建的记录。</td></tr>
-                            <tr><td>Limit per Person<small>limitPerPerson, limitPerPersonClientField</small></td><td>设为 1 时，每位访客只能有一个即将到来的预订，按其在预订表单中输入的电子邮件或“预订人”关联的联系人计数。在服务器上检查。</td></tr>
+                            <tr><td>Limit per Person<small>limitPerPerson, limitPerPersonClientField</small></td><td>设为 1 时，每位访客只能有一个即将到来的预订，按其在预订表单中填写的电子邮件计数。由服务器端检查。</td></tr>
                             <tr><td>Only These Times<small>availableTimes</small></td><td>只提供您选定的开始时间，例如 9:00、10:30 和 13:00。</td></tr>
                             <tr><td>Conflict Behavior<small>conflictBehavior</small></td><td>Block（默认）。冲突的预订永远不会被保存。</td></tr>
                             <tr><td>Capacity Field<small>capacityField</small></td><td>有 20 个座位的课程满 20 人即关闭。</td></tr>
@@ -539,7 +530,6 @@
                         <tr><td>查看空闲时间段和已占用的时间</td><td class="c"><span class="y" aria-label="是">&#10003;</span></td><td class="c"><span class="y" aria-label="是">&#10003;</span></td></tr>
                         <tr><td>预订（创建记录）</td><td class="c"><span class="y" aria-label="是">&#10003;</span></td><td class="c"><span class="y" aria-label="是">&#10003;</span></td></tr>
                         <tr><td>将预订添加到 Outlook、Google 或 Apple 日历</td><td class="c"><span class="y" aria-label="是">&#10003;</span><small><a href="/zh/blog/salesforce-add-to-calendar.html">保存后提供 .ics</a></small></td><td class="c"><span class="y" aria-label="是">&#10003;</span></td></tr>
-                        <tr><td>关联到本人的联系人或潜在客户</td><td class="c"><span class="y" aria-label="是">&#10003;</span><small>按电子邮件，<a href="#who-is-booking">预订人</a></small></td><td class="c"><span class="y" aria-label="是">&#10003;</span></td></tr>
                         <tr><td>移动或编辑预订</td><td class="c"><span class="n" aria-label="否">&#10007;</span><small>Salesforce 访客限制</small></td><td class="c"><span class="y" aria-label="是">&#10003;</span><small>需有权限</small></td></tr>
                         <tr><td>取消或删除</td><td class="c"><span class="n" aria-label="否">&#10007;</span><small>Salesforce 访客限制</small></td><td class="c"><span class="y" aria-label="是">&#10003;</span><small>需有权限</small></td></tr>
                         <tr><td>个人的&ldquo;我的预订&rdquo;日历</td><td class="c"><span class="n" aria-label="否">&#10007;</span><small>所有访客共用一个用户</small></td><td class="c"><span class="y" aria-label="是">&#10003;</span><small>通过屏幕 Flow</small></td></tr>
@@ -550,7 +540,6 @@
                     <div class="gs-card"><b>访客访问权限，每个站点设置一次</b><p>将 <b>MultiDatePick - Guest</b> 权限集分配给站点的访客用户；它包含组件访问权限，以及访客被允许的读取和创建权限。再为您自己的对象添加读取和创建权限、一条访客共享规则，然后发布并激活。</p></div>
                     <div class="gs-card sf"><b>默认记录所有者</b><p>访客不能拥有记录，所以 Salesforce 会把每项访客预订分配给一个默认所有者。在 Experience Workspaces 的“管理”>“首选项”中设置。</p></div>
                 </div>
-                <p class="gs-note" id="who-is-booking"><b>知道是谁预订的。</b>在设置向导（字段步骤）中开启<b>预订人</b>，选择联系人或潜在客户。每位访客输入姓名和电子邮件；预订会关联到具有该电子邮件的联系人，或关联到新建的联系人，因此 jane@example.com 的两次预订都会显示在 Jane 的联系人上。匹配在服务器上进行，访客只会得到“已预订”。请为访客用户授予联系人（或潜在客户）的创建权限和查找字段的访问权限；不需要任何共享规则。</p>
                 <p class="gs-note"><b>访客想移动预订？</b>MultiDatePick 会说明为什么不行，而不是抛出一个莫名其妙的错误。完整的六步访客检查清单见<a href="/zh/home-app-experience.html#guest-sites">应用程序、主页与 Experience 页面</a>。</p>
             </div>
         </section>
@@ -637,10 +626,6 @@
                 <details>
                     <summary>公开预订能限制每场的名额吗？</summary>
                     <p>能。为资源设置容量，例如 12 个名额，每个时间段就会显示 3/12 这样的实时标记。已满的时间段无法选择，因此公开场次的预订数永远不会超过名额。最短提前时间、缓冲时间和停用日期同样适用于访客。</p>
-                </details>
-                <details>
-                    <summary>访客预订能否关联到 Salesforce 中的联系人或潜在客户？</summary>
-                    <p>可以，无需代码。在设置向导中开启“预订人”，选择联系人或潜在客户，以及接收此人的查找字段。访客在预订时输入姓名和电子邮件。MultiDatePick 查找具有该电子邮件的联系人（或潜在客户）并将预订关联到它；如果是新人，则新建一个。访客永远看不到任何人的信息，每人上限也可以按该查找字段计数。</p>
                 </details>
                 <details>
                     <summary>其他时区的访客看到的是自己的时间吗？</summary>
