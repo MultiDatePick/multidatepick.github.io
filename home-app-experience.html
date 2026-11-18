@@ -175,7 +175,7 @@
         <section class="guide-hero">
             <div class="container">
                 <h1>App Pages, Home Pages &amp; Experience Sites</h1>
-                <p class="subtitle">MultiDatePick works on every Lightning surface, not just record pages. The trick is one property: <strong>Static Parent Record Id</strong>.</p>
+                <p class="subtitle">MultiDatePick works on every Lightning surface, not just record pages. On an App or Home page, the Setup Wizard asks whose records to show: just the person looking (the default), everyone's, only ones that match, or one record's. <strong>Static Parent Record Id</strong> is only for one record's.</p>
                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
                     <a href="#setup" class="btn btn-primary">Watch the Setup</a>
                     <a href="#troubleshooting" class="btn btn-secondary">Troubleshooting</a>
@@ -189,10 +189,11 @@
                 <p>MultiDatePick saves the dates you pick as records on a related object, each one linked back to a <strong>parent record</strong>. The component just needs to know <em>which</em> parent.</p>
                 <ul>
                     <li><strong>On a record page</strong> (e.g. an Event record), Salesforce automatically hands the component the current record's Id (the <code>recordId</code>). Nothing extra to configure.</li>
-                    <li><strong>On an App Page, Home Page, or Experience Site</strong>, there is no "current record." Salesforce passes nothing. With no parent, the component has nowhere to save, so it <strong>hides the Save button by design</strong> rather than show one that fails on click.</li>
+                    <li><strong>On an App or Home page</strong> there is no current record. The wizard's <strong>Whose records?</strong> answer decides what shows and where new picks go. <strong>Just the person looking</strong>, <strong>Everyone's</strong> and <strong>Only ones that match</strong> need no parent: new picks save with no parent record.</li>
+                    <li><strong>On an Experience site</strong> the wizard asks <strong>Bookings attach to</strong>: <strong>The page's record</strong>, or <strong>One record</strong> (Static Parent Record Id).</li>
                 </ul>
                 <div class="callout callout-blue">
-                    <div><strong>The fix is the Static Parent Record Id property.</strong> Paste a specific parent record's Id into it, and the component behaves exactly as if it were sitting on that record's page. It is a property you set in the builder. It has nothing to do with a Salesforce Static Resource, which is a separate feature for uploaded files.</div>
+                    <div><strong>One record's ties every pick to one fixed record, through the Static Parent Record Id property.</strong> Paste that record's Id into it, and the component behaves exactly as if it were sitting on that record's page. It is a property you set in the builder. It has nothing to do with a Salesforce Static Resource, which is a separate feature for uploaded files.</div>
                 </div>
                 <p style="color:#5a6b7b;font-size:.95rem;margin:20px 0;"><em>Find <strong>Static Parent Record Id</strong> in the property panel after you drag MultiDatePick onto an App Page or Home Page in Lightning App Builder, or onto a page in Experience Builder.</em></p>
             </div>
@@ -201,7 +202,7 @@
         <section class="section">
             <div class="container">
                 <h2 id="static-vs-flow">Static Parent Record Id vs. a Flow: when to use which</h2>
-                <p>Static Parent Record Id points the component at <strong>one fixed parent</strong>, so <strong>every visitor sees the same record.</strong> That is perfect for some cases and wrong for others. When the record needs to change per user or per visit, drive it from a <strong>Screen Flow</strong> instead. Drop the component on a Flow screen and bind its <strong>Parent Record Id</strong> to a variable the Flow resolves at runtime.</p>
+                <p>Static Parent Record Id points the component at <strong>one fixed parent</strong>, so <strong>every visitor sees the same record.</strong> That is perfect for some cases and wrong for others. When each person should see only their own records, you need no Flow: pick <strong>Just the person looking</strong> in the wizard. Use a <strong>Screen Flow</strong> when the record is chosen per visit. Drop the component on a Flow screen and bind its <strong>Parent Record Id</strong> to a variable the Flow resolves at runtime.</p>
                 <h3 style="margin-top:24px;">Use Static Parent Record Id when the record is the same for everybody</h3>
                 <ul>
                     <li><strong>A public booking page:</strong> a guest-facing "request an appointment" page where every booking attaches to the same parent record (one office, location, or resource). A fixed Id is exactly right.</li>
@@ -211,7 +212,7 @@
                 <p style="color:#5a6b7b;font-size:.95rem;"><em>Rule of thumb: reach for Static Parent Record Id when the answer to "whose record is this?" is "the same one for everybody."</em></p>
                 <h3 style="margin-top:24px;">Use a Flow when the record is chosen at runtime</h3>
                 <ul>
-                    <li><strong>Per-user records:</strong> each person sees only their own (for example, every contractor lands on their own PTO calendar). The Flow does a <em>Get Records</em> where the owner or a linked Contact = <code>{!$User.Id}</code>, stores the Id, and passes it to the component.</li>
+                    <li><strong>Per-user records through another record:</strong> when a person's records hang off a Contact or another record tied to them (not records they own, which need no Flow), the Flow does a <em>Get Records</em> where that record's user = <code>{!$User.Id}</code>, stores the Id, and passes it to the component.</li>
                     <li><strong>URL-driven:</strong> a Flow input variable reads <code>?id=&hellip;</code> from the link, so one page serves many records. This works for guests too, with no login.</li>
                     <li><strong>Pick-first:</strong> screen 1 lets the user search or choose (an employee, a room, a client); screen 2 shows that record's calendar.</li>
                 </ul>

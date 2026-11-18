@@ -193,7 +193,7 @@
         <section class="guide-hero">
             <div class="container">
                 <h1>Pages d'application, pages d'accueil &amp; sites Experience</h1>
-                <p class="subtitle">MultiDatePick fonctionne sur toutes les surfaces Lightning, pas seulement sur les pages d'enregistrement. Tout tient en une propriété : <strong>Static Parent Record Id</strong>.</p>
+                <p class="subtitle">MultiDatePick fonctionne sur toutes les surfaces Lightning, pas seulement sur les pages d'enregistrement. Sur une page d'application ou d'accueil, l'assistant de configuration demande de qui afficher les enregistrements : « Seulement la personne qui consulte » (par défaut), « Tout le monde », « Seulement ceux qui correspondent » ou « D’un seul enregistrement ». <strong>Static Parent Record Id</strong> ne sert que pour « D’un seul enregistrement ».</p>
                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
                     <a href="#setup" class="btn btn-primary">Voir la configuration</a> <a href="#troubleshooting" class="btn btn-secondary">Dépannage</a>
                 </div>
@@ -206,10 +206,11 @@
                 <p>MultiDatePick enregistre les dates choisies comme enregistrements sur un objet associé, chacun relié à un <strong>enregistrement parent</strong>. Le composant doit simplement savoir <em>quel</em> parent.</p>
                 <ul>
                     <li><strong>Sur une page d'enregistrement</strong> (par exemple un enregistrement Event), Salesforce transmet automatiquement au composant l'Id de l'enregistrement en cours (le <code>recordId</code>). Rien de plus à configurer.</li>
-                    <li><strong>Sur une page d'application, une page d'accueil ou un site Experience</strong>, il n'y a pas d'« enregistrement en cours ». Salesforce ne transmet rien. Sans parent, le composant n'a nulle part où enregistrer : il <strong>masque volontairement le bouton Enregistrer</strong> plutôt que d'en afficher un qui échouerait au clic.</li>
+                    <li><strong>Sur une page d'application ou d'accueil</strong>, il n'y a pas d'enregistrement en cours. La réponse à <strong>Les enregistrements de qui ?</strong> dans l'assistant décide de ce qui s'affiche et d'où vont les nouvelles sélections. <strong>Seulement la personne qui consulte</strong>, <strong>Tout le monde</strong> et <strong>Seulement ceux qui correspondent</strong> n'ont besoin d'aucun parent : les nouvelles sélections sont enregistrées sans enregistrement parent.</li>
+                    <li><strong>Sur un site Experience</strong>, l'assistant demande <strong>Les réservations sont liées à</strong> : <strong>L’enregistrement de la page</strong>, ou <strong>Un enregistrement précis</strong> (Static Parent Record Id).</li>
                 </ul>
                 <div class="callout callout-blue">
-                    <div><strong>La solution, c'est la propriété Static Parent Record Id.</strong> Collez-y l'Id d'un enregistrement parent précis, et le composant se comporte exactement comme s'il était sur la page de cet enregistrement. C'est une propriété que vous réglez dans le générateur. Elle n'a rien à voir avec une ressource statique Salesforce (Static Resource), une fonctionnalité distincte pour les fichiers téléchargés.</div>
+                    <div><strong>« D’un seul enregistrement » rattache chaque sélection à un enregistrement fixe, via la propriété Static Parent Record Id.</strong> Collez-y l'Id de cet enregistrement, et le composant se comporte exactement comme s'il était sur la page de cet enregistrement. C'est une propriété que vous réglez dans le générateur. Elle n'a rien à voir avec une ressource statique Salesforce (Static Resource), une fonctionnalité distincte pour les fichiers téléchargés.</div>
                 </div>
                 <p style="color:#5a6b7b;font-size:.95rem;margin:20px 0;"><em>Vous trouverez <strong>Static Parent Record Id</strong> dans le panneau des propriétés après avoir fait glisser MultiDatePick sur une page d'application ou d'accueil dans Lightning App Builder, ou sur une page dans Experience Builder.</em></p>
             </div>
@@ -218,7 +219,7 @@
         <section class="section">
             <div class="container">
                 <h2 id="static-vs-flow">Static Parent Record Id ou un flux : lequel choisir</h2>
-                <p>Static Parent Record Id fait pointer le composant sur <strong>un parent fixe</strong> : <strong>tous les visiteurs voient le même enregistrement.</strong> C'est parfait dans certains cas, inadapté dans d'autres. Quand l'enregistrement doit changer selon l'utilisateur ou la visite, pilotez-le plutôt depuis un <strong>flux d'écran (Screen Flow)</strong>. Déposez le composant sur un écran de flux et liez son <strong>Parent Record Id</strong> à une variable que le flux détermine à l'exécution.</p>
+                <p>Static Parent Record Id fait pointer le composant sur <strong>un parent fixe</strong> : <strong>tous les visiteurs voient le même enregistrement.</strong> C'est parfait dans certains cas, inadapté dans d'autres. Quand chacun ne doit voir que ses propres enregistrements, aucun flux n'est nécessaire : choisissez <strong>Seulement la personne qui consulte</strong> dans l'assistant. Utilisez un <strong>flux d'écran (Screen Flow)</strong> quand l'enregistrement est choisi à chaque visite. Déposez le composant sur un écran de flux et liez son <strong>Parent Record Id</strong> à une variable que le flux détermine à l'exécution.</p>
                 <h3 style="margin-top:24px;">Static Parent Record Id quand l'enregistrement est le même pour tous</h3>
                 <ul>
                     <li><strong>Une page de réservation publique :</strong> une page « demander un rendez-vous » ouverte aux invités, où chaque réservation est rattachée au même enregistrement parent (un bureau, un lieu ou une ressource). Un Id fixe est exactement ce qu'il faut.</li>
@@ -228,7 +229,7 @@
                 <p style="color:#5a6b7b;font-size:.95rem;"><em>Règle simple : choisissez Static Parent Record Id quand la réponse à « à qui est cet enregistrement ? » est « le même pour tout le monde ».</em></p>
                 <h3 style="margin-top:24px;">Un flux quand l'enregistrement est choisi à l'exécution</h3>
                 <ul>
-                    <li><strong>Enregistrements par utilisateur :</strong> chacun ne voit que le sien (par exemple, chaque prestataire arrive sur son propre calendrier de congés). Le flux exécute un élément <em>Obtenir des enregistrements</em> où le propriétaire ou un Contact lié = <code>{!$User.Id}</code>, stocke l'Id et le transmet au composant.</li>
+                    <li><strong>Enregistrements par utilisateur via un autre enregistrement :</strong> quand les enregistrements d'une personne dépendent d'un Contact ou d'un autre enregistrement qui lui est lié (et non d'enregistrements dont elle est propriétaire, qui n'ont besoin d'aucun flux), le flux exécute un élément <em>Obtenir des enregistrements</em> où l'utilisateur de cet enregistrement = <code>{!$User.Id}</code>, stocke l'Id et le transmet au composant.</li>
                     <li><strong>Piloté par l'URL :</strong> une variable d'entrée du flux lit <code>?id=&hellip;</code> dans le lien, et une seule page sert ainsi de nombreux enregistrements. Cela fonctionne aussi pour les invités, sans connexion.</li>
                     <li><strong>Choisir d'abord :</strong> l'écran 1 permet à l'utilisateur de chercher ou de choisir (un employé, une salle, un client) ; l'écran 2 affiche le calendrier de cet enregistrement.</li>
                 </ul>

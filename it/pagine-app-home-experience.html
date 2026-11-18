@@ -193,7 +193,7 @@
         <section class="guide-hero">
             <div class="container">
                 <h1>Pagine app, pagine iniziali e siti Experience</h1>
-                <p class="subtitle">MultiDatePick funziona su ogni superficie Lightning, non solo sulle pagine record. Il trucco è una sola proprietà: <strong>Static Parent Record Id</strong>.</p>
+                <p class="subtitle">MultiDatePick funziona su ogni superficie Lightning, non solo sulle pagine record. Su una pagina app o iniziale, la configurazione guidata chiede di chi mostrare i record: solo di chi guarda (l'impostazione predefinita), di tutti, solo quelli che corrispondono o di un solo record. <strong>Static Parent Record Id</strong> serve solo per l'opzione “Di un solo record”.</p>
                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
                     <a href="#setup" class="btn btn-primary">Guarda la configurazione</a> <a href="#troubleshooting" class="btn btn-secondary">Risoluzione dei problemi</a>
                 </div>
@@ -206,10 +206,11 @@
                 <p>MultiDatePick salva le date scelte come record su un oggetto correlato, ognuno collegato a un <strong>record padre</strong>. Il componente deve solo sapere <em>quale</em> padre.</p>
                 <ul>
                     <li><strong>Su una pagina record</strong> (ad esempio un record Evento), Salesforce passa automaticamente al componente l'Id del record corrente (il <code>recordId</code>). Non c'è altro da configurare.</li>
-                    <li><strong>Su una pagina app, una pagina iniziale o un sito Experience</strong> non esiste un "record corrente". Salesforce non passa nulla. Senza un padre il componente non ha dove salvare, quindi <strong>nasconde il pulsante Salva per scelta</strong> invece di mostrarne uno che fallisce al clic.</li>
+                    <li><strong>Su una pagina app o una pagina iniziale</strong> non esiste un record corrente. La risposta a <strong>I record di chi?</strong> nella configurazione guidata decide cosa compare e dove vanno le nuove scelte. <strong>Solo di chi guarda</strong>, <strong>Di tutti</strong> e <strong>Solo quelli che corrispondono</strong> non richiedono un padre: le nuove scelte vengono salvate senza record padre.</li>
+                    <li><strong>Su un sito Experience</strong> la configurazione guidata chiede <strong>Le prenotazioni si collegano a</strong>: <strong>Il record della pagina</strong> oppure <strong>Un record preciso</strong> (Static Parent Record Id).</li>
                 </ul>
                 <div class="callout callout-blue">
-                    <div><strong>La soluzione è la proprietà Static Parent Record Id.</strong> Incollaci l'Id di un record padre specifico e il componente si comporta esattamente come se fosse sulla pagina di quel record. È una proprietà che imposti nel builder. Non ha nulla a che fare con una risorsa statica di Salesforce, che è una funzionalità diversa per i file caricati.</div>
+                    <div><strong>L'opzione “Di un solo record” collega ogni scelta a un unico record fisso, tramite la proprietà Static Parent Record Id.</strong> Incollaci l'Id di quel record e il componente si comporta esattamente come se fosse sulla pagina di quel record. È una proprietà che imposti nel builder. Non ha nulla a che fare con una risorsa statica di Salesforce, che è una funzionalità diversa per i file caricati.</div>
                 </div>
                 <p style="color:#5a6b7b;font-size:.95rem;margin:20px 0;"><em>Trovi <strong>Static Parent Record Id</strong> nel pannello delle proprietà dopo aver trascinato MultiDatePick su una pagina app o pagina iniziale in Lightning App Builder, oppure su una pagina in Experience Builder.</em></p>
             </div>
@@ -218,7 +219,7 @@
         <section class="section">
             <div class="container">
                 <h2 id="static-vs-flow">Static Parent Record Id o flusso: quando usare l'uno o l'altro</h2>
-                <p>Static Parent Record Id fa puntare il componente a <strong>un unico padre fisso</strong>, quindi <strong>ogni visitatore vede lo stesso record.</strong> In alcuni casi è perfetto, in altri è sbagliato. Quando il record deve cambiare per utente o per visita, gestiscilo con un <strong>flusso su schermo (Screen Flow)</strong>. Inserisci il componente in una schermata del flusso e collega il suo <strong>Parent Record Id</strong> a una variabile che il flusso risolve in fase di esecuzione.</p>
+                <p>Static Parent Record Id fa puntare il componente a <strong>un unico padre fisso</strong>, quindi <strong>ogni visitatore vede lo stesso record.</strong> In alcuni casi è perfetto, in altri è sbagliato. Se ognuno deve vedere solo i propri record, non serve un flusso: scegli <strong>Solo di chi guarda</strong> nella configurazione guidata. Usa un <strong>flusso su schermo (Screen Flow)</strong> quando il record si sceglie a ogni visita. Inserisci il componente in una schermata del flusso e collega il suo <strong>Parent Record Id</strong> a una variabile che il flusso risolve in fase di esecuzione.</p>
                 <h3 style="margin-top:24px;">Usa Static Parent Record Id quando il record è lo stesso per tutti</h3>
                 <ul>
                     <li><strong>Una pagina di prenotazione pubblica:</strong> una pagina "richiedi un appuntamento" per i guest in cui ogni prenotazione si collega allo stesso record padre (un ufficio, una sede o una risorsa). Un Id fisso è esattamente ciò che serve.</li>
@@ -228,7 +229,7 @@
                 <p style="color:#5a6b7b;font-size:.95rem;"><em>Regola pratica: usa Static Parent Record Id quando alla domanda "di chi è questo record?" la risposta è "lo stesso per tutti".</em></p>
                 <h3 style="margin-top:24px;">Usa un flusso quando il record viene scelto in fase di esecuzione</h3>
                 <ul>
-                    <li><strong>Record per utente:</strong> ognuno vede solo i propri (ad esempio, ogni collaboratore esterno arriva sul proprio calendario ferie). Il flusso esegue un <em>Get Records</em> dove il titolare o un Contatto collegato = <code>{!$User.Id}</code>, memorizza l'Id e lo passa al componente.</li>
+                    <li><strong>Record per utente tramite un altro record:</strong> quando i record di una persona dipendono da un Contatto o da un altro record collegato a lei (non da record di cui è titolare, che non richiedono un flusso), il flusso esegue un <em>Get Records</em> dove l'utente di quel record = <code>{!$User.Id}</code>, memorizza l'Id e lo passa al componente.</li>
                     <li><strong>Guidato dall'URL:</strong> una variabile di input del flusso legge <code>?id=&hellip;</code> dal link, così una pagina serve molti record. Funziona anche per i guest, senza login.</li>
                     <li><strong>Prima scegli:</strong> nella schermata 1 l'utente cerca o sceglie (un dipendente, una sala, un cliente); la schermata 2 mostra il calendario di quel record.</li>
                 </ul>

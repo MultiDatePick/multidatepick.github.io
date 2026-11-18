@@ -193,7 +193,7 @@
         <section class="guide-hero">
             <div class="container">
                 <h1>应用程序页面、主页和 Experience 站点</h1>
-                <p class="subtitle">MultiDatePick 可用于所有 Lightning 页面，不仅限于记录页面。诀窍就是一个属性：<strong>Static Parent Record Id</strong>。</p>
+                <p class="subtitle">MultiDatePick 可用于所有 Lightning 页面，不仅限于记录页面。在应用程序页面或主页上，设置向导会询问要显示谁的记录：仅查看者（默认）、所有人、仅符合条件的，或某一条记录的。<strong>Static Parent Record Id</strong> 只用于“某一条记录的”。</p>
                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
                     <a href="#setup" class="btn btn-primary">观看设置演示</a> <a href="#troubleshooting" class="btn btn-secondary">故障排除</a>
                 </div>
@@ -206,10 +206,11 @@
                 <p>MultiDatePick 会把您选的日期保存为相关对象上的记录，每条都关联回一条<strong>父记录</strong>。组件只需要知道是<em>哪一条</em>父记录。</p>
                 <ul>
                     <li><strong>在记录页面上</strong>（例如某条 Event 记录），Salesforce 会自动把当前记录的 Id（即 <code>recordId</code>）传给组件。无需额外配置。</li>
-                    <li><strong>在应用程序页面、主页或 Experience 站点上</strong>，没有“当前记录”，Salesforce 什么也不会传。没有父记录，组件就无处保存，因此它<strong>按设计会隐藏“保存”按钮</strong>，而不是显示一个一单击就出错的按钮。</li>
+                    <li><strong>在应用程序页面或主页上</strong>，没有当前记录。向导中<strong>谁的记录?</strong>的答案决定显示哪些记录、新选择保存到哪里。<strong>仅查看者</strong>、<strong>所有人</strong>和<strong>仅符合条件的</strong>都不需要父记录：新选择保存时不带父记录。</li>
+                    <li><strong>在 Experience 站点上</strong>，向导会询问<strong>预订关联到</strong>：<strong>页面的记录</strong>，或<strong>某一条记录</strong>（Static Parent Record Id）。</li>
                 </ul>
                 <div class="callout callout-blue">
-                    <div><strong>解决方法是 Static Parent Record Id 属性。</strong>把某条父记录的 Id 粘贴进去，组件的行为就和放在该记录页面上完全一样。这是在构建器中设置的一个属性，与 Salesforce 的静态资源 (Static Resource) 毫无关系，后者是用于上传文件的另一项功能。</div>
+                    <div><strong>“某一条记录的”通过 Static Parent Record Id 属性，把每个选择关联到一条固定的记录。</strong>把该记录的 Id 粘贴进去，组件的行为就和放在该记录页面上完全一样。这是在构建器中设置的一个属性，与 Salesforce 的静态资源 (Static Resource) 毫无关系，后者是用于上传文件的另一项功能。</div>
                 </div>
                 <p style="color:#5a6b7b;font-size:.95rem;margin:20px 0;"><em>在 Lightning App Builder 中把 MultiDatePick 拖到应用程序页面或主页上，或在 Experience Builder 中拖到页面上之后，即可在属性面板中找到 <strong>Static Parent Record Id</strong>。</em></p>
             </div>
@@ -218,7 +219,7 @@
         <section class="section">
             <div class="container">
                 <h2 id="static-vs-flow">Static Parent Record Id 与 Flow：何时用哪个</h2>
-                <p>Static Parent Record Id 让组件指向<strong>一条固定的父记录</strong>，因此<strong>每位访问者看到的都是同一条记录。</strong>这在有些场景下恰到好处，在另一些场景下则不合适。如果记录需要因用户或每次访问而变化，请改用<strong>屏幕 Flow（Screen Flow）</strong>来驱动。把组件放到 Flow 屏幕上，再将其 <strong>Parent Record Id</strong> 绑定到 Flow 在运行时解析出的变量。</p>
+                <p>Static Parent Record Id 让组件指向<strong>一条固定的父记录</strong>，因此<strong>每位访问者看到的都是同一条记录。</strong>这在有些场景下恰到好处，在另一些场景下则不合适。如果每个人只应看到自己的记录，无需 Flow：在向导中选择<strong>仅查看者</strong>即可。如果每次访问时才确定记录，请使用<strong>屏幕 Flow（Screen Flow）</strong>。把组件放到 Flow 屏幕上，再将其 <strong>Parent Record Id</strong> 绑定到 Flow 在运行时解析出的变量。</p>
                 <h3 style="margin-top:24px;">记录对所有人都相同时，使用 Static Parent Record Id</h3>
                 <ul>
                     <li><strong>公共预订页面：</strong>面向访客的“申请预约”页面，所有预订都关联到同一条父记录（一个办公室、地点或资源）。固定 Id 正合适。</li>
@@ -228,7 +229,7 @@
                 <p style="color:#5a6b7b;font-size:.95rem;"><em>经验法则：如果“这是谁的记录？”的答案是“对所有人都是同一条”，就用 Static Parent Record Id。</em></p>
                 <h3 style="margin-top:24px;">记录在运行时才确定时，使用 Flow</h3>
                 <ul>
-                    <li><strong>按用户区分的记录：</strong>每个人只看到自己的记录（例如每位外包人员都进入自己的休假日历）。Flow 用“获取记录”(<em>Get Records</em>) 查找所有者或关联联系人 = <code>{!$User.Id}</code> 的记录，保存其 Id，再传给组件。</li>
+                    <li><strong>通过另一条记录按用户区分：</strong>当一个人的记录挂在联系人或其他与其关联的记录下时（而不是本人拥有的记录，那种情况无需 Flow），Flow 用“获取记录”(<em>Get Records</em>) 查找该记录的用户 = <code>{!$User.Id}</code> 的记录，保存其 Id，再传给组件。</li>
                     <li><strong>由 URL 驱动：</strong>Flow 的输入变量从链接中读取 <code>?id=&hellip;</code>，一个页面即可服务多条记录。访客同样适用，无需登录。</li>
                     <li><strong>先选后看：</strong>第一个屏幕让用户搜索或选择（员工、会议室、客户）；第二个屏幕显示该记录的日历。</li>
                 </ul>

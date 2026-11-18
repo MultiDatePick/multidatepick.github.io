@@ -193,7 +193,7 @@
         <section class="guide-hero">
             <div class="container">
                 <h1>アプリケーションページ、ホームページ、Experience サイト</h1>
-                <p class="subtitle">MultiDatePick はレコードページだけでなく、あらゆる Lightning の画面で動作します。ポイントは <strong>Static Parent Record Id</strong> という 1 つのプロパティです。</p>
+                <p class="subtitle">MultiDatePick はレコードページだけでなく、あらゆる Lightning の画面で動作します。アプリケーションページやホームページでは、セットアップウィザードが誰のレコードを表示するかを尋ねます。選択肢は「閲覧者のみ」(既定)、「全員」、「条件に合うものだけ」、「特定のレコード」です。<strong>Static Parent Record Id</strong> を使うのは「特定のレコード」の場合だけです。</p>
                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
                     <a href="#setup" class="btn btn-primary">設定の様子を見る</a> <a href="#troubleshooting" class="btn btn-secondary">トラブルシューティング</a>
                 </div>
@@ -206,10 +206,11 @@
                 <p>MultiDatePick は、選択した日付を関連オブジェクトのレコードとして保存し、それぞれを<strong>親レコード</strong>に紐付けます。コンポーネントが知る必要があるのは、<em>どの</em>親かということだけです。</p>
                 <ul>
                     <li><strong>レコードページ</strong> (例: 行事のレコード) では、Salesforce が現在のレコードの Id (<code>recordId</code>) を自動的にコンポーネントに渡します。追加の設定は不要です。</li>
-                    <li><strong>アプリケーションページ、ホームページ、Experience サイト</strong>には「現在のレコード」がありません。Salesforce は何も渡しません。親がなければ保存先がないため、コンポーネントはクリックしても失敗するボタンを表示する代わりに、<strong>意図的に保存ボタンを非表示にします</strong>。</li>
+                    <li><strong>アプリケーションページやホームページ</strong>には現在のレコードがありません。ウィザードの <strong>誰のレコードですか?</strong> の回答によって、何を表示し、新しい選択内容をどこに保存するかが決まります。<strong>閲覧者のみ</strong>、<strong>全員</strong>、<strong>条件に合うものだけ</strong> は親が不要で、新しい選択内容は親レコードなしで保存されます。</li>
+                    <li><strong>Experience サイト</strong>では、ウィザードで <strong>予約の関連付け先</strong> を選びます。<strong>ページのレコード</strong> か、<strong>特定のレコード</strong> (Static Parent Record Id) です。</li>
                 </ul>
                 <div class="callout callout-blue">
-                    <div><strong>解決策は Static Parent Record Id プロパティです。</strong>特定の親レコードの Id を貼り付けると、コンポーネントはそのレコードのページに置かれているのとまったく同じように動作します。これはビルダーで設定するプロパティです。アップロードしたファイル用の別機能である Salesforce の静的リソースとは関係ありません。</div>
+                    <div><strong>「特定のレコード」は、Static Parent Record Id プロパティを使って、すべての選択内容を 1 つの固定レコードに結び付けます。</strong>そのレコードの Id を貼り付けると、コンポーネントはそのレコードのページに置かれているのとまったく同じように動作します。これはビルダーで設定するプロパティです。アップロードしたファイル用の別機能である Salesforce の静的リソースとは関係ありません。</div>
                 </div>
                 <p style="color:#5a6b7b;font-size:.95rem;margin:20px 0;"><em>Lightning App Builder でアプリケーションページやホームページに、または Experience Builder でページに MultiDatePick をドラッグすると、プロパティパネルに <strong>Static Parent Record Id</strong> が表示されます。</em></p>
             </div>
@@ -218,7 +219,7 @@
         <section class="section">
             <div class="container">
                 <h2 id="static-vs-flow">Static Parent Record Id とフローの使い分け</h2>
-                <p>Static Parent Record Id はコンポーネントを<strong>固定の 1 つの親</strong>に向けるため、<strong>すべての訪問者が同じレコードを見ます。</strong>これが最適な場合もあれば、そうでない場合もあります。ユーザーや訪問ごとにレコードを変える必要があるなら、代わりに<strong>画面フロー</strong>で制御します。コンポーネントをフロー画面に配置し、その <strong>Parent Record Id</strong> を、フローが実行時に決める変数に関連付けます。</p>
+                <p>Static Parent Record Id はコンポーネントを<strong>固定の 1 つの親</strong>に向けるため、<strong>すべての訪問者が同じレコードを見ます。</strong>これが最適な場合もあれば、そうでない場合もあります。各自が自分のレコードだけを見るようにしたいなら、フローは不要です。ウィザードで <strong>閲覧者のみ</strong> を選びます。訪問ごとにレコードを決める場合は<strong>画面フロー</strong>を使います。コンポーネントをフロー画面に配置し、その <strong>Parent Record Id</strong> を、フローが実行時に決める変数に関連付けます。</p>
                 <h3 style="margin-top:24px;">全員に同じレコードなら Static Parent Record Id</h3>
                 <ul>
                     <li><strong>公開の予約ページ:</strong> ゲスト向けの「予約を申し込む」ページで、すべての予約が同じ親レコード (1 つの事業所、拠点、リソース) に紐付く場合。固定の Id がまさに最適です。</li>
@@ -228,7 +229,7 @@
                 <p style="color:#5a6b7b;font-size:.95rem;"><em>目安: 「これは誰のレコード?」という問いの答えが「全員同じもの」なら、Static Parent Record Id を使います。</em></p>
                 <h3 style="margin-top:24px;">実行時にレコードを決めるならフロー</h3>
                 <ul>
-                    <li><strong>ユーザーごとのレコード:</strong> 各自が自分のレコードだけを見る場合 (例: 各契約者が自分の休暇カレンダーを開く)。フローで所有者または紐付いた取引先責任者が <code>{!$User.Id}</code> と一致する <em>レコードを取得</em> を行い、Id を保存してコンポーネントに渡します。</li>
+                    <li><strong>別のレコードを介したユーザーごとのレコード:</strong> ユーザーのレコードが、本人に紐付いた取引先責任者などのレコードの下にある場合 (本人が所有するレコードならフローは不要です)、フローでそのレコードのユーザーが <code>{!$User.Id}</code> と一致する <em>レコードを取得</em> を行い、Id を保存してコンポーネントに渡します。</li>
                     <li><strong>URL で指定:</strong> フローの入力変数がリンクの <code>?id=&hellip;</code> を読み取るので、1 つのページで多くのレコードに対応できます。ゲストでもログインなしで使えます。</li>
                     <li><strong>先に選択:</strong> 1 つ目の画面でユーザーが対象 (従業員、会議室、顧客) を検索・選択し、2 つ目の画面でそのレコードのカレンダーを表示します。</li>
                 </ul>

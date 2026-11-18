@@ -193,7 +193,7 @@
         <section class="guide-hero">
             <div class="container">
                 <h1>Páginas de aplicación, páginas de inicio y sitios de Experience Cloud</h1>
-                <p class="subtitle">MultiDatePick funciona en todas las superficies de Lightning, no solo en las páginas de registro. El truco es una sola propiedad: <strong>Static Parent Record Id</strong>.</p>
+                <p class="subtitle">MultiDatePick funciona en todas las superficies de Lightning, no solo en las páginas de registro. En una página de aplicación o de inicio, el asistente de configuración pregunta de quién son los registros que se muestran: solo de quien lo ve (la opción por defecto), de todos, solo los que coinciden o de un registro concreto. <strong>Static Parent Record Id</strong> solo se usa con un registro concreto.</p>
                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
                     <a href="#setup" class="btn btn-primary">Ver la configuración</a> <a href="#troubleshooting" class="btn btn-secondary">Solución de problemas</a>
                 </div>
@@ -206,10 +206,11 @@
                 <p>MultiDatePick guarda las fechas que eliges como registros en un objeto relacionado, cada uno vinculado a un <strong>registro principal</strong>. El componente solo necesita saber <em>cuál</em>.</p>
                 <ul>
                     <li><strong>En una página de registro</strong> (por ejemplo, un registro de evento), Salesforce pasa automáticamente al componente el Id del registro actual (el <code>recordId</code>). No hay nada más que configurar.</li>
-                    <li><strong>En una página de aplicación, una página de inicio o un sitio de Experience Cloud</strong> no hay «registro actual». Salesforce no pasa nada. Sin registro principal, el componente no tiene dónde guardar, así que <strong>oculta el botón Guardar a propósito</strong> en lugar de mostrar uno que falla al hacer clic.</li>
+                    <li><strong>En una página de aplicación o de inicio</strong> no hay registro actual. La respuesta a <strong>¿Los registros de quién?</strong> en el asistente decide qué se muestra y dónde van las nuevas selecciones. <strong>Solo de quien lo ve</strong>, <strong>De todos</strong> y <strong>Solo los que coinciden</strong> no necesitan registro principal: las nuevas selecciones se guardan sin registro principal.</li>
+                    <li><strong>En un sitio de Experience Cloud</strong> el asistente pregunta <strong>Las reservas se vinculan a</strong>: <strong>El registro de la página</strong> o <strong>Un registro concreto</strong> (Static Parent Record Id).</li>
                 </ul>
                 <div class="callout callout-blue">
-                    <div><strong>La solución es la propiedad Static Parent Record Id.</strong> Pega en ella el Id de un registro principal concreto y el componente se comporta exactamente como si estuviera en la página de ese registro. Es una propiedad que defines en el generador. No tiene nada que ver con un recurso estático de Salesforce, que es una función distinta para archivos cargados.</div>
+                    <div><strong>De un registro concreto vincula cada selección a un registro fijo, mediante la propiedad Static Parent Record Id.</strong> Pega en ella el Id de ese registro y el componente se comporta exactamente como si estuviera en la página de ese registro. Es una propiedad que defines en el generador. No tiene nada que ver con un recurso estático de Salesforce, que es una función distinta para archivos cargados.</div>
                 </div>
                 <p style="color:#5a6b7b;font-size:.95rem;margin:20px 0;"><em>Encontrarás <strong>Static Parent Record Id</strong> en el panel de propiedades después de arrastrar MultiDatePick a una página de aplicación o de inicio en Lightning App Builder, o a una página en Experience Builder.</em></p>
             </div>
@@ -218,7 +219,7 @@
         <section class="section">
             <div class="container">
                 <h2 id="static-vs-flow">Static Parent Record Id o un flujo: cuándo usar cada uno</h2>
-                <p>Static Parent Record Id apunta el componente a <strong>un registro principal fijo</strong>, así que <strong>todos los visitantes ven el mismo registro.</strong> Es perfecto para algunos casos y un error para otros. Cuando el registro tiene que cambiar según el usuario o la visita, contrólalo desde un <strong>flujo de pantalla (Screen Flow)</strong>. Coloca el componente en una pantalla del flujo y enlaza su <strong>Parent Record Id</strong> a una variable que el flujo resuelve en tiempo de ejecución.</p>
+                <p>Static Parent Record Id apunta el componente a <strong>un registro principal fijo</strong>, así que <strong>todos los visitantes ven el mismo registro.</strong> Es perfecto para algunos casos y un error para otros. Cuando cada persona debe ver solo sus propios registros, no necesitas ningún flujo: elige <strong>Solo de quien lo ve</strong> en el asistente. Usa un <strong>flujo de pantalla (Screen Flow)</strong> cuando el registro se elige en cada visita. Coloca el componente en una pantalla del flujo y enlaza su <strong>Parent Record Id</strong> a una variable que el flujo resuelve en tiempo de ejecución.</p>
                 <h3 style="margin-top:24px;">Usa Static Parent Record Id cuando el registro es el mismo para todos</h3>
                 <ul>
                     <li><strong>Una página de reservas pública:</strong> una página de «solicitar una cita» para invitados en la que todas las reservas se vinculan al mismo registro principal (una oficina, una sede o un recurso). Un Id fijo es justo lo que necesitas.</li>
@@ -228,7 +229,7 @@
                 <p style="color:#5a6b7b;font-size:.95rem;"><em>Regla práctica: recurre a Static Parent Record Id cuando la respuesta a «¿de quién es este registro?» sea «el mismo para todos».</em></p>
                 <h3 style="margin-top:24px;">Usa un flujo cuando el registro se elige en tiempo de ejecución</h3>
                 <ul>
-                    <li><strong>Registros por usuario:</strong> cada persona ve solo los suyos (por ejemplo, cada contratista llega a su propio calendario de vacaciones). El flujo hace un <em>Get Records</em> donde el propietario o un contacto vinculado = <code>{!$User.Id}</code>, guarda el Id y lo pasa al componente.</li>
+                    <li><strong>Registros por usuario a través de otro registro:</strong> cuando los registros de una persona dependen de un contacto u otro registro vinculado a ella (no de registros de los que es propietaria, que no necesitan flujo), el flujo hace un <em>Get Records</em> donde el usuario de ese registro = <code>{!$User.Id}</code>, guarda el Id y lo pasa al componente.</li>
                     <li><strong>Desde la URL:</strong> una variable de entrada del flujo lee <code>?id=&hellip;</code> del enlace, así que una sola página sirve para muchos registros. También funciona para invitados, sin iniciar sesión.</li>
                     <li><strong>Elegir primero:</strong> la pantalla 1 permite buscar o elegir (un empleado, una sala, un cliente); la pantalla 2 muestra el calendario de ese registro.</li>
                 </ul>

@@ -193,7 +193,7 @@
         <section class="guide-hero">
             <div class="container">
                 <h1>App-Seiten, Startseiten &amp; Experience Cloud-Sites</h1>
-                <p class="subtitle">MultiDatePick funktioniert auf jeder Lightning-Oberfläche, nicht nur auf Datensatzseiten. Der Trick ist eine einzige Eigenschaft: <strong>Static Parent Record Id</strong>.</p>
+                <p class="subtitle">MultiDatePick funktioniert auf jeder Lightning-Oberfläche, nicht nur auf Datensatzseiten. Auf einer App- oder Startseite fragt der Einrichtungsassistent, wessen Datensätze angezeigt werden: nur die der betrachtenden Person (die Vorgabe), alle, nur passende oder die eines bestimmten Datensatzes. <strong>Static Parent Record Id</strong> brauchen Sie nur für einen bestimmten Datensatz.</p>
                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
                     <a href="#setup" class="btn btn-primary">Einrichtung ansehen</a> <a href="#troubleshooting" class="btn btn-secondary">Fehlerbehebung</a>
                 </div>
@@ -206,10 +206,11 @@
                 <p>MultiDatePick speichert die gewählten Termine als Datensätze auf einem verknüpften Objekt, jeden mit Verweis auf einen <strong>übergeordneten Datensatz</strong>. Die Komponente muss nur wissen, <em>welchen</em>.</p>
                 <ul>
                     <li><strong>Auf einer Datensatzseite</strong> (z. B. einem Event-Datensatz) übergibt Salesforce der Komponente automatisch die Id des aktuellen Datensatzes (die <code>recordId</code>). Sie müssen nichts weiter konfigurieren.</li>
-                    <li><strong>Auf einer App-Seite, Startseite oder Experience Cloud-Site</strong> gibt es keinen „aktuellen Datensatz“. Salesforce übergibt nichts. Ohne übergeordneten Datensatz weiß die Komponente nicht, wohin sie speichern soll, und <strong>blendet die Schaltfläche Speichern bewusst aus</strong>, statt eine anzuzeigen, die beim Klick scheitert.</li>
+                    <li><strong>Auf einer App- oder Startseite</strong> gibt es keinen aktuellen Datensatz. Die Antwort auf <strong>Wessen Datensätze?</strong> im Assistenten entscheidet, was angezeigt wird und wohin neue Auswahlen gehen. <strong>Nur die betrachtende Person</strong>, <strong>Alle</strong> und <strong>Nur passende</strong> brauchen keinen übergeordneten Datensatz: Neue Auswahlen werden ohne übergeordneten Datensatz gespeichert.</li>
+                    <li><strong>Auf einer Experience Cloud-Site</strong> fragt der Assistent <strong>Buchungen gehören zu</strong>: <strong>Dem Datensatz der Seite</strong> oder <strong>Einem bestimmten Datensatz</strong> (Static Parent Record Id).</li>
                 </ul>
                 <div class="callout callout-blue">
-                    <div><strong>Die Lösung ist die Eigenschaft Static Parent Record Id.</strong> Fügen Sie die Id eines bestimmten übergeordneten Datensatzes ein, und die Komponente verhält sich genau so, als stünde sie auf der Seite dieses Datensatzes. Es ist eine Eigenschaft, die Sie im Builder setzen. Mit einer statischen Ressource (Static Resource) in Salesforce, einer eigenen Funktion für hochgeladene Dateien, hat sie nichts zu tun.</div>
+                    <div><strong>„Eines bestimmten Datensatzes“ bindet jede Auswahl an einen festen Datensatz, über die Eigenschaft Static Parent Record Id.</strong> Fügen Sie die Id dieses Datensatzes ein, und die Komponente verhält sich genau so, als stünde sie auf seiner Seite. Es ist eine Eigenschaft, die Sie im Builder setzen. Mit einer statischen Ressource (Static Resource) in Salesforce, einer eigenen Funktion für hochgeladene Dateien, hat sie nichts zu tun.</div>
                 </div>
                 <p style="color:#5a6b7b;font-size:.95rem;margin:20px 0;"><em>Sie finden <strong>Static Parent Record Id</strong> im Eigenschaftenbereich, nachdem Sie MultiDatePick im Lightning App Builder auf eine App-Seite oder Startseite oder im Experience Builder auf eine Seite gezogen haben.</em></p>
             </div>
@@ -218,7 +219,7 @@
         <section class="section">
             <div class="container">
                 <h2 id="static-vs-flow">Static Parent Record Id oder Flow: Was wann passt</h2>
-                <p>Static Parent Record Id richtet die Komponente auf <strong>einen festen übergeordneten Datensatz</strong> aus, also <strong>sieht jeder Besucher denselben Datensatz.</strong> Für manche Fälle ist das perfekt, für andere falsch. Wenn der Datensatz je Benutzer oder Besuch wechseln soll, steuern Sie ihn stattdessen über einen <strong>Bildschirm-Flow (Screen Flow)</strong>. Ziehen Sie die Komponente auf einen Flow-Bildschirm und binden Sie ihre <strong>Parent Record Id</strong> an eine Variable, die der Flow zur Laufzeit ermittelt.</p>
+                <p>Static Parent Record Id richtet die Komponente auf <strong>einen festen übergeordneten Datensatz</strong> aus, also <strong>sieht jeder Besucher denselben Datensatz.</strong> Für manche Fälle ist das perfekt, für andere falsch. Soll jede Person nur ihre eigenen Datensätze sehen, brauchen Sie keinen Flow: Wählen Sie im Assistenten <strong>Nur die betrachtende Person</strong>. Einen <strong>Bildschirm-Flow (Screen Flow)</strong> nutzen Sie, wenn der Datensatz bei jedem Besuch neu bestimmt wird. Ziehen Sie die Komponente auf einen Flow-Bildschirm und binden Sie ihre <strong>Parent Record Id</strong> an eine Variable, die der Flow zur Laufzeit ermittelt.</p>
                 <h3 style="margin-top:24px;">Static Parent Record Id, wenn der Datensatz für alle derselbe ist</h3>
                 <ul>
                     <li><strong>Eine öffentliche Buchungsseite:</strong> eine Seite für Gäste zum „Termin anfragen“, auf der jede Buchung am selben übergeordneten Datensatz hängt (ein Büro, ein Standort oder eine Ressource). Eine feste Id ist genau richtig.</li>
@@ -228,7 +229,7 @@
                 <p style="color:#5a6b7b;font-size:.95rem;"><em>Faustregel: Nehmen Sie Static Parent Record Id, wenn die Antwort auf „Wessen Datensatz ist das?“ lautet: „Für alle derselbe.“</em></p>
                 <h3 style="margin-top:24px;">Ein Flow, wenn der Datensatz zur Laufzeit gewählt wird</h3>
                 <ul>
-                    <li><strong>Datensätze pro Benutzer:</strong> Jede Person sieht nur ihre eigenen (zum Beispiel landet jeder Auftragnehmer in seinem eigenen Urlaubskalender). Der Flow macht ein <em>Get Records</em>, bei dem der Inhaber oder ein verknüpfter Kontakt = <code>{!$User.Id}</code> ist, speichert die Id und gibt sie an die Komponente weiter.</li>
+                    <li><strong>Datensätze pro Benutzer über einen anderen Datensatz:</strong> Hängen die Datensätze einer Person an einem Kontakt oder einem anderen mit ihr verknüpften Datensatz (für Datensätze, deren Inhaber sie selbst ist, brauchen Sie keinen Flow), macht der Flow ein <em>Get Records</em>, bei dem der Benutzer dieses Datensatzes = <code>{!$User.Id}</code> ist, speichert die Id und gibt sie an die Komponente weiter.</li>
                     <li><strong>Per URL gesteuert:</strong> Eine Eingabevariable des Flows liest <code>?id=&hellip;</code> aus dem Link, sodass eine Seite viele Datensätze bedient. Das funktioniert auch für Gäste, ohne Anmeldung.</li>
                     <li><strong>Erst auswählen:</strong> Auf Bildschirm 1 sucht oder wählt der Benutzer (einen Mitarbeitenden, einen Raum, einen Kunden); Bildschirm 2 zeigt den Kalender dieses Datensatzes.</li>
                 </ul>
