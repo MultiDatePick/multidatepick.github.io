@@ -4,34 +4,57 @@
   <!-- redirect:fallback  An old URL with no stub of its own: try the old-page map (MAP is written by
        tools/site/redirect-stubs.js from tools/site/redirects.json in the dev repo), then case, trailing
        slash and .htm variants, then an English slug under a language folder (the English page's hreflang
-       names that language's page). No match: this page stays as it is. -->
+       names that language's page; an English redirect stub is followed to its page first). No match under a
+       language folder: that language's own 404 page (/<lang>/404.html, built by i18n.js) with the address put
+       back in the bar, so a German visitor gets a German 404. Nothing shows until that is decided. No match
+       elsewhere: this page stays as it is. -->
   <script>
   (function () {
-    var MAP = {"/appexchange-data-shapes.html":"/","/campaigns.html":"/blog/salesforce-campaign-multiple-dates.html","/index-classic.html":"/","/multidatepickbooking.html":"/salesforce-booking-calendar.html","/salesforce-calendar-interview-scheduling.html":"/salesforce-calendar-staffing-recruiting.html","/de/salesforce-interviewplanung.html":"/de/salesforce-kalender-personaldienstleister-recruiting.html","/es/calendario-salesforce-programar-entrevistas.html":"/es/calendario-salesforce-reclutamiento-seleccion-personal.html","/fr/planification-entretiens-salesforce.html":"/fr/calendrier-salesforce-interim-recrutement.html","/it/pianificazione-colloqui-salesforce.html":"/it/calendario-salesforce-staffing-recruiting.html","/pt-br/agendamento-de-entrevistas-salesforce.html":"/pt-br/calendario-salesforce-staffing-e-recrutamento.html","/ja/salesforce-calendar-interview-scheduling.html":"/ja/salesforce-calendar-staffing-recruiting.html","/zh/salesforce-calendar-interview-scheduling.html":"/zh/salesforce-calendar-staffing-recruiting.html","/hi/salesforce-calendar-interview-scheduling.html":"/hi/salesforce-calendar-staffing-recruiting.html"};
+    var MAP = {"/appexchange-data-shapes.html":"/","/campaigns.html":"/blog/salesforce-campaign-multiple-dates.html","/index-classic.html":"/","/multidatepickbooking.html":"/salesforce-booking-calendar.html","/salesforce-calendar-interview-scheduling.html":"/salesforce-calendar-staffing-recruiting.html","/de/salesforce-interviewplanung.html":"/de/salesforce-kalender-personaldienstleister-recruiting.html","/es/calendario-salesforce-programar-entrevistas.html":"/es/calendario-salesforce-reclutamiento-seleccion-personal.html","/fr/planification-entretiens-salesforce.html":"/fr/calendrier-salesforce-interim-recrutement.html","/it/pianificazione-colloqui-salesforce.html":"/it/calendario-salesforce-staffing-recruiting.html","/pt-br/agendamento-de-entrevistas-salesforce.html":"/pt-br/calendario-salesforce-staffing-e-recrutamento.html","/ja/salesforce-calendar-interview-scheduling.html":"/ja/salesforce-calendar-staffing-recruiting.html","/zh/salesforce-calendar-interview-scheduling.html":"/zh/salesforce-calendar-staffing-recruiting.html","/hi/salesforce-calendar-interview-scheduling.html":"/hi/salesforce-calendar-staffing-recruiting.html","/de/tips.html":"/de/benutzerhandbuch.html","/de/get-started.html":"/de/erste-schritte.html","/es/tips.html":"/es/guia-del-usuario.html","/es/get-started.html":"/es/primeros-pasos.html","/fr/tips.html":"/fr/guide-utilisateur.html","/fr/get-started.html":"/fr/prise-en-main.html","/it/tips.html":"/it/guida-utente.html","/it/get-started.html":"/it/per-iniziare.html","/pt-br/tips.html":"/pt-br/guia-do-usuario.html","/pt-br/get-started.html":"/pt-br/primeiros-passos.html","/ja/tips.html":"/ja/user-guide.html","/ja/get-started.html":"/ja/gettingstarted.html","/zh/tips.html":"/zh/user-guide.html","/zh/get-started.html":"/zh/gettingstarted.html","/hi/tips.html":"/hi/user-guide.html","/hi/get-started.html":"/hi/gettingstarted.html"};
     var HREFLANG = { de: 'de', es: 'es', fr: 'fr', it: 'it', 'pt-br': 'pt-BR', ja: 'ja', zh: 'zh-Hans', hi: 'hi' };
+    var root = document.documentElement;
+    // The translated copy of this page: put back the address the visitor asked for, and stop.
+    if (root.lang && root.lang !== 'en') {
+      var from = /[?&]from=([^&#]*)/.exec(location.search);
+      try { from = from ? decodeURIComponent(from[1]) : ''; } catch (e) { from = ''; }
+      if (/^\/(?![\/\\])/.test(from)) try { history.replaceState(null, '', from); } catch (e) {}
+      return;
+    }
     var here = location.pathname, tail = location.search + location.hash;
     try { here = decodeURIComponent(here); } catch (e) {}
     if (/\.(png|jpe?g|gif|webp|svg|ico|css|js|json|txt|xml|zip)$/i.test(here)) return;
-    var go = function (u) { if (u && u !== here) location.replace(u + tail); };
     var p = here.toLowerCase().replace(/\/index\.html?$/, '/').replace(/\.htm$/, '.html');
     if (p.length > 1 && p.charAt(p.length - 1) === '/') p = p.slice(0, -1);
-    if (MAP[p] || MAP[p + '.html']) return go(MAP[p] || MAP[p + '.html']);
     var seg = p.split('/'), lang = HREFLANG[seg[1]] ? seg[1] : '';
     var rest = lang ? '/' + seg.slice(2).join('/') : p;
+    var done = false;
+    var finish = function (u) {
+      if (done) return;
+      done = true;
+      if (u && u !== here) return location.replace(u + tail);
+      if (lang && rest !== '/404.html') return location.replace('/' + lang + '/404.html?from=' + encodeURIComponent(location.pathname + tail));
+      root.style.visibility = '';
+    };
+    if (MAP[p] || MAP[p + '.html']) return finish(MAP[p] || MAP[p + '.html']);
+    if (lang) { root.style.visibility = 'hidden'; setTimeout(finish, 4000); }
     var tries = /\.html$/.test(p) ? [p] : [p + '.html', p + '/'];
     var exists = function (u) { return fetch(u, { method: 'HEAD' }).then(function (r) { return r.ok; }, function () { return false; }); };
+    var text = function (u) { return fetch(u).then(function (r) { return r.ok ? r.text() : ''; }); };
     var first = function (i) {
       if (i >= tries.length) return Promise.resolve('');
       return tries[i] === here ? first(i + 1) : exists(tries[i]).then(function (ok) { return ok ? tries[i] : first(i + 1); });
     };
     first(0).then(function (u) {
-      if (u || !lang || rest === '/') return go(u);
+      if (u || !lang || rest === '/') return finish(u);
       var en = MAP[rest] || MAP[rest + '.html'] || (/\.html$/.test(rest) ? rest : rest + '.html');
-      return fetch(en).then(function (r) { return r.ok ? r.text() : ''; }).then(function (html) {
+      return text(en).then(function (html) {
+        var stub = /data-redirect-stub[\s\S]*?url=([^"]+)"/.exec(html);
+        return stub ? text(stub[1].replace(/&amp;/g, '&')) : html;
+      }).then(function (html) {
         var m = new RegExp('hreflang="' + HREFLANG[lang] + '" href="https://multidatepick\\.com([^"]+)"').exec(html);
-        go(m ? m[1] : '');
+        finish(m ? m[1] : '');
       });
-    }).catch(function () {});
+    }).catch(function () { finish(''); });
   })();
   </script>
   <!-- /redirect:fallback -->
@@ -71,6 +94,18 @@
         .four04-suggested a { background: white; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px 22px; color: var(--blue-900); text-decoration: none; font-weight: 600; transition: all .15s; }
         .four04-suggested a:hover { border-color: var(--blue-900); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,.08); }
     </style>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/404.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/404.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/404.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/404.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/404.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/404.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/404.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/404.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/404.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/404.html">
+    <!-- /i18n:alternates -->
 </head>
 <body>
     <!-- consent:ui -->
@@ -250,7 +285,13 @@
                 </div>
             </div>
         </div>
-    </footer>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Language" translate="no"><ul><li><a href="/404.html" hreflang="en" lang="en" aria-current="page">English</a></li><li><a href="/de/404.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/404.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/404.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/404.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/404.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/404.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/404.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/404.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
     <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Expand image</p><p data-k="expand-diagram">Expand diagram</p><p data-k="close">Close</p><p data-k="prev-image">Previous image</p><p data-k="next-image">Next image</p><p data-k="image-viewer">Image viewer</p></div>
+    <!-- /i18n:jsstrings -->
 </body>
 </html>

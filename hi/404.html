@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <!-- redirect:fallback  An old URL with no stub of its own: try the old-page map (MAP is written by
+       tools/site/redirect-stubs.js from tools/site/redirects.json in the dev repo), then case, trailing
+       slash and .htm variants, then an English slug under a language folder (the English page's hreflang
+       names that language's page; an English redirect stub is followed to its page first). No match under a
+       language folder: that language's own 404 page (/<lang>/404.html, built by i18n.js) with the address put
+       back in the bar, so a German visitor gets a German 404. Nothing shows until that is decided. No match
+       elsewhere: this page stays as it is. -->
+  <script>
+  (function () {
+    var MAP = {"/appexchange-data-shapes.html":"/","/campaigns.html":"/blog/salesforce-campaign-multiple-dates.html","/index-classic.html":"/","/multidatepickbooking.html":"/salesforce-booking-calendar.html","/salesforce-calendar-interview-scheduling.html":"/salesforce-calendar-staffing-recruiting.html","/de/salesforce-interviewplanung.html":"/de/salesforce-kalender-personaldienstleister-recruiting.html","/es/calendario-salesforce-programar-entrevistas.html":"/es/calendario-salesforce-reclutamiento-seleccion-personal.html","/fr/planification-entretiens-salesforce.html":"/fr/calendrier-salesforce-interim-recrutement.html","/it/pianificazione-colloqui-salesforce.html":"/it/calendario-salesforce-staffing-recruiting.html","/pt-br/agendamento-de-entrevistas-salesforce.html":"/pt-br/calendario-salesforce-staffing-e-recrutamento.html","/ja/salesforce-calendar-interview-scheduling.html":"/ja/salesforce-calendar-staffing-recruiting.html","/zh/salesforce-calendar-interview-scheduling.html":"/zh/salesforce-calendar-staffing-recruiting.html","/hi/salesforce-calendar-interview-scheduling.html":"/hi/salesforce-calendar-staffing-recruiting.html"};
+    var HREFLANG = { de: 'de', es: 'es', fr: 'fr', it: 'it', 'pt-br': 'pt-BR', ja: 'ja', zh: 'zh-Hans', hi: 'hi' };
+    var root = document.documentElement;
+    // The translated copy of this page: put back the address the visitor asked for, and stop.
+    if (root.lang && root.lang !== 'en') {
+      var from = /[?&]from=([^&#]*)/.exec(location.search);
+      try { from = from ? decodeURIComponent(from[1]) : ''; } catch (e) { from = ''; }
+      if (/^\/(?![\/\\])/.test(from)) try { history.replaceState(null, '', from); } catch (e) {}
+      return;
+    }
+    var here = location.pathname, tail = location.search + location.hash;
+    try { here = decodeURIComponent(here); } catch (e) {}
+    if (/\.(png|jpe?g|gif|webp|svg|ico|css|js|json|txt|xml|zip)$/i.test(here)) return;
+    var p = here.toLowerCase().replace(/\/index\.html?$/, '/').replace(/\.htm$/, '.html');
+    if (p.length > 1 && p.charAt(p.length - 1) === '/') p = p.slice(0, -1);
+    var seg = p.split('/'), lang = HREFLANG[seg[1]] ? seg[1] : '';
+    var rest = lang ? '/' + seg.slice(2).join('/') : p;
+    var done = false;
+    var finish = function (u) {
+      if (done) return;
+      done = true;
+      if (u && u !== here) return location.replace(u + tail);
+      if (lang && rest !== '/404.html') return location.replace('/' + lang + '/404.html?from=' + encodeURIComponent(location.pathname + tail));
+      root.style.visibility = '';
+    };
+    if (MAP[p] || MAP[p + '.html']) return finish(MAP[p] || MAP[p + '.html']);
+    if (lang) { root.style.visibility = 'hidden'; setTimeout(finish, 4000); }
+    var tries = /\.html$/.test(p) ? [p] : [p + '.html', p + '/'];
+    var exists = function (u) { return fetch(u, { method: 'HEAD' }).then(function (r) { return r.ok; }, function () { return false; }); };
+    var text = function (u) { return fetch(u).then(function (r) { return r.ok ? r.text() : ''; }); };
+    var first = function (i) {
+      if (i >= tries.length) return Promise.resolve('');
+      return tries[i] === here ? first(i + 1) : exists(tries[i]).then(function (ok) { return ok ? tries[i] : first(i + 1); });
+    };
+    first(0).then(function (u) {
+      if (u || !lang || rest === '/') return finish(u);
+      var en = MAP[rest] || MAP[rest + '.html'] || (/\.html$/.test(rest) ? rest : rest + '.html');
+      return text(en).then(function (html) {
+        var stub = /data-redirect-stub[\s\S]*?url=([^"]+)"/.exec(html);
+        return stub ? text(stub[1].replace(/&amp;/g, '&')) : html;
+      }).then(function (html) {
+        var m = new RegExp('hreflang="' + HREFLANG[lang] + '" href="https://multidatepick\\.com([^"]+)"').exec(html);
+        finish(m ? m[1] : '');
+      });
+    }).catch(function () { finish(''); });
+  })();
+  </script>
+  <!-- /redirect:fallback -->
+  <!-- consent:head ft -->
+  <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    (function(){var c=null;try{c=JSON.parse(localStorage.getItem('mdp_consent'));if(!c||c.v!==1||!(Date.now()-c.ts<31536000000))c=null;}catch(e){c=null;}window.mdpConsent=c;
+    if(c&&c.analytics)gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.mdpFirstTouch=function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}};if(c&&c.attribution)window.mdpFirstTouch();})();
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script defer src="/js/consent.js"></script>
+  <!-- /consent:head -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>पेज नहीं मिला (404) | MultiDatePick</title>
+    <meta name="description" content="आप जो पेज ढूँढ रहे हैं, वह मौजूद नहीं है। MultiDatePick के होम पेज पर लौटें या किसी कंपोनेंट का पेज देखें।">
+    <meta name="robots" content="noindex,follow">
+    <link rel="canonical" href="https://multidatepick.com/hi/404.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <style>
+        .four04-hero { text-align: center; padding: 100px 24px 80px; }
+        .four04-code { font-size: 8rem; font-weight: 800; color: var(--blue-900); line-height: 1; margin: 0; letter-spacing: -4px; }
+        .four04-headline { font-size: 2rem; color: var(--blue-900); margin: 16px 0 12px; }
+        .four04-sub { font-size: 1.05rem; color: var(--gray-600); max-width: 560px; margin: 0 auto 32px; }
+        .four04-suggested { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; max-width: 800px; margin: 0 auto; }
+        .four04-suggested a { background: white; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px 22px; color: var(--blue-900); text-decoration: none; font-weight: 600; transition: all .15s; }
+        .four04-suggested a:hover { border-color: var(--blue-900); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+    </style>
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/404.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/404.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/404.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/404.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/404.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/404.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/404.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/404.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/404.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/404.html">
+    <!-- /i18n:alternates -->
+</head>
+<body>
+    <!-- consent:ui -->
+    <div class="mdp-cc-bar" id="mdpConsentBar" role="region" aria-label="Cookie विकल्प" hidden>
+        <p>हम analytics के लिए cookies सिर्फ़ आपकी सहमति से इस्तेमाल करते हैं। <span class="mdp-cc-wide">कुछ भी बेचा नहीं जाता, न विज्ञापनों में इस्तेमाल होता है।</span> <a href="/hi/privacy.html">गोपनीयता नीति</a></p>
+        <div class="mdp-cc-btns">
+            <button type="button" class="mdp-cc-btn mdp-cc-btn--text" data-mdp-consent="settings">सेटिंग्स</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="reject">सभी अस्वीकार करें</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="accept">सभी स्वीकार करें</button>
+        </div>
+    </div>
+    <dialog class="mdp-cc-dialog" id="mdpConsentDialog" aria-labelledby="mdpConsentTitle" aria-describedby="mdpConsentIntro">
+        <div class="mdp-cc-in">
+            <h2 id="mdpConsentTitle">Cookie सेटिंग्स</h2>
+            <button type="button" class="mdp-cc-x" data-mdp-consent="close" aria-label="बंद करें">&times;</button>
+            <p class="mdp-cc-intro" id="mdpConsentIntro">चुनें कि यह साइट आपके browser में क्या सेव कर सकती है। आप इसे कभी भी हर पेज के नीचे Cookie सेटिंग्स से बदल सकते हैं।</p>
+            <div class="mdp-cc-opt">
+                <span class="mdp-cc-name">साइट चलाने के लिए ज़रूरी</span> <span class="mdp-cc-desc">सिर्फ़ आपकी cookie पसंद याद रखता है।</span> <span class="mdp-cc-always">हमेशा चालू</span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAnalytics">Analytics</label> <span class="mdp-cc-desc" id="mdpConsentAnalyticsDesc">Google Analytics विज़िट और पेज गिनता है, ताकि हम साइट बेहतर बना सकें।</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAnalytics" aria-describedby="mdpConsentAnalyticsDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAttribution">आप कहाँ से आए</label> <span class="mdp-cc-desc" id="mdpConsentAttributionDesc">वह लिंक या कैंपेन याद रखता है जो आपको पहली बार यहाँ लाया, और उसे हमारे फ़ॉर्म के साथ भेजता है।</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAttribution" aria-describedby="mdpConsentAttributionDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-btns">
+                <button type="button" class="mdp-cc-btn mdp-cc-btn--line" data-mdp-consent="reject">सभी अस्वीकार करें</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="save">पसंद सेव करें</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- /consent:ui -->
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/hi/" class="logo"><img src="/images/logo.png" alt="MultiDatePick लोगो: Salesforce मल्टी-डेट कैलेंडर और संसाधन बुकिंग कंपोनेंट" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="नेविगेशन खोलें/बंद करें"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">प्रोडक्ट <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/multidatepickdates.html">कई तारीखें चुनें</a></li>
+                        <li><a href="/hi/multidatepickdatetime.html">तारीख और समय चुनें</a></li>
+                        <li><a href="/hi/salesforce-booking-calendar.html">रूम और लोग बुक करें</a></li>
+                        <li><a href="/hi/salesforce-gantt-chart.html">Gantt चार्ट से प्लान करें</a></li>
+                        <li><a href="/hi/blog/salesforce-calendar-views.html">सात कैलेंडर व्यू</a></li>
+                        <li><a href="/hi/configlibrary.html">Config Library</a></li>
+                        <li><a href="/hi/trust.html">भरोसा और सुरक्षा</a></li>
+                        <li><a href="/hi/accessibility.html">सुगम्यता (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">समाधान <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/salesforce-calendar.html">Salesforce कैलेंडर</a></li>
+                        <li><a href="/hi/salesforce-conference-room-booking-calendar.html">कॉन्फ़्रेंस रूम बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-staffing-recruiting.html">स्टाफ़िंग और रिक्रूटिंग</a></li>
+                        <li><a href="/hi/salesforce-timesheet-calendar.html">टाइमशीट</a></li>
+                        <li><a href="/hi/blog/salesforce-campaign-multiple-dates.html">Campaign कैलेंडर</a></li>
+                        <li><a href="/hi/blog/salesforce-section-508-government-calendar.html">सरकारी विभाग / Section 508</a></li>
+                        <li><a href="/hi/salesforce-class-scheduling.html">क्लास और कोर्स शेड्यूलिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-experience-cloud-booking.html">Experience Cloud बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/hi/pricing.html">कीमत</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">डॉक्स <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/hi/blog/no-code-salesforce-calendar.html">नो-कोड सेटअप</a></li>
+                        <li><a href="/hi/gettingstarted.html">शुरुआत करें</a></li>
+                        <li><a href="/hi/user-guide.html">यूज़र गाइड</a></li>
+                        <li><a href="/hi/flowcheatsheet.html">Screen Flow गाइड</a></li>
+                        <li><a href="/hi/home-app-experience.html">ऐप, होम और Experience पेज</a></li>
+                        <li><a href="/hi/troubleshooting.html">समस्या निवारण</a></li>
+                        <li><a href="/hi/faq.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/hi/blog/">ब्लॉग</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/hi/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">लाइव डेमो आज़माएँ</a></li>
+                <li><a href="/hi/notify-me-at-launch.html" class="nav-cta">लॉन्च पर सूचना पाएँ</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <section class="four04-hero">
+            <p class="four04-code">404</p>
+            <h1 class="four04-headline">पेज नहीं मिला</h1>
+            <p class="four04-sub">आप जो पेज ढूँढ रहे हैं, वह मौजूद नहीं है या कहीं और चला गया है। इनमें से किसी पेज पर जाएँ।</p>
+            <div class="four04-suggested">
+                <a href="/hi/">होम</a> <a href="/hi/gettingstarted.html">शुरुआत करें</a> <a href="/hi/multidatepickdates.html">Dates कंपोनेंट</a> <a href="/hi/multidatepickdatetime.html">Dates &amp; Times कंपोनेंट</a> <a href="/hi/salesforce-booking-calendar.html">Resource Booking कंपोनेंट</a> <a href="/hi/configlibrary.html">Config Library</a> <a href="/hi/user-guide.html">यूज़र गाइड</a>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/hi/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick लोगो: Salesforce मल्टी-डेट कैलेंडर और संसाधन बुकिंग कंपोनेंट" width="180" height="45">
+                    </a>
+                    <p>किसी भी Salesforce ऑब्जेक्ट पर कैलेंडर, बुकिंग और Gantt चार्ट। बिना कोड के।</p>
+                </div>
+                <div class="footer-links">
+                    <h2>प्रोडक्ट</h2>
+                    <ul>
+                        <li><a href="/hi/multidatepickdates.html">कई तारीखें चुनें</a></li>
+                        <li><a href="/hi/multidatepickdatetime.html">तारीख और समय चुनें</a></li>
+                        <li><a href="/hi/salesforce-booking-calendar.html">रूम और लोग बुक करें</a></li>
+                        <li><a href="/hi/salesforce-gantt-chart.html">Gantt चार्ट से प्लान करें</a></li>
+                        <li><a href="/hi/blog/salesforce-calendar-views.html">सात कैलेंडर व्यू</a></li>
+                        <li><a href="/hi/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>समाधान</h2>
+                    <ul>
+                        <li><a href="/hi/salesforce-calendar.html">Salesforce कैलेंडर</a></li>
+                        <li><a href="/hi/salesforce-conference-room-booking-calendar.html">कॉन्फ़्रेंस रूम बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-staffing-recruiting.html">स्टाफ़िंग और रिक्रूटिंग</a></li>
+                        <li><a href="/hi/salesforce-timesheet-calendar.html">टाइमशीट</a></li>
+                        <li><a href="/hi/blog/salesforce-campaign-multiple-dates.html">Campaign कैलेंडर</a></li>
+                        <li><a href="/hi/blog/salesforce-section-508-government-calendar.html">सरकारी विभाग / Section 508</a></li>
+                        <li><a href="/hi/salesforce-class-scheduling.html">क्लास और कोर्स शेड्यूलिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-experience-cloud-booking.html">Experience Cloud बुकिंग</a></li>
+                        <li><a href="/hi/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>डॉक्स</h2>
+                    <ul>
+                        <li><a href="/hi/gettingstarted.html">शुरुआत करें</a></li>
+                        <li><a href="/hi/user-guide.html">यूज़र गाइड</a></li>
+                        <li><a href="/hi/flowcheatsheet.html">Screen Flow गाइड</a></li>
+                        <li><a href="/hi/home-app-experience.html">ऐप, होम और Experience पेज</a></li>
+                        <li><a href="/hi/troubleshooting.html">समस्या निवारण</a></li>
+                        <li><a href="/hi/faq.html">FAQ</a></li>
+                    </ul>
+                    <h2>डेवलपर्स के लिए</h2>
+                    <ul>
+                        <li><a href="/hi/salesforce-calendar-developer-guide.html">डेवलपर गाइड</a></li>
+                        <li><a href="/hi/deploy-flow-vscode.html">Flow डिप्लॉय करें (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>कंपनी</h2>
+                    <ul>
+                        <li><a href="/hi/pricing.html">कीमत</a></li>
+                        <li><a href="/hi/blog/">ब्लॉग</a></li>
+                        <li><a href="/hi/trust.html">भरोसा और सुरक्षा</a></li>
+                        <li><a href="/hi/accessibility.html">सुगम्यता</a></li>
+                        <li><a href="/hi/notify-me-at-launch.html">लॉन्च पर सूचना पाएँ</a></li>
+                        <li><a href="/hi/custom-config.html">मुफ़्त कस्टम कॉन्फ़िगरेशन</a></li>
+                        <li><a href="mailto:support@multidatepick.com">सपोर्ट</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. सर्वाधिकार सुरक्षित।</span>
+                <!-- consent:footer --><div class="footer-social footer-legal"><a href="/hi/privacy.html">गोपनीयता नीति</a><a href="/hi/privacy.html#cookie-settings" data-mdp-consent="open">Cookie सेटिंग्स</a></div><!-- /consent:footer -->
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+    <!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="भाषा" translate="no"><ul><li><a href="/404.html" hreflang="en" lang="en">English</a></li><li><a href="/de/404.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/404.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/404.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/404.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/404.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/404.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/404.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/404.html" hreflang="hi" lang="hi" aria-current="page">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">इमेज बड़ी करें</p><p data-k="expand-diagram">आरेख बड़ा करें</p><p data-k="close">बंद करें</p><p data-k="prev-image">पिछली इमेज</p><p data-k="next-image">अगली इमेज</p><p data-k="image-viewer">इमेज व्यूअर</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>
