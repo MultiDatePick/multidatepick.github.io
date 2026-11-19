@@ -22,6 +22,7 @@
     <meta name="description" content="安装 MultiDatePick，分配权限集，在设置向导中创建配置，再把日历添加到 Salesforce 页面或屏幕 Flow。无需 Apex。">
     <link rel="canonical" href="https://multidatepick.com/zh/gettingstarted.html">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/data-shape.css">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -132,6 +133,14 @@
                         "acceptedAnswer": {
                             "@type": "Answer",
                             "text": "可以。在“现有配置”选项卡中导出配置，然后把 JSON 粘贴到另一个组织的“导入 / 导出”选项卡中。导入时可以匹配名称不同的对象或字段。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "使用 MultiDatePick 需要哪些 Salesforce 对象？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "预订需要一个预订对象，带一个日期和一个查找字段，指向带名称的资源对象。选择需要一个子对象，带一个日期和一个查找字段，指向它所属的记录。规划需要一个带开始日期的对象；指向项目的查找字段可以把任务归组。可以用您自己的对象，也可以用 MultiDatePick 自带的现成对象 MDP Schedule 和 MDP Resource。"
                         }
                     }
                 ],
@@ -446,6 +455,110 @@
                         <tr><td>资源、可用性、容量、营业时间</td><td class="c n">-</td><td class="c n">-</td><td class="c y">&#10003;</td></tr>
                     </tbody>
                 </table>
+
+                <!-- DATA SHAPES: the objects each feature needs -->
+                <h2 id="data-shapes" style="margin-top:56px;scroll-margin-top:80px;">您需要什么：每项功能所需的对象</h2>
+                <p class="gs-lead">预订、选择和规划都会保存到您选择的 Salesforce 对象中。下面是能运行的最小结构，以及开启更多功能的字段。粗体为必填项。</p>
+                <div class="ds" id="shape-book">
+                    <span class="ds-tag">预订</span>
+                    <h3>预订会议室、人员和设备</h3>
+                    <p class="ds-lead">两个您很可能已经有的对象。可以用您自己的，也可以用 MultiDatePick 自带的现成对象。</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>预订</b><small>例如 MDP Schedule</small></div>
+                            <dl>
+                                <div><dt><strong>日期</strong><span class="ds-sr">（必填）</span></dt><dd>日期</dd></div>
+                                <div><dt>开始时间和结束时间</dt><dd>时间</dd></div>
+                                <div><dt><strong>资源</strong><span class="ds-sr">（必填）</span></dt><dd>查找到资源</dd></div>
+                                <div><dt>状态</dt><dd>选项列表</dd></div>
+                                <div><dt>结束日期</dt><dd>日期</dd></div>
+                                <div><dt>相关记录</dt><dd>查找到任意对象</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>查找到</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>资源</b><small>会议室、人员、车辆</small></div>
+                            <dl>
+                                <div><dt><strong>名称</strong><span class="ds-sr">（必填）</span></dt><dd>文本</dd></div>
+                                <div><dt>容量</dt><dd>数字</dd></div>
+                                <div><dt>开放和关闭时间</dt><dd>时间</dd></div>
+                                <div><dt>提供的开始时间</dt><dd>文本</dd></div>
+                            </dl>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>粗体</strong> = 必填。其余字段开启更多功能：<strong>开始时间</strong>和<strong>结束时间</strong>提供时间段；不设置它们即可按整天预订。</li>
+                        <li>要预订人员？任务或事件的“被分配人”，或自定义对象的“所有人”，就是资源。不需要资源对象。</li>
+                    </ul>
+                </div>
+                <div class="ds" id="shape-pick">
+                    <span class="ds-tag">选择</span>
+                    <h3>在任意记录上选择日期和时间</h3>
+                    <p class="ds-lead">一个子对象：保存一个日期，并查找到它所属的记录。休假、拜访、排班、课程。</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>日期记录</b><small>例如休假日、拜访</small></div>
+                            <dl>
+                                <div><dt><strong>日期</strong><span class="ds-sr">（必填）</span></dt><dd>日期</dd></div>
+                                <div><dt><strong>父记录</strong><span class="ds-sr">（必填）</span></dt><dd>查找</dd></div>
+                                <div><dt>结束日期</dt><dd>日期</dd></div>
+                                <div><dt>开始时间和结束时间</dt><dd>时间</dd></div>
+                                <div><dt>状态</dt><dd>选项列表</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>查找到</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>任意记录</b><small>日历所在的页面</small></div>
+                            <p>联系人、客户、业务机会、个案，或您自己的对象。</p>
+                            <p>日历放在该记录的记录页上，并把所选内容保存为它的子记录。</p>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>粗体</strong> = 必填。有<strong>结束日期</strong>时，连续的几天保存为一条记录。加上<strong>开始时间</strong>和<strong>结束时间</strong>，就成了日期加时间的日历。</li>
+                        <li>已经在用事件？事件的开始和结束可以直接使用。在没有记录的应用程序页面或主页上，父记录查找字段是可选的。</li>
+                    </ul>
+                </div>
+                <div class="ds" id="shape-plan">
+                    <span class="ds-tag">规划</span>
+                    <h3>在甘特图上规划项目</h3>
+                    <p class="ds-lead">任务有开始、结束和负责人，归属于一个项目。每多一个字段，就多一项功能。</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>任务</b><small>例如 MDP Schedule、项目任务</small></div>
+                            <dl>
+                                <div><dt><strong>开始</strong><span class="ds-sr">（必填）</span></dt><dd>日期</dd></div>
+                                <div><dt>结束</dt><dd>日期</dd></div>
+                                <div><dt>项目</dt><dd>查找到项目</dd></div>
+                                <div><dt>人员</dt><dd>查找到用户</dd></div>
+                                <div><dt>等待</dt><dd>查找到任务</dd></div>
+                                <div><dt>阶段</dt><dd>选项列表、文本或查找</dd></div>
+                                <div><dt>完成百分比</dt><dd>百分比或数字</dd></div>
+                                <div><dt>每天小时数或总小时数</dt><dd>数字</dd></div>
+                                <div><dt>计划开始和结束</dt><dd>日期</dd></div>
+                                <div><dt>里程碑</dt><dd>复选框</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>查找到</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-col">
+                            <div class="ds-obj">
+                                <div class="ds-obj-h"><b>项目</b></div>
+                                <p>任何用来归组任务的记录：项目、业务机会、客户。</p>
+                            </div>
+                            <div class="ds-obj opt">
+                                <div class="ds-obj-h"><b>任务链接</b><small>仅当一个任务等待多个任务时</small></div>
+                                <dl>
+                                    <div><dt>在前和等待</dt><dd>查找到任务</dd></div>
+                                    <div><dt>链接类型</dt><dd>选项列表或文本</dd></div>
+                                    <div><dt>滞后</dt><dd>数字</dd></div>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>粗体</strong> = 必填：没有<strong>结束</strong>的任务为期一天。<strong>项目</strong>让每个项目占一行，<strong>人员</strong>可开启工作负荷（留空则使用记录的所有人），<strong>等待</strong>绘制链接和关键路径，<strong>计划</strong>日期提供基线。</li>
+                    </ul>
+                </div>
+                <p class="ds-more">所有字段和设置及示例：<a href="/zh/salesforce-booking-calendar.html#object-mapping">Resource Booking</a>、<a href="/zh/multidatepickdates.html#object-mapping">Dates</a>、<a href="/zh/multidatepickdatetime.html#object-mapping">Dates &amp; Times</a> 和<a href="/zh/salesforce-gantt-chart.html#setup">甘特图</a>。</p>
             </div>
         </section>
 
@@ -458,7 +571,7 @@
                     <tbody>
                         <tr><td>安装</td><td>在 <a href="/zh/notify-me-at-launch.html">AppExchange 列表页</a>（上线后）单击 <b>Get It Now</b>。可选择仅为管理员、为所有用户或为特定简档安装。</td></tr>
                         <tr><td>确认</td><td><b>“设置”中的“已安装的软件包”</b>会列出 MultiDatePick。在 Lightning App Builder 或 Flow Builder 中搜索 <b>MultiDatePick</b>，可以看到 <b>Dates</b>、<b>Dates &amp; Times</b> 和 <b>Resource Booking</b>。</td></tr>
-                        <tr><td>学习</td><td>软件包附带引导式 Flow：<b>Intro to MultiDatePick</b>，以及分别针对 Dates、Dates &amp; Times 和 Resource Booking 的 <b>Deep Dive</b> Flow。从设置向导中启动即可。</td></tr>
+                        <tr><td>学习</td><td>软件包附带引导式导览：<b>Intro to MultiDatePick</b> 会先问您想做什么，然后启动<b>选择</b>、<b>预订</b>或<b>规划</b>导览。从设置向导中启动即可。</td></tr>
                         <tr><td>语言</td><td>如果您的组织使用翻译工作台 (Translation Workbench)，必须在<b>“设置”中“翻译工作台”下的“翻译语言设置”</b>中启用每位用户的语言，MultiDatePick 已翻译的选项列表值（例如状态值）才会显示。字段标签和日历本身的文字无论如何都会翻译。</td></tr>
                     </tbody>
                 </table>
@@ -618,6 +731,10 @@
                 <details>
                     <summary>可以把 MultiDatePick 配置迁移到另一个 Salesforce 组织吗？</summary>
                     <p>可以。在“现有配置”选项卡中导出配置，然后把 JSON 粘贴到另一个组织的“导入 / 导出”选项卡中。导入时可以匹配名称不同的对象或字段。</p>
+                </details>
+                <details>
+                    <summary>使用 MultiDatePick 需要哪些 Salesforce 对象？</summary>
+                    <p>预订需要一个预订对象，带一个日期和一个查找字段，指向带名称的资源对象。选择需要一个子对象，带一个日期和一个查找字段，指向它所属的记录。规划需要一个带开始日期的对象；指向项目的查找字段可以把任务归组。可以用您自己的对象，也可以用 MultiDatePick 自带的现成对象 MDP Schedule 和 MDP Resource。</p>
                 </details>
             </div>
         </section>

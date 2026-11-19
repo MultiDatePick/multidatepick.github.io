@@ -22,6 +22,7 @@
     <meta name="description" content="Install MultiDatePick, assign a permission set, build a config in the Setup Wizard, then add the calendar to a Salesforce page or Screen Flow. No Apex required.">
     <link rel="canonical" href="https://multidatepick.com/gettingstarted.html">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/data-shape.css">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -96,7 +97,8 @@
                     {"@type": "Question", "name": "Which MultiDatePick permission set should I assign?", "acceptedAnswer": {"@type": "Answer", "text": "MultiDatePick - Setup for the admins who build configs, MultiDatePick - User for everyone who only uses the calendars, MultiDatePick - All Access for admins who do both, and MultiDatePick - Guest for the guest user of a public Experience Cloud site. Users also need access to your own objects and fields."}},
                     {"@type": "Question", "name": "Why is there no Save button on my App Page or Home Page calendar?", "acceptedAnswer": {"@type": "Answer", "text": "App and Home pages have no record of their own. In the Setup Wizard, answer Whose records? (Just the person looking, Everyone's or Only ones that match need no parent; One record's needs Static Parent Record Id) and save the config again."}},
                     {"@type": "Question", "name": "Do I have to set every checkbox in Flow Builder?", "acceptedAnswer": {"@type": "Answer", "text": "No. Set Config Name to the config you saved in the Setup Wizard and every checkbox setting comes from the config. Only if you skip Config Name and set properties by hand do you set the checkboxes yourself."}},
-                    {"@type": "Question", "name": "Can I move a MultiDatePick config to another Salesforce org?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Export it from the Existing Configurations tab, then paste the JSON into the Import / Export tab in the other org. The import lets you match any object or field names that differ."}}
+                    {"@type": "Question", "name": "Can I move a MultiDatePick config to another Salesforce org?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Export it from the Existing Configurations tab, then paste the JSON into the Import / Export tab in the other org. The import lets you match any object or field names that differ."}},
+                    {"@type": "Question", "name": "What Salesforce objects do I need for MultiDatePick?", "acceptedAnswer": {"@type": "Answer", "text": "Book needs a booking object with a Date and a lookup to a resource object with a Name. Pick needs one child object with a Date and a lookup to the record it belongs to. Plan needs one object with a start date; a project lookup groups the tasks. Use your own objects, or the ready-made MDP Schedule and MDP Resource that come with MultiDatePick."}}
                 ]
             },
             {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo.webp", "thumbnailUrl": "https://multidatepick.com/images/components/salesforce-multi-date-picker-demo-poster.png", "caption": "Getting started with the Dates component in Salesforce, animated: name a time-off request, drag three days of Thanksgiving week, add the Friday, save", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}, "copyrightNotice": "© 2026 MultiDatePick"},
@@ -334,6 +336,110 @@
                         <tr><td>Resources, availability, capacity, business hours</td><td class="c n">-</td><td class="c n">-</td><td class="c y">&#10003;</td></tr>
                     </tbody>
                 </table>
+
+                <!-- DATA SHAPES: the objects each feature needs -->
+                <h2 id="data-shapes" style="margin-top:56px;scroll-margin-top:80px;">What you need: the objects for each feature</h2>
+                <p class="gs-lead">Book, Pick and Plan each save to Salesforce objects you choose. Here is the smallest shape that works, and the fields that turn on more. In bold: what each one needs.</p>
+                <div class="ds" id="shape-book">
+                    <span class="ds-tag">Book</span>
+                    <h3>Book rooms, people and equipment</h3>
+                    <p class="ds-lead">Two objects you probably already have. Use your own, or the ready-made ones that come with MultiDatePick.</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Booking</b><small>for example MDP Schedule</small></div>
+                            <dl>
+                                <div><dt><strong>Date</strong><span class="ds-sr"> (needed)</span></dt><dd>Date</dd></div>
+                                <div><dt>Start time and End time</dt><dd>Time</dd></div>
+                                <div><dt><strong>Resource</strong><span class="ds-sr"> (needed)</span></dt><dd>Lookup to Resource</dd></div>
+                                <div><dt>Status</dt><dd>Picklist</dd></div>
+                                <div><dt>End date</dt><dd>Date</dd></div>
+                                <div><dt>Related record</dt><dd>Lookup to any object</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>looks up to</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Resource</b><small>a room, a person, a car</small></div>
+                            <dl>
+                                <div><dt><strong>Name</strong><span class="ds-sr"> (needed)</span></dt><dd>Text</dd></div>
+                                <div><dt>Capacity</dt><dd>Number</dd></div>
+                                <div><dt>Opens and Closes</dt><dd>Time</dd></div>
+                                <div><dt>Start times offered</dt><dd>Text</dd></div>
+                            </dl>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>Bold</strong> = needed. The rest turn on extra features: <strong>Start time</strong> and <strong>End time</strong> give time slots, so leave them out to book whole days.</li>
+                        <li>Booking a person instead? A Task or Event&rsquo;s Assigned To, or a custom object&rsquo;s Owner, is the resource. No resource object needed.</li>
+                    </ul>
+                </div>
+                <div class="ds" id="shape-pick">
+                    <span class="ds-tag">Pick</span>
+                    <h3>Pick dates and times on any record</h3>
+                    <p class="ds-lead">One child object that holds a date and looks up to the record it belongs to. Days off, visits, shifts, sessions.</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Date record</b><small>for example Time Off Day, Visit</small></div>
+                            <dl>
+                                <div><dt><strong>Date</strong><span class="ds-sr"> (needed)</span></dt><dd>Date</dd></div>
+                                <div><dt><strong>Parent record</strong><span class="ds-sr"> (needed)</span></dt><dd>Lookup</dd></div>
+                                <div><dt>End date</dt><dd>Date</dd></div>
+                                <div><dt>Start time and End time</dt><dd>Time</dd></div>
+                                <div><dt>Status</dt><dd>Picklist</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>looks up to</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Any record</b><small>the page it sits on</small></div>
+                            <p>Contact, Account, Opportunity, Case, or one of your own objects.</p>
+                            <p>The calendar goes on its record page and saves the picks as its child records.</p>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>Bold</strong> = needed. An <strong>End date</strong> saves a run of days as one record. <strong>Start time</strong> and <strong>End time</strong> turn it into a date and time calendar.</li>
+                        <li>Already using Events? Event&rsquo;s Start and End work as they are. On an App or Home page with no record, the parent lookup is optional.</li>
+                    </ul>
+                </div>
+                <div class="ds" id="shape-plan">
+                    <span class="ds-tag">Plan</span>
+                    <h3>Plan projects on a Gantt chart</h3>
+                    <p class="ds-lead">Tasks with a start, an end and an owner, under a project. Every extra field adds a feature.</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Task</b><small>for example MDP Schedule, Project Task</small></div>
+                            <dl>
+                                <div><dt><strong>Start</strong><span class="ds-sr"> (needed)</span></dt><dd>Date</dd></div>
+                                <div><dt>End</dt><dd>Date</dd></div>
+                                <div><dt>Project</dt><dd>Lookup to Project</dd></div>
+                                <div><dt>Person</dt><dd>Lookup to User</dd></div>
+                                <div><dt>Waits on</dt><dd>Lookup to Task</dd></div>
+                                <div><dt>Phase</dt><dd>Picklist, text or lookup</dd></div>
+                                <div><dt>Percent done</dt><dd>Percent or number</dd></div>
+                                <div><dt>Hours a day or Total hours</dt><dd>Number</dd></div>
+                                <div><dt>Planned start and end</dt><dd>Date</dd></div>
+                                <div><dt>Milestone</dt><dd>Checkbox</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>looks up to</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-col">
+                            <div class="ds-obj">
+                                <div class="ds-obj-h"><b>Project</b></div>
+                                <p>Any record that groups the tasks: a Project, an Opportunity, an Account.</p>
+                            </div>
+                            <div class="ds-obj opt">
+                                <div class="ds-obj-h"><b>Task link</b><small>only if a task waits on several</small></div>
+                                <dl>
+                                    <div><dt>Comes first and Waits</dt><dd>Lookup to Task</dd></div>
+                                    <div><dt>Link type</dt><dd>Picklist or text</dd></div>
+                                    <div><dt>Lag</dt><dd>Number</dd></div>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>Bold</strong> = needed: a task with no <strong>End</strong> is one day long. <strong>Project</strong> gives one row per project, <strong>Person</strong> lets you turn on Workload (left blank, it uses the record&rsquo;s owner), <strong>Waits on</strong> draws links and the critical path, and <strong>Planned</strong> dates give the baseline.</li>
+                    </ul>
+                </div>
+                <p class="ds-more">Every field and setting, with examples: <a href="/salesforce-booking-calendar.html#object-mapping">Resource Booking</a>, <a href="/multidatepickdates.html#object-mapping">Dates</a>, <a href="/multidatepickdatetime.html#object-mapping">Dates &amp; Times</a> and <a href="/salesforce-gantt-chart.html#setup">the Gantt chart</a>.</p>
             </div>
         </section>
 
@@ -346,7 +452,7 @@
                     <tbody>
                         <tr><td>Install</td><td>On the <a href="/notify-me-at-launch.html">AppExchange listing</a> (at launch), click <b>Get It Now</b>. Install for admins only, all users, or specific profiles.</td></tr>
                         <tr><td>Check it</td><td><b>Setup, Installed Packages</b> lists MultiDatePick. In Lightning App Builder or Flow Builder, search <b>MultiDatePick</b> to see <b>Dates</b>, <b>Dates &amp; Times</b> and <b>Resource Booking</b>.</td></tr>
-                        <tr><td>Learn it</td><td>The package ships guided flows: <b>Intro to MultiDatePick</b>, plus a <b>Deep Dive</b> flow each for Dates, Dates &amp; Times and Resource Booking. Start them from the Setup Wizard.</td></tr>
+                        <tr><td>Learn it</td><td>The package ships guided tours: <b>Intro to MultiDatePick</b> asks what you want to do, then starts the <b>Pick</b>, <b>Book</b> or <b>Plan</b> tour. Start them from the Setup Wizard.</td></tr>
                         <tr><td>Languages</td><td>If your org uses the Translation Workbench, each user's language must be active in <b>Setup, Translation Workbench, Translation Language Settings</b> for MultiDatePick's translated picklist values, such as the status values, to show. Field labels and the calendar's own text are translated either way.</td></tr>
                     </tbody>
                 </table>
@@ -506,6 +612,10 @@
                 <details>
                     <summary>Can I move a MultiDatePick config to another Salesforce org?</summary>
                     <p>Yes. Export it from the Existing Configurations tab, then paste the JSON into the Import / Export tab in the other org. The import lets you match any object or field names that differ.</p>
+                </details>
+                <details>
+                    <summary>What Salesforce objects do I need for MultiDatePick?</summary>
+                    <p>Book needs a booking object with a Date and a lookup to a resource object with a Name. Pick needs one child object with a Date and a lookup to the record it belongs to. Plan needs one object with a start date; a project lookup groups the tasks. Use your own objects, or the ready-made MDP Schedule and MDP Resource that come with MultiDatePick.</p>
                 </details>
             </div>
         </section>

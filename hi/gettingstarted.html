@@ -22,6 +22,7 @@
     <meta name="description" content="MultiDatePick इंस्टॉल करें, permission set असाइन करें, Setup Wizard में कॉन्फ़िगरेशन बनाएँ और कैलेंडर को पेज या Screen Flow में जोड़ें। बिना Apex।">
     <link rel="canonical" href="https://multidatepick.com/hi/gettingstarted.html">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/data-shape.css">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -132,6 +133,14 @@
                         "acceptedAnswer": {
                             "@type": "Answer",
                             "text": "हाँ। मौजूदा कॉन्फ़िगरेशन (Existing Configurations) टैब से इसे निर्यात करें, फिर दूसरे org में JSON को आयात / निर्यात टैब में पेस्ट करें। आयात करते समय आप अलग नाम वाले किसी भी ऑब्जेक्ट या फ़ील्ड को मिला सकते हैं।"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick के लिए कौन से Salesforce ऑब्जेक्ट चाहिए?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "बुक करें के लिए एक बुकिंग ऑब्जेक्ट चाहिए, जिसमें एक तारीख हो और नाम वाले संसाधन ऑब्जेक्ट का lookup हो। चुनें के लिए एक child ऑब्जेक्ट चाहिए, जिसमें एक तारीख हो और अपने रिकॉर्ड का lookup हो। प्लान करें के लिए आरंभ तिथि वाला एक ऑब्जेक्ट चाहिए; प्रोजेक्ट का lookup टास्क को समूह में रखता है। अपने ऑब्जेक्ट इस्तेमाल करें, या MultiDatePick के साथ आने वाले तैयार MDP Schedule और MDP Resource।"
                         }
                     }
                 ],
@@ -446,6 +455,110 @@
                         <tr><td>संसाधन, उपलब्धता, क्षमता, व्यावसायिक घंटे</td><td class="c n">-</td><td class="c n">-</td><td class="c y">&#10003;</td></tr>
                     </tbody>
                 </table>
+
+                <!-- DATA SHAPES: the objects each feature needs -->
+                <h2 id="data-shapes" style="margin-top:56px;scroll-margin-top:80px;">आपको क्या चाहिए: हर फ़ीचर के लिए ऑब्जेक्ट</h2>
+                <p class="gs-lead">बुक करें, चुनें और प्लान करें, तीनों आपके चुने हुए Salesforce ऑब्जेक्ट में सेव करते हैं। यह रहा सबसे छोटा ढाँचा जो काम करता है, और वे फ़ील्ड जो और फ़ीचर चालू करते हैं। बोल्ड में: हर एक को क्या चाहिए।</p>
+                <div class="ds" id="shape-book">
+                    <span class="ds-tag">बुक करें</span>
+                    <h3>कमरे, लोग और उपकरण बुक करें</h3>
+                    <p class="ds-lead">दो ऑब्जेक्ट, जो शायद आपके पास पहले से हैं। अपने ऑब्जेक्ट इस्तेमाल करें, या MultiDatePick के साथ आने वाले तैयार ऑब्जेक्ट।</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>बुकिंग</b><small>जैसे MDP Schedule</small></div>
+                            <dl>
+                                <div><dt><strong>दिनांक</strong><span class="ds-sr"> (ज़रूरी)</span></dt><dd>दिनांक</dd></div>
+                                <div><dt>आरंभ समय और अंत समय</dt><dd>समय</dd></div>
+                                <div><dt><strong>संसाधन</strong><span class="ds-sr"> (ज़रूरी)</span></dt><dd>संसाधन का lookup</dd></div>
+                                <div><dt>स्थिति</dt><dd>Picklist</dd></div>
+                                <div><dt>समाप्ति तिथि</dt><dd>दिनांक</dd></div>
+                                <div><dt>संबंधित रिकॉर्ड</dt><dd>किसी भी ऑब्जेक्ट का lookup</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>lookup करता है</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>संसाधन</b><small>कमरा, व्यक्ति, कार</small></div>
+                            <dl>
+                                <div><dt><strong>नाम</strong><span class="ds-sr"> (ज़रूरी)</span></dt><dd>टेक्स्ट</dd></div>
+                                <div><dt>क्षमता</dt><dd>संख्या</dd></div>
+                                <div><dt>खुलने और बंद होने का समय</dt><dd>समय</dd></div>
+                                <div><dt>उपलब्ध आरंभ समय</dt><dd>टेक्स्ट</dd></div>
+                            </dl>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>बोल्ड</strong> = ज़रूरी। बाकी फ़ील्ड और फ़ीचर चालू करते हैं: <strong>आरंभ समय</strong> और <strong>अंत समय</strong> से टाइम स्लॉट मिलते हैं, पूरे दिन बुक करने के लिए इन्हें छोड़ दें।</li>
+                        <li>किसी व्यक्ति को बुक करना है? Task या Event का Assigned To, या किसी custom ऑब्जेक्ट का Owner ही संसाधन है। संसाधन ऑब्जेक्ट की ज़रूरत नहीं।</li>
+                    </ul>
+                </div>
+                <div class="ds" id="shape-pick">
+                    <span class="ds-tag">चुनें</span>
+                    <h3>किसी भी रिकॉर्ड पर तारीखें और समय चुनें</h3>
+                    <p class="ds-lead">एक child ऑब्जेक्ट, जिसमें एक तारीख हो और जो अपने रिकॉर्ड का lookup करे। छुट्टियाँ, विज़िट, शिफ़्ट, सेशन।</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>तारीख रिकॉर्ड</b><small>जैसे छुट्टी का दिन, विज़िट</small></div>
+                            <dl>
+                                <div><dt><strong>दिनांक</strong><span class="ds-sr"> (ज़रूरी)</span></dt><dd>दिनांक</dd></div>
+                                <div><dt><strong>पैरेंट रिकॉर्ड</strong><span class="ds-sr"> (ज़रूरी)</span></dt><dd>Lookup</dd></div>
+                                <div><dt>समाप्ति तिथि</dt><dd>दिनांक</dd></div>
+                                <div><dt>आरंभ समय और अंत समय</dt><dd>समय</dd></div>
+                                <div><dt>स्थिति</dt><dd>Picklist</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>lookup करता है</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>कोई भी रिकॉर्ड</b><small>जिस पेज पर कैलेंडर है</small></div>
+                            <p>Contact, Account, Opportunity, Case, या आपका कोई अपना ऑब्जेक्ट।</p>
+                            <p>कैलेंडर उसके रिकॉर्ड पेज पर लगता है और चुनी गई तारीखें उसके child रिकॉर्ड के रूप में सेव करता है।</p>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>बोल्ड</strong> = ज़रूरी। <strong>समाप्ति तिथि</strong> से लगातार कई दिन एक रिकॉर्ड में सेव होते हैं। <strong>आरंभ समय</strong> और <strong>अंत समय</strong> से यह तारीख और समय वाला कैलेंडर बन जाता है।</li>
+                        <li>पहले से Event इस्तेमाल करते हैं? Event के Start और End जैसे हैं वैसे ही काम करते हैं। बिना रिकॉर्ड वाले App या Home पेज पर पैरेंट lookup वैकल्पिक है।</li>
+                    </ul>
+                </div>
+                <div class="ds" id="shape-plan">
+                    <span class="ds-tag">प्लान करें</span>
+                    <h3>Gantt चार्ट पर प्रोजेक्ट प्लान करें</h3>
+                    <p class="ds-lead">प्रोजेक्ट के अंदर टास्क, जिनमें आरंभ, अंत और एक ज़िम्मेदार व्यक्ति हो। हर अतिरिक्त फ़ील्ड एक फ़ीचर जोड़ता है।</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>टास्क</b><small>जैसे MDP Schedule, Project Task</small></div>
+                            <dl>
+                                <div><dt><strong>आरंभ</strong><span class="ds-sr"> (ज़रूरी)</span></dt><dd>दिनांक</dd></div>
+                                <div><dt>अंत</dt><dd>दिनांक</dd></div>
+                                <div><dt>प्रोजेक्ट</dt><dd>प्रोजेक्ट का lookup</dd></div>
+                                <div><dt>व्यक्ति</dt><dd>User का lookup</dd></div>
+                                <div><dt>प्रतीक्षा में</dt><dd>टास्क का lookup</dd></div>
+                                <div><dt>चरण</dt><dd>Picklist, टेक्स्ट या lookup</dd></div>
+                                <div><dt>पूर्ण प्रतिशत</dt><dd>प्रतिशत या संख्या</dd></div>
+                                <div><dt>प्रति दिन घंटे या कुल घंटे</dt><dd>संख्या</dd></div>
+                                <div><dt>नियोजित आरंभ और अंत</dt><dd>दिनांक</dd></div>
+                                <div><dt>माइलस्टोन</dt><dd>चेकबॉक्स</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>lookup करता है</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-col">
+                            <div class="ds-obj">
+                                <div class="ds-obj-h"><b>प्रोजेक्ट</b></div>
+                                <p>कोई भी रिकॉर्ड जो टास्क को समूह में रखे: Project, Opportunity, Account।</p>
+                            </div>
+                            <div class="ds-obj opt">
+                                <div class="ds-obj-h"><b>टास्क लिंक</b><small>सिर्फ़ तब, जब कोई टास्क कई टास्क की प्रतीक्षा करे</small></div>
+                                <dl>
+                                    <div><dt>पहले आता है और प्रतीक्षा करता है</dt><dd>टास्क का lookup</dd></div>
+                                    <div><dt>लिंक का प्रकार</dt><dd>Picklist या टेक्स्ट</dd></div>
+                                    <div><dt>अंतराल</dt><dd>संख्या</dd></div>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>बोल्ड</strong> = ज़रूरी: बिना <strong>अंत</strong> वाला टास्क एक दिन का होता है। <strong>प्रोजेक्ट</strong> से हर प्रोजेक्ट की एक पंक्ति बनती है, <strong>व्यक्ति</strong> से कार्यभार चालू कर सकते हैं (खाली छोड़ें तो रिकॉर्ड का owner), <strong>प्रतीक्षा में</strong> लिंक और क्रिटिकल पाथ बनाता है, और <strong>नियोजित</strong> तिथियाँ बेसलाइन देती हैं।</li>
+                    </ul>
+                </div>
+                <p class="ds-more">हर फ़ील्ड और सेटिंग, उदाहरणों के साथ: <a href="/hi/salesforce-booking-calendar.html#object-mapping">Resource Booking</a>, <a href="/hi/multidatepickdates.html#object-mapping">Dates</a>, <a href="/hi/multidatepickdatetime.html#object-mapping">Dates &amp; Times</a> और <a href="/hi/salesforce-gantt-chart.html#setup">Gantt चार्ट</a>।</p>
             </div>
         </section>
 
@@ -458,7 +571,7 @@
                     <tbody>
                         <tr><td>इंस्टॉल</td><td><a href="/hi/notify-me-at-launch.html">AppExchange लिस्टिंग</a> पर (लॉन्च के समय) <b>Get It Now</b> पर क्लिक करें। केवल एडमिन, सभी यूज़र या चुनिंदा profile के लिए इंस्टॉल करें।</td></tr>
                         <tr><td>जाँचें</td><td><b>Setup, Installed Packages</b> में MultiDatePick दिखता है। Lightning App Builder या Flow Builder में <b>MultiDatePick</b> खोजें, तो <b>Dates</b>, <b>Dates &amp; Times</b> और <b>Resource Booking</b> दिखेंगे।</td></tr>
-                        <tr><td>सीखें</td><td>पैकेज के साथ गाइडेड Flow आते हैं: <b>Intro to MultiDatePick</b>, और Dates, Dates &amp; Times और Resource Booking, हर एक के लिए एक <b>Deep Dive</b> Flow। इन्हें Setup Wizard से शुरू करें।</td></tr>
+                        <tr><td>सीखें</td><td>पैकेज के साथ गाइडेड टूर आते हैं: <b>Intro to MultiDatePick</b> पूछता है कि आप क्या करना चाहते हैं, फिर <b>चुनें</b>, <b>बुक करें</b> या <b>प्लान करें</b> टूर शुरू करता है। इन्हें Setup Wizard से शुरू करें।</td></tr>
                         <tr><td>भाषाएँ</td><td>अगर आपका org Translation Workbench इस्तेमाल करता है, तो MultiDatePick की अनुवादित पिकलिस्ट वैल्यू, जैसे स्टेटस वैल्यू, दिखाने के लिए हर यूज़र की भाषा <b>Setup, Translation Workbench, Translation Language Settings</b> में सक्रिय होनी चाहिए। फ़ील्ड लेबल और कैलेंडर का अपना टेक्स्ट हर हाल में अनुवादित रहता है।</td></tr>
                     </tbody>
                 </table>
@@ -618,6 +731,10 @@
                 <details>
                     <summary>क्या मैं MultiDatePick कॉन्फ़िगरेशन को दूसरे Salesforce org में ले जा सकता हूँ?</summary>
                     <p>हाँ। मौजूदा कॉन्फ़िगरेशन (Existing Configurations) टैब से इसे निर्यात करें, फिर दूसरे org में JSON को आयात / निर्यात टैब में पेस्ट करें। आयात करते समय आप अलग नाम वाले किसी भी ऑब्जेक्ट या फ़ील्ड को मिला सकते हैं।</p>
+                </details>
+                <details>
+                    <summary>MultiDatePick के लिए कौन से Salesforce ऑब्जेक्ट चाहिए?</summary>
+                    <p>बुक करें के लिए एक बुकिंग ऑब्जेक्ट चाहिए, जिसमें एक तारीख हो और नाम वाले संसाधन ऑब्जेक्ट का lookup हो। चुनें के लिए एक child ऑब्जेक्ट चाहिए, जिसमें एक तारीख हो और अपने रिकॉर्ड का lookup हो। प्लान करें के लिए आरंभ तिथि वाला एक ऑब्जेक्ट चाहिए; प्रोजेक्ट का lookup टास्क को समूह में रखता है। अपने ऑब्जेक्ट इस्तेमाल करें, या MultiDatePick के साथ आने वाले तैयार MDP Schedule और MDP Resource।</p>
                 </details>
             </div>
         </section>

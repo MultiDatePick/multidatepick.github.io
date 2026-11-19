@@ -22,6 +22,7 @@
     <meta name="description" content="Installa MultiDatePick, assegna un set di autorizzazioni, crea una configurazione e aggiungi il calendario a una pagina o a un flusso Salesforce. Senza Apex.">
     <link rel="canonical" href="https://multidatepick.com/it/per-iniziare.html">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/data-shape.css">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -132,6 +133,14 @@
                         "acceptedAnswer": {
                             "@type": "Answer",
                             "text": "Sì. Esportala dalla scheda Configurazioni esistenti, poi incolla il JSON nella scheda Importa / Esporta dell'altra organizzazione. L'importazione ti permette di abbinare i nomi di oggetti o campi che non coincidono."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Quali oggetti Salesforce servono per MultiDatePick?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Prenota richiede un oggetto prenotazione con una data e un lookup a un oggetto risorsa con un nome. Scegli richiede un oggetto figlio con una data e un lookup al record a cui appartiene. Pianifica richiede un oggetto con una data di inizio; un lookup a un progetto raggruppa le attività. Usa i tuoi oggetti o quelli pronti, MDP Schedule e MDP Resource, inclusi in MultiDatePick."
                         }
                     }
                 ],
@@ -446,6 +455,110 @@
                         <tr><td>Risorse, disponibilità, capacità, orario lavorativo</td><td class="c n">-</td><td class="c n">-</td><td class="c y">&#10003;</td></tr>
                     </tbody>
                 </table>
+
+                <!-- DATA SHAPES: the objects each feature needs -->
+                <h2 id="data-shapes" style="margin-top:56px;scroll-margin-top:80px;">Cosa ti serve: gli oggetti per ogni funzione</h2>
+                <p class="gs-lead">Prenota, Scegli e Pianifica salvano negli oggetti Salesforce che scegli tu. Ecco la struttura minima che funziona e i campi che attivano altre funzioni. In grassetto: ciò che serve a ciascuno.</p>
+                <div class="ds" id="shape-book">
+                    <span class="ds-tag">Prenota</span>
+                    <h3>Prenota sale, persone e attrezzature</h3>
+                    <p class="ds-lead">Due oggetti che probabilmente hai già. Usa i tuoi oppure quelli pronti inclusi in MultiDatePick.</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Prenotazione</b><small>ad esempio MDP Schedule</small></div>
+                            <dl>
+                                <div><dt><strong>Data</strong><span class="ds-sr"> (obbligatorio)</span></dt><dd>Data</dd></div>
+                                <div><dt>Ora di inizio e ora di fine</dt><dd>Ora</dd></div>
+                                <div><dt><strong>Risorsa</strong><span class="ds-sr"> (obbligatorio)</span></dt><dd>Lookup a Risorsa</dd></div>
+                                <div><dt>Stato</dt><dd>Elenco di selezione</dd></div>
+                                <div><dt>Data di fine</dt><dd>Data</dd></div>
+                                <div><dt>Record correlato</dt><dd>Lookup a qualsiasi oggetto</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>punta a</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Risorsa</b><small>una sala, una persona, un'auto</small></div>
+                            <dl>
+                                <div><dt><strong>Nome</strong><span class="ds-sr"> (obbligatorio)</span></dt><dd>Testo</dd></div>
+                                <div><dt>Capacità</dt><dd>Numero</dd></div>
+                                <div><dt>Apertura e chiusura</dt><dd>Ora</dd></div>
+                                <div><dt>Orari di inizio offerti</dt><dd>Testo</dd></div>
+                            </dl>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>In grassetto</strong> = obbligatorio. Gli altri attivano funzioni in più: <strong>Ora di inizio</strong> e <strong>Ora di fine</strong> creano le fasce orarie; omettili per prenotare giornate intere.</li>
+                        <li>Prenoti una persona? Il campo Assegnato a di un'attività o di un evento, o il titolare di un oggetto personalizzato, è la risorsa. Nessun oggetto risorsa necessario.</li>
+                    </ul>
+                </div>
+                <div class="ds" id="shape-pick">
+                    <span class="ds-tag">Scegli</span>
+                    <h3>Scegli date e orari su qualsiasi record</h3>
+                    <p class="ds-lead">Un oggetto figlio che contiene una data e punta al record a cui appartiene. Giorni di ferie, visite, turni, sessioni.</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Record della data</b><small>ad esempio giorno di ferie, visita</small></div>
+                            <dl>
+                                <div><dt><strong>Data</strong><span class="ds-sr"> (obbligatorio)</span></dt><dd>Data</dd></div>
+                                <div><dt><strong>Record padre</strong><span class="ds-sr"> (obbligatorio)</span></dt><dd>Lookup</dd></div>
+                                <div><dt>Data di fine</dt><dd>Data</dd></div>
+                                <div><dt>Ora di inizio e ora di fine</dt><dd>Ora</dd></div>
+                                <div><dt>Stato</dt><dd>Elenco di selezione</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>punta a</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Qualsiasi record</b><small>la pagina con il calendario</small></div>
+                            <p>Contatto, account, opportunità, caso o uno dei tuoi oggetti.</p>
+                            <p>Il calendario va nella sua pagina record e salva le scelte come record figli.</p>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>In grassetto</strong> = obbligatorio. Una <strong>Data di fine</strong> salva più giorni consecutivi come un solo record. <strong>Ora di inizio</strong> e <strong>Ora di fine</strong> lo trasformano in un calendario con date e orari.</li>
+                        <li>Usi già gli eventi? Inizio e fine dell'evento funzionano così come sono. In una pagina app o home senza record, il lookup al record padre è facoltativo.</li>
+                    </ul>
+                </div>
+                <div class="ds" id="shape-plan">
+                    <span class="ds-tag">Pianifica</span>
+                    <h3>Pianifica i progetti su un diagramma di Gantt</h3>
+                    <p class="ds-lead">Attività con inizio, fine e un responsabile, sotto un progetto. Ogni campo in più aggiunge una funzione.</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Attività</b><small>ad esempio MDP Schedule, Attività di progetto</small></div>
+                            <dl>
+                                <div><dt><strong>Inizio</strong><span class="ds-sr"> (obbligatorio)</span></dt><dd>Data</dd></div>
+                                <div><dt>Fine</dt><dd>Data</dd></div>
+                                <div><dt>Progetto</dt><dd>Lookup a Progetto</dd></div>
+                                <div><dt>Persona</dt><dd>Lookup a Utente</dd></div>
+                                <div><dt>Attende</dt><dd>Lookup ad Attività</dd></div>
+                                <div><dt>Fase</dt><dd>Elenco di selezione, testo o lookup</dd></div>
+                                <div><dt>Percentuale completata</dt><dd>Percentuale o numero</dd></div>
+                                <div><dt>Ore al giorno od ore totali</dt><dd>Numero</dd></div>
+                                <div><dt>Inizio e fine previsti</dt><dd>Data</dd></div>
+                                <div><dt>Traguardo</dt><dd>Casella di controllo</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>punta a</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-col">
+                            <div class="ds-obj">
+                                <div class="ds-obj-h"><b>Progetto</b></div>
+                                <p>Qualsiasi record che raggruppa le attività: un progetto, un'opportunità, un account.</p>
+                            </div>
+                            <div class="ds-obj opt">
+                                <div class="ds-obj-h"><b>Collegamento tra attività</b><small>solo se un'attività ne attende diverse</small></div>
+                                <dl>
+                                    <div><dt>Viene prima e Attende</dt><dd>Lookup ad Attività</dd></div>
+                                    <div><dt>Tipo di collegamento</dt><dd>Elenco di selezione o testo</dd></div>
+                                    <div><dt>Sfasamento</dt><dd>Numero</dd></div>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>In grassetto</strong> = obbligatorio: un'attività senza <strong>Fine</strong> dura un giorno. <strong>Progetto</strong> dà una riga per progetto, <strong>Persona</strong> permette di attivare il carico di lavoro (se vuoto, usa il titolare del record), <strong>Attende</strong> disegna i collegamenti e il percorso critico, e le date <strong>previste</strong> danno la baseline.</li>
+                    </ul>
+                </div>
+                <p class="ds-more">Ogni campo e impostazione, con esempi: <a href="/it/calendario-prenotazioni-salesforce.html#object-mapping">Resource Booking</a>, <a href="/it/selettore-date-multiple-salesforce.html#object-mapping">Dates</a>, <a href="/it/selettore-data-ora-fasce-orarie-salesforce.html#object-mapping">Dates &amp; Times</a> e <a href="/it/diagramma-gantt-salesforce.html#setup">il diagramma di Gantt</a>.</p>
             </div>
         </section>
 
@@ -458,7 +571,7 @@
                     <tbody>
                         <tr><td>Installa</td><td>Nella <a href="/it/avvisami-al-lancio.html">scheda AppExchange</a> (al lancio), fai clic su <b>Get It Now</b>. Installa per i soli amministratori, per tutti gli utenti o per profili specifici.</td></tr>
                         <tr><td>Verifica</td><td>In <b>Imposta, Pacchetti installati</b> compare MultiDatePick. In Lightning App Builder o Flow Builder, cerca <b>MultiDatePick</b> per vedere <b>Dates</b>, <b>Dates &amp; Times</b> e <b>Resource Booking</b>.</td></tr>
-                        <tr><td>Imparalo</td><td>Il pacchetto include flussi guidati: <b>Intro to MultiDatePick</b>, più un flusso <b>Deep Dive</b> ciascuno per Dates, Dates &amp; Times e Resource Booking. Avviali dalla configurazione guidata.</td></tr>
+                        <tr><td>Imparalo</td><td>Il pacchetto include tour guidati: <b>Intro to MultiDatePick</b> ti chiede cosa vuoi fare, poi avvia il tour <b>Scegli</b>, <b>Prenota</b> o <b>Pianifica</b>. Avviali dalla configurazione guidata.</td></tr>
                         <tr><td>Lingue</td><td>Se la tua organizzazione usa il Workbench traduzione (Translation Workbench), la lingua di ogni utente deve essere attiva in <b>Imposta, Workbench traduzione, Impostazioni lingua di traduzione</b> perché compaiano i valori tradotti degli elenchi di selezione di MultiDatePick, come i valori di stato. Le etichette dei campi e i testi del calendario sono tradotti in ogni caso.</td></tr>
                     </tbody>
                 </table>
@@ -618,6 +731,10 @@
                 <details>
                     <summary>Posso spostare una configurazione MultiDatePick in un'altra organizzazione Salesforce?</summary>
                     <p>Sì. Esportala dalla scheda Configurazioni esistenti, poi incolla il JSON nella scheda Importa / Esporta dell'altra organizzazione. L'importazione ti permette di abbinare i nomi di oggetti o campi che non coincidono.</p>
+                </details>
+                <details>
+                    <summary>Quali oggetti Salesforce servono per MultiDatePick?</summary>
+                    <p>Prenota richiede un oggetto prenotazione con una data e un lookup a un oggetto risorsa con un nome. Scegli richiede un oggetto figlio con una data e un lookup al record a cui appartiene. Pianifica richiede un oggetto con una data di inizio; un lookup a un progetto raggruppa le attività. Usa i tuoi oggetti o quelli pronti, MDP Schedule e MDP Resource, inclusi in MultiDatePick.</p>
                 </details>
             </div>
         </section>

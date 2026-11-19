@@ -22,6 +22,7 @@
     <meta name="description" content="MultiDatePick をインストールし、権限セットを割り当て、セットアップウィザードで設定を作成して、Salesforce のページや画面フローにカレンダーを追加。Apex 不要。">
     <link rel="canonical" href="https://multidatepick.com/ja/gettingstarted.html">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/data-shape.css">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -132,6 +133,14 @@
                         "acceptedAnswer": {
                             "@type": "Answer",
                             "text": "はい。[既存の設定] タブからエクスポートし、移行先の組織の [インポート / エクスポート] タブに JSON を貼り付けます。オブジェクト名や項目名が異なる場合も、インポート時に対応付けられます。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "MultiDatePick にはどの Salesforce オブジェクトが必要ですか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "予約には、日付と、名前を持つリソースオブジェクトへの参照がある予約オブジェクトが必要です。選ぶには、日付と、所属するレコードへの参照がある子オブジェクトが 1 つ必要です。計画には、開始日を持つオブジェクトが 1 つ必要で、プロジェクトへの参照があればタスクをまとめられます。自社のオブジェクトでも、MultiDatePick に付属する MDP Schedule と MDP Resource でも使えます。"
                         }
                     }
                 ],
@@ -446,6 +455,110 @@
                         <tr><td>リソース、空き状況、定員、営業時間</td><td class="c n">-</td><td class="c n">-</td><td class="c y">&#10003;</td></tr>
                     </tbody>
                 </table>
+
+                <!-- DATA SHAPES: the objects each feature needs -->
+                <h2 id="data-shapes" style="margin-top:56px;scroll-margin-top:80px;">必要なもの: 機能ごとのオブジェクト</h2>
+                <p class="gs-lead">予約・選ぶ・計画は、それぞれお選びの Salesforce オブジェクトに保存します。動作に必要な最小限の形と、機能を増やす項目をまとめました。太字が必須項目です。</p>
+                <div class="ds" id="shape-book">
+                    <span class="ds-tag">予約</span>
+                    <h3>会議室、人、備品を予約</h3>
+                    <p class="ds-lead">おそらく既にお持ちの 2 つのオブジェクトです。自社のオブジェクトでも、MultiDatePick に付属する既製のオブジェクトでも使えます。</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>予約</b><small>例: MDP Schedule</small></div>
+                            <dl>
+                                <div><dt><strong>日付</strong><span class="ds-sr"> (必須)</span></dt><dd>日付</dd></div>
+                                <div><dt>開始時刻と終了時刻</dt><dd>時刻</dd></div>
+                                <div><dt><strong>リソース</strong><span class="ds-sr"> (必須)</span></dt><dd>リソースへの参照</dd></div>
+                                <div><dt>状況</dt><dd>選択リスト</dd></div>
+                                <div><dt>終了日</dt><dd>日付</dd></div>
+                                <div><dt>関連レコード</dt><dd>任意のオブジェクトへの参照</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>参照先</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>リソース</b><small>会議室、人、車</small></div>
+                            <dl>
+                                <div><dt><strong>名前</strong><span class="ds-sr"> (必須)</span></dt><dd>テキスト</dd></div>
+                                <div><dt>定員</dt><dd>数値</dd></div>
+                                <div><dt>開始・終了時刻</dt><dd>時刻</dd></div>
+                                <div><dt>提供する開始時刻</dt><dd>テキスト</dd></div>
+                            </dl>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>太字</strong> = 必須。そのほかの項目で機能が増えます。<strong>開始時刻</strong>と<strong>終了時刻</strong>で時間枠になり、省くと終日単位で予約します。</li>
+                        <li>人を予約する場合は、ToDo や行動の任命先、またはカスタムオブジェクトの所有者がリソースになります。リソースオブジェクトは不要です。</li>
+                    </ul>
+                </div>
+                <div class="ds" id="shape-pick">
+                    <span class="ds-tag">選ぶ</span>
+                    <h3>どのレコードでも日付と時刻を選ぶ</h3>
+                    <p class="ds-lead">日付を持ち、所属するレコードを参照する子オブジェクトが 1 つ。休暇、訪問、シフト、セッションなど。</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>日付レコード</b><small>例: 休暇日、訪問</small></div>
+                            <dl>
+                                <div><dt><strong>日付</strong><span class="ds-sr"> (必須)</span></dt><dd>日付</dd></div>
+                                <div><dt><strong>親レコード</strong><span class="ds-sr"> (必須)</span></dt><dd>参照</dd></div>
+                                <div><dt>終了日</dt><dd>日付</dd></div>
+                                <div><dt>開始時刻と終了時刻</dt><dd>時刻</dd></div>
+                                <div><dt>状況</dt><dd>選択リスト</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>参照先</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>任意のレコード</b><small>カレンダーを置くページ</small></div>
+                            <p>取引先責任者、取引先、商談、ケース、または独自のオブジェクト。</p>
+                            <p>カレンダーはそのレコードページに置き、選んだ日付を子レコードとして保存します。</p>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>太字</strong> = 必須。<strong>終了日</strong>があれば連続した日を 1 件のレコードとして保存します。<strong>開始時刻</strong>と<strong>終了時刻</strong>を加えると日付と時刻のカレンダーになります。</li>
+                        <li>すでに行動を使っていますか? 行動の開始と終了はそのまま使えます。レコードのないアプリケーションページやホームページでは、親への参照は省略できます。</li>
+                    </ul>
+                </div>
+                <div class="ds" id="shape-plan">
+                    <span class="ds-tag">計画</span>
+                    <h3>ガントチャートでプロジェクトを計画</h3>
+                    <p class="ds-lead">開始、終了、担当者を持つタスクをプロジェクトの下に。項目を足すごとに機能が増えます。</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>タスク</b><small>例: MDP Schedule、プロジェクトタスク</small></div>
+                            <dl>
+                                <div><dt><strong>開始</strong><span class="ds-sr"> (必須)</span></dt><dd>日付</dd></div>
+                                <div><dt>終了</dt><dd>日付</dd></div>
+                                <div><dt>プロジェクト</dt><dd>プロジェクトへの参照</dd></div>
+                                <div><dt>担当者</dt><dd>ユーザーへの参照</dd></div>
+                                <div><dt>待ち先</dt><dd>タスクへの参照</dd></div>
+                                <div><dt>フェーズ</dt><dd>選択リスト、テキスト、参照</dd></div>
+                                <div><dt>完了率</dt><dd>パーセントまたは数値</dd></div>
+                                <div><dt>1 日の時間または合計時間</dt><dd>数値</dd></div>
+                                <div><dt>計画開始日と計画終了日</dt><dd>日付</dd></div>
+                                <div><dt>マイルストーン</dt><dd>チェックボックス</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>参照先</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-col">
+                            <div class="ds-obj">
+                                <div class="ds-obj-h"><b>プロジェクト</b></div>
+                                <p>タスクをまとめる任意のレコード: プロジェクト、商談、取引先など。</p>
+                            </div>
+                            <div class="ds-obj opt">
+                                <div class="ds-obj-h"><b>タスクリンク</b><small>1 つのタスクが複数を待つ場合のみ</small></div>
+                                <dl>
+                                    <div><dt>先行と後続</dt><dd>タスクへの参照</dd></div>
+                                    <div><dt>リンクの種類</dt><dd>選択リストまたはテキスト</dd></div>
+                                    <div><dt>ラグ</dt><dd>数値</dd></div>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>太字</strong> = 必須。<strong>終了</strong>のないタスクは 1 日の長さになります。<strong>プロジェクト</strong>でプロジェクトごとに 1 行、<strong>担当者</strong>で作業負荷をオンにでき (空欄ならレコードの所有者)、<strong>待ち先</strong>でリンクとクリティカルパスを描き、<strong>計画</strong>日でベースラインを表示します。</li>
+                    </ul>
+                </div>
+                <p class="ds-more">すべての項目と設定 (例付き): <a href="/ja/salesforce-booking-calendar.html#object-mapping">Resource Booking</a>、<a href="/ja/multidatepickdates.html#object-mapping">Dates</a>、<a href="/ja/multidatepickdatetime.html#object-mapping">Dates &amp; Times</a>、<a href="/ja/salesforce-gantt-chart.html#setup">ガントチャート</a>。</p>
             </div>
         </section>
 
@@ -458,7 +571,7 @@
                     <tbody>
                         <tr><td>インストール</td><td><a href="/ja/notify-me-at-launch.html">AppExchange のリスト</a> (公開時) で <b>Get It Now</b> をクリックします。管理者のみ、全ユーザー、または特定のプロファイルを対象にインストールします。</td></tr>
                         <tr><td>確認</td><td><b>[設定] の [インストール済みパッケージ]</b> に MultiDatePick が表示されます。Lightning App Builder または Flow Builder で <b>MultiDatePick</b> を検索すると、<b>Dates</b>、<b>Dates &amp; Times</b>、<b>Resource Booking</b> が表示されます。</td></tr>
-                        <tr><td>使い方を学ぶ</td><td>パッケージにはガイド付きのフローが含まれています: <b>Intro to MultiDatePick</b> と、Dates、Dates &amp; Times、Resource Booking それぞれの <b>Deep Dive</b> フローです。セットアップウィザードから起動できます。</td></tr>
+                        <tr><td>使い方を学ぶ</td><td>パッケージにはガイド付きツアーが含まれています。<b>Intro to MultiDatePick</b> がやりたいことを尋ね、<b>選ぶ</b>、<b>予約</b>、<b>計画</b>のいずれかのツアーを始めます。セットアップウィザードから起動できます。</td></tr>
                         <tr><td>言語</td><td>組織でトランスレーションワークベンチ (Translation Workbench) を使用している場合、MultiDatePick の翻訳済み選択リスト値 (状況の値など) を表示するには、各ユーザーの言語を <b>[設定] の [トランスレーションワークベンチ] の [翻訳言語設定]</b> で有効にしておく必要があります。項目ラベルとカレンダー自体のテキストは、どちらの場合も翻訳されます。</td></tr>
                     </tbody>
                 </table>
@@ -618,6 +731,10 @@
                 <details>
                     <summary>MultiDatePick の設定を別の Salesforce 組織に移せますか?</summary>
                     <p>はい。[既存の設定] タブからエクスポートし、移行先の組織の [インポート / エクスポート] タブに JSON を貼り付けます。オブジェクト名や項目名が異なる場合も、インポート時に対応付けられます。</p>
+                </details>
+                <details>
+                    <summary>MultiDatePick にはどの Salesforce オブジェクトが必要ですか?</summary>
+                    <p>予約には、日付と、名前を持つリソースオブジェクトへの参照がある予約オブジェクトが必要です。選ぶには、日付と、所属するレコードへの参照がある子オブジェクトが 1 つ必要です。計画には、開始日を持つオブジェクトが 1 つ必要で、プロジェクトへの参照があればタスクをまとめられます。自社のオブジェクトでも、MultiDatePick に付属する MDP Schedule と MDP Resource でも使えます。</p>
                 </details>
             </div>
         </section>

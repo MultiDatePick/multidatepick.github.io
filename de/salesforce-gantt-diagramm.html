@@ -22,6 +22,7 @@
     <meta name="description" content="Gantt-Diagramm in Salesforce für jedes Objekt, ohne Code: Projekte, Phasen, verknüpfte Aufgaben, kritischer Pfad, Basisplan und Bearbeiten im Diagramm.">
     <link rel="canonical" href="https://multidatepick.com/de/salesforce-gantt-diagramm.html">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/data-shape.css">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -200,6 +201,14 @@
                         "acceptedAnswer": {
                             "@type": "Answer",
                             "text": "Nein. Sie ist Teil von MultiDatePick: $25 pro Benutzer und Monat, alle Funktionen in einem Tarif und 30 Tage kostenlos testen. Die Gantt-Ansicht ist eine der Ansichten des Kalenders und wird pro Seite im Einrichtungsassistenten aktiviert."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Welche Objekte brauche ich für das Gantt-Diagramm?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Ein Objekt mit einem Startdatum: Jeder Datensatz ist ein Balken, einen Tag lang, wenn er kein Enddatum hat. Ein Nachschlagefeld auf ein Projekt ergibt eine Zeile pro Projekt, und optionale Felder bringen den Rest: eine Person für die Arbeitslast, Wartet auf für Verknüpfungen und den kritischen Pfad, Phase, Prozent erledigt, Stunden, geplante Termine für den Basisplan und ein Kontrollkästchen Meilenstein. Ein eigenes Objekt für Aufgabenverknüpfungen ist nur nötig, wenn eine Aufgabe auf mehrere wartet."
                         }
                     }
                 ],
@@ -999,6 +1008,47 @@
                         <figcaption>Die Vorschau zeigt Phasen, Füllungen und Verknüpfungen, sobald das jeweilige Feld gewählt ist.</figcaption>
                     </figure>
                 </div>
+                <div class="ds" id="data-shape">
+                    <span class="ds-tag">Planen</span>
+                    <h3>Projekte im Gantt-Diagramm planen</h3>
+                    <p class="ds-lead">Aufgaben mit Beginn, Ende und einer zuständigen Person, unter einem Projekt. Jedes weitere Feld bringt eine Funktion dazu.</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Aufgabe</b><small>z. B. MDP Schedule, Projektaufgabe</small></div>
+                            <dl>
+                                <div><dt><strong>Beginn</strong><span class="ds-sr"> (erforderlich)</span></dt><dd>Datum</dd></div>
+                                <div><dt>Ende</dt><dd>Datum</dd></div>
+                                <div><dt>Projekt</dt><dd>Nachschlagefeld auf Projekt</dd></div>
+                                <div><dt>Person</dt><dd>Nachschlagefeld auf Benutzer</dd></div>
+                                <div><dt>Wartet auf</dt><dd>Nachschlagefeld auf Aufgabe</dd></div>
+                                <div><dt>Phase</dt><dd>Auswahlliste, Text oder Nachschlagefeld</dd></div>
+                                <div><dt>Prozent erledigt</dt><dd>Prozent oder Zahl</dd></div>
+                                <div><dt>Stunden pro Tag oder Gesamtstunden</dt><dd>Zahl</dd></div>
+                                <div><dt>Geplanter Beginn und geplantes Ende</dt><dd>Datum</dd></div>
+                                <div><dt>Meilenstein</dt><dd>Kontrollkästchen</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>verweist auf</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-col">
+                            <div class="ds-obj">
+                                <div class="ds-obj-h"><b>Projekt</b></div>
+                                <p>Jeder Datensatz, der die Aufgaben bündelt: ein Projekt, eine Opportunity, ein Account.</p>
+                            </div>
+                            <div class="ds-obj opt">
+                                <div class="ds-obj-h"><b>Aufgabenverknüpfung</b><small>nur wenn eine Aufgabe auf mehrere wartet</small></div>
+                                <dl>
+                                    <div><dt>Kommt zuerst und Wartet</dt><dd>Nachschlagefeld auf Aufgabe</dd></div>
+                                    <div><dt>Verknüpfungstyp</dt><dd>Auswahlliste oder Text</dd></div>
+                                    <div><dt>Verzögerung</dt><dd>Zahl</dd></div>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>Fett</strong> = erforderlich: Eine Aufgabe ohne <strong>Ende</strong> dauert einen Tag. <strong>Projekt</strong> ergibt eine Zeile pro Projekt, mit <strong>Person</strong> schalten Sie die Arbeitslast ein (ohne Wert gilt der Inhaber des Datensatzes), <strong>Wartet auf</strong> zeichnet Verknüpfungen und den kritischen Pfad, und <strong>geplante</strong> Termine ergeben den Basisplan.</li>
+                    </ul>
+                </div>
+                <p class="ds-more">Die Objekte für Buchen, Auswählen und Planen nebeneinander: <a href="/de/erste-schritte.html#data-shapes">Was Sie brauchen</a>.</p>
                 <h3>Die Einstellungen, einfach erklärt</h3>
                 <div class="hm-scroll">
                 <table class="gs-table">
@@ -1136,6 +1186,10 @@
                 <details>
                     <summary>Kostet die Gantt-Ansicht extra?</summary>
                     <p>Nein. Sie ist Teil von MultiDatePick: $25 pro Benutzer und Monat, alle Funktionen in einem Tarif und 30 Tage kostenlos testen. Die Gantt-Ansicht ist eine der Ansichten des Kalenders und wird pro Seite im Einrichtungsassistenten aktiviert.</p>
+                </details>
+                <details>
+                    <summary>Welche Objekte brauche ich für das Gantt-Diagramm?</summary>
+                    <p>Ein Objekt mit einem Startdatum: Jeder Datensatz ist ein Balken, einen Tag lang, wenn er kein Enddatum hat. Ein Nachschlagefeld auf ein Projekt ergibt eine Zeile pro Projekt, und optionale Felder bringen den Rest: eine Person für die Arbeitslast, Wartet auf für Verknüpfungen und den kritischen Pfad, Phase, Prozent erledigt, Stunden, geplante Termine für den Basisplan und ein Kontrollkästchen Meilenstein. Ein eigenes Objekt für Aufgabenverknüpfungen ist nur nötig, wenn eine Aufgabe auf mehrere wartet.</p>
                 </details>
             </div>
         </section>

@@ -62,6 +62,12 @@ Is MultiDatePick no-code? Yes. A Salesforce admin sets it up with clicks in thre
 
 Optional, for teams that want it: Flow outputs and the Parse Date Entries from JSON action for full control of what gets saved, and configurations as Custom Metadata for CI/CD.
 
+What you need, the objects for each feature (https://multidatepick.com/gettingstarted.html#data-shapes), needed fields first:
+
+- Book: a booking object (Date; Resource lookup; optional Start time and End time for time slots, Status, End date, a lookup to a related record) that looks up to a resource object (Name; optional Capacity, opening and closing times, start times offered). MultiDatePick ships MDP Schedule and MDP Resource ready to use. To book people, a Task or Event's Assigned To, or a custom object's Owner, is the resource.
+- Pick: one child object (Date; a lookup to the record it belongs to; optional End date for a run of days as one record, Start time and End time, Status) on any record page. Event's Start and End work as they are.
+- Plan (Gantt): one task object with a start date (End optional; with none a task is one day long) and optional Project lookup, Person (User lookup, for Workload), Waits on (self-lookup, for links and the critical path), Phase, Percent done, Hours a day or Total hours, Planned start and end (baseline), Milestone checkbox; plus a task link object (Comes first, Waits, Link type, Lag) only when a task waits on several.
+
 ## What's in the package
 
 - Three components share a configurable base, and the admin picks the one that fits the job: Dates for multi-date selection with ranges and recurring patterns; Dates & Times for date plus per-date or shared time-slot scheduling with conflict detection; and Resource Booking for resource reservation with capacity tracking, live availability badges, business hours per resource, multi-resource checkboxes, bulk inline edit mode, and booking rules (minimum notice, a rolling book-ahead window and buffer time between bookings).
@@ -93,7 +99,7 @@ Five-step no-code setup guide, one GIF per step. No code required.
 - 3. Build a config in the Setup Wizard: say where the calendar lives and the shape of your records, and it picks the component and fills in the fields, with a live preview. Every object and field is a dropdown. Or import a ready-made config from the Config Library.
 - 4. Lightning pages: drag the component on in Lightning App Builder and paste the Config Name. Record pages supply the parent record. On App and Home pages the wizard asks Whose records? (Just the person looking, the default; Everyone's; Only ones that match; One record's): only One record's needs Static Parent Record Id. On Experience pages, Bookings attach to The page's record or One record (Static Parent Record Id).
 - 5. Screen Flow: drag the component onto a screen and set Config Name; every checkbox comes from the config. Bind Parent Record Id and every component saves its own records, no Loop needed (Resource Booking always saves its own bookings). For full control, leave Parent Record Id blank on Dates or Dates & Times and use the Flow outputs with the Parse Date Entries from JSON action.
-- The package ships guided flows: Intro to MultiDatePick and a Deep Dive flow each for Dates, Dates & Times and Resource Booking, started from the Setup Wizard.
+- The package ships guided tours, started from the Setup Wizard: Intro to MultiDatePick asks what you want to do, then starts the Pick, Book or Plan tour on sample records.
 
 ## No-Code Salesforce Multi-Date and Range Picker LWC (https://multidatepick.com/multidatepickdates.html)
 
@@ -622,7 +628,7 @@ How MultiDatePick handles data and security.
 - The optional Map view and location picker use Salesforce's standard map component (lightning-map), which shows maps and places addresses with Google Maps, through Salesforce.
 - Like any AppExchange app, Salesforce sends MultiDatePick install and license details: the org Id, company name and edition, the version installed, the number of licenses, and the name and email of the admin who installed it.
 - Passed the Salesforce AppExchange Security Review.
-- Every query that returns data, and every write, runs in USER_MODE and enforces object, field-level security and sharing. Two internal checks run in system mode and return no data: the running user's own permission set count and a row lock before a booking saves. It never elevates privileges.
+- Every query that returns records, and every write, runs in USER_MODE and enforces object, field-level security and sharing. A few checks run in system mode and return only numbers, never records: capacity and conflict counts that include bookings the user cannot see (so nobody double books), the running user's own permission set count, and a row lock before a booking saves. The counts still need the user's object and field access. It never elevates privileges.
 - Four permission sets: MultiDatePick - Setup (admins, includes the Setup Wizard), MultiDatePick - User (everyone who uses calendars), MultiDatePick - All Access (both), MultiDatePick - Guest (the guest user of a public Experience Cloud site: read and create).
 - Saves are additive by default; records are never deleted without an explicit action.
 - Keyboard and screen reader support. The VPAT 2.5 at /accessibility.html covers three components and all seven views (Calendar, Timeline, Week, Utilization, Agenda, Map and Gantt) and rates every applicable WCAG 2.1 A and AA criterion as Supports except two, rated Partially Supports: contrast (admins can pick their own status colors) and reflow (the month grid keeps seven columns at 320 pixels wide).
@@ -652,7 +658,7 @@ Optional, for the times a developer or architect is involved anyway (reviewing t
 - Your data stays your data: picks become ordinary records on the objects you choose; nothing to migrate or sync, no external service, no callout. Triggers, flows, validation rules and reports keep working.
 - Screen Flow outputs: Selected Dates (text collection, YYYY-MM-DD), Date Ranges JSON, Dates With Times JSON (Dates & Times), Successful Bookings Count (Resource Booking). With Parent Record Id bound the calendar saves its own records; "My flow saves them" in the wizard hands the picks to the flow instead. Resource Booking always saves its own bookings: with a Relationship Field set it books nothing while Parent Record Id is empty, and with no Relationship Field it books them linked to no record.
 - Apex-defined types for looping JSON: MultiDatePickEntryCollection (data, totalCount, success, errorMessage) and MultiDatePickEntry (id, fromDate, toDate, startTime, endTime).
-- Security: every query that returns data and every save runs in user mode (object permissions, field-level security and sharing, guests included); two internal checks run in system mode and return no data. No callouts, servers or subprocessors; passed the Salesforce Security Review.
+- Security: every query that returns records and every save runs in user mode (object permissions, field-level security and sharing, guests included); a few checks run in system mode and return only numbers, never records (capacity and conflict counts that include bookings the user cannot see, so nobody double books). No callouts, servers or subprocessors; passed the Salesforce Security Review.
 - Sandbox to production: build and test in a sandbox, deploy the Config__mdt and Config_Extension__mdt records (or export and import the JSON), move the page or flow, assign permission sets.
 
 ## Salesforce Flow Loops: Create a Record for Every Date or Shift (https://multidatepick.com/blog/salesforce-flow-loop-multiple-records.html)
@@ -1058,7 +1064,7 @@ Published 2026-11-02. A component library's calendar compared with a finished bo
 
 - Scorecard: MultiDatePick 7 rows won, the component library's calendar 1, even 5. New rows: project plans (a Gantt view with task dependencies), Undo of a drag and set start times go to MultiDatePick; privacy on public pages is even.
 - MultiDatePick builds in capacity and conflict checks, multi-date picking, public booking pages and a utilization heatmap, with no wiring. The wider component library matters if you also want tables, charts and other components.
-- No Apex: set up in the Setup Wizard or Lightning App Builder on any standard or custom object; every query and save runs as the viewing user.
+- No Apex: set up in the Setup Wizard or Lightning App Builder on any standard or custom object; every record read and every save runs as the viewing user.
 - Resource timeline included with every license: rooms, people or equipment down the side, days across, drag to move or resize.
 - Screen Flows: add the component to a screen and set Config Name; picked dates, ranges and times come out as Flow variables, or the calendar saves the records itself.
 

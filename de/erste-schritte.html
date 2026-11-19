@@ -22,6 +22,7 @@
     <meta name="description" content="MultiDatePick installieren, Berechtigungssatz zuweisen, im Einrichtungsassistenten konfigurieren, Kalender auf eine Seite oder in einen Flow. Ohne Apex.">
     <link rel="canonical" href="https://multidatepick.com/de/erste-schritte.html">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/data-shape.css">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -132,6 +133,14 @@
                         "acceptedAnswer": {
                             "@type": "Answer",
                             "text": "Ja. Exportieren Sie sie auf der Registerkarte Vorhandene Konfigurationen und fügen Sie das JSON in der anderen Org auf der Registerkarte Importieren / Exportieren ein. Beim Import ordnen Sie abweichende Objekt- oder Feldnamen zu."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Welche Salesforce-Objekte brauche ich für MultiDatePick?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Buchen braucht ein Buchungsobjekt mit einem Datum und einem Nachschlagefeld auf ein Ressourcenobjekt mit einem Namen. Auswählen braucht ein untergeordnetes Objekt mit einem Datum und einem Nachschlagefeld auf den Datensatz, zu dem es gehört. Planen braucht ein Objekt mit einem Startdatum; ein Nachschlagefeld auf ein Projekt gruppiert die Aufgaben. Nutzen Sie Ihre eigenen Objekte oder die fertigen Objekte MDP Schedule und MDP Resource, die mit MultiDatePick kommen."
                         }
                     }
                 ],
@@ -446,6 +455,110 @@
                         <tr><td>Ressourcen, Verfügbarkeit, Kapazität, Geschäftszeiten</td><td class="c n">-</td><td class="c n">-</td><td class="c y">&#10003;</td></tr>
                     </tbody>
                 </table>
+
+                <!-- DATA SHAPES: the objects each feature needs -->
+                <h2 id="data-shapes" style="margin-top:56px;scroll-margin-top:80px;">Was Sie brauchen: die Objekte für jede Funktion</h2>
+                <p class="gs-lead">Buchen, Auswählen und Planen speichern jeweils in Salesforce-Objekte Ihrer Wahl. Hier sehen Sie die kleinste Struktur, die funktioniert, und die Felder, die mehr freischalten. Fett: was jeweils erforderlich ist.</p>
+                <div class="ds" id="shape-book">
+                    <span class="ds-tag">Buchen</span>
+                    <h3>Räume, Personen und Ausstattung buchen</h3>
+                    <p class="ds-lead">Zwei Objekte, die Sie wahrscheinlich schon haben. Nutzen Sie Ihre eigenen oder die fertigen Objekte, die mit MultiDatePick kommen.</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Buchung</b><small>z. B. MDP Schedule</small></div>
+                            <dl>
+                                <div><dt><strong>Datum</strong><span class="ds-sr"> (erforderlich)</span></dt><dd>Datum</dd></div>
+                                <div><dt>Startzeit und Endzeit</dt><dd>Uhrzeit</dd></div>
+                                <div><dt><strong>Ressource</strong><span class="ds-sr"> (erforderlich)</span></dt><dd>Nachschlagefeld auf Ressource</dd></div>
+                                <div><dt>Status</dt><dd>Auswahlliste</dd></div>
+                                <div><dt>Enddatum</dt><dd>Datum</dd></div>
+                                <div><dt>Zugehöriger Datensatz</dt><dd>Nachschlagefeld auf ein beliebiges Objekt</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>verweist auf</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Ressource</b><small>ein Raum, eine Person, ein Auto</small></div>
+                            <dl>
+                                <div><dt><strong>Name</strong><span class="ds-sr"> (erforderlich)</span></dt><dd>Text</dd></div>
+                                <div><dt>Kapazität</dt><dd>Zahl</dd></div>
+                                <div><dt>Öffnet und schließt</dt><dd>Uhrzeit</dd></div>
+                                <div><dt>Angebotene Startzeiten</dt><dd>Text</dd></div>
+                            </dl>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>Fett</strong> = erforderlich. Der Rest schaltet weitere Funktionen frei: <strong>Startzeit</strong> und <strong>Endzeit</strong> ergeben Zeitfenster; lassen Sie sie weg, um ganze Tage zu buchen.</li>
+                        <li>Sie buchen stattdessen eine Person? Dann ist das Feld „Zugewiesen zu“ einer Aufgabe oder eines Ereignisses oder der Inhaber eines benutzerdefinierten Objekts die Ressource. Kein Ressourcenobjekt nötig.</li>
+                    </ul>
+                </div>
+                <div class="ds" id="shape-pick">
+                    <span class="ds-tag">Auswählen</span>
+                    <h3>Termine und Uhrzeiten auf jedem Datensatz auswählen</h3>
+                    <p class="ds-lead">Ein untergeordnetes Objekt mit einem Datum und einem Verweis auf den Datensatz, zu dem es gehört. Freie Tage, Besuche, Schichten, Termine.</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Datumsdatensatz</b><small>z. B. freier Tag, Besuch</small></div>
+                            <dl>
+                                <div><dt><strong>Datum</strong><span class="ds-sr"> (erforderlich)</span></dt><dd>Datum</dd></div>
+                                <div><dt><strong>Übergeordneter Datensatz</strong><span class="ds-sr"> (erforderlich)</span></dt><dd>Nachschlagefeld</dd></div>
+                                <div><dt>Enddatum</dt><dd>Datum</dd></div>
+                                <div><dt>Startzeit und Endzeit</dt><dd>Uhrzeit</dd></div>
+                                <div><dt>Status</dt><dd>Auswahlliste</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>verweist auf</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Beliebiger Datensatz</b><small>die Seite mit dem Kalender</small></div>
+                            <p>Kontakt, Account, Opportunity, Kundenvorgang oder eines Ihrer eigenen Objekte.</p>
+                            <p>Der Kalender kommt auf seine Datensatzseite und speichert die Auswahl als untergeordnete Datensätze.</p>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>Fett</strong> = erforderlich. Ein <strong>Enddatum</strong> speichert mehrere aufeinanderfolgende Tage als einen Datensatz. <strong>Startzeit</strong> und <strong>Endzeit</strong> machen daraus einen Kalender mit Datum und Uhrzeit.</li>
+                        <li>Sie nutzen schon Ereignisse? Beginn und Ende des Ereignisses funktionieren unverändert. Auf einer App- oder Startseite ohne Datensatz ist das Nachschlagefeld auf den übergeordneten Datensatz optional.</li>
+                    </ul>
+                </div>
+                <div class="ds" id="shape-plan">
+                    <span class="ds-tag">Planen</span>
+                    <h3>Projekte im Gantt-Diagramm planen</h3>
+                    <p class="ds-lead">Aufgaben mit Beginn, Ende und einer zuständigen Person, unter einem Projekt. Jedes weitere Feld bringt eine Funktion dazu.</p>
+                    <div class="ds-row">
+                        <div class="ds-obj">
+                            <div class="ds-obj-h"><b>Aufgabe</b><small>z. B. MDP Schedule, Projektaufgabe</small></div>
+                            <dl>
+                                <div><dt><strong>Beginn</strong><span class="ds-sr"> (erforderlich)</span></dt><dd>Datum</dd></div>
+                                <div><dt>Ende</dt><dd>Datum</dd></div>
+                                <div><dt>Projekt</dt><dd>Nachschlagefeld auf Projekt</dd></div>
+                                <div><dt>Person</dt><dd>Nachschlagefeld auf Benutzer</dd></div>
+                                <div><dt>Wartet auf</dt><dd>Nachschlagefeld auf Aufgabe</dd></div>
+                                <div><dt>Phase</dt><dd>Auswahlliste, Text oder Nachschlagefeld</dd></div>
+                                <div><dt>Prozent erledigt</dt><dd>Prozent oder Zahl</dd></div>
+                                <div><dt>Stunden pro Tag oder Gesamtstunden</dt><dd>Zahl</dd></div>
+                                <div><dt>Geplanter Beginn und geplantes Ende</dt><dd>Datum</dd></div>
+                                <div><dt>Meilenstein</dt><dd>Kontrollkästchen</dd></div>
+                            </dl>
+                        </div>
+                        <div class="ds-link"><span>verweist auf</span><span class="ds-arrow" aria-hidden="true"></span></div>
+                        <div class="ds-col">
+                            <div class="ds-obj">
+                                <div class="ds-obj-h"><b>Projekt</b></div>
+                                <p>Jeder Datensatz, der die Aufgaben bündelt: ein Projekt, eine Opportunity, ein Account.</p>
+                            </div>
+                            <div class="ds-obj opt">
+                                <div class="ds-obj-h"><b>Aufgabenverknüpfung</b><small>nur wenn eine Aufgabe auf mehrere wartet</small></div>
+                                <dl>
+                                    <div><dt>Kommt zuerst und Wartet</dt><dd>Nachschlagefeld auf Aufgabe</dd></div>
+                                    <div><dt>Verknüpfungstyp</dt><dd>Auswahlliste oder Text</dd></div>
+                                    <div><dt>Verzögerung</dt><dd>Zahl</dd></div>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="ds-notes">
+                        <li><strong>Fett</strong> = erforderlich: Eine Aufgabe ohne <strong>Ende</strong> dauert einen Tag. <strong>Projekt</strong> ergibt eine Zeile pro Projekt, mit <strong>Person</strong> schalten Sie die Arbeitslast ein (ohne Wert gilt der Inhaber des Datensatzes), <strong>Wartet auf</strong> zeichnet Verknüpfungen und den kritischen Pfad, und <strong>geplante</strong> Termine ergeben den Basisplan.</li>
+                    </ul>
+                </div>
+                <p class="ds-more">Alle Felder und Einstellungen mit Beispielen: <a href="/de/salesforce-buchungskalender.html#object-mapping">Resource Booking</a>, <a href="/de/salesforce-mehrfach-datumsauswahl.html#object-mapping">Dates</a>, <a href="/de/salesforce-datum-zeitfenster-auswahl.html#object-mapping">Dates &amp; Times</a> und <a href="/de/salesforce-gantt-diagramm.html#setup">das Gantt-Diagramm</a>.</p>
             </div>
         </section>
 
@@ -458,7 +571,7 @@
                     <tbody>
                         <tr><td>Installieren</td><td>Klicken Sie im <a href="/de/zum-start-benachrichtigen.html">AppExchange-Eintrag</a> (zum Start) auf <b>Get It Now</b>. Installieren Sie nur für Admins, für alle Benutzer oder für bestimmte Profile.</td></tr>
                         <tr><td>Prüfen</td><td>Unter <b>Setup, Installierte Pakete</b> steht MultiDatePick. Suchen Sie im Lightning App Builder oder Flow Builder nach <b>MultiDatePick</b>, um <b>Dates</b>, <b>Dates &amp; Times</b> und <b>Resource Booking</b> zu sehen.</td></tr>
-                        <tr><td>Kennenlernen</td><td>Das Paket bringt geführte Flows mit: <b>Intro to MultiDatePick</b> und je eine <b>Vertiefung (Deep Dive)</b> für Dates, Dates &amp; Times und Resource Booking. Starten Sie sie aus dem Einrichtungsassistenten.</td></tr>
+                        <tr><td>Kennenlernen</td><td>Das Paket bringt geführte Touren mit: <b>Intro to MultiDatePick</b> fragt, was Sie vorhaben, und startet dann die Tour <b>Auswählen</b>, <b>Buchen</b> oder <b>Planen</b>. Starten Sie sie aus dem Einrichtungsassistenten.</td></tr>
                         <tr><td>Sprachen</td><td>Wenn Ihre Org die Übersetzungs-Workbench (Translation Workbench) nutzt, muss die Sprache jedes Benutzers unter <b>Setup, Übersetzungs-Workbench, Übersetzungs&shy;sprach&shy;einstellungen</b> aktiv sein, damit die übersetzten Auswahllistenwerte von MultiDatePick, etwa die Statuswerte, angezeigt werden. Feldbeschriftungen und die Texte des Kalenders selbst sind in jedem Fall übersetzt.</td></tr>
                     </tbody>
                 </table>
@@ -618,6 +731,10 @@
                 <details>
                     <summary>Kann ich eine MultiDatePick-Konfiguration in eine andere Salesforce-Org übertragen?</summary>
                     <p>Ja. Exportieren Sie sie auf der Registerkarte Vorhandene Konfigurationen und fügen Sie das JSON in der anderen Org auf der Registerkarte Importieren / Exportieren ein. Beim Import ordnen Sie abweichende Objekt- oder Feldnamen zu.</p>
+                </details>
+                <details>
+                    <summary>Welche Salesforce-Objekte brauche ich für MultiDatePick?</summary>
+                    <p>Buchen braucht ein Buchungsobjekt mit einem Datum und einem Nachschlagefeld auf ein Ressourcenobjekt mit einem Namen. Auswählen braucht ein untergeordnetes Objekt mit einem Datum und einem Nachschlagefeld auf den Datensatz, zu dem es gehört. Planen braucht ein Objekt mit einem Startdatum; ein Nachschlagefeld auf ein Projekt gruppiert die Aufgaben. Nutzen Sie Ihre eigenen Objekte oder die fertigen Objekte MDP Schedule und MDP Resource, die mit MultiDatePick kommen.</p>
                 </details>
             </div>
         </section>
