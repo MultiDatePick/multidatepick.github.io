@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- consent:head ft -->
+  <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    (function(){var c=null;try{c=JSON.parse(localStorage.getItem('mdp_consent'));if(!c||c.v!==1||!(Date.now()-c.ts<31536000000))c=null;}catch(e){c=null;}window.mdpConsent=c;
+    if(c&&c.analytics)gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.mdpFirstTouch=function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}};if(c&&c.attribution)window.mdpFirstTouch();})();
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script defer src="/js/consent.js"></script>
+  <!-- /consent:head -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Critical Path in Salesforce: Gantt Chart, Slack and Float</title>
+    <meta name="description" content="What the critical path is, why it matters and how slack (float) works, then how to see the critical path live on a Salesforce Gantt chart, with no code.">
+    <link rel="canonical" href="https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/solutions.css">
+    <style>
+        /* Critical path post: same look as the Timesheet, Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.ts-narrow { max-width: 720px; margin-left: auto; margin-right: auto; }
+        .tl-feats.cp-four { grid-template-columns: repeat(2, 1fr); }
+        .section ul li { margin: 6px 0; line-height: 1.6; color: #374151; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <meta property="og:title" content="Critical Path in Salesforce: Gantt Chart, Slack and Float">
+    <meta property="og:description" content="What the critical path is, why it matters and how slack (float) works, then how to see the critical path live on a Salesforce Gantt chart, with no code.">
+    <meta property="og:image" content="https://multidatepick.com/images/blog/salesforce-critical-path-gantt-chart.png">
+    <meta property="og:url" content="https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Critical Path in Salesforce: Gantt Chart, Slack and Float">
+    <meta name="twitter:description" content="What the critical path is, why it matters and how slack (float) works, then how to see the critical path live on a Salesforce Gantt chart, with no code.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/blog/salesforce-critical-path-gantt-chart.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/kritischer-pfad-salesforce-gantt-diagramm.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/chemin-critique-diagramme-gantt-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/percorso-critico-diagramma-gantt-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/caminho-critico-salesforce-grafico-de-gantt.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- consent:ui -->
+    <div class="mdp-cc-bar" id="mdpConsentBar" role="region" aria-label="Cookie choices" hidden>
+        <p>We use cookies for analytics, only with your OK. <span class="mdp-cc-wide">Nothing is sold or used for ads.</span> <a href="/privacy.html">Privacy policy</a></p>
+        <div class="mdp-cc-btns">
+            <button type="button" class="mdp-cc-btn mdp-cc-btn--text" data-mdp-consent="settings">Settings</button>
+            <button type="button" class="mdp-cc-btn" data-mdp-consent="reject">Reject all</button>
+            <button type="button" class="mdp-cc-btn" data-mdp-consent="accept">Accept all</button>
+        </div>
+    </div>
+    <dialog class="mdp-cc-dialog" id="mdpConsentDialog" aria-labelledby="mdpConsentTitle" aria-describedby="mdpConsentIntro">
+        <div class="mdp-cc-in">
+            <h2 id="mdpConsentTitle">Cookie settings</h2>
+            <button type="button" class="mdp-cc-x" data-mdp-consent="close" aria-label="Close">&times;</button>
+            <p class="mdp-cc-intro" id="mdpConsentIntro">Choose what this site may store in your browser. You can change it any time from Cookie settings at the bottom of every page.</p>
+            <div class="mdp-cc-opt">
+                <span class="mdp-cc-name">Needed for the site to work</span>
+                <span class="mdp-cc-desc">Only remembers your cookie choice.</span>
+                <span class="mdp-cc-always">Always on</span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAnalytics">Analytics</label>
+                <span class="mdp-cc-desc" id="mdpConsentAnalyticsDesc">Google Analytics counts visits and pages so we can improve the site.</span>
+                <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAnalytics" aria-describedby="mdpConsentAnalyticsDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAttribution">Where you came from</label>
+                <span class="mdp-cc-desc" id="mdpConsentAttributionDesc">Remembers the link or campaign that first brought you here, and sends it with our forms.</span>
+                <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAttribution" aria-describedby="mdpConsentAttributionDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-btns">
+                <button type="button" class="mdp-cc-btn mdp-cc-btn--line" data-mdp-consent="reject">Reject all</button>
+                <button type="button" class="mdp-cc-btn" data-mdp-consent="save">Save choices</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- /consent:ui -->
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">
+        Coming soon to the Salesforce AppExchange
+        <button class="banner-close" id="bannerClose" aria-label="Dismiss banner" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="logo"><img src="../images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Product <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/salesforce-booking-calendar.html">Book Rooms and People</a></li>
+                        <li><a href="/multidatepickdates.html">Pick Many Dates</a></li>
+                        <li><a href="/multidatepickdatetime.html">Pick Dates and Times</a></li>
+                        <li><a href="/salesforce-gantt-chart.html">Plan with a Gantt Chart</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Seven Calendar Views</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                        <li><a href="/trust.html">Trust &amp; Security</a></li>
+                        <li><a href="/accessibility.html">Accessibility (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Solutions <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
+                        <li><a href="/salesforce-timesheet-calendar.html">Timesheets</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Calendar</a></li>
+                        <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
+                        <li><a href="/salesforce-class-scheduling.html">Class &amp; Course Scheduling</a></li>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/pricing.html">Pricing</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Docs <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/blog/no-code-salesforce-calendar.html">No-Code Setup</a></li>
+                        <li><a href="/gettingstarted.html">Getting Started</a></li>
+                        <li><a href="/user-guide.html">User Guide</a></li>
+                        <li><a href="/flowcheatsheet.html">Screen Flow Guide</a></li>
+                        <li><a href="/home-app-experience.html">App, Home &amp; Experience Pages</a></li>
+                        <li><a href="/troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/en-US/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Try the Live Demo</a></li>
+                <li><a href="/notify-me-at-launch.html" class="nav-cta">Notify Me at Launch</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {"@type": "BlogPosting", "headline": "The Critical Path in Salesforce: What It Is and How to Use It", "description": "What the critical path is, why it matters and how slack (float) works, then how to see the critical path live on a Salesforce Gantt chart, with no code.", "datePublished": "2026-11-23", "dateModified": "2026-11-23", "author": {"@type": "Organization", "name": "MultiDatePick"}, "publisher": {"@type": "Organization", "name": "MultiDatePick"}, "mainEntityOfPage": "https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html", "image": "https://multidatepick.com/images/blog/salesforce-critical-path-gantt-chart.png", "keywords": "critical path in Salesforce, critical path Gantt chart, Salesforce project critical path, what is slack, what is float, critical path method"},
+                {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the critical path in project management?", "acceptedAnswer": {"@type": "Answer", "text": "The critical path is the longest chain of linked tasks from a project's start to its finish. Every task on it has zero slack, so a delay to any one of them moves the finish date by the same amount. Tasks off the critical path have room to slip without changing the finish."}}, {"@type": "Question", "name": "What is slack, or float, in a Gantt chart?", "acceptedAnswer": {"@type": "Answer", "text": "Slack, also called float or total float, is how many working days a task can slip before it moves the finish date: the latest it can start minus the earliest it can start. A slack of 0 puts a task on the critical path, and a negative slack means the project already runs past its planned finish."}}, {"@type": "Question", "name": "Does Salesforce have a critical path?", "acceptedAnswer": {"@type": "Answer", "text": "Not for project tasks in Sales Cloud or Service Cloud. MultiDatePick adds a Gantt view to any standard or custom Salesforce object, with a Critical path button that outlines the zero-slack tasks, a Slack column and a hover line on each task that says how many workdays it can slip."}}, {"@type": "Question", "name": "How do I show the critical path on a Salesforce Gantt chart?", "acceptedAnswer": {"@type": "Answer", "text": "In MultiDatePick, link the tasks with a Waits On lookup or a task link object, then press Critical path in the Gantt toolbar. Add {Slack} to the Gantt columns for each task's slack in workdays, and hover any bar for its slack in one line. It is set up in the Setup Wizard with no code."}}, {"@type": "Question", "name": "Does the critical path update when a task moves?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Drag a task with Push on and the tasks waiting on it move with it on working days; the outlined chain and every slack figure update at once. Move a critical task past the plan and the project end moves with it, and the task reads Behind by the workdays it lost. One Undo puts the tasks and the critical path back."}}, {"@type": "Question", "name": "Are weekends counted as slack?", "acceptedAnswer": {"@type": "Answer", "text": "No. Skip weekends is on by default, so Saturdays and Sundays never count toward slack, lag or a task's length, and office closures from Blocked Dates are left out too. Turn Skip weekends off for teams that work every day."}}]},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/blog/salesforce-critical-path-drag.webp", "thumbnailUrl": "https://multidatepick.com/images/blog/salesforce-critical-path-drag-poster.png", "caption": "Critical path in a Salesforce Gantt chart, animated: Beta build dragged a week later, Launch day and the project end follow, now Behind by 5 workdays", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}, "copyrightNotice": "© 2026 MultiDatePick"},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/blog/salesforce-critical-path-slack-column.png", "caption": "Critical path in Salesforce: Spring Product Launch on a Gantt chart, its zero-slack chain outlined, with a Slack column of 0 and 3 workdays per task", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}, "copyrightNotice": "© 2026 MultiDatePick"},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/blog/salesforce-gantt-slack-hover.png", "caption": "Slack on a Salesforce Gantt chart: hovering Press kit shows one line with its dates and Can slip 3 workdays, beside the critical path to Launch day", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}, "copyrightNotice": "© 2026 MultiDatePick"},
+                {"@type": "ImageObject", "contentUrl": "https://multidatepick.com/images/gantt/salesforce-gantt-baseline-planned-dates.png", "caption": "Salesforce Gantt chart baseline for tracking slip: a plan bar under each Website Relaunch task, +2 days on two slipped tasks and a Variance column", "creditText": "MultiDatePick", "creator": {"@type": "Organization", "name": "MultiDatePick"}, "copyrightNotice": "© 2026 MultiDatePick"}
+            ]
+        }
+        </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>The Critical Path in Salesforce: What It Is and How to Use It</h1>
+                <p class="subtitle">The chain of tasks that sets your finish date, the slack every other task has, and how to see both live on a Salesforce Gantt chart, with no code.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Published November 23, 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">"What is the critical path?" "Which tasks can slip without moving the launch?" "How do I see the critical path in Salesforce?" Every project has a handful of tasks that decide when it ends. Lose a day on one of them and the finish date moves. Lose a day anywhere else and, up to a point, nothing changes.</p>
+
+                <p>MultiDatePick puts a <strong>Gantt chart on any Salesforce object</strong> and works out that chain for you. Press <strong>Critical path</strong> and the tasks with no room to slip stand out; a <strong>Slack</strong> column says how many workdays every other task can slip. Drag a task and both update on the spot. <strong>No Apex, no add-on project app.</strong></p>
+
+                <figure class="sc-shot">
+                    <img src="/images/blog/salesforce-critical-path-drag-poster.png" data-gif="/images/blog/salesforce-critical-path-drag.webp" alt="Critical path in a Salesforce Gantt chart, animated: Beta build dragged a week later, Launch day and the project end follow, now Behind by 5 workdays" loading="lazy" decoding="async" width="1200" height="760" data-zoomable>
+                    <figcaption>Beta build is on the critical path: drag it a week and launch day moves a week, so the project turns Late, 5 workdays behind plan.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">What the critical path is</h2>
+                <p>The <strong>critical path</strong> is the longest chain of linked tasks from a project&rsquo;s start to its finish. Every task on it has <strong>zero slack</strong>: it has to start and end on time, because the next task is waiting for it and nothing in the chain has room to spare. Delay any one of them by a day and the finish date moves by a day.</p>
+                <p>A plain example: a spring product launch. The team runs customer interviews for 5 workdays, then the beta build takes 8, then it is launch day. Sales training (3 workdays) also has to finish before launch, and the press kit (3 workdays) waits on a pricing review.</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">Task</th><th>Workdays</th><th>Waits on</th><th>Slack</th></tr></thead>
+                    <tbody>
+                    <tr><td>Customer interviews</td><td>5</td><td>Nothing</td><td><strong>0</strong>, critical</td></tr>
+                    <tr><td>Beta build</td><td>8</td><td>Customer interviews</td><td><strong>0</strong>, critical</td></tr>
+                    <tr><td>Sales training</td><td>3</td><td>Pricing review, 2 workdays after it</td><td><strong>0</strong>, critical</td></tr>
+                    <tr><td>Pricing review</td><td>6</td><td>Nothing</td><td>3 workdays</td></tr>
+                    <tr><td>Press kit</td><td>3</td><td>Pricing review</td><td>3 workdays</td></tr>
+                    <tr><td>Launch day</td><td>Milestone</td><td>Beta build, Sales training, Press kit</td><td><strong>0</strong>, critical</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>Interviews, then the beta build, then launch day is the critical path. Sales training is planned to end right at launch, so it has no room either. If the beta build runs two days over, launch day moves two days. If the press kit runs two days over, launch day does not move: the press kit had 3 workdays to spare, and now it has 1.</p>
+
+                <h2 style="margin-top:44px;">Why it matters</h2>
+                <p>On a plan with forty tasks, the critical path is usually a few of them. Knowing which few changes how a project manager spends the week:</p>
+                <div class="tl-feats cp-four">
+                    <div class="tl-feat"><h3>Know which tasks to protect</h3><p>Put your best people, and your attention, on the tasks that set the finish date. A slip there is a slip in the launch.</p></div>
+                    <div class="tl-feat"><h3>See where you can safely slip</h3><p>A task with 3 workdays of slack can wait for a busy specialist, or give up a day to an urgent request, and the date holds.</p></div>
+                    <div class="tl-feat"><h3>Spot real risk early</h3><p>A late task on the critical path is a late project, today. A late task with slack is a note for the stand-up, not an alarm.</p></div>
+                    <div class="tl-feat"><h3>Better trade-offs when something runs late</h3><p>Add people, cut scope or overlap work only where it moves the finish. Speeding up a task with slack buys nothing.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Slack explained: &ldquo;Can slip 3 workdays&rdquo;</h2>
+                <p><strong>Slack</strong>, also called <strong>float</strong> or total float, is how many working days a task can slip before it moves the finish date. It is the gap between the earliest a task can start and the latest it can start without pushing anything on the critical path.</p>
+                <ul>
+                    <li><strong>Slack above 0:</strong> room to spare. The press kit ends 3 workdays before launch day, so it <em>can slip 3 workdays</em>.</li>
+                    <li><strong>Slack of 0:</strong> on the critical path. Any delay moves the finish.</li>
+                    <li><strong>Slack below 0:</strong> the project is already behind its planned finish. A chain that now ends two workdays after the plan reads <em>Behind by 2 workdays</em>.</li>
+                </ul>
+                <p>Slack is counted in <strong>workdays</strong>, so a weekend in the middle of a task is not &ldquo;spare time&rdquo;. In MultiDatePick, hover any linked task and its line says exactly that:</p>
+                <figure class="sc-shot">
+                    <img src="/images/blog/salesforce-gantt-slack-hover.png" alt="Slack on a Salesforce Gantt chart: hovering Press kit shows one line with its dates and Can slip 3 workdays, beside the critical path to Launch day" loading="lazy" width="1200" height="463" data-zoomable>
+                    <figcaption>Hover a task: Press kit can slip 3 workdays before launch day moves.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">The critical path in Salesforce, with MultiDatePick</h2>
+                <p>Salesforce has no critical path of its own for project tasks. MultiDatePick&rsquo;s <a href="/salesforce-gantt-chart.html">Gantt chart for Salesforce</a> reads your own task records, on any standard or custom object, and works it out from their dates and links:</p>
+                <ol class="cp-steps">
+                    <li><strong>Link the tasks.</strong> Point the Gantt at a Waits On lookup (one link per task), or at a link object for several links each, with link types (after it ends, start together, finish together) and lag in workdays.</li>
+                    <li><strong>Press Critical path.</strong> The toolbar button outlines every zero-slack task and the links between them, project by project: each project has its own critical path to its own finish.</li>
+                    <li><strong>Add the Slack column.</strong> Put <code>{Slack}</code> in the Gantt columns and every task shows its slack in workdays beside its name, sortable like any column.</li>
+                    <li><strong>Hover a bar.</strong> One line beside the bar gives its name, dates and slack: <em>Can slip 3 workdays</em>, <em>No slack: on the critical path</em> or <em>Behind by 2 workdays</em>. A click opens the full card.</li>
+                    <li><strong>Drag a task.</strong> With <strong>Push on</strong>, the tasks waiting on it move with it, on working days, and the chain and every slack figure update at once. One Undo puts it all back.</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/blog/salesforce-critical-path-slack-column.png" alt="Critical path in Salesforce: Spring Product Launch on a Gantt chart, its zero-slack chain outlined, with a Slack column of 0 and 3 workdays per task" loading="lazy" width="1600" height="767" data-zoomable>
+                    <figcaption>Critical path on: the zero-slack chain to launch day is outlined, and the Slack column shows every other task&rsquo;s room.</figcaption>
+                </figure>
+                <p><strong>Skip weekends</strong> is on by default, so Saturdays and Sundays never count as slack, lag or task length. Office closures from Blocked Dates are left out too. A <strong>milestone</strong> that waits on a task sits on that task&rsquo;s last day, so launch day lands right where the beta build ends, not a day later.</p>
+
+                <h2 style="margin-top:44px;">Tips for a critical path you can trust</h2>
+                <ul>
+                    <li><strong>Keep links accurate.</strong> The critical path is only as good as the links. A task that really waits on another but is not linked looks like it has slack it does not have. When plans change, change the link too.</li>
+                    <li><strong>Put milestones on the last task&rsquo;s day.</strong> A milestone a few days after the work it waits on adds slack to the whole chain, and the real critical path stops lighting up. Link the milestone and let it sit on that task&rsquo;s end.</li>
+                    <li><strong>Check it weekly.</strong> The path moves as work finishes early or late. A quick look at the Slack column each week shows a task drifting toward 0 before it becomes the reason for a late launch.</li>
+                    <li><strong>Use a baseline to see slip.</strong> Map two planned date fields and press <strong>Set baseline</strong> to save today&rsquo;s dates as the plan. <strong>Show plan</strong> draws a plan bar under every task with <em>+2 days</em> on the ones that slipped, and a project that runs past its planned finish shows how far: <em>Behind by 2 workdays</em>.</li>
+                </ul>
+                <figure class="sc-shot">
+                    <img src="/images/gantt/salesforce-gantt-baseline-planned-dates.png" alt="Salesforce Gantt chart baseline for tracking slip: a plan bar under each Website Relaunch task, +2 days on two slipped tasks and a Variance column" loading="lazy" width="1600" height="896" data-zoomable>
+                    <figcaption>Show plan: a thin plan bar under each task and the workdays it slipped.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">The settings that shape it</h2>
+                <p>Each one is a field in the Setup Wizard&rsquo;s Gantt box and a property on the component:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Setting</th><th>What it does for the critical path</th><th style="width:22%;">API name</th></tr></thead>
+                    <tbody>
+                    <tr><td>Gantt Waits On Field</td><td>A lookup to the task that must end first: one link per task.</td><td><code>ganttDependsOnField</code></td></tr>
+                    <tr><td>Task link object</td><td>Several links per task, each with a type (after, start together, finish together) and lag in workdays.</td><td><code>Gantt_Link_Object__c</code></td></tr>
+                    <tr><td>Gantt Columns</td><td>Add <code>{Slack}</code> for a Slack column beside each task.</td><td><code>ganttColumns</code></td></tr>
+                    <tr><td>Gantt Skip Weekends</td><td>On by default: slack, lag and pushes count workdays only.</td><td><code>ganttSkipWeekends</code></td></tr>
+                    <tr><td>Gantt Dependency Mode</td><td>push (default): a moved task pushes the tasks waiting on it.</td><td><code>ganttDependencyMode</code></td></tr>
+                    <tr><td>Gantt Milestone Field</td><td>A checkbox that draws a milestone dot on its predecessor&rsquo;s last day.</td><td><code>ganttMilestoneField</code></td></tr>
+                    <tr><td>Gantt Planned Start and End</td><td>The baseline: plan bars, slipped days, and how far a project runs behind its planned finish.</td><td><code>ganttBaselineStartField</code>, <code>ganttBaselineEndField</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>More than the critical path.</strong> The same Gantt view has project health, phases, percent done, values edited right in the chart and a Workload view of who is overbooked. <a href="/salesforce-gantt-chart.html">See every Gantt feature</a>, or how it compares in <a href="/blog/best-gantt-chart-for-salesforce.html">the best Gantt chart for Salesforce</a>.
+                </div>
+
+                <h2 style="margin-top:44px;">Questions people ask</h2>
+                <div class="tl-faq">
+                    <details><summary>What is the critical path in project management?</summary><p>The critical path is the longest chain of linked tasks from a project's start to its finish. Every task on it has zero slack, so a delay to any one of them moves the finish date by the same amount. Tasks off the critical path have room to slip without changing the finish.</p></details>
+                    <details><summary>What is slack, or float, in a Gantt chart?</summary><p>Slack, also called float or total float, is how many working days a task can slip before it moves the finish date: the latest it can start minus the earliest it can start. A slack of 0 puts a task on the critical path, and a negative slack means the project already runs past its planned finish.</p></details>
+                    <details><summary>Does Salesforce have a critical path?</summary><p>Not for project tasks in Sales Cloud or Service Cloud. MultiDatePick adds a Gantt view to any standard or custom Salesforce object, with a Critical path button that outlines the zero-slack tasks, a Slack column and a hover line on each task that says how many workdays it can slip.</p></details>
+                    <details><summary>How do I show the critical path on a Salesforce Gantt chart?</summary><p>In MultiDatePick, link the tasks with a Waits On lookup or a task link object, then press Critical path in the Gantt toolbar. Add {Slack} to the Gantt columns for each task's slack in workdays, and hover any bar for its slack in one line. It is set up in the Setup Wizard with no code.</p></details>
+                    <details><summary>Does the critical path update when a task moves?</summary><p>Yes. Drag a task with Push on and the tasks waiting on it move with it on working days; the outlined chain and every slack figure update at once. Move a critical task past the plan and the project end moves with it, and the task reads Behind by the workdays it lost. One Undo puts the tasks and the critical path back.</p></details>
+                    <details><summary>Are weekends counted as slack?</summary><p>No. Skip weekends is on by default, so Saturdays and Sundays never count toward slack, lag or a task's length, and office closures from Blocked Dates are left out too. Turn Skip weekends off for teams that work every day.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>See what sets your finish date.</h2>
+                    <p>Open the Projects page on the live demo, open a project and press Critical path.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/en-US/projects?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-critical-path-gantt-chart" class="btn btn-demo" target="_blank" rel="noopener">Try the Live Demo</a>
+                        <a href="/notify-me-at-launch.html" class="btn btn-primary">Notify Me at Launch</a>
+                        <a href="/salesforce-gantt-chart.html" class="btn btn-secondary">Salesforce Gantt Chart</a>
+                    </div>
+                    <ul class="check-list"><li>$25/user/month, every feature</li><li>30-day free trial, no card</li><li>No Apex</li><li>Set up with clicks</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Related reading</h3>
+                    <ul>
+                        <li><a href="/salesforce-gantt-chart.html">The Salesforce Gantt chart: every feature</a></li>
+                        <li><a href="/blog/best-gantt-chart-for-salesforce.html">The best Gantt chart for Salesforce, compared</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Seven calendar views, the Gantt among them</a></li>
+                        <li><a href="/blog/salesforce-timeline-view.html">The Salesforce timeline view</a></li>
+                        <li><a href="/blog/no-code-salesforce-calendar.html">The no-code Salesforce calendar</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/" class="logo">
+                        <img src="../images/logo.png" alt="MultiDatePick logo: Salesforce multi-date calendar and resource booking component" width="180" height="45">
+                    </a>
+                    <p>Bookings, calendars and Gantt charts on any Salesforce object. No code.</p>
+                </div>
+                <div class="footer-links">
+                    <h2>Product</h2>
+                    <ul>
+                        <li><a href="/salesforce-booking-calendar.html">Book Rooms and People</a></li>
+                        <li><a href="/multidatepickdates.html">Pick Many Dates</a></li>
+                        <li><a href="/multidatepickdatetime.html">Pick Dates and Times</a></li>
+                        <li><a href="/salesforce-gantt-chart.html">Plan with a Gantt Chart</a></li>
+                        <li><a href="/blog/salesforce-calendar-views.html">Seven Calendar Views</a></li>
+                        <li><a href="/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Solutions</h2>
+                    <ul>
+                        <li><a href="/salesforce-calendar.html">Salesforce Calendar</a></li>
+                        <li><a href="/salesforce-conference-room-booking-calendar.html">Conference Room Booking</a></li>
+                        <li><a href="/salesforce-calendar-staffing-recruiting.html">Staffing &amp; Recruiting</a></li>
+                        <li><a href="/salesforce-timesheet-calendar.html">Timesheets</a></li>
+                        <li><a href="/blog/salesforce-campaign-multiple-dates.html">Campaign Calendar</a></li>
+                        <li><a href="/blog/salesforce-section-508-government-calendar.html">Government / Section 508</a></li>
+                        <li><a href="/salesforce-class-scheduling.html">Class &amp; Course Scheduling</a></li>
+                        <li><a href="/salesforce-calendar-experience-cloud-booking.html">Experience Cloud Booking</a></li>
+                        <li><a href="/salesforce-calendar-vs-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Docs</h2>
+                    <ul>
+                        <li><a href="/gettingstarted.html">Getting Started</a></li>
+                        <li><a href="/user-guide.html">User Guide</a></li>
+                        <li><a href="/flowcheatsheet.html">Screen Flow Guide</a></li>
+                        <li><a href="/home-app-experience.html">App, Home &amp; Experience Pages</a></li>
+                        <li><a href="/troubleshooting.html">Troubleshooting</a></li>
+                        <li><a href="/faq.html">FAQ</a></li>
+                    </ul>
+                    <h2>For developers</h2>
+                    <ul>
+                        <li><a href="/salesforce-calendar-developer-guide.html">Developer Guide</a></li>
+                        <li><a href="/deploy-flow-vscode.html">Deploy a Flow (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Company</h2>
+                    <ul>
+                        <li><a href="/pricing.html">Pricing</a></li>
+                        <li><a href="/blog/">Blog</a></li>
+                        <li><a href="/trust.html">Trust &amp; Security</a></li>
+                        <li><a href="/accessibility.html">Accessibility</a></li>
+                        <li><a href="/notify-me-at-launch.html">Notify Me at Launch</a></li>
+                        <li><a href="/custom-config.html">Free Custom Config</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. All rights reserved.</span>
+                <!-- consent:footer --><div class="footer-social footer-legal"><a href="/privacy.html">Privacy policy</a><a href="/privacy.html#cookie-settings" data-mdp-consent="open">Cookie settings</a></div><!-- /consent:footer -->
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a>
+                    <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Language" translate="no"><ul><li><a href="/blog/salesforce-critical-path-gantt-chart.html" hreflang="en" lang="en" aria-current="page">English</a></li><li><a href="/de/blog/kritischer-pfad-salesforce-gantt-diagramm.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/chemin-critique-diagramme-gantt-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/percorso-critico-diagramma-gantt-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/caminho-critico-salesforce-grafico-de-gantt.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-critical-path-gantt-chart.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-critical-path-gantt-chart.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-critical-path-gantt-chart.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="../js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Expand image</p><p data-k="expand-diagram">Expand diagram</p><p data-k="close">Close</p><p data-k="prev-image">Previous image</p><p data-k="next-image">Next image</p><p data-k="image-viewer">Image viewer</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

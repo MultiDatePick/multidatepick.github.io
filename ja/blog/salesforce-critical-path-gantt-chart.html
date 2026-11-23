@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- consent:head ft -->
+  <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    (function(){var c=null;try{c=JSON.parse(localStorage.getItem('mdp_consent'));if(!c||c.v!==1||!(Date.now()-c.ts<31536000000))c=null;}catch(e){c=null;}window.mdpConsent=c;
+    if(c&&c.analytics)gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.mdpFirstTouch=function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}};if(c&&c.attribution)window.mdpFirstTouch();})();
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script defer src="/js/consent.js"></script>
+  <!-- /consent:head -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce のクリティカルパス: ガントチャートとフロート</title>
+    <meta name="description" content="クリティカルパスとは何か、余裕日数 (フロート) の仕組み、そして Salesforce のガントチャートでクリティカルパスをノーコードで可視化する方法を解説します。">
+    <link rel="canonical" href="https://multidatepick.com/ja/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Critical path post: same look as the Timesheet, Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.ts-narrow { max-width: 720px; margin-left: auto; margin-right: auto; }
+        .tl-feats.cp-four { grid-template-columns: repeat(2, 1fr); }
+        .section ul li { margin: 6px 0; line-height: 1.6; color: #374151; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <meta property="og:title" content="Salesforce のクリティカルパス: ガントチャートとフロート">
+    <meta property="og:description" content="クリティカルパスとは何か、余裕日数 (フロート) の仕組み、そして Salesforce のガントチャートでクリティカルパスをノーコードで可視化する方法を解説します。">
+    <meta property="og:image" content="https://multidatepick.com/images/ja/blog/salesforce-critical-path-gantt-chart-cover.png">
+    <meta property="og:url" content="https://multidatepick.com/ja/blog/salesforce-critical-path-gantt-chart.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce のクリティカルパス: ガントチャートとフロート">
+    <meta name="twitter:description" content="クリティカルパスとは何か、余裕日数 (フロート) の仕組み、そして Salesforce のガントチャートでクリティカルパスをノーコードで可視化する方法を解説します。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/ja/blog/salesforce-critical-path-gantt-chart-cover.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/kritischer-pfad-salesforce-gantt-diagramm.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/chemin-critique-diagramme-gantt-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/percorso-critico-diagramma-gantt-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/caminho-critico-salesforce-grafico-de-gantt.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- consent:ui -->
+    <div class="mdp-cc-bar" id="mdpConsentBar" role="region" aria-label="Cookieの選択" hidden>
+        <p>同意いただいた場合のみ、アクセス解析にCookieを使用します。<span class="mdp-cc-wide">データの販売や広告利用は一切ありません。</span> <a href="/ja/privacy.html">プライバシーポリシー</a></p>
+        <div class="mdp-cc-btns">
+            <button type="button" class="mdp-cc-btn mdp-cc-btn--text" data-mdp-consent="settings">設定</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="reject">すべて拒否</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="accept">すべて許可</button>
+        </div>
+    </div>
+    <dialog class="mdp-cc-dialog" id="mdpConsentDialog" aria-labelledby="mdpConsentTitle" aria-describedby="mdpConsentIntro">
+        <div class="mdp-cc-in">
+            <h2 id="mdpConsentTitle">Cookie設定</h2>
+            <button type="button" class="mdp-cc-x" data-mdp-consent="close" aria-label="閉じる">&times;</button>
+            <p class="mdp-cc-intro" id="mdpConsentIntro">このサイトがブラウザに保存してよい内容を選んでください。各ページ下部の「Cookie設定」からいつでも変更できます。</p>
+            <div class="mdp-cc-opt">
+                <span class="mdp-cc-name">サイトの動作に必要</span> <span class="mdp-cc-desc">Cookieの選択内容だけを記憶します。</span> <span class="mdp-cc-always">常に有効</span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAnalytics">アクセス解析</label> <span class="mdp-cc-desc" id="mdpConsentAnalyticsDesc">サイト改善のため、Google Analyticsで訪問数と閲覧ページを集計します。</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAnalytics" aria-describedby="mdpConsentAnalyticsDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAttribution">流入元</label> <span class="mdp-cc-desc" id="mdpConsentAttributionDesc">最初にこのサイトへ来るきっかけになったリンクやキャンペーンを記憶し、フォーム送信時に一緒に送ります。</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAttribution" aria-describedby="mdpConsentAttributionDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-btns">
+                <button type="button" class="mdp-cc-btn mdp-cc-btn--line" data-mdp-consent="reject">すべて拒否</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="save">選択を保存</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- /consent:ui -->
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Salesforce AppExchange で近日公開 <button class="banner-close" id="bannerClose" aria-label="バナーを閉じる" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/ja/" class="logo"><img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="ナビゲーションの切り替え"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">製品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-booking-calendar.html">会議室や人を予約</a></li>
+                        <li><a href="/ja/multidatepickdates.html">複数の日付を選ぶ</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">日付と時刻を選ぶ</a></li>
+                        <li><a href="/ja/salesforce-gantt-chart.html">ガントチャートで計画</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">7 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ソリューション <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-timesheet-calendar.html">タイムシート</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンカレンダー</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-class-scheduling.html">クラス・講座スケジュール</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/pricing.html">料金</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">ドキュメント <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/ja/blog/no-code-salesforce-calendar.html">ノーコード設定</a></li>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                </li>
+                <li><a href="/ja/blog/">ブログ</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">ライブデモを試す</a></li>
+                <li><a href="/ja/notify-me-at-launch.html" class="nav-cta">公開時に通知を受け取る</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "BlogPosting",
+                "headline": "クリティカルパスとは? Salesforce での見方と使い方",
+                "description": "クリティカルパスとは何か、余裕日数 (フロート) の仕組み、そして Salesforce のガントチャートでクリティカルパスをノーコードで可視化する方法を解説します。",
+                "datePublished": "2026-11-23",
+                "dateModified": "2026-11-23",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/ja/blog/salesforce-critical-path-gantt-chart.html",
+                "image": "https://multidatepick.com/images/ja/blog/salesforce-critical-path-gantt-chart-cover.png",
+                "keywords": "クリティカルパス Salesforce, クリティカルパス とは, クリティカルパス ガントチャート, Salesforce プロジェクト管理 クリティカルパス, フロート とは, トータルフロート, 余裕日数, クリティカルパス法, CPM",
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "プロジェクト管理におけるクリティカルパスとは?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "クリティカルパスとは、プロジェクトの開始から終了までをつなぐ、依存関係のあるタスクの最も長い連なりです。その上のタスクはすべて余裕がゼロなので、どれか 1 つが遅れると、終了日も同じだけ遅れます。クリティカルパス上にないタスクは、終了日を変えずに遅らせる余地があります。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "ガントチャートの余裕日数 (フロート) とは?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "余裕日数は、フロートやトータルフロート、スラックとも呼ばれ、終了日を動かさずにタスクを何営業日遅らせられるかを表します。計算は「最遅開始日 - 最早開始日」です。余裕日数が 0 のタスクはクリティカルパス上にあり、マイナスならプロジェクトはすでに計画した終了日を過ぎています。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce にクリティカルパスはありますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sales Cloud や Service Cloud のプロジェクトタスクにはありません。MultiDatePick は、Salesforce の標準オブジェクトにもカスタムオブジェクトにもガントビューを追加します。余裕ゼロのタスクを枠で囲む「クリティカルパス」ボタン、「余裕日数」列、そして各タスクにカーソルを合わせると何営業日遅れても大丈夫かを示す 1 行の表示を備えています。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce のガントチャートでクリティカルパスを表示するには?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "MultiDatePick で、タスク同士を「待ち先」の参照項目またはタスクリンクオブジェクトでつなぎ、ガントのツールバーで「クリティカルパス」を押します。ガントの列に {Slack} を追加すると各タスクの余裕日数が営業日で表示され、バーにカーソルを合わせると余裕日数が 1 行で表示されます。設定はセットアップウィザードで行い、コードは不要です。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "タスクを動かすとクリティカルパスも更新されますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "はい。「押し出しオン」の状態でタスクをドラッグすると、そのタスクを待っているタスクも営業日単位で一緒に動き、枠で囲まれた連なりとすべての余裕日数がすぐに更新されます。クリティカルなタスクを計画より後ろに動かすとプロジェクトの終了日も一緒に動き、タスクには失った営業日数が「遅れ」として表示されます。「元に戻す」を 1 回押せば、タスクもクリティカルパスも元どおりです。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "週末は余裕日数に含まれますか?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "いいえ。「週末を除外」は初期設定でオンになっているため、土曜と日曜が余裕日数、ラグ、タスクの期間に数えられることはありません。ブロック日付の休業日も除外されます。毎日稼働するチームは「週末を除外」をオフにしてください。"
+                        }
+                    }
+                ],
+                "inLanguage": "ja"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-critical-path-drag.webp",
+                "thumbnailUrl": "https://multidatepick.com/images/ja/blog/salesforce-critical-path-drag-poster.png",
+                "caption": "Salesforce ガントチャートのクリティカルパス (アニメーション): ベータ版の開発を 1 週間後ろにドラッグすると、発売日とプロジェクト終了日も続き、5 営業日の遅れに",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-critical-path-slack-column.png",
+                "caption": "Salesforce のクリティカルパス: ガントチャート上の春の新製品発売。余裕ゼロの連なりを枠で囲み、余裕日数列にタスクごとの 0 と 3 営業日を表示",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/blog/salesforce-gantt-slack-hover.png",
+                "caption": "Salesforce ガントチャートの余裕日数: プレスキットにカーソルを合わせると日付と「3 営業日遅れても影響なし」を 1 行で表示。隣は発売日へのクリティカルパス",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/ja/gantt/salesforce-gantt-baseline-planned-dates.png",
+                "caption": "遅れを追跡する Salesforce ガントチャートのベースライン: ウェブサイト刷新の各タスクの下に計画バー、遅れた 2 タスクに +2 日、差異列",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>クリティカルパスとは? Salesforce での見方と使い方</h1>
+                <p class="subtitle">終了日を決めるタスクの連なり、ほかのタスクが持つ余裕日数、そしてその両方を Salesforce のガントチャートでノーコードで確認する方法。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">公開日 2026 年 11 月 23 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">「クリティカルパスとは?」「発売日を動かさずに遅らせてもよいタスクはどれ?」「Salesforce でクリティカルパスを見るには?」どのプロジェクトにも、いつ終わるかを決める少数のタスクがあります。そのどれかで 1 日遅れれば、終了日も動きます。ほかのタスクで 1 日遅れても、ある程度までは何も変わりません。</p>
+
+                <p>MultiDatePick は<strong>Salesforce のあらゆるオブジェクトにガントチャート</strong>を追加し、この連なりを自動で割り出します。<strong>クリティカルパス</strong>を押すと、遅らせる余地のないタスクが目立って表示され、<strong>余裕日数</strong>列にはほかの各タスクが何営業日遅れても大丈夫かが表示されます。タスクをドラッグすれば、どちらもその場で更新されます。<strong>Apex も、別のプロジェクト管理アプリも不要です。</strong></p>
+
+                <figure class="sc-shot">
+                    <img src="/images/ja/blog/salesforce-critical-path-drag-poster.png" data-gif="/images/ja/blog/salesforce-critical-path-drag.webp" alt="Salesforce ガントチャートのクリティカルパス (アニメーション): ベータ版の開発を 1 週間後ろにドラッグすると、発売日とプロジェクト終了日も続き、5 営業日の遅れに" loading="lazy" decoding="async" width="1200" height="760" data-zoomable>
+                    <figcaption>ベータ版の開発はクリティカルパス上にあります。1 週間後ろにドラッグすると発売日も 1 週間動き、プロジェクトは「遅延」、計画より 5 営業日の遅れになります。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">クリティカルパスとは</h2>
+                <p><strong>クリティカルパス</strong>とは、プロジェクトの開始から終了までをつなぐ、依存関係のあるタスクの最も長い連なりです。その上のタスクはすべて<strong>余裕ゼロ</strong>です。次のタスクが待っていて、連なりのどこにもゆとりがないため、予定どおりに始めて予定どおりに終える必要があります。どれか 1 つが 1 日遅れれば、終了日も 1 日遅れます。</p>
+                <p>簡単な例として、春の新製品発売を考えます。チームはまず顧客インタビューを 5 営業日行い、次にベータ版の開発に 8 営業日かけ、そのあとが発売日です。営業トレーニング (3 営業日) も発売前に終える必要があり、プレスキット (3 営業日) は価格の見直しを待ってから始まります。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">ToDo</th><th>営業日</th><th>待ち先</th><th>余裕日数</th></tr></thead>
+                    <tbody>
+                    <tr><td>顧客インタビュー</td><td>5</td><td>なし</td><td><strong>0</strong> (クリティカル)</td></tr>
+                    <tr><td>ベータ版の開発</td><td>8</td><td>顧客インタビュー</td><td><strong>0</strong> (クリティカル)</td></tr>
+                    <tr><td>営業トレーニング</td><td>3</td><td>価格の見直し (終了の 2 営業日後)</td><td><strong>0</strong> (クリティカル)</td></tr>
+                    <tr><td>価格の見直し</td><td>6</td><td>なし</td><td>3 営業日</td></tr>
+                    <tr><td>プレスキット</td><td>3</td><td>価格の見直し</td><td>3 営業日</td></tr>
+                    <tr><td>発売日</td><td>マイルストーン</td><td>ベータ版の開発、営業トレーニング、プレスキット</td><td><strong>0</strong> (クリティカル)</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>顧客インタビュー、ベータ版の開発、発売日という流れがクリティカルパスです。営業トレーニングはちょうど発売日に終わる計画なので、こちらも余裕がありません。ベータ版の開発が 2 日延びれば、発売日も 2 日延びます。プレスキットが 2 日延びても発売日は動きません。プレスキットには 3 営業日の余裕があり、それが 1 営業日に減るだけです。</p>
+
+                <h2 style="margin-top:44px;">クリティカルパスが重要な理由</h2>
+                <p>タスクが 40 個ある計画でも、クリティカルパス上にあるのはたいてい数個です。それがどれかを知るだけで、プロジェクトマネージャーの 1 週間の使い方が変わります。</p>
+                <div class="tl-feats cp-four">
+                    <div class="tl-feat"><h3>守るべきタスクがわかる</h3><p>終了日を決めるタスクにこそ、優秀なメンバーと注意を集中させましょう。そこでの遅れは、そのまま発売の遅れになります。</p></div>
+                    <div class="tl-feat"><h3>安全に遅らせられる場所がわかる</h3><p>余裕日数が 3 営業日あるタスクなら、忙しい専門家の手が空くのを待ったり、急ぎの依頼に 1 日譲ったりしても、終了日は守れます。</p></div>
+                    <div class="tl-feat"><h3>本当のリスクに早く気づける</h3><p>クリティカルパス上のタスクの遅れは、その時点でプロジェクトの遅れです。余裕のあるタスクの遅れは、朝会で共有する程度のことで、警報ではありません。</p></div>
+                    <div class="tl-feat"><h3>遅れたときに正しい判断ができる</h3><p>人を増やす、範囲を削る、作業を並行させるといった手は、終了日が動くところだけに打ちましょう。余裕のあるタスクを早めても、何も得られません。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">余裕日数 (フロート) とは: 「3 営業日遅れても影響なし」</h2>
+                <p><strong>余裕日数</strong>は、<strong>フロート</strong>やトータルフロートとも呼ばれ、終了日を動かさずにタスクを何営業日遅らせられるかを表します。タスクを最も早く始められる日と、クリティカルパス上の何も押し出さずに始められる最も遅い日の差です。</p>
+                <ul>
+                    <li><strong>余裕日数が 0 より大きい:</strong> ゆとりがあります。プレスキットは発売日の 3 営業日前に終わるので、<em>3 営業日遅れても影響なし</em>です。</li>
+                    <li><strong>余裕日数が 0:</strong> クリティカルパス上にあります。少しでも遅れれば終了日が動きます。</li>
+                    <li><strong>余裕日数が 0 未満:</strong> プロジェクトはすでに計画した終了日を過ぎています。計画より 2 営業日遅れて終わる連なりには<em>2 営業日の遅れ</em>と表示されます。</li>
+                </ul>
+                <p>余裕日数は<strong>営業日</strong>で数えるため、タスクの途中にある週末は「余った時間」になりません。MultiDatePick では、リンクされたタスクにカーソルを合わせると、まさにそのことが 1 行で表示されます。</p>
+                <figure class="sc-shot">
+                    <img src="/images/ja/blog/salesforce-gantt-slack-hover.png" alt="Salesforce ガントチャートの余裕日数: プレスキットにカーソルを合わせると日付と「3 営業日遅れても影響なし」を 1 行で表示。隣は発売日へのクリティカルパス" loading="lazy" width="1200" height="463" data-zoomable>
+                    <figcaption>タスクにカーソルを合わせると、プレスキットは 3 営業日遅れても発売日に影響しないことがわかります。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">MultiDatePick で Salesforce のクリティカルパスを見る</h2>
+                <p>Salesforce には、プロジェクトタスク向けのクリティカルパス機能がありません。MultiDatePick の<a href="/ja/salesforce-gantt-chart.html">Salesforce 用ガントチャート</a>は、標準オブジェクトでもカスタムオブジェクトでも、お使いのタスクレコードを読み込み、その日付とリンクからクリティカルパスを割り出します。</p>
+                <ol class="cp-steps">
+                    <li><strong>タスクをリンクする。</strong> ガントに「待ち先」の参照項目 (タスクごとにリンク 1 つ) を指定するか、タスクごとに複数のリンクを持てるリンクオブジェクトを指定します。リンクオブジェクトなら、リンクの種類 (先行の終了後、同時に開始、同時に終了) と営業日単位のラグも設定できます。</li>
+                    <li><strong>「クリティカルパス」を押す。</strong> ツールバーのボタンで、余裕ゼロのタスクとその間のリンクがすべて枠で囲まれます。プロジェクトごとに、それぞれの終了日までのクリティカルパスが表示されます。</li>
+                    <li><strong>「余裕日数」列を追加する。</strong> ガントの列に <code>{Slack}</code> を入れると、各タスクの名前の横に余裕日数が営業日で表示されます。ほかの列と同じように並べ替えもできます。</li>
+                    <li><strong>バーにカーソルを合わせる。</strong> バーの横に名前、日付、余裕日数が 1 行で表示されます。<em>3 営業日遅れても影響なし</em>、<em>余裕なし: クリティカルパス上</em>、<em>2 営業日の遅れ</em>のいずれかです。クリックすると詳細カードが開きます。</li>
+                    <li><strong>タスクをドラッグする。</strong> <strong>押し出しオン</strong>なら、そのタスクを待っているタスクも営業日単位で一緒に動き、連なりとすべての余裕日数がすぐに更新されます。「元に戻す」を 1 回押せば、すべて元どおりです。</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/ja/blog/salesforce-critical-path-slack-column.png" alt="Salesforce のクリティカルパス: ガントチャート上の春の新製品発売。余裕ゼロの連なりを枠で囲み、余裕日数列にタスクごとの 0 と 3 営業日を表示" loading="lazy" width="1600" height="760" data-zoomable>
+                    <figcaption>クリティカルパスをオンにした状態: 発売日までの余裕ゼロの連なりが枠で囲まれ、余裕日数列にほかの各タスクのゆとりが表示されます。</figcaption>
+                </figure>
+                <p><strong>週末を除外</strong>は初期設定でオンなので、土曜と日曜が余裕日数、ラグ、タスクの期間に数えられることはありません。ブロック日付の休業日も除外されます。タスクを待つ<strong>マイルストーン</strong>はそのタスクの最終日に置かれるため、発売日は 1 日後ではなく、ベータ版の開発が終わるちょうどその日になります。</p>
+
+                <h2 style="margin-top:44px;">信頼できるクリティカルパスにするコツ</h2>
+                <ul>
+                    <li><strong>リンクを正確に保つ。</strong> クリティカルパスの精度はリンクの精度で決まります。実際にはほかのタスクを待っているのにリンクされていないタスクは、本当はない余裕があるように見えてしまいます。計画が変わったら、リンクも変えましょう。</li>
+                    <li><strong>マイルストーンは最後のタスクの日に置く。</strong> 待っている作業の数日後にマイルストーンを置くと、連なり全体に余裕が加わり、本当のクリティカルパスが表示されなくなります。マイルストーンをリンクして、そのタスクの終了日に置きましょう。</li>
+                    <li><strong>毎週確認する。</strong> 作業が早く終わったり遅れたりするたびに、クリティカルパスは変わります。毎週「余裕日数」列をさっと確認すれば、0 に近づいているタスクに、発売遅延の原因になる前に気づけます。</li>
+                    <li><strong>ベースラインで遅れを見る。</strong> 計画日の項目を 2 つマッピングし、<strong>ベースラインを設定</strong>を押すと、今日の日付が計画として保存されます。<strong>計画を表示</strong>にすると、すべてのタスクの下に計画バーが表示され、遅れたタスクには <em>+2 日</em>が付きます。計画した終了日を過ぎたプロジェクトには、どれだけ遅れているかが表示されます (<em>2 営業日の遅れ</em>)。</li>
+                </ul>
+                <figure class="sc-shot">
+                    <img src="/images/ja/gantt/salesforce-gantt-baseline-planned-dates.png" alt="遅れを追跡する Salesforce ガントチャートのベースライン: ウェブサイト刷新の各タスクの下に計画バー、遅れた 2 タスクに +2 日、差異列" loading="lazy" width="1600" height="883" data-zoomable>
+                    <figcaption>計画を表示: 各タスクの下に細い計画バーと、遅れた営業日数が表示されます。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">動作を決める設定</h2>
+                <p>いずれもセットアップウィザードのガント欄の項目で、コンポーネントのプロパティでもあります。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">設定</th><th>クリティカルパスでの役割</th><th style="width:22%;">API 参照名</th></tr></thead>
+                    <tbody>
+                    <tr><td>Gantt Waits On Field</td><td>先に終わる必要があるタスクへの参照項目。タスクごとにリンク 1 つ。</td><td><code>ganttDependsOnField</code></td></tr>
+                    <tr><td>タスクリンクオブジェクト</td><td>タスクごとに複数のリンク。それぞれに種類 (終了後、同時に開始、同時に終了) と営業日単位のラグを設定。</td><td><code>Gantt_Link_Object__c</code></td></tr>
+                    <tr><td>Gantt Columns</td><td><code>{Slack}</code> を追加すると、各タスクの横に余裕日数列が表示されます。</td><td><code>ganttColumns</code></td></tr>
+                    <tr><td>Gantt Skip Weekends</td><td>初期設定でオン: 余裕日数、ラグ、押し出しを営業日だけで数えます。</td><td><code>ganttSkipWeekends</code></td></tr>
+                    <tr><td>Gantt Dependency Mode</td><td>push (初期設定): 動かしたタスクが、それを待っているタスクを押し出します。</td><td><code>ganttDependencyMode</code></td></tr>
+                    <tr><td>Gantt Milestone Field</td><td>先行タスクの最終日にマイルストーンの点を描くチェックボックス。</td><td><code>ganttMilestoneField</code></td></tr>
+                    <tr><td>Gantt Planned Start and End</td><td>ベースライン: 計画バー、遅れた日数、プロジェクトが計画した終了日からどれだけ遅れているか。</td><td><code>ganttBaselineStartField</code>, <code>ganttBaselineEndField</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>クリティカルパスだけではありません。</strong> 同じガントビューで、プロジェクトの健全性、フェーズ、完了率、チャート上での値の直接編集、そして誰が過負荷かがわかる作業負荷ビューも使えます。<a href="/ja/salesforce-gantt-chart.html">ガントの全機能を見る</a>か、<a href="/ja/blog/best-gantt-chart-for-salesforce.html">Salesforce に最適なガントチャートの比較</a>をご覧ください。</div>
+
+                <h2 style="margin-top:44px;">よくある質問</h2>
+                <div class="tl-faq">
+                    <details><summary>プロジェクト管理におけるクリティカルパスとは?</summary><p>クリティカルパスとは、プロジェクトの開始から終了までをつなぐ、依存関係のあるタスクの最も長い連なりです。その上のタスクはすべて余裕がゼロなので、どれか 1 つが遅れると、終了日も同じだけ遅れます。クリティカルパス上にないタスクは、終了日を変えずに遅らせる余地があります。</p></details>
+                    <details><summary>ガントチャートの余裕日数 (フロート) とは?</summary><p>余裕日数は、フロートやトータルフロート、スラックとも呼ばれ、終了日を動かさずにタスクを何営業日遅らせられるかを表します。計算は「最遅開始日 - 最早開始日」です。余裕日数が 0 のタスクはクリティカルパス上にあり、マイナスならプロジェクトはすでに計画した終了日を過ぎています。</p></details>
+                    <details><summary>Salesforce にクリティカルパスはありますか?</summary><p>Sales Cloud や Service Cloud のプロジェクトタスクにはありません。MultiDatePick は、Salesforce の標準オブジェクトにもカスタムオブジェクトにもガントビューを追加します。余裕ゼロのタスクを枠で囲む「クリティカルパス」ボタン、「余裕日数」列、そして各タスクにカーソルを合わせると何営業日遅れても大丈夫かを示す 1 行の表示を備えています。</p></details>
+                    <details><summary>Salesforce のガントチャートでクリティカルパスを表示するには?</summary><p>MultiDatePick で、タスク同士を「待ち先」の参照項目またはタスクリンクオブジェクトでつなぎ、ガントのツールバーで「クリティカルパス」を押します。ガントの列に {Slack} を追加すると各タスクの余裕日数が営業日で表示され、バーにカーソルを合わせると余裕日数が 1 行で表示されます。設定はセットアップウィザードで行い、コードは不要です。</p></details>
+                    <details><summary>タスクを動かすとクリティカルパスも更新されますか?</summary><p>はい。「押し出しオン」の状態でタスクをドラッグすると、そのタスクを待っているタスクも営業日単位で一緒に動き、枠で囲まれた連なりとすべての余裕日数がすぐに更新されます。クリティカルなタスクを計画より後ろに動かすとプロジェクトの終了日も一緒に動き、タスクには失った営業日数が「遅れ」として表示されます。「元に戻す」を 1 回押せば、タスクもクリティカルパスも元どおりです。</p></details>
+                    <details><summary>週末は余裕日数に含まれますか?</summary><p>いいえ。「週末を除外」は初期設定でオンになっているため、土曜と日曜が余裕日数、ラグ、タスクの期間に数えられることはありません。ブロック日付の休業日も除外されます。毎日稼働するチームは「週末を除外」をオフにしてください。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>終了日を決めているタスクを見てみましょう。</h2>
+                    <p>ライブデモのプロジェクトページでプロジェクトを開き、「クリティカルパス」を押してください。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/ja/projects?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-critical-path-gantt-chart" class="btn btn-demo" target="_blank" rel="noopener">ライブデモを試す</a> <a href="/ja/notify-me-at-launch.html" class="btn btn-primary">公開時に通知を受け取る</a> <a href="/ja/salesforce-gantt-chart.html" class="btn btn-secondary">Salesforce ガントチャート</a>
+                    </div>
+                    <ul class="check-list"><li>$25/ユーザー/月ですべての機能</li><li>30 日間無料、カード不要</li><li>Apex 不要</li><li>クリックだけで設定</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>関連記事</h3>
+                    <ul>
+                        <li><a href="/ja/salesforce-gantt-chart.html">Salesforce ガントチャート: すべての機能</a></li>
+                        <li><a href="/ja/blog/best-gantt-chart-for-salesforce.html">Salesforce に最適なガントチャートを比較</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">ガントを含む 7 つのカレンダービュー</a></li>
+                        <li><a href="/ja/blog/salesforce-timeline-view.html">Salesforce のタイムライン表示</a></li>
+                        <li><a href="/ja/blog/no-code-salesforce-calendar.html">ノーコードの Salesforce カレンダー</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/ja/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick ロゴ: Salesforce の複数日付カレンダー・リソース予約コンポーネント" width="180" height="45">
+                    </a>
+                    <p>あらゆる Salesforce オブジェクトに予約、カレンダー、ガントチャートを。コードは不要です。</p>
+                </div>
+                <div class="footer-links">
+                    <h2>製品</h2>
+                    <ul>
+                        <li><a href="/ja/salesforce-booking-calendar.html">会議室や人を予約</a></li>
+                        <li><a href="/ja/multidatepickdates.html">複数の日付を選ぶ</a></li>
+                        <li><a href="/ja/multidatepickdatetime.html">日付と時刻を選ぶ</a></li>
+                        <li><a href="/ja/salesforce-gantt-chart.html">ガントチャートで計画</a></li>
+                        <li><a href="/ja/blog/salesforce-calendar-views.html">7 つのカレンダー表示</a></li>
+                        <li><a href="/ja/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>ソリューション</h2>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar.html">Salesforce カレンダー</a></li>
+                        <li><a href="/ja/salesforce-conference-room-booking-calendar.html">会議室予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-staffing-recruiting.html">人材派遣・採用</a></li>
+                        <li><a href="/ja/salesforce-timesheet-calendar.html">タイムシート</a></li>
+                        <li><a href="/ja/blog/salesforce-campaign-multiple-dates.html">キャンペーンカレンダー</a></li>
+                        <li><a href="/ja/blog/salesforce-section-508-government-calendar.html">官公庁 / Section 508</a></li>
+                        <li><a href="/ja/salesforce-class-scheduling.html">クラス・講座スケジュール</a></li>
+                        <li><a href="/ja/salesforce-calendar-experience-cloud-booking.html">Experience Cloud での予約</a></li>
+                        <li><a href="/ja/salesforce-calendar-vs-lightning-scheduler.html">Lightning Scheduler との比較</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>ドキュメント</h2>
+                    <ul>
+                        <li><a href="/ja/gettingstarted.html">はじめに</a></li>
+                        <li><a href="/ja/user-guide.html">ユーザーガイド</a></li>
+                        <li><a href="/ja/flowcheatsheet.html">画面フロー (Screen Flow) ガイド</a></li>
+                        <li><a href="/ja/home-app-experience.html">アプリケーション・ホーム・Experience ページ</a></li>
+                        <li><a href="/ja/troubleshooting.html">トラブルシューティング</a></li>
+                        <li><a href="/ja/faq.html">よくある質問</a></li>
+                    </ul>
+                    <h2>開発者向け</h2>
+                    <ul>
+                        <li><a href="/ja/salesforce-calendar-developer-guide.html">開発者ガイド</a></li>
+                        <li><a href="/ja/deploy-flow-vscode.html">フローのデプロイ (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>会社情報</h2>
+                    <ul>
+                        <li><a href="/ja/pricing.html">料金</a></li>
+                        <li><a href="/ja/blog/">ブログ</a></li>
+                        <li><a href="/ja/trust.html">信頼性とセキュリティ</a></li>
+                        <li><a href="/ja/accessibility.html">アクセシビリティ</a></li>
+                        <li><a href="/ja/notify-me-at-launch.html">公開時に通知を受け取る</a></li>
+                        <li><a href="/ja/custom-config.html">無料カスタム設定</a></li>
+                        <li><a href="mailto:support@multidatepick.com">サポート</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 無断転載を禁じます。</span>
+                <!-- consent:footer --><div class="footer-social footer-legal"><a href="/ja/privacy.html">プライバシーポリシー</a><a href="/ja/privacy.html#cookie-settings" data-mdp-consent="open">Cookie設定</a></div><!-- /consent:footer -->
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="言語" translate="no"><ul><li><a href="/blog/salesforce-critical-path-gantt-chart.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/kritischer-pfad-salesforce-gantt-diagramm.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/chemin-critique-diagramme-gantt-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/percorso-critico-diagramma-gantt-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/caminho-critico-salesforce-grafico-de-gantt.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-critical-path-gantt-chart.html" hreflang="ja" lang="ja" aria-current="page">日本語</a></li><li><a href="/zh/blog/salesforce-critical-path-gantt-chart.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-critical-path-gantt-chart.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">画像を拡大</p><p data-k="expand-diagram">図を拡大</p><p data-k="close">閉じる</p><p data-k="prev-image">前の画像</p><p data-k="next-image">次の画像</p><p data-k="image-viewer">画像ビューアー</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

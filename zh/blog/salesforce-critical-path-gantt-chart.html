@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- consent:head ft -->
+  <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    (function(){var c=null;try{c=JSON.parse(localStorage.getItem('mdp_consent'));if(!c||c.v!==1||!(Date.now()-c.ts<31536000000))c=null;}catch(e){c=null;}window.mdpConsent=c;
+    if(c&&c.analytics)gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.mdpFirstTouch=function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}};if(c&&c.attribution)window.mdpFirstTouch();})();
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script defer src="/js/consent.js"></script>
+  <!-- /consent:head -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce 关键路径：甘特图、浮动时间与总时差</title>
+    <meta name="description" content="什么是关键路径？为什么重要？浮动时间（总时差）怎么算？本文用实例讲清楚，并教您在 Salesforce 甘特图上实时查看关键路径，无需代码。">
+    <link rel="canonical" href="https://multidatepick.com/zh/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Critical path post: same look as the Timesheet, Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.ts-narrow { max-width: 720px; margin-left: auto; margin-right: auto; }
+        .tl-feats.cp-four { grid-template-columns: repeat(2, 1fr); }
+        .section ul li { margin: 6px 0; line-height: 1.6; color: #374151; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <meta property="og:title" content="Salesforce 关键路径：甘特图、浮动时间与总时差">
+    <meta property="og:description" content="什么是关键路径？为什么重要？浮动时间（总时差）怎么算？本文用实例讲清楚，并教您在 Salesforce 甘特图上实时查看关键路径，无需代码。">
+    <meta property="og:image" content="https://multidatepick.com/images/zh/blog/salesforce-critical-path-gantt-chart-cover.png">
+    <meta property="og:url" content="https://multidatepick.com/zh/blog/salesforce-critical-path-gantt-chart.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Salesforce 关键路径：甘特图、浮动时间与总时差">
+    <meta name="twitter:description" content="什么是关键路径？为什么重要？浮动时间（总时差）怎么算？本文用实例讲清楚，并教您在 Salesforce 甘特图上实时查看关键路径，无需代码。">
+    <meta name="twitter:image" content="https://multidatepick.com/images/zh/blog/salesforce-critical-path-gantt-chart-cover.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/kritischer-pfad-salesforce-gantt-diagramm.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/chemin-critique-diagramme-gantt-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/percorso-critico-diagramma-gantt-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/caminho-critico-salesforce-grafico-de-gantt.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- consent:ui -->
+    <div class="mdp-cc-bar" id="mdpConsentBar" role="region" aria-label="Cookie 选择" hidden>
+        <p>仅在您同意后，我们才使用 Cookie 进行分析。<span class="mdp-cc-wide">数据绝不出售，也不用于广告。</span> <a href="/zh/privacy.html">隐私政策</a></p>
+        <div class="mdp-cc-btns">
+            <button type="button" class="mdp-cc-btn mdp-cc-btn--text" data-mdp-consent="settings">设置</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="reject">全部拒绝</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="accept">全部接受</button>
+        </div>
+    </div>
+    <dialog class="mdp-cc-dialog" id="mdpConsentDialog" aria-labelledby="mdpConsentTitle" aria-describedby="mdpConsentIntro">
+        <div class="mdp-cc-in">
+            <h2 id="mdpConsentTitle">Cookie 设置</h2>
+            <button type="button" class="mdp-cc-x" data-mdp-consent="close" aria-label="关闭">&times;</button>
+            <p class="mdp-cc-intro" id="mdpConsentIntro">选择本网站可以在您的浏览器中存储哪些内容。您可以随时通过每个页面底部的“Cookie 设置”进行更改。</p>
+            <div class="mdp-cc-opt">
+                <span class="mdp-cc-name">网站运行所必需</span> <span class="mdp-cc-desc">仅记住您的 Cookie 选择。</span> <span class="mdp-cc-always">始终开启</span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAnalytics">分析</label> <span class="mdp-cc-desc" id="mdpConsentAnalyticsDesc">Google Analytics 统计访问量和浏览的页面，帮助我们改进网站。</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAnalytics" aria-describedby="mdpConsentAnalyticsDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAttribution">访问来源</label> <span class="mdp-cc-desc" id="mdpConsentAttributionDesc">记住最初将您带到本网站的链接或推广活动，并随表单一起发送。</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAttribution" aria-describedby="mdpConsentAttributionDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-btns">
+                <button type="button" class="mdp-cc-btn mdp-cc-btn--line" data-mdp-consent="reject">全部拒绝</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="save">保存选择</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- /consent:ui -->
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">即将登陆 Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="关闭横幅" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/zh/" class="logo"><img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="切换导航菜单"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">产品 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-booking-calendar.html">预订会议室和人员</a></li>
+                        <li><a href="/zh/multidatepickdates.html">选择多个日期</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">选择日期和时间</a></li>
+                        <li><a href="/zh/salesforce-gantt-chart.html">用甘特图规划项目</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">七种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍 (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">解决方案 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-timesheet-calendar.html">工时表</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日历</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-class-scheduling.html">课程排期</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/pricing.html">价格</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">文档 <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/zh/blog/no-code-salesforce-calendar.html">无代码设置</a></li>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                </li>
+                <li><a href="/zh/blog/">博客</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">试用在线演示</a></li>
+                <li><a href="/zh/notify-me-at-launch.html" class="nav-cta">上线时通知我</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "BlogPosting",
+                "headline": "Salesforce 中的关键路径：是什么，怎么用",
+                "description": "什么是关键路径？为什么重要？浮动时间（总时差）怎么算？本文用实例讲清楚，并教您在 Salesforce 甘特图上实时查看关键路径，无需代码。",
+                "datePublished": "2026-11-23",
+                "dateModified": "2026-11-23",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/zh/blog/salesforce-critical-path-gantt-chart.html",
+                "image": "https://multidatepick.com/images/zh/blog/salesforce-critical-path-gantt-chart-cover.png",
+                "keywords": "Salesforce 关键路径, 关键路径甘特图, Salesforce 项目关键路径, 什么是浮动时间, 什么是总时差, 时差, 关键路径法, CPM",
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "项目管理中的关键路径是什么？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "关键路径是从项目开始到结束、由相互关联的任务组成的最长任务链。链上每个任务的浮动时间都为零，因此其中任何一个任务延误多少，完成日期就推迟多少。不在关键路径上的任务有推迟的余地，不会改变完成日期。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "甘特图中的浮动时间（时差）是什么？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "浮动时间也叫时差或总时差（英文 slack 或 float），指一个任务在不推迟完成日期的前提下最多可以推迟多少个工作日，即最晚开始时间减去最早开始时间。浮动时间为 0 的任务位于关键路径上；浮动时间为负，说明项目已经超出计划的完成日期。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce 有关键路径功能吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sales Cloud 和 Service Cloud 的项目任务没有。MultiDatePick 为任意 Salesforce 标准对象或自定义对象添加甘特图视图：“关键路径”按钮会框出浮动时间为零的任务，“浮动时间”列列出每个任务的数字，每个任务上的悬停提示还会说明它可以推迟多少个工作日。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "如何在 Salesforce 甘特图上显示关键路径？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "在 MultiDatePick 中，用“等待”查找字段或任务链接对象把任务关联起来，然后点击甘特图工具栏中的“关键路径”。在甘特图列中加入 {Slack}，即可看到每个任务以工作日计的浮动时间；鼠标悬停在任意横条上，一行就能看到它的浮动时间。全部在设置向导中完成，无需代码。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "任务移动后，关键路径会更新吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "会。在“推移：开”状态下拖动任务，等待它的任务会按工作日随之移动；框出的任务链和每个浮动时间数字都会立即更新。把关键任务拖到计划之后，项目结束日期也会随之推迟，该任务会显示落后了多少个工作日。一次撤消即可把任务和关键路径全部恢复。"
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "周末会计入浮动时间吗？",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "不会。“跳过周末”默认开启，因此周六和周日从不计入浮动时间、滞后时间或任务工期，屏蔽日期中的办公室停业日也会排除在外。对于每天都上班的团队，关闭“跳过周末”即可。"
+                        }
+                    }
+                ],
+                "inLanguage": "zh-Hans"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-critical-path-drag.webp",
+                "thumbnailUrl": "https://multidatepick.com/images/zh/blog/salesforce-critical-path-drag-poster.png",
+                "caption": "Salesforce 甘特图中的关键路径动画：把“Beta 版本”往后拖一周，“发布日”和项目结束日期随之推迟，显示“落后 5 个工作日”",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-critical-path-slack-column.png",
+                "caption": "Salesforce 关键路径：甘特图上的“春季产品发布”，浮动时间为零的任务链被框出，“浮动时间”列显示每个任务 0 或 3 个工作日",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/blog/salesforce-gantt-slack-hover.png",
+                "caption": "Salesforce 甘特图上的浮动时间：悬停在“媒体资料包”上，一行显示其日期和“可推迟 3 个工作日”，旁边是通往“发布日”的关键路径",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/zh/gantt/salesforce-gantt-baseline-planned-dates.png",
+                "caption": "用 Salesforce 甘特图基线跟踪延误：“网站改版”每个任务下方一条计划条，两个延误任务显示 +2 天，并有“偏差”列",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Salesforce 中的关键路径：是什么，怎么用</h1>
+                <p class="subtitle">决定完成日期的任务链、其他每个任务的浮动时间，以及如何在 Salesforce 甘特图上实时查看两者，无需代码。</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">发布于 2026 年 11 月 23 日 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">“什么是关键路径？”“哪些任务可以推迟而不影响发布？”“怎样在 Salesforce 中查看关键路径？”每个项目都有少数几个任务决定它何时结束。其中一个耽误一天，完成日期就推迟一天。在别处耽误一天，在一定限度内什么都不会变。</p>
+
+                <p>MultiDatePick 让您<strong>在任意 Salesforce 对象上使用甘特图</strong>，并自动算出这条任务链。点击<strong>关键路径</strong>，没有推迟余地的任务就会突出显示；<strong>浮动时间</strong>列则显示其他每个任务还能推迟多少个工作日。拖动一个任务，两者都会当场更新。<strong>无需 Apex，也无需额外的项目管理应用。</strong></p>
+
+                <figure class="sc-shot">
+                    <img src="/images/zh/blog/salesforce-critical-path-drag-poster.png" data-gif="/images/zh/blog/salesforce-critical-path-drag.webp" alt="Salesforce 甘特图中的关键路径动画：把“Beta 版本”往后拖一周，“发布日”和项目结束日期随之推迟，显示“落后 5 个工作日”" loading="lazy" decoding="async" width="1200" height="760" data-zoomable>
+                    <figcaption>“Beta 版本”在关键路径上：把它拖后一周，发布日也推迟一周，项目因此变为“延迟”，比计划晚 5 个工作日。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">什么是关键路径</h2>
+                <p><strong>关键路径</strong>是从项目开始到结束、由相互关联的任务组成的最长任务链。链上每个任务的<strong>浮动时间都为零</strong>：它必须按时开始、按时结束，因为下一个任务在等它，整条链上没有任何富余。其中任何一个任务延误一天，完成日期就推迟一天。</p>
+                <p>举个简单的例子：春季产品发布。团队先做 5 个工作日的客户访谈，接着 Beta 版本需要 8 个工作日，然后就是发布日。销售培训（3 个工作日）也必须在发布前完成，而媒体资料包（3 个工作日）要等定价评审完成。</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">任务</th><th>工作日</th><th>等待</th><th>浮动时间</th></tr></thead>
+                    <tbody>
+                    <tr><td>客户访谈</td><td>5</td><td>无</td><td><strong>0</strong>，关键</td></tr>
+                    <tr><td>Beta 版本</td><td>8</td><td>客户访谈</td><td><strong>0</strong>，关键</td></tr>
+                    <tr><td>销售培训</td><td>3</td><td>定价评审，其后 2 个工作日</td><td><strong>0</strong>，关键</td></tr>
+                    <tr><td>定价评审</td><td>6</td><td>无</td><td>3 个工作日</td></tr>
+                    <tr><td>媒体资料包</td><td>3</td><td>定价评审</td><td>3 个工作日</td></tr>
+                    <tr><td>发布日</td><td>里程碑</td><td>Beta 版本、销售培训、媒体资料包</td><td><strong>0</strong>，关键</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>客户访谈、Beta 版本、发布日，这就是关键路径。销售培训按计划恰好在发布时结束，所以它也没有余地。如果 Beta 版本超期两天，发布日就推迟两天。如果媒体资料包超期两天，发布日不变：媒体资料包原本有 3 个工作日的富余，现在还剩 1 个。</p>
+
+                <h2 style="margin-top:44px;">关键路径为什么重要</h2>
+                <p>一个有四十个任务的计划，关键路径上通常只有几个。知道是哪几个，会改变项目经理一周的工作重点：</p>
+                <div class="tl-feats cp-four">
+                    <div class="tl-feat"><h3>知道该保护哪些任务</h3><p>把最得力的人手和您的注意力放在决定完成日期的任务上。这些任务延误，发布就延误。</p></div>
+                    <div class="tl-feat"><h3>看清哪里可以放心推迟</h3><p>有 3 个工作日浮动时间的任务，可以等一位忙碌的专家，也可以让出一天处理紧急需求，日期依然不变。</p></div>
+                    <div class="tl-feat"><h3>及早发现真正的风险</h3><p>关键路径上的任务延迟，就意味着项目延迟，而且是现在。有浮动时间的任务延迟，只是站会上提一句的事，不必拉响警报。</p></div>
+                    <div class="tl-feat"><h3>进度落后时做出更好的取舍</h3><p>只在能影响完成日期的地方增加人手、削减范围或并行作业。加快一个有浮动时间的任务，毫无收益。</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">浮动时间详解：&ldquo;可推迟 3 个工作日&rdquo;</h2>
+                <p><strong>浮动时间</strong>也叫<strong>时差</strong>或总时差（英文 slack 或 float），指一个任务在推迟完成日期之前最多可以推迟多少个工作日。它是任务的最早开始时间，与不推迟关键路径上任何任务的最晚开始时间之间的差距。</p>
+                <ul>
+                    <li><strong>浮动时间大于 0：</strong>有富余。媒体资料包在发布日前 3 个工作日结束，所以它<em>可推迟 3 个工作日</em>。</li>
+                    <li><strong>浮动时间为 0：</strong>位于关键路径上。任何延误都会推迟完成日期。</li>
+                    <li><strong>浮动时间小于 0：</strong>项目已经落后于计划完成日期。一条现在比计划晚两个工作日结束的任务链会显示<em>落后 2 个工作日</em>。</li>
+                </ul>
+                <p>浮动时间按<strong>工作日</strong>计算，所以任务中间的周末不算&ldquo;空闲时间&rdquo;。在 MultiDatePick 中，把鼠标悬停在任意已关联的任务上，它的提示行就会这样写明：</p>
+                <figure class="sc-shot">
+                    <img src="/images/zh/blog/salesforce-gantt-slack-hover.png" alt="Salesforce 甘特图上的浮动时间：悬停在“媒体资料包”上，一行显示其日期和“可推迟 3 个工作日”，旁边是通往“发布日”的关键路径" loading="lazy" width="1200" height="463" data-zoomable>
+                    <figcaption>悬停在任务上：媒体资料包可推迟 3 个工作日，之后才会影响发布日。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">用 MultiDatePick 在 Salesforce 中查看关键路径</h2>
+                <p>Salesforce 本身没有针对项目任务的关键路径。MultiDatePick 的<a href="/zh/salesforce-gantt-chart.html">Salesforce 甘特图</a>读取您自己的任务记录，适用于任意标准对象或自定义对象，并根据记录的日期和链接算出关键路径：</p>
+                <ol class="cp-steps">
+                    <li><strong>关联任务。</strong>让甘特图指向一个“等待”查找字段（每个任务一个链接），或者指向一个链接对象，让每个任务有多个链接，并可设置链接类型（结束后开始、同时开始、同时结束）和以工作日计的滞后时间。</li>
+                    <li><strong>点击“关键路径”。</strong>这个工具栏按钮会逐个项目框出所有浮动时间为零的任务及其之间的链接：每个项目都有通往自己完成日期的关键路径。</li>
+                    <li><strong>添加“浮动时间”列。</strong>在甘特图列中加入 <code>{Slack}</code>，每个任务名称旁都会显示以工作日计的浮动时间，可像其他列一样排序。</li>
+                    <li><strong>悬停在横条上。</strong>横条旁的一行会显示任务名称、日期和浮动时间：<em>可推迟 3 个工作日</em>、<em>无浮动时间：位于关键路径上</em>或<em>落后 2 个工作日</em>。点击即可打开完整卡片。</li>
+                    <li><strong>拖动任务。</strong>在<strong>推移：开</strong>状态下，等待它的任务会按工作日随之移动，任务链和每个浮动时间数字都会立即更新。一次撤消即可全部恢复。</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/zh/blog/salesforce-critical-path-slack-column.png" alt="Salesforce 关键路径：甘特图上的“春季产品发布”，浮动时间为零的任务链被框出，“浮动时间”列显示每个任务 0 或 3 个工作日" loading="lazy" width="1600" height="803" data-zoomable>
+                    <figcaption>开启关键路径：通往发布日的零浮动时间任务链被框出，“浮动时间”列显示其他每个任务的富余。</figcaption>
+                </figure>
+                <p><strong>跳过周末</strong>默认开启，因此周六和周日从不计入浮动时间、滞后时间或任务工期。屏蔽日期中的办公室停业日也会排除在外。等待某个任务的<strong>里程碑</strong>会落在该任务的最后一天，所以发布日正好落在 Beta 版本结束的那天，而不是晚一天。</p>
+
+                <h2 style="margin-top:44px;">让关键路径值得信赖的几个技巧</h2>
+                <ul>
+                    <li><strong>保持链接准确。</strong>关键路径的准确程度取决于链接。一个实际上要等待另一个任务、却没有关联的任务，看起来会有它其实没有的浮动时间。计划变了，链接也要跟着改。</li>
+                    <li><strong>把里程碑放在最后一个任务的那天。</strong>如果里程碑比它所等待的工作晚几天，整条任务链都会多出浮动时间，真正的关键路径就不再高亮。关联好里程碑，让它落在那个任务的结束日。</li>
+                    <li><strong>每周检查一次。</strong>随着工作提前或推迟完成，关键路径也会变化。每周快速看一眼“浮动时间”列，就能在某个任务滑向 0、成为发布延迟的原因之前发现它。</li>
+                    <li><strong>用基线查看延误。</strong>映射两个计划日期字段，然后点击<strong>设置基线</strong>，把今天的日期保存为计划。<strong>显示计划</strong>会在每个任务下方画出计划条，延误的任务标注<em>+2 天</em>；超出计划完成日期的项目会显示超出多少：<em>落后 2 个工作日</em>。</li>
+                </ul>
+                <figure class="sc-shot">
+                    <img src="/images/zh/gantt/salesforce-gantt-baseline-planned-dates.png" alt="用 Salesforce 甘特图基线跟踪延误：“网站改版”每个任务下方一条计划条，两个延误任务显示 +2 天，并有“偏差”列" loading="lazy" width="1600" height="937" data-zoomable>
+                    <figcaption>显示计划：每个任务下方一条细细的计划条，以及它延误的工作日数。</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">决定其行为的设置</h2>
+                <p>每一项既是设置向导“甘特图”区域中的一个字段，也是组件上的一个属性：</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">设置项</th><th>对关键路径的作用</th><th style="width:22%;">API 名称</th></tr></thead>
+                    <tbody>
+                    <tr><td>Gantt Waits On Field</td><td>指向必须先结束的任务的查找字段：每个任务一个链接。</td><td><code>ganttDependsOnField</code></td></tr>
+                    <tr><td>任务链接对象</td><td>每个任务可有多个链接，每个链接都有类型（结束后开始、同时开始、同时结束）和以工作日计的滞后时间。</td><td><code>Gantt_Link_Object__c</code></td></tr>
+                    <tr><td>Gantt Columns</td><td>加入 <code>{Slack}</code>，在每个任务旁显示“浮动时间”列。</td><td><code>ganttColumns</code></td></tr>
+                    <tr><td>Gantt Skip Weekends</td><td>默认开启：浮动时间、滞后时间和推移都只计算工作日。</td><td><code>ganttSkipWeekends</code></td></tr>
+                    <tr><td>Gantt Dependency Mode</td><td>push（默认）：移动一个任务时，等待它的任务也会被推移。</td><td><code>ganttDependencyMode</code></td></tr>
+                    <tr><td>Gantt Milestone Field</td><td>一个复选框，在其前置任务的最后一天画出里程碑圆点。</td><td><code>ganttMilestoneField</code></td></tr>
+                    <tr><td>Gantt Planned Start 和 Gantt Planned End</td><td>基线：计划条、延误天数，以及项目落后于计划完成日期多少。</td><td><code>ganttBaselineStartField</code>, <code>ganttBaselineEndField</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>不止关键路径。</strong>同一个甘特图视图还提供项目状况、阶段、完成百分比、直接在图表中编辑的值，以及显示谁超负荷的工作负荷视图。<a href="/zh/salesforce-gantt-chart.html">查看全部甘特图功能</a>，或在<a href="/zh/blog/best-gantt-chart-for-salesforce.html">最佳 Salesforce 甘特图</a>一文中看它如何对比。</div>
+
+                <h2 style="margin-top:44px;">常见问题</h2>
+                <div class="tl-faq">
+                    <details><summary>项目管理中的关键路径是什么？</summary><p>关键路径是从项目开始到结束、由相互关联的任务组成的最长任务链。链上每个任务的浮动时间都为零，因此其中任何一个任务延误多少，完成日期就推迟多少。不在关键路径上的任务有推迟的余地，不会改变完成日期。</p></details>
+                    <details><summary>甘特图中的浮动时间（时差）是什么？</summary><p>浮动时间也叫时差或总时差（英文 slack 或 float），指一个任务在不推迟完成日期的前提下最多可以推迟多少个工作日，即最晚开始时间减去最早开始时间。浮动时间为 0 的任务位于关键路径上；浮动时间为负，说明项目已经超出计划的完成日期。</p></details>
+                    <details><summary>Salesforce 有关键路径功能吗？</summary><p>Sales Cloud 和 Service Cloud 的项目任务没有。MultiDatePick 为任意 Salesforce 标准对象或自定义对象添加甘特图视图：“关键路径”按钮会框出浮动时间为零的任务，“浮动时间”列列出每个任务的数字，每个任务上的悬停提示还会说明它可以推迟多少个工作日。</p></details>
+                    <details><summary>如何在 Salesforce 甘特图上显示关键路径？</summary><p>在 MultiDatePick 中，用“等待”查找字段或任务链接对象把任务关联起来，然后点击甘特图工具栏中的“关键路径”。在甘特图列中加入 {Slack}，即可看到每个任务以工作日计的浮动时间；鼠标悬停在任意横条上，一行就能看到它的浮动时间。全部在设置向导中完成，无需代码。</p></details>
+                    <details><summary>任务移动后，关键路径会更新吗？</summary><p>会。在“推移：开”状态下拖动任务，等待它的任务会按工作日随之移动；框出的任务链和每个浮动时间数字都会立即更新。把关键任务拖到计划之后，项目结束日期也会随之推迟，该任务会显示落后了多少个工作日。一次撤消即可把任务和关键路径全部恢复。</p></details>
+                    <details><summary>周末会计入浮动时间吗？</summary><p>不会。“跳过周末”默认开启，因此周六和周日从不计入浮动时间、滞后时间或任务工期，屏蔽日期中的办公室停业日也会排除在外。对于每天都上班的团队，关闭“跳过周末”即可。</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>看清是什么决定了您的完成日期。</h2>
+                    <p>在在线演示中打开“项目”页面，打开一个项目，然后点击“关键路径”。</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/projects?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-critical-path-gantt-chart" class="btn btn-demo" target="_blank" rel="noopener">试用在线演示</a> <a href="/zh/notify-me-at-launch.html" class="btn btn-primary">上线时通知我</a> <a href="/zh/salesforce-gantt-chart.html" class="btn btn-secondary">Salesforce 甘特图</a>
+                    </div>
+                    <ul class="check-list"><li>$25/用户/月，全部功能</li><li>30 天免费试用，无需信用卡</li><li>无需 Apex</li><li>点几下即可设置</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>相关阅读</h3>
+                    <ul>
+                        <li><a href="/zh/salesforce-gantt-chart.html">Salesforce 甘特图：全部功能</a></li>
+                        <li><a href="/zh/blog/best-gantt-chart-for-salesforce.html">最佳 Salesforce 甘特图对比</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">七种日历视图，甘特图是其中之一</a></li>
+                        <li><a href="/zh/blog/salesforce-timeline-view.html">Salesforce 时间轴视图</a></li>
+                        <li><a href="/zh/blog/no-code-salesforce-calendar.html">无代码 Salesforce 日历</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/zh/" class="logo">
+                        <img src="/images/logo.png" alt="MultiDatePick 标志：Salesforce 多日期日历与资源预订组件" width="180" height="45">
+                    </a>
+                    <p>为任何 Salesforce 对象加上预订、日历和甘特图。无需代码。</p>
+                </div>
+                <div class="footer-links">
+                    <h2>产品</h2>
+                    <ul>
+                        <li><a href="/zh/salesforce-booking-calendar.html">预订会议室和人员</a></li>
+                        <li><a href="/zh/multidatepickdates.html">选择多个日期</a></li>
+                        <li><a href="/zh/multidatepickdatetime.html">选择日期和时间</a></li>
+                        <li><a href="/zh/salesforce-gantt-chart.html">用甘特图规划项目</a></li>
+                        <li><a href="/zh/blog/salesforce-calendar-views.html">七种日历视图</a></li>
+                        <li><a href="/zh/configlibrary.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>解决方案</h2>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar.html">Salesforce 日历</a></li>
+                        <li><a href="/zh/salesforce-conference-room-booking-calendar.html">会议室预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-staffing-recruiting.html">人力派遣与招聘</a></li>
+                        <li><a href="/zh/salesforce-timesheet-calendar.html">工时表</a></li>
+                        <li><a href="/zh/blog/salesforce-campaign-multiple-dates.html">市场活动日历</a></li>
+                        <li><a href="/zh/blog/salesforce-section-508-government-calendar.html">政府 / Section 508</a></li>
+                        <li><a href="/zh/salesforce-class-scheduling.html">课程排期</a></li>
+                        <li><a href="/zh/salesforce-calendar-experience-cloud-booking.html">Experience Cloud 预订</a></li>
+                        <li><a href="/zh/salesforce-calendar-vs-lightning-scheduler.html">对比 Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>文档</h2>
+                    <ul>
+                        <li><a href="/zh/gettingstarted.html">入门指南</a></li>
+                        <li><a href="/zh/user-guide.html">用户指南</a></li>
+                        <li><a href="/zh/flowcheatsheet.html">屏幕 Flow 指南</a></li>
+                        <li><a href="/zh/home-app-experience.html">应用程序、主页与 Experience 页面</a></li>
+                        <li><a href="/zh/troubleshooting.html">故障排除</a></li>
+                        <li><a href="/zh/faq.html">常见问题</a></li>
+                    </ul>
+                    <h2>面向开发者</h2>
+                    <ul>
+                        <li><a href="/zh/salesforce-calendar-developer-guide.html">开发者指南</a></li>
+                        <li><a href="/zh/deploy-flow-vscode.html">部署 Flow (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>公司</h2>
+                    <ul>
+                        <li><a href="/zh/pricing.html">价格</a></li>
+                        <li><a href="/zh/blog/">博客</a></li>
+                        <li><a href="/zh/trust.html">信任与安全</a></li>
+                        <li><a href="/zh/accessibility.html">无障碍</a></li>
+                        <li><a href="/zh/notify-me-at-launch.html">上线时通知我</a></li>
+                        <li><a href="/zh/custom-config.html">免费定制配置</a></li>
+                        <li><a href="mailto:support@multidatepick.com">支持</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. 保留所有权利。</span>
+                <!-- consent:footer --><div class="footer-social footer-legal"><a href="/zh/privacy.html">隐私政策</a><a href="/zh/privacy.html#cookie-settings" data-mdp-consent="open">Cookie 设置</a></div><!-- /consent:footer -->
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="语言" translate="no"><ul><li><a href="/blog/salesforce-critical-path-gantt-chart.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/kritischer-pfad-salesforce-gantt-diagramm.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/chemin-critique-diagramme-gantt-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/percorso-critico-diagramma-gantt-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/caminho-critico-salesforce-grafico-de-gantt.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-critical-path-gantt-chart.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-critical-path-gantt-chart.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="page">简体中文</a></li><li><a href="/hi/blog/salesforce-critical-path-gantt-chart.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">放大图片</p><p data-k="expand-diagram">放大示意图</p><p data-k="close">关闭</p><p data-k="prev-image">上一张图片</p><p data-k="next-image">下一张图片</p><p data-k="image-viewer">图片查看器</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

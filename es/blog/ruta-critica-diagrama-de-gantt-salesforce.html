@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- consent:head ft -->
+  <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    (function(){var c=null;try{c=JSON.parse(localStorage.getItem('mdp_consent'));if(!c||c.v!==1||!(Date.now()-c.ts<31536000000))c=null;}catch(e){c=null;}window.mdpConsent=c;
+    if(c&&c.analytics)gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.mdpFirstTouch=function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}};if(c&&c.attribution)window.mdpFirstTouch();})();
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script defer src="/js/consent.js"></script>
+  <!-- /consent:head -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruta crítica en Salesforce: diagrama de Gantt y holgura</title>
+    <meta name="description" content="Qué es la ruta crítica (camino crítico), cómo funciona la holgura y cómo ver la ruta crítica en vivo en un diagrama de Gantt de Salesforce, sin código.">
+    <link rel="canonical" href="https://multidatepick.com/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Critical path post: same look as the Timesheet, Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.ts-narrow { max-width: 720px; margin-left: auto; margin-right: auto; }
+        .tl-feats.cp-four { grid-template-columns: repeat(2, 1fr); }
+        .section ul li { margin: 6px 0; line-height: 1.6; color: #374151; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <meta property="og:title" content="Ruta crítica en Salesforce: diagrama de Gantt y holgura">
+    <meta property="og:description" content="Qué es la ruta crítica (camino crítico), cómo funciona la holgura y cómo ver la ruta crítica en vivo en un diagrama de Gantt de Salesforce, sin código.">
+    <meta property="og:image" content="https://multidatepick.com/images/es/blog/ruta-critica-salesforce-cover.png">
+    <meta property="og:url" content="https://multidatepick.com/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_ES">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Ruta crítica en Salesforce: diagrama de Gantt y holgura">
+    <meta name="twitter:description" content="Qué es la ruta crítica (camino crítico), cómo funciona la holgura y cómo ver la ruta crítica en vivo en un diagrama de Gantt de Salesforce, sin código.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/es/blog/ruta-critica-salesforce-cover.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/kritischer-pfad-salesforce-gantt-diagramm.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/chemin-critique-diagramme-gantt-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/percorso-critico-diagramma-gantt-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/caminho-critico-salesforce-grafico-de-gantt.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- consent:ui -->
+    <div class="mdp-cc-bar" id="mdpConsentBar" role="region" aria-label="Preferencias de cookies" hidden>
+        <p>Usamos cookies de analítica solo si lo aceptas. <span class="mdp-cc-wide">Nada se vende ni se usa para anuncios.</span> <a href="/es/politica-de-privacidad.html">Política de privacidad</a></p>
+        <div class="mdp-cc-btns">
+            <button type="button" class="mdp-cc-btn mdp-cc-btn--text" data-mdp-consent="settings">Configurar</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="reject">Rechazar todo</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="accept">Aceptar todo</button>
+        </div>
+    </div>
+    <dialog class="mdp-cc-dialog" id="mdpConsentDialog" aria-labelledby="mdpConsentTitle" aria-describedby="mdpConsentIntro">
+        <div class="mdp-cc-in">
+            <h2 id="mdpConsentTitle">Configuración de cookies</h2>
+            <button type="button" class="mdp-cc-x" data-mdp-consent="close" aria-label="Cerrar">&times;</button>
+            <p class="mdp-cc-intro" id="mdpConsentIntro">Elige qué puede guardar este sitio en tu navegador. Puedes cambiarlo cuando quieras desde Configuración de cookies, al pie de cada página.</p>
+            <div class="mdp-cc-opt">
+                <span class="mdp-cc-name">Necesarias para que el sitio funcione</span> <span class="mdp-cc-desc">Solo recuerdan tu elección sobre las cookies.</span> <span class="mdp-cc-always">Siempre activas</span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAnalytics">Analítica</label> <span class="mdp-cc-desc" id="mdpConsentAnalyticsDesc">Google Analytics cuenta las visitas y las páginas vistas para que podamos mejorar el sitio.</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAnalytics" aria-describedby="mdpConsentAnalyticsDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAttribution">De dónde vienes</label> <span class="mdp-cc-desc" id="mdpConsentAttributionDesc">Recuerda el enlace o la campaña que te trajo aquí la primera vez y lo envía con nuestros formularios.</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAttribution" aria-describedby="mdpConsentAttributionDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-btns">
+                <button type="button" class="mdp-cc-btn mdp-cc-btn--line" data-mdp-consent="reject">Rechazar todo</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="save">Guardar preferencias</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- /consent:ui -->
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Próximamente en Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Cerrar aviso" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/es/" class="logo"><img src="/images/logo.png" alt="Logotipo de MultiDatePick: componente de calendario de varias fechas y reserva de recursos para Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Mostrar u ocultar navegación"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Producto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/calendario-reservas-salesforce.html">Reservar salas y personas</a></li>
+                        <li><a href="/es/selector-varias-fechas-salesforce.html">Elegir varias fechas</a></li>
+                        <li><a href="/es/selector-franjas-horarias-salesforce.html">Elegir fechas y horas</a></li>
+                        <li><a href="/es/diagrama-de-gantt-salesforce.html">Planificar con Gantt</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Siete vistas de calendario</a></li>
+                        <li><a href="/es/biblioteca-configuraciones-calendario-salesforce.html">Config Library</a></li>
+                        <li><a href="/es/confianza-y-seguridad.html">Confianza y seguridad</a></li>
+                        <li><a href="/es/accesibilidad-vpat.html">Accesibilidad (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Soluciones <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/calendario-salesforce.html">Calendario de Salesforce</a></li>
+                        <li><a href="/es/reserva-salas-reuniones-salesforce.html">Reserva de salas de reuniones</a></li>
+                        <li><a href="/es/calendario-salesforce-reclutamiento-seleccion-personal.html">Reclutamiento y selección</a></li>
+                        <li><a href="/es/hoja-de-horas-salesforce.html">Hojas de horas</a></li>
+                        <li><a href="/es/blog/fechas-de-campana-salesforce.html">Calendario de campañas</a></li>
+                        <li><a href="/es/blog/calendario-salesforce-accesible-sector-publico-section-508.html">Sector público / Section 508</a></li>
+                        <li><a href="/es/programacion-clases-cursos-salesforce.html">Programación de clases y cursos</a></li>
+                        <li><a href="/es/calendario-reservas-experience-cloud-salesforce.html">Reservas en Experience Cloud</a></li>
+                        <li><a href="/es/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/es/precios.html">Precios</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentación <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/es/blog/calendario-salesforce-sin-codigo.html">Configuración sin código</a></li>
+                        <li><a href="/es/primeros-pasos.html">Primeros pasos</a></li>
+                        <li><a href="/es/guia-del-usuario.html">Guía del usuario</a></li>
+                        <li><a href="/es/guia-flujos-de-pantalla-salesforce.html">Guía de flujos de pantalla</a></li>
+                        <li><a href="/es/paginas-aplicacion-inicio-experience-cloud.html">Páginas de aplicación, inicio y Experience</a></li>
+                        <li><a href="/es/solucion-de-problemas.html">Solución de problemas</a></li>
+                        <li><a href="/es/preguntas-frecuentes.html">Preguntas frecuentes</a></li>
+                    </ul>
+                </li>
+                <li><a href="/es/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/es/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Prueba la demo en vivo</a></li>
+                <li><a href="/es/avisame-en-el-lanzamiento.html" class="nav-cta">Avísame en el lanzamiento</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "BlogPosting",
+                "headline": "La ruta crítica en Salesforce: qué es y cómo usarla",
+                "description": "Qué es la ruta crítica (camino crítico), cómo funciona la holgura y cómo ver la ruta crítica en vivo en un diagrama de Gantt de Salesforce, sin código.",
+                "datePublished": "2026-11-23",
+                "dateModified": "2026-11-23",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html",
+                "image": "https://multidatepick.com/images/es/blog/ruta-critica-salesforce-cover.png",
+                "keywords": "ruta crítica Salesforce, camino crítico, ruta crítica diagrama de Gantt, ruta crítica de un proyecto en Salesforce, qué es la holgura, holgura total, método de la ruta crítica, CPM",
+                "inLanguage": "es"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "¿Qué es la ruta crítica en la gestión de proyectos?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "La ruta crítica (o camino crítico) es la cadena más larga de tareas vinculadas desde el inicio de un proyecto hasta su final. Todas sus tareas tienen holgura cero, así que si cualquiera se retrasa, la fecha de fin se mueve lo mismo. Las tareas fuera de la ruta crítica tienen margen para retrasarse sin cambiar el final."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Qué es la holgura en un diagrama de Gantt?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "La holgura, también llamada holgura total o margen (en inglés, slack o float), es cuántos días laborables puede retrasarse una tarea antes de mover la fecha de fin: el inicio más tardío posible menos el inicio más temprano posible. Con una holgura de 0, la tarea está en la ruta crítica, y una holgura negativa significa que el proyecto ya va más allá de su fin previsto."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Salesforce tiene ruta crítica?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "No para las tareas de proyecto en Sales Cloud o Service Cloud. MultiDatePick añade una vista de Gantt a cualquier objeto estándar o personalizado de Salesforce, con un botón Ruta crítica que resalta con un contorno las tareas sin holgura, una columna Holgura y una línea al pasar el cursor sobre cada tarea que indica cuántos días laborables puede retrasarse."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Cómo muestro la ruta crítica en un diagrama de Gantt de Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "En MultiDatePick, vincula las tareas con un campo de búsqueda Espera a o con un objeto de vínculo de tareas y pulsa Ruta crítica en la barra de herramientas del Gantt. Añade {Slack} a las columnas del Gantt para ver la holgura de cada tarea en días laborables y pasa el cursor sobre cualquier barra para leer su holgura en una línea. Se configura en el asistente de configuración, sin código."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Se actualiza la ruta crítica cuando se mueve una tarea?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sí. Arrastra una tarea con Empujar activado y las tareas que la esperan se mueven con ella en días laborables; la cadena resaltada y cada cifra de holgura se actualizan al instante. Si mueves una tarea crítica más allá del plan, el fin del proyecto se mueve con ella y la tarea indica cuántos días laborables de retraso lleva. Un solo Deshacer devuelve las tareas y la ruta crítica a su sitio."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "¿Los fines de semana cuentan como holgura?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "No. Omitir fines de semana está activado por defecto, así que los sábados y domingos nunca cuentan para la holgura, el desfase ni la duración de una tarea, y los cierres de oficina de Fechas bloqueadas también quedan fuera. Desactiva Omitir fines de semana para equipos que trabajan todos los días."
+                        }
+                    }
+                ],
+                "inLanguage": "es"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/es/blog/salesforce-ruta-critica-arrastrar.webp",
+                "thumbnailUrl": "https://multidatepick.com/images/es/blog/salesforce-ruta-critica-arrastrar-poster.png",
+                "caption": "Ruta crítica en un diagrama de Gantt de Salesforce, animado: Versión beta arrastrada una semana, Día del lanzamiento y el fin del proyecto la siguen, con 5 días laborables de retraso",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/es/blog/salesforce-ruta-critica-columna-holgura.png",
+                "caption": "Ruta crítica en Salesforce: Lanzamiento de producto de primavera en un Gantt, la cadena sin holgura resaltada y una columna Holgura con 0 y 3 días laborables",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/es/blog/salesforce-diagrama-de-gantt-holgura.png",
+                "caption": "Holgura en un Gantt de Salesforce: al pasar el cursor por Dossier de prensa se ven sus fechas y Puede retrasarse 3 días laborables, junto a la ruta crítica",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/es/gantt/diagrama-de-gantt-salesforce-linea-base-fechas-planificadas.png",
+                "caption": "Línea base en un Gantt de Salesforce: barra del plan bajo cada tarea de Relanzamiento del sitio web, +2 días en dos tareas retrasadas y columna Desviación",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>La ruta crítica en Salesforce: qué es y cómo usarla</h1>
+                <p class="subtitle">La cadena de tareas que fija tu fecha de fin, la holgura de todas las demás y cómo ver ambas en vivo en un diagrama de Gantt de Salesforce, sin código.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Publicado el 23 de noviembre de 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">«¿Qué es la ruta crítica?» «¿Qué tareas pueden retrasarse sin mover el lanzamiento?» «¿Cómo veo la ruta crítica en Salesforce?» Todo proyecto tiene un puñado de tareas que deciden cuándo termina. Pierde un día en una de ellas y la fecha de fin se mueve. Pierde un día en cualquier otra y, hasta cierto punto, no cambia nada.</p>
+
+                <p>MultiDatePick pone un <strong>diagrama de Gantt en cualquier objeto de Salesforce</strong> y calcula esa cadena por ti. Pulsa <strong>Ruta crítica</strong> y destacan las tareas que no tienen margen; una columna <strong>Holgura</strong> indica cuántos días laborables puede retrasarse cada una de las demás. Arrastra una tarea y ambas cosas se actualizan al momento. <strong>Sin Apex ni apps de proyectos adicionales.</strong></p>
+
+                <figure class="sc-shot">
+                    <img src="/images/es/blog/salesforce-ruta-critica-arrastrar-poster.png" data-gif="/images/es/blog/salesforce-ruta-critica-arrastrar.webp" alt="Ruta crítica en un diagrama de Gantt de Salesforce, animado: Versión beta arrastrada una semana, Día del lanzamiento y el fin del proyecto la siguen, con 5 días laborables de retraso" loading="lazy" decoding="async" width="1200" height="760" data-zoomable>
+                    <figcaption>La versión beta está en la ruta crítica: arrástrala una semana y el día del lanzamiento se mueve una semana, así que el proyecto pasa a Retrasado, con 5 días laborables de retraso sobre el plan.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Qué es la ruta crítica</h2>
+                <p>La <strong>ruta crítica</strong> es la cadena más larga de tareas vinculadas desde el inicio de un proyecto hasta su final. Todas sus tareas tienen <strong>holgura cero</strong>: deben empezar y terminar a tiempo, porque la siguiente tarea las espera y en la cadena no sobra ni un día. Si cualquiera se retrasa un día, la fecha de fin se mueve un día.</p>
+                <p>Un ejemplo sencillo: el lanzamiento de un producto en primavera. El equipo hace entrevistas con clientes durante 5 días laborables, después la versión beta lleva 8 y luego llega el día del lanzamiento. La formación comercial (3 días laborables) también debe terminar antes del lanzamiento, y el dossier de prensa (3 días laborables) espera a una revisión de precios.</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">Tarea</th><th>Días laborables</th><th>Espera a</th><th>Holgura</th></tr></thead>
+                    <tbody>
+                    <tr><td>Entrevistas con clientes</td><td>5</td><td>Nada</td><td><strong>0</strong>, crítica</td></tr>
+                    <tr><td>Versión beta</td><td>8</td><td>Entrevistas con clientes</td><td><strong>0</strong>, crítica</td></tr>
+                    <tr><td>Formación comercial</td><td>3</td><td>Revisión de precios, 2 días laborables después</td><td><strong>0</strong>, crítica</td></tr>
+                    <tr><td>Revisión de precios</td><td>6</td><td>Nada</td><td>3 días laborables</td></tr>
+                    <tr><td>Dossier de prensa</td><td>3</td><td>Revisión de precios</td><td>3 días laborables</td></tr>
+                    <tr><td>Día del lanzamiento</td><td>Hito</td><td>Versión beta, Formación comercial, Dossier de prensa</td><td><strong>0</strong>, crítica</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>Entrevistas, versión beta y día del lanzamiento: esa es la ruta crítica. La formación comercial está planificada para terminar justo en el lanzamiento, así que tampoco tiene margen. Si la versión beta se alarga dos días, el día del lanzamiento se mueve dos días. Si el dossier de prensa se alarga dos días, el lanzamiento no se mueve: el dossier tenía 3 días laborables de holgura y ahora tiene 1.</p>
+
+                <h2 style="margin-top:44px;">Por qué importa</h2>
+                <p>En un plan de cuarenta tareas, la ruta crítica suele ser solo unas pocas. Saber cuáles cambia cómo un jefe de proyecto reparte su semana:</p>
+                <div class="tl-feats cp-four">
+                    <div class="tl-feat"><h3>Saber qué tareas proteger</h3><p>Pon a tus mejores personas, y tu atención, en las tareas que fijan la fecha de fin. Un retraso ahí es un retraso del lanzamiento.</p></div>
+                    <div class="tl-feat"><h3>Ver dónde puedes retrasarte sin riesgo</h3><p>Una tarea con 3 días laborables de holgura puede esperar a un especialista muy ocupado o ceder un día a una petición urgente, y la fecha se mantiene.</p></div>
+                    <div class="tl-feat"><h3>Detectar el riesgo real a tiempo</h3><p>Una tarea retrasada en la ruta crítica es un proyecto retrasado, hoy mismo. Una tarea retrasada con holgura es un tema para la reunión diaria, no una alarma.</p></div>
+                    <div class="tl-feat"><h3>Mejores decisiones cuando algo se retrasa</h3><p>Añade personas, recorta alcance o solapa trabajo solo donde eso mueve el final. Acelerar una tarea con holgura no aporta nada.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">La holgura explicada: «Puede retrasarse 3 días laborables»</h2>
+                <p>La <strong>holgura</strong>, también llamada <strong>holgura total</strong> o margen (en inglés, slack o float), es cuántos días laborables puede retrasarse una tarea antes de mover la fecha de fin. Es la diferencia entre el inicio más temprano posible de una tarea y el inicio más tardío que no empuja nada de la ruta crítica.</p>
+                <ul>
+                    <li><strong>Holgura mayor que 0:</strong> hay margen. El dossier de prensa termina 3 días laborables antes del día del lanzamiento, así que <em>puede retrasarse 3 días laborables</em>.</li>
+                    <li><strong>Holgura de 0:</strong> en la ruta crítica. Cualquier retraso mueve el final.</li>
+                    <li><strong>Holgura menor que 0:</strong> el proyecto ya va por detrás de su fin previsto. Una cadena que ahora termina dos días laborables después del plan muestra <em>Con 2 días laborables de retraso</em>.</li>
+                </ul>
+                <p>La holgura se cuenta en <strong>días laborables</strong>, así que un fin de semana en medio de una tarea no es «tiempo de sobra». En MultiDatePick, pasa el cursor sobre cualquier tarea vinculada y su línea lo dice tal cual:</p>
+                <figure class="sc-shot">
+                    <img src="/images/es/blog/salesforce-diagrama-de-gantt-holgura.png" alt="Holgura en un Gantt de Salesforce: al pasar el cursor por Dossier de prensa se ven sus fechas y Puede retrasarse 3 días laborables, junto a la ruta crítica" loading="lazy" width="1200" height="463" data-zoomable>
+                    <figcaption>Pasa el cursor sobre una tarea: Dossier de prensa puede retrasarse 3 días laborables antes de que se mueva el día del lanzamiento.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">La ruta crítica en Salesforce, con MultiDatePick</h2>
+                <p>Salesforce no tiene ruta crítica propia para tareas de proyecto. El <a href="/es/diagrama-de-gantt-salesforce.html">diagrama de Gantt para Salesforce</a> de MultiDatePick lee tus propios registros de tareas, en cualquier objeto estándar o personalizado, y la calcula a partir de sus fechas y vínculos:</p>
+                <ol class="cp-steps">
+                    <li><strong>Vincula las tareas.</strong> Apunta el Gantt a un campo de búsqueda Espera a (un vínculo por tarea) o a un objeto de vínculo para varios vínculos por tarea, con tipos de vínculo (al terminar, empezar a la vez, terminar a la vez) y desfase en días laborables.</li>
+                    <li><strong>Pulsa Ruta crítica.</strong> El botón de la barra de herramientas resalta cada tarea sin holgura y los vínculos entre ellas, proyecto por proyecto: cada proyecto tiene su propia ruta crítica hasta su propio final.</li>
+                    <li><strong>Añade la columna Holgura.</strong> Pon <code>{Slack}</code> en las columnas del Gantt y cada tarea muestra su holgura en días laborables junto a su nombre, ordenable como cualquier otra columna.</li>
+                    <li><strong>Pasa el cursor sobre una barra.</strong> Una línea junto a la barra da su nombre, fechas y holgura: <em>Puede retrasarse 3 días laborables</em>, <em>Sin holgura: en la ruta crítica</em> o <em>Con 2 días laborables de retraso</em>. Un clic abre la tarjeta completa.</li>
+                    <li><strong>Arrastra una tarea.</strong> Con <strong>Empujar activado</strong>, las tareas que la esperan se mueven con ella, en días laborables, y la cadena y cada cifra de holgura se actualizan al instante. Un solo Deshacer lo devuelve todo a su sitio.</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/es/blog/salesforce-ruta-critica-columna-holgura.png" alt="Ruta crítica en Salesforce: Lanzamiento de producto de primavera en un Gantt, la cadena sin holgura resaltada y una columna Holgura con 0 y 3 días laborables" loading="lazy" width="1600" height="750" data-zoomable>
+                    <figcaption>Ruta crítica activada: la cadena sin holgura hasta el día del lanzamiento aparece resaltada y la columna Holgura muestra el margen de cada una de las demás tareas.</figcaption>
+                </figure>
+                <p><strong>Omitir fines de semana</strong> está activado por defecto, así que los sábados y domingos nunca cuentan como holgura, desfase ni duración de una tarea. Los cierres de oficina de Fechas bloqueadas también quedan fuera. Un <strong>hito</strong> que espera a una tarea se sitúa en el último día de esa tarea, así que el día del lanzamiento cae justo donde termina la versión beta, no un día después.</p>
+
+                <h2 style="margin-top:44px;">Consejos para una ruta crítica fiable</h2>
+                <ul>
+                    <li><strong>Mantén los vínculos al día.</strong> La ruta crítica es tan buena como sus vínculos. Una tarea que en realidad espera a otra pero no está vinculada parece tener una holgura que no tiene. Cuando cambie el plan, cambia también el vínculo.</li>
+                    <li><strong>Pon los hitos en el día de la última tarea.</strong> Un hito unos días después del trabajo al que espera añade holgura a toda la cadena, y la ruta crítica real deja de resaltarse. Vincula el hito y deja que se sitúe en el final de esa tarea.</li>
+                    <li><strong>Revísala cada semana.</strong> La ruta cambia a medida que el trabajo termina antes o después. Un vistazo semanal a la columna Holgura muestra una tarea que se acerca a 0 antes de que se convierta en el motivo de un lanzamiento tardío.</li>
+                    <li><strong>Usa una línea base para ver los retrasos.</strong> Asigna dos campos de fechas previstas y pulsa <strong>Fijar línea base</strong> para guardar las fechas de hoy como el plan. <strong>Mostrar plan</strong> dibuja una barra del plan bajo cada tarea con <em>+2 días</em> en las que se han retrasado, y un proyecto que va más allá de su fin previsto muestra cuánto: <em>Con 2 días laborables de retraso</em>.</li>
+                </ul>
+                <figure class="sc-shot">
+                    <img src="/images/es/gantt/diagrama-de-gantt-salesforce-linea-base-fechas-planificadas.png" alt="Línea base en un Gantt de Salesforce: barra del plan bajo cada tarea de Relanzamiento del sitio web, +2 días en dos tareas retrasadas y columna Desviación" loading="lazy" width="1600" height="868" data-zoomable>
+                    <figcaption>Mostrar plan: una fina barra del plan bajo cada tarea y los días laborables que se ha retrasado.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Los ajustes que lo definen</h2>
+                <p>Cada uno es un campo del bloque Gantt del asistente de configuración y una propiedad del componente:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Ajuste</th><th>Qué aporta a la ruta crítica</th><th style="width:22%;">Nombre de API</th></tr></thead>
+                    <tbody>
+                    <tr><td>Gantt Waits On Field</td><td>Una búsqueda a la tarea que debe terminar antes: un vínculo por tarea.</td><td><code>ganttDependsOnField</code></td></tr>
+                    <tr><td>Objeto de vínculo de tareas</td><td>Varios vínculos por tarea, cada uno con un tipo (al terminar, empezar a la vez, terminar a la vez) y desfase en días laborables.</td><td><code>Gantt_Link_Object__c</code></td></tr>
+                    <tr><td>Gantt Columns</td><td>Añade <code>{Slack}</code> para una columna Holgura junto a cada tarea.</td><td><code>ganttColumns</code></td></tr>
+                    <tr><td>Gantt Skip Weekends</td><td>Activado por defecto: la holgura, el desfase y los empujes cuentan solo días laborables.</td><td><code>ganttSkipWeekends</code></td></tr>
+                    <tr><td>Gantt Dependency Mode</td><td>push (predeterminado): al mover una tarea se mueven las tareas que la esperan.</td><td><code>ganttDependencyMode</code></td></tr>
+                    <tr><td>Gantt Milestone Field</td><td>Una casilla de verificación que dibuja un punto de hito en el último día de su predecesora.</td><td><code>ganttMilestoneField</code></td></tr>
+                    <tr><td>Gantt Planned Start and End</td><td>La línea base: barras del plan, días de retraso y cuánto va un proyecto por detrás de su fin previsto.</td><td><code>ganttBaselineStartField</code>, <code>ganttBaselineEndField</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Más que la ruta crítica.</strong> La misma vista de Gantt incluye la salud del proyecto, fases, porcentaje completado, valores editados directamente en el diagrama y una vista Carga de trabajo con quién está sobrecargado. <a href="/es/diagrama-de-gantt-salesforce.html">Ver todas las funciones del Gantt</a>, o cómo se compara en <a href="/es/blog/mejor-diagrama-de-gantt-salesforce.html">el mejor diagrama de Gantt para Salesforce</a>.</div>
+
+                <h2 style="margin-top:44px;">Preguntas frecuentes</h2>
+                <div class="tl-faq">
+                    <details><summary>¿Qué es la ruta crítica en la gestión de proyectos?</summary><p>La ruta crítica (o camino crítico) es la cadena más larga de tareas vinculadas desde el inicio de un proyecto hasta su final. Todas sus tareas tienen holgura cero, así que si cualquiera se retrasa, la fecha de fin se mueve lo mismo. Las tareas fuera de la ruta crítica tienen margen para retrasarse sin cambiar el final.</p></details>
+                    <details><summary>¿Qué es la holgura en un diagrama de Gantt?</summary><p>La holgura, también llamada holgura total o margen (en inglés, slack o float), es cuántos días laborables puede retrasarse una tarea antes de mover la fecha de fin: el inicio más tardío posible menos el inicio más temprano posible. Con una holgura de 0, la tarea está en la ruta crítica, y una holgura negativa significa que el proyecto ya va más allá de su fin previsto.</p></details>
+                    <details><summary>¿Salesforce tiene ruta crítica?</summary><p>No para las tareas de proyecto en Sales Cloud o Service Cloud. MultiDatePick añade una vista de Gantt a cualquier objeto estándar o personalizado de Salesforce, con un botón Ruta crítica que resalta con un contorno las tareas sin holgura, una columna Holgura y una línea al pasar el cursor sobre cada tarea que indica cuántos días laborables puede retrasarse.</p></details>
+                    <details><summary>¿Cómo muestro la ruta crítica en un diagrama de Gantt de Salesforce?</summary><p>En MultiDatePick, vincula las tareas con un campo de búsqueda Espera a o con un objeto de vínculo de tareas y pulsa Ruta crítica en la barra de herramientas del Gantt. Añade {Slack} a las columnas del Gantt para ver la holgura de cada tarea en días laborables y pasa el cursor sobre cualquier barra para leer su holgura en una línea. Se configura en el asistente de configuración, sin código.</p></details>
+                    <details><summary>¿Se actualiza la ruta crítica cuando se mueve una tarea?</summary><p>Sí. Arrastra una tarea con Empujar activado y las tareas que la esperan se mueven con ella en días laborables; la cadena resaltada y cada cifra de holgura se actualizan al instante. Si mueves una tarea crítica más allá del plan, el fin del proyecto se mueve con ella y la tarea indica cuántos días laborables de retraso lleva. Un solo Deshacer devuelve las tareas y la ruta crítica a su sitio.</p></details>
+                    <details><summary>¿Los fines de semana cuentan como holgura?</summary><p>No. Omitir fines de semana está activado por defecto, así que los sábados y domingos nunca cuentan para la holgura, el desfase ni la duración de una tarea, y los cierres de oficina de Fechas bloqueadas también quedan fuera. Desactiva Omitir fines de semana para equipos que trabajan todos los días.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Mira qué fija tu fecha de fin.</h2>
+                    <p>Abre la página Proyectos de la demo en vivo, abre un proyecto y pulsa Ruta crítica.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/es/projects?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-critical-path-gantt-chart" class="btn btn-demo" target="_blank" rel="noopener">Prueba la demo en vivo</a> <a href="/es/avisame-en-el-lanzamiento.html" class="btn btn-primary">Avísame en el lanzamiento</a> <a href="/es/diagrama-de-gantt-salesforce.html" class="btn btn-secondary">Diagrama de Gantt para Salesforce</a>
+                    </div>
+                    <ul class="check-list"><li>US$25/usuario/mes, todas las funciones</li><li>Prueba gratis de 30 días, sin tarjeta</li><li>Sin Apex</li><li>Configurado con clics</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Lecturas relacionadas</h3>
+                    <ul>
+                        <li><a href="/es/diagrama-de-gantt-salesforce.html">El diagrama de Gantt para Salesforce: todas las funciones</a></li>
+                        <li><a href="/es/blog/mejor-diagrama-de-gantt-salesforce.html">El mejor diagrama de Gantt para Salesforce, comparado</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Siete vistas de calendario, entre ellas el Gantt</a></li>
+                        <li><a href="/es/blog/linea-de-tiempo-salesforce.html">La vista de línea de tiempo en Salesforce</a></li>
+                        <li><a href="/es/blog/calendario-salesforce-sin-codigo.html">El calendario de Salesforce sin código</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/es/" class="logo">
+                        <img src="/images/logo.png" alt="Logotipo de MultiDatePick: componente de calendario de varias fechas y reserva de recursos para Salesforce" width="180" height="45">
+                    </a>
+                    <p>Reservas, calendarios y diagramas de Gantt en cualquier objeto de Salesforce. Sin código.</p>
+                </div>
+                <div class="footer-links">
+                    <h2>Producto</h2>
+                    <ul>
+                        <li><a href="/es/calendario-reservas-salesforce.html">Reservar salas y personas</a></li>
+                        <li><a href="/es/selector-varias-fechas-salesforce.html">Elegir varias fechas</a></li>
+                        <li><a href="/es/selector-franjas-horarias-salesforce.html">Elegir fechas y horas</a></li>
+                        <li><a href="/es/diagrama-de-gantt-salesforce.html">Planificar con Gantt</a></li>
+                        <li><a href="/es/blog/vistas-calendario-salesforce.html">Siete vistas de calendario</a></li>
+                        <li><a href="/es/biblioteca-configuraciones-calendario-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Soluciones</h2>
+                    <ul>
+                        <li><a href="/es/calendario-salesforce.html">Calendario de Salesforce</a></li>
+                        <li><a href="/es/reserva-salas-reuniones-salesforce.html">Reserva de salas de reuniones</a></li>
+                        <li><a href="/es/calendario-salesforce-reclutamiento-seleccion-personal.html">Reclutamiento y selección</a></li>
+                        <li><a href="/es/hoja-de-horas-salesforce.html">Hojas de horas</a></li>
+                        <li><a href="/es/blog/fechas-de-campana-salesforce.html">Calendario de campañas</a></li>
+                        <li><a href="/es/blog/calendario-salesforce-accesible-sector-publico-section-508.html">Sector público / Section 508</a></li>
+                        <li><a href="/es/programacion-clases-cursos-salesforce.html">Programación de clases y cursos</a></li>
+                        <li><a href="/es/calendario-reservas-experience-cloud-salesforce.html">Reservas en Experience Cloud</a></li>
+                        <li><a href="/es/alternativa-salesforce-lightning-scheduler.html">vs. Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Documentación</h2>
+                    <ul>
+                        <li><a href="/es/primeros-pasos.html">Primeros pasos</a></li>
+                        <li><a href="/es/guia-del-usuario.html">Guía del usuario</a></li>
+                        <li><a href="/es/guia-flujos-de-pantalla-salesforce.html">Guía de flujos de pantalla</a></li>
+                        <li><a href="/es/paginas-aplicacion-inicio-experience-cloud.html">Páginas de aplicación, inicio y Experience</a></li>
+                        <li><a href="/es/solucion-de-problemas.html">Solución de problemas</a></li>
+                        <li><a href="/es/preguntas-frecuentes.html">Preguntas frecuentes</a></li>
+                    </ul>
+                    <h2>Para desarrolladores</h2>
+                    <ul>
+                        <li><a href="/es/guia-desarrolladores-calendario-salesforce.html">Guía para desarrolladores</a></li>
+                        <li><a href="/es/implementar-flujo-vs-code.html">Implementar un flujo (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Empresa</h2>
+                    <ul>
+                        <li><a href="/es/precios.html">Precios</a></li>
+                        <li><a href="/es/blog/">Blog</a></li>
+                        <li><a href="/es/confianza-y-seguridad.html">Confianza y seguridad</a></li>
+                        <li><a href="/es/accesibilidad-vpat.html">Accesibilidad</a></li>
+                        <li><a href="/es/avisame-en-el-lanzamiento.html">Avísame en el lanzamiento</a></li>
+                        <li><a href="/es/configuracion-personalizada-calendario-salesforce-gratis.html">Configuración gratis a medida</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Soporte</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Todos los derechos reservados.</span>
+                <!-- consent:footer --><div class="footer-social footer-legal"><a href="/es/politica-de-privacidad.html">Política de privacidad</a><a href="/es/politica-de-privacidad.html#cookie-settings" data-mdp-consent="open">Configuración de cookies</a></div><!-- /consent:footer -->
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Idioma" translate="no"><ul><li><a href="/blog/salesforce-critical-path-gantt-chart.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/kritischer-pfad-salesforce-gantt-diagramm.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html" hreflang="es" lang="es" aria-current="page">Español</a></li><li><a href="/fr/blog/chemin-critique-diagramme-gantt-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/percorso-critico-diagramma-gantt-salesforce.html" hreflang="it" lang="it">Italiano</a></li><li><a href="/pt-br/blog/caminho-critico-salesforce-grafico-de-gantt.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-critical-path-gantt-chart.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-critical-path-gantt-chart.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-critical-path-gantt-chart.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ampliar imagen</p><p data-k="expand-diagram">Ampliar diagrama</p><p data-k="close">Cerrar</p><p data-k="prev-image">Imagen anterior</p><p data-k="next-image">Imagen siguiente</p><p data-k="image-viewer">Visor de imágenes</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>

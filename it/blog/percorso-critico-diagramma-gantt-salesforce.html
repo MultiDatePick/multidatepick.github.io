@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <!-- consent:head ft -->
+  <!-- Google tag (gtag.js) under Consent Mode v2: nothing is stored until the visitor agrees (js/consent.js, /privacy.html). -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    (function(){var c=null;try{c=JSON.parse(localStorage.getItem('mdp_consent'));if(!c||c.v!==1||!(Date.now()-c.ts<31536000000))c=null;}catch(e){c=null;}window.mdpConsent=c;
+    if(c&&c.analytics)gtag('consent', 'update', { analytics_storage: 'granted' });
+    window.mdpFirstTouch=function(){try{var K='mdp_first_touch';if(localStorage.getItem(K))return;var p=new URLSearchParams(location.search);var d=new Date();localStorage.setItem(K,JSON.stringify({utm_source:p.get('utm_source')||'',utm_medium:p.get('utm_medium')||'',utm_campaign:p.get('utm_campaign')||'',utm_term:p.get('utm_term')||'',utm_content:p.get('utm_content')||'',referrer:document.referrer||'',landing:location.href||'',date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()}));}catch(e){}};if(c&&c.attribution)window.mdpFirstTouch();})();
+    gtag('js', new Date());
+    gtag('config', 'G-YE5L0ECBSY');
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE5L0ECBSY"></script>
+  <script defer src="/js/consent.js"></script>
+  <!-- /consent:head -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Percorso critico Salesforce: diagramma di Gantt e margine</title>
+    <meta name="description" content="Cos'è il percorso critico, come funziona il margine (float) e come vedere il percorso critico dal vivo su un diagramma di Gantt Salesforce, senza codice.">
+    <link rel="canonical" href="https://multidatepick.com/it/blog/percorso-critico-diagramma-gantt-salesforce.html">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/solutions.css">
+    <style>
+        /* Critical path post: same look as the Timesheet, Timeline and Utilization posts. */
+        .section h2 { position: relative; padding-left: 16px; color: #0F2D52; }
+        .section h2::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 22px; border-radius: 0 3px 3px 0; background: #F97316; }
+        .tl-wide { width: min(1080px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
+        .tl-feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 8px; }
+        .tl-feat { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 18px 16px; box-shadow: 0 3px 14px rgba(15, 45, 82, 0.05); position: relative; } .tl-feat::before { content:""; position:absolute; left:0; top:20px; width:4px; height:22px; border-radius:0 3px 3px 0; background:#F97316; }
+        .tl-feat h3 { margin: 0 0 6px; font-size: 1.05rem; color: #0F2D52; }
+        .tl-feat p { margin: 0; color: #374151; font-size: 0.93rem; line-height: 1.55; }
+        .tl-uses { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .tl-use { display: flex; gap: 12px; align-items: flex-start; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px 14px 20px; position: relative; } .tl-use::before { content:""; position:absolute; left:0; top:15px; width:4px; height:22px; border-radius:0 3px 3px 0; background:var(--c); }
+        .tl-use strong { display: block; color: #0F2D52; margin-bottom: 2px; }
+        .tl-use span { color: #4B5563; font-size: 0.92rem; line-height: 1.5; }
+        .tl-faq details { border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin: 10px 0; background: #fff; }
+        .tl-faq summary { font-weight: 700; color: #0F2D52; cursor: pointer; }
+        .tl-faq p { margin: 10px 0 0; color: #374151; line-height: 1.6; }
+        .cp-steps { counter-reset: cp; list-style: none; padding: 0; margin: 18px 0; }
+        .cp-steps li { counter-increment: cp; position: relative; padding: 2px 0 14px 46px; color: #374151; line-height: 1.6; }
+        .cp-steps li::before { content: counter(cp); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #F97316; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .cp-steps li strong { color: #0F2D52; }
+        .bp-grid { width: 100%; border-collapse: collapse; margin: 20px 0 24px; font-size: 0.93rem; }
+        .bp-grid th { text-align: left; padding: 10px 12px; color: #0F2D52; font-weight: 700; background: #F0F9FF; border-bottom: 2px solid #0176D3; }
+        .bp-grid td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; color: #374151; vertical-align: top; }
+        .bp-grid th + th, .bp-grid td + td { border-left: 1px solid #E2E8F0; }
+        .bp-grid td:first-child { color: #0F2D52; font-weight: 600; }
+        .bp-grid code { font-size: 0.8rem; color: #64748B; background: none; padding: 0; }
+        .bp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; margin: 26px 0; }
+        .bp-pair .sc-shot { margin: 0; }
+        .bp-end { margin: 44px 0 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 24px 26px 22px; box-shadow: 0 4px 18px rgba(15, 45, 82, 0.06); }
+        .section .bp-end h2 { margin: 0 0 6px; font-size: 1.35rem; }
+        .bp-end p { margin: 0 0 16px; color: #374151; }
+        .bp-end-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc-shot.ts-narrow { max-width: 720px; margin-left: auto; margin-right: auto; }
+        .tl-feats.cp-four { grid-template-columns: repeat(2, 1fr); }
+        .section ul li { margin: 6px 0; line-height: 1.6; color: #374151; }
+        @media (max-width: 860px) { .tl-feats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 640px) {
+            .tl-feats, .tl-uses, .bp-pair { grid-template-columns: 1fr; }
+            .bp-end { padding: 20px 18px; }
+            .bp-end-ctas .btn { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+    <meta property="og:title" content="Percorso critico Salesforce: diagramma di Gantt e margine">
+    <meta property="og:description" content="Cos'è il percorso critico, come funziona il margine (float) e come vedere il percorso critico dal vivo su un diagramma di Gantt Salesforce, senza codice.">
+    <meta property="og:image" content="https://multidatepick.com/images/it/blog/percorso-critico-salesforce-cover.png">
+    <meta property="og:url" content="https://multidatepick.com/it/blog/percorso-critico-diagramma-gantt-salesforce.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="it_IT">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Percorso critico Salesforce: diagramma di Gantt e margine">
+    <meta name="twitter:description" content="Cos'è il percorso critico, come funziona il margine (float) e come vedere il percorso critico dal vivo su un diagramma di Gantt Salesforce, senza codice.">
+    <meta name="twitter:image" content="https://multidatepick.com/images/it/blog/percorso-critico-salesforce-cover.png">
+<!-- i18n:alternates -->
+    <link rel="alternate" hreflang="en" href="https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="de" href="https://multidatepick.com/de/blog/kritischer-pfad-salesforce-gantt-diagramm.html">
+    <link rel="alternate" hreflang="es" href="https://multidatepick.com/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html">
+    <link rel="alternate" hreflang="fr" href="https://multidatepick.com/fr/blog/chemin-critique-diagramme-gantt-salesforce.html">
+    <link rel="alternate" hreflang="it" href="https://multidatepick.com/it/blog/percorso-critico-diagramma-gantt-salesforce.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://multidatepick.com/pt-br/blog/caminho-critico-salesforce-grafico-de-gantt.html">
+    <link rel="alternate" hreflang="ja" href="https://multidatepick.com/ja/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://multidatepick.com/zh/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="hi" href="https://multidatepick.com/hi/blog/salesforce-critical-path-gantt-chart.html">
+    <link rel="alternate" hreflang="x-default" href="https://multidatepick.com/blog/salesforce-critical-path-gantt-chart.html">
+    <!-- /i18n:alternates -->
+</head>
+
+<body>
+    <!-- consent:ui -->
+    <div class="mdp-cc-bar" id="mdpConsentBar" role="region" aria-label="Preferenze cookie" hidden>
+        <p>Usiamo cookie statistici solo con il tuo consenso. <span class="mdp-cc-wide">Nulla viene venduto o usato per la pubblicità.</span> <a href="/it/informativa-privacy.html">Informativa sulla privacy</a></p>
+        <div class="mdp-cc-btns">
+            <button type="button" class="mdp-cc-btn mdp-cc-btn--text" data-mdp-consent="settings">Personalizza</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="reject">Rifiuta tutto</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="accept">Accetta tutto</button>
+        </div>
+    </div>
+    <dialog class="mdp-cc-dialog" id="mdpConsentDialog" aria-labelledby="mdpConsentTitle" aria-describedby="mdpConsentIntro">
+        <div class="mdp-cc-in">
+            <h2 id="mdpConsentTitle">Impostazioni cookie</h2>
+            <button type="button" class="mdp-cc-x" data-mdp-consent="close" aria-label="Chiudi">&times;</button>
+            <p class="mdp-cc-intro" id="mdpConsentIntro">Scegli cosa può salvare questo sito nel tuo browser. Puoi cambiare idea quando vuoi da Impostazioni cookie, in fondo a ogni pagina.</p>
+            <div class="mdp-cc-opt">
+                <span class="mdp-cc-name">Necessari al funzionamento del sito</span> <span class="mdp-cc-desc">Ricordano solo la tua scelta sui cookie.</span> <span class="mdp-cc-always">Sempre attivi</span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAnalytics">Statistiche</label> <span class="mdp-cc-desc" id="mdpConsentAnalyticsDesc">Google Analytics conta le visite e le pagine viste per aiutarci a migliorare il sito.</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAnalytics" aria-describedby="mdpConsentAnalyticsDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-opt">
+                <label for="mdpConsentAttribution">Da dove arrivi</label> <span class="mdp-cc-desc" id="mdpConsentAttributionDesc">Ricorda il link o la campagna che ti ha portato qui la prima volta e lo invia con i nostri moduli.</span> <span class="mdp-cc-ctl"><input type="checkbox" role="switch" id="mdpConsentAttribution" aria-describedby="mdpConsentAttributionDesc"><span class="mdp-cc-sw" aria-hidden="true"></span></span>
+            </div>
+            <div class="mdp-cc-btns">
+                <button type="button" class="mdp-cc-btn mdp-cc-btn--line" data-mdp-consent="reject">Rifiuta tutto</button> <button type="button" class="mdp-cc-btn" data-mdp-consent="save">Salva preferenze</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- /consent:ui -->
+    <!-- ANNOUNCEMENT BANNER -->
+    <div class="announcement-banner" id="announcementBanner">Presto disponibile su Salesforce AppExchange <button class="banner-close" id="bannerClose" aria-label="Chiudi banner" type="button">&times;</button>
+    </div>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/it/" class="logo"><img src="/images/logo.png" alt="Logo MultiDatePick: componente calendario a più date e prenotazione risorse per Salesforce" width="180" height="45"></a>
+            <button class="nav-toggle" aria-label="Apri/chiudi menu di navigazione"><span></span><span></span><span></span></button>
+            <nav><ul class="nav-links">
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Prodotto <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Prenota sale e persone</a></li>
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Scegli più date</a></li>
+                        <li><a href="/it/selettore-data-ora-fasce-orarie-salesforce.html">Scegli date e orari</a></li>
+                        <li><a href="/it/diagramma-gantt-salesforce.html">Pianifica con il diagramma di Gantt</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Sette viste calendario</a></li>
+                        <li><a href="/it/configurazioni-calendario-salesforce.html">Config Library</a></li>
+                        <li><a href="/it/affidabilita-e-sicurezza.html">Affidabilità e sicurezza</a></li>
+                        <li><a href="/it/accessibilita-vpat.html">Accessibilità (VPAT)</a></li>
+                    </ul>
+                </li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Soluzioni <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/calendario-salesforce.html">Calendario Salesforce</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Staffing e recruiting</a></li>
+                        <li><a href="/it/calendario-timesheet-salesforce.html">Timesheet</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Calendario delle campagne</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">Pubblica amministrazione / Section 508</a></li>
+                        <li><a href="/it/pianificazione-corsi-salesforce.html">Pianificazione di lezioni e corsi</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce-experience-cloud.html">Prenotazioni su Experience Cloud</a></li>
+                        <li><a href="/it/alternativa-salesforce-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </li>
+                <li><a href="/it/prezzi.html">Prezzi</a></li>
+                <li class="nav-dropdown">
+                    <button type="button" class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">Documentazione <span class="nav-caret" aria-hidden="true">&#9662;</span></button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="/it/blog/calendario-salesforce-no-code.html">Configurazione no-code</a></li>
+                        <li><a href="/it/per-iniziare.html">Per iniziare</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente</a></li>
+                        <li><a href="/it/guida-flussi-su-schermo-salesforce.html">Guida ai flussi su schermo</a></li>
+                        <li><a href="/it/pagine-app-home-experience.html">Pagine app, iniziali ed Experience</a></li>
+                        <li><a href="/it/risoluzione-problemi.html">Risoluzione dei problemi</a></li>
+                        <li><a href="/it/domande-frequenti.html">FAQ</a></li>
+                    </ul>
+                </li>
+                <li><a href="/it/blog/">Blog</a></li>
+                <li><a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/it/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=nav" class="nav-cta nav-cta-ghost" target="_blank" rel="noopener">Prova la demo live</a></li>
+                <li><a href="/it/avvisami-al-lancio.html" class="nav-cta">Avvisami al lancio</a></li>
+                </ul></nav>
+        </div>
+    </header>
+    <main class="page-content">
+        <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "BlogPosting",
+                "headline": "Il percorso critico in Salesforce: cos'è e come usarlo",
+                "description": "Cos'è il percorso critico, come funziona il margine (float) e come vedere il percorso critico dal vivo su un diagramma di Gantt Salesforce, senza codice.",
+                "datePublished": "2026-11-23",
+                "dateModified": "2026-11-23",
+                "author": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "mainEntityOfPage": "https://multidatepick.com/it/blog/percorso-critico-diagramma-gantt-salesforce.html",
+                "image": "https://multidatepick.com/images/it/blog/percorso-critico-salesforce-cover.png",
+                "keywords": "percorso critico Salesforce, percorso critico diagramma di Gantt, percorso critico progetto Salesforce, cos'è il margine, margine totale, float, slack, metodo del percorso critico, CPM",
+                "inLanguage": "it"
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Cos'è il percorso critico nella gestione dei progetti?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Il percorso critico è la catena più lunga di attività collegate dall'inizio alla fine di un progetto. Ogni attività che ne fa parte ha margine zero, quindi un ritardo su una qualsiasi di esse sposta la data di fine della stessa quantità. Le attività fuori dal percorso critico possono slittare senza cambiare la fine."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Cos'è il margine (float o slack) in un diagramma di Gantt?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Il margine, detto anche margine totale, float o slack, è il numero di giorni lavorativi di cui un'attività può slittare prima di spostare la data di fine: la data di inizio al più tardi meno quella al più presto. Con margine 0 l'attività è sul percorso critico, e un margine negativo significa che il progetto va già oltre la fine prevista."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Salesforce ha un percorso critico?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Non per le attività di progetto in Sales Cloud o Service Cloud. MultiDatePick aggiunge una vista Gantt a qualsiasi oggetto Salesforce standard o personalizzato, con un pulsante Percorso critico che evidenzia le attività senza margine, una colonna Margine e, al passaggio del mouse su ogni attività, una riga che dice di quanti giorni lavorativi può slittare."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Come mostro il percorso critico su un diagramma di Gantt Salesforce?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "In MultiDatePick collega le attività con un lookup Attende o con un oggetto di collegamento tra attività, poi premi Percorso critico nella barra degli strumenti del Gantt. Aggiungi {Slack} alle colonne del Gantt per vedere il margine di ogni attività in giorni lavorativi, e passa il mouse su una barra per leggerne il margine in una riga. Si imposta con la configurazione guidata, senza codice."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Il percorso critico si aggiorna quando un'attività si sposta?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Sì. Trascina un'attività con Spinta attiva e le attività che la attendono si spostano con lei, nei giorni lavorativi; la catena evidenziata e ogni margine si aggiornano subito. Se sposti un'attività critica oltre il piano, la fine del progetto si sposta con lei e l'attività indica In ritardo per i giorni lavorativi persi. Un solo Annulla ultima rimette a posto le attività e il percorso critico."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "I fine settimana contano come margine?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "No. Salta i fine settimana è attivo per impostazione predefinita, quindi sabati e domeniche non contano mai per margine, sfasamento o durata di un'attività, e anche le chiusure dell'ufficio indicate nelle Date bloccate restano escluse. Disattiva Salta i fine settimana per i team che lavorano tutti i giorni."
+                        }
+                    }
+                ],
+                "inLanguage": "it"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/it/blog/salesforce-percorso-critico-trascinare.webp",
+                "thumbnailUrl": "https://multidatepick.com/images/it/blog/salesforce-percorso-critico-trascinare-poster.png",
+                "caption": "Percorso critico in un Gantt Salesforce, animato: Versione beta spostata di una settimana, Giorno del lancio la segue, In ritardo di 5 giorni lavorativi",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/it/blog/salesforce-percorso-critico-colonna-margine.png",
+                "caption": "Percorso critico in Salesforce: Lancio prodotto di primavera su un Gantt, catena senza margine evidenziata, colonna Margine con 0 e 3 giorni lavorativi",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/it/blog/salesforce-diagramma-gantt-margine.png",
+                "caption": "Margine in un diagramma di Gantt Salesforce: al passaggio del mouse, Cartella stampa mostra le sue date e Può slittare di 3 giorni lavorativi",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            },
+            {
+                "@type": "ImageObject",
+                "contentUrl": "https://multidatepick.com/images/it/gantt/diagramma-gantt-salesforce-baseline-date-pianificate.png",
+                "caption": "Baseline nel diagramma di Gantt Salesforce per vedere gli slittamenti: barra del piano sotto le attività di Rilancio del sito web, +2 giorni e colonna Scostamento",
+                "creditText": "MultiDatePick",
+                "creator": {
+                    "@type": "Organization",
+                    "name": "MultiDatePick"
+                },
+                "copyrightNotice": "© 2026 MultiDatePick"
+            }
+        ]
+    }
+    </script>
+        <section class="guide-hero">
+            <div class="container">
+                <h1>Il percorso critico in Salesforce: cos'è e come usarlo</h1>
+                <p class="subtitle">La catena di attività che decide la tua data di fine, il margine di tutte le altre e come vederli dal vivo su un diagramma di Gantt Salesforce, senza codice.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container" style="max-width:820px;">
+                <p class="sc-meta">Pubblicato il 23 novembre 2026 &middot; MultiDatePick</p>
+
+                <p class="sc-lead">«Cos'è il percorso critico?» «Quali attività possono slittare senza spostare il lancio?» «Come vedo il percorso critico in Salesforce?» In ogni progetto c'è una manciata di attività che decide quando finisce. Perdi un giorno su una di queste e la data di fine si sposta. Perdi un giorno altrove e, fino a un certo punto, non cambia nulla.</p>
+
+                <p>MultiDatePick porta un <strong>diagramma di Gantt su qualsiasi oggetto Salesforce</strong> e calcola quella catena per te. Premi <strong>Percorso critico</strong> e le attività senza margine risaltano; una colonna <strong>Margine</strong> dice di quanti giorni lavorativi può slittare ogni altra attività. Trascina un'attività e si aggiornano entrambi all'istante. <strong>Niente Apex, niente app di progetto aggiuntiva.</strong></p>
+
+                <figure class="sc-shot">
+                    <img src="/images/it/blog/salesforce-percorso-critico-trascinare-poster.png" data-gif="/images/it/blog/salesforce-percorso-critico-trascinare.webp" alt="Percorso critico in un Gantt Salesforce, animato: Versione beta spostata di una settimana, Giorno del lancio la segue, In ritardo di 5 giorni lavorativi" loading="lazy" decoding="async" width="1200" height="760" data-zoomable>
+                    <figcaption>La versione beta è sul percorso critico: spostala di una settimana e il lancio slitta di una settimana. Il progetto passa In ritardo, con 5 giorni lavorativi di ritardo sul piano.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Cos'è il percorso critico</h2>
+                <p>Il <strong>percorso critico</strong> è la catena più lunga di attività collegate dall'inizio alla fine di un progetto. Ogni attività che ne fa parte ha <strong>margine zero</strong>: deve iniziare e finire in tempo, perché l'attività successiva la sta aspettando e nella catena non c'è spazio di manovra. Ritarda una qualsiasi di esse di un giorno e la data di fine si sposta di un giorno.</p>
+                <p>Un esempio semplice: il lancio di un prodotto in primavera. Il team conduce interviste ai clienti per 5 giorni lavorativi, poi la versione beta ne richiede 8, poi arriva il giorno del lancio. Anche la formazione commerciale (3 giorni lavorativi) deve finire prima del lancio, e la cartella stampa (3 giorni lavorativi) attende la revisione dei prezzi.</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:30%;">Attività</th><th>Giorni lavorativi</th><th>Attende</th><th>Margine</th></tr></thead>
+                    <tbody>
+                    <tr><td>Interviste ai clienti</td><td>5</td><td>Niente</td><td><strong>0</strong>, critica</td></tr>
+                    <tr><td>Versione beta</td><td>8</td><td>Interviste ai clienti</td><td><strong>0</strong>, critica</td></tr>
+                    <tr><td>Formazione commerciale</td><td>3</td><td>Revisione dei prezzi, con sfasamento di 2 giorni lavorativi</td><td><strong>0</strong>, critica</td></tr>
+                    <tr><td>Revisione dei prezzi</td><td>6</td><td>Niente</td><td>3 giorni lavorativi</td></tr>
+                    <tr><td>Cartella stampa</td><td>3</td><td>Revisione dei prezzi</td><td>3 giorni lavorativi</td></tr>
+                    <tr><td>Giorno del lancio</td><td>Traguardo</td><td>Versione beta, Formazione commerciale, Cartella stampa</td><td><strong>0</strong>, critica</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>Interviste, poi versione beta, poi giorno del lancio: questo è il percorso critico. La formazione commerciale è pianificata per finire proprio al lancio, quindi nemmeno lei ha margine. Se la versione beta sfora di due giorni, il lancio slitta di due giorni. Se la cartella stampa sfora di due giorni, il lancio non si muove: la cartella stampa aveva 3 giorni lavorativi di margine, e ora ne ha 1.</p>
+
+                <h2 style="margin-top:44px;">Perché è importante</h2>
+                <p>In un piano con quaranta attività, il percorso critico di solito ne comprende poche. Sapere quali cambia il modo in cui un project manager organizza la settimana:</p>
+                <div class="tl-feats cp-four">
+                    <div class="tl-feat"><h3>Sapere quali attività proteggere</h3><p>Metti le persone migliori, e la tua attenzione, sulle attività che decidono la data di fine. Un ritardo lì è un ritardo del lancio.</p></div>
+                    <div class="tl-feat"><h3>Vedere dove puoi slittare senza rischi</h3><p>Un'attività con 3 giorni lavorativi di margine può aspettare uno specialista impegnato, o cedere un giorno a una richiesta urgente, e la data regge.</p></div>
+                    <div class="tl-feat"><h3>Individuare presto i rischi veri</h3><p>Un'attività in ritardo sul percorso critico è un progetto in ritardo, già oggi. Un'attività in ritardo con margine è un appunto per lo stand-up, non un allarme.</p></div>
+                    <div class="tl-feat"><h3>Compromessi migliori quando qualcosa ritarda</h3><p>Aggiungi persone, riduci il perimetro o sovrapponi il lavoro solo dove sposta la fine. Accelerare un'attività con margine non fa guadagnare nulla.</p></div>
+                </div>
+
+                <h2 style="margin-top:44px;">Il margine spiegato: «Può slittare di 3 giorni lavorativi»</h2>
+                <p>Il <strong>margine</strong>, chiamato anche <strong>float</strong>, slack o margine totale, è il numero di giorni lavorativi di cui un'attività può slittare prima di spostare la data di fine. È la differenza tra la data più presto in cui un'attività può iniziare e quella più tarda in cui può iniziare senza spostare nulla sul percorso critico.</p>
+                <ul>
+                    <li><strong>Margine sopra 0:</strong> c'è spazio di manovra. La cartella stampa finisce 3 giorni lavorativi prima del giorno del lancio, quindi <em>può slittare di 3 giorni lavorativi</em>.</li>
+                    <li><strong>Margine 0:</strong> sul percorso critico. Qualsiasi ritardo sposta la fine.</li>
+                    <li><strong>Margine sotto 0:</strong> il progetto è già oltre la fine prevista. Una catena che ora finisce due giorni lavorativi dopo il piano indica <em>In ritardo di 2 giorni lavorativi</em>.</li>
+                </ul>
+                <p>Il margine si conta in <strong>giorni lavorativi</strong>, quindi un fine settimana nel mezzo di un'attività non è «tempo di scorta». In MultiDatePick, passa il mouse su un'attività collegata e la sua riga lo dice esattamente:</p>
+                <figure class="sc-shot">
+                    <img src="/images/it/blog/salesforce-diagramma-gantt-margine.png" alt="Margine in un diagramma di Gantt Salesforce: al passaggio del mouse, Cartella stampa mostra le sue date e Può slittare di 3 giorni lavorativi" loading="lazy" width="1200" height="463" data-zoomable>
+                    <figcaption>Passa il mouse su un'attività: Cartella stampa può slittare di 3 giorni lavorativi prima che il lancio si sposti.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Il percorso critico in Salesforce, con MultiDatePick</h2>
+                <p>Salesforce non ha un proprio percorso critico per le attività di progetto. Il <a href="/it/diagramma-gantt-salesforce.html">diagramma di Gantt per Salesforce</a> di MultiDatePick legge i tuoi record di attività, su qualsiasi oggetto standard o personalizzato, e lo calcola dalle loro date e dai loro collegamenti:</p>
+                <ol class="cp-steps">
+                    <li><strong>Collega le attività.</strong> Indica al Gantt un lookup Attende (un collegamento per attività), oppure un oggetto di collegamento per più collegamenti ciascuna, con tipi di collegamento (dopo la fine, inizio insieme, fine insieme) e sfasamento in giorni lavorativi.</li>
+                    <li><strong>Premi Percorso critico.</strong> Il pulsante nella barra degli strumenti evidenzia ogni attività senza margine e i collegamenti tra loro, progetto per progetto: ogni progetto ha il proprio percorso critico verso la propria fine.</li>
+                    <li><strong>Aggiungi la colonna Margine.</strong> Inserisci <code>{Slack}</code> nelle colonne del Gantt e ogni attività mostra il suo margine in giorni lavorativi accanto al nome, ordinabile come qualsiasi colonna.</li>
+                    <li><strong>Passa il mouse su una barra.</strong> Una riga accanto alla barra ne indica nome, date e margine: <em>Può slittare di 3 giorni lavorativi</em>, <em>Nessun margine: sul percorso critico</em> o <em>In ritardo di 2 giorni lavorativi</em>. Un clic apre la scheda completa.</li>
+                    <li><strong>Trascina un'attività.</strong> Con <strong>Spinta attiva</strong>, le attività che la attendono si spostano con lei, nei giorni lavorativi, e la catena e ogni margine si aggiornano subito. Un solo Annulla ultima rimette tutto a posto.</li>
+                </ol>
+                <figure class="sc-shot">
+                    <img src="/images/it/blog/salesforce-percorso-critico-colonna-margine.png" alt="Percorso critico in Salesforce: Lancio prodotto di primavera su un Gantt, catena senza margine evidenziata, colonna Margine con 0 e 3 giorni lavorativi" loading="lazy" width="1600" height="763" data-zoomable>
+                    <figcaption>Percorso critico attivo: la catena senza margine fino al giorno del lancio è evidenziata, e la colonna Margine mostra lo spazio di ogni altra attività.</figcaption>
+                </figure>
+                <p><strong>Salta i fine settimana</strong> è attivo per impostazione predefinita, quindi sabati e domeniche non contano mai come margine, sfasamento o durata. Anche le chiusure dell'ufficio indicate nelle Date bloccate restano escluse. Un <strong>traguardo (milestone)</strong> che attende un'attività si colloca sull'ultimo giorno di quell'attività, così il giorno del lancio cade proprio dove finisce la versione beta, non un giorno dopo.</p>
+
+                <h2 style="margin-top:44px;">Consigli per un percorso critico affidabile</h2>
+                <ul>
+                    <li><strong>Tieni i collegamenti precisi.</strong> Il percorso critico vale quanto i collegamenti. Un'attività che in realtà ne attende un'altra ma non è collegata sembra avere un margine che non ha. Quando il piano cambia, cambia anche il collegamento.</li>
+                    <li><strong>Metti i traguardi sul giorno dell'ultima attività.</strong> Un traguardo qualche giorno dopo il lavoro che attende aggiunge margine a tutta la catena, e il vero percorso critico smette di risaltare. Collega il traguardo e lascia che si collochi alla fine di quell'attività.</li>
+                    <li><strong>Controllalo ogni settimana.</strong> Il percorso cambia man mano che il lavoro finisce in anticipo o in ritardo. Un'occhiata settimanale alla colonna Margine mostra un'attività che scivola verso 0 prima che diventi il motivo di un lancio in ritardo.</li>
+                    <li><strong>Usa una baseline per vedere gli slittamenti.</strong> Mappa due campi di data prevista e premi <strong>Imposta baseline</strong> per salvare le date di oggi come piano. <strong>Mostra piano</strong> disegna una barra del piano sotto ogni attività con <em>+2 giorni</em> su quelle slittate, e un progetto che va oltre la fine prevista mostra di quanto: <em>In ritardo di 2 giorni lavorativi</em>.</li>
+                </ul>
+                <figure class="sc-shot">
+                    <img src="/images/it/gantt/diagramma-gantt-salesforce-baseline-date-pianificate.png" alt="Baseline nel diagramma di Gantt Salesforce per vedere gli slittamenti: barra del piano sotto le attività di Rilancio del sito web, +2 giorni e colonna Scostamento" loading="lazy" width="1600" height="890" data-zoomable>
+                    <figcaption>Mostra piano: una sottile barra del piano sotto ogni attività e i giorni lavorativi di slittamento.</figcaption>
+                </figure>
+
+                <h2 style="margin-top:44px;">Le impostazioni che lo definiscono</h2>
+                <p>Ognuna è un campo nel riquadro Gantt della configurazione guidata e una proprietà del componente:</p>
+                <div style="overflow-x:auto;">
+                <table class="property-table bp-grid">
+                    <thead><tr><th style="width:28%;">Impostazione</th><th>Cosa fa per il percorso critico</th><th style="width:22%;">Nome API</th></tr></thead>
+                    <tbody>
+                    <tr><td>Gantt Waits On Field</td><td>Un lookup all'attività che deve finire prima: un collegamento per attività.</td><td><code>ganttDependsOnField</code></td></tr>
+                    <tr><td>Oggetto di collegamento tra attività</td><td>Più collegamenti per attività, ognuno con un tipo (dopo, inizio insieme, fine insieme) e uno sfasamento in giorni lavorativi.</td><td><code>Gantt_Link_Object__c</code></td></tr>
+                    <tr><td>Gantt Columns</td><td>Aggiungi <code>{Slack}</code> per una colonna Margine accanto a ogni attività.</td><td><code>ganttColumns</code></td></tr>
+                    <tr><td>Gantt Skip Weekends</td><td>Attivo per impostazione predefinita: margine, sfasamento e spinte contano solo i giorni lavorativi.</td><td><code>ganttSkipWeekends</code></td></tr>
+                    <tr><td>Gantt Dependency Mode</td><td>push (predefinito): un'attività spostata spinge le attività che la attendono.</td><td><code>ganttDependencyMode</code></td></tr>
+                    <tr><td>Gantt Milestone Field</td><td>Una casella di controllo che disegna un traguardo sull'ultimo giorno dell'attività precedente.</td><td><code>ganttMilestoneField</code></td></tr>
+                    <tr><td>Gantt Planned Start and End</td><td>La baseline: barre del piano, giorni di slittamento e di quanto un progetto va oltre la fine prevista.</td><td><code>ganttBaselineStartField</code>, <code>ganttBaselineEndField</code></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="sc-note">
+                    <strong>Molto più del percorso critico.</strong> La stessa vista Gantt offre l'andamento dei progetti, le fasi, la percentuale completata, valori modificabili direttamente nel diagramma e una vista Carico di lavoro su chi è sovraccarico. <a href="/it/diagramma-gantt-salesforce.html">Scopri tutte le funzionalità del Gantt</a>, o il confronto nel <a href="/it/blog/miglior-diagramma-gantt-salesforce.html">miglior diagramma di Gantt per Salesforce</a>.</div>
+
+                <h2 style="margin-top:44px;">Domande frequenti</h2>
+                <div class="tl-faq">
+                    <details><summary>Cos'è il percorso critico nella gestione dei progetti?</summary><p>Il percorso critico è la catena più lunga di attività collegate dall'inizio alla fine di un progetto. Ogni attività che ne fa parte ha margine zero, quindi un ritardo su una qualsiasi di esse sposta la data di fine della stessa quantità. Le attività fuori dal percorso critico possono slittare senza cambiare la fine.</p></details>
+                    <details><summary>Cos'è il margine (float o slack) in un diagramma di Gantt?</summary><p>Il margine, detto anche margine totale, float o slack, è il numero di giorni lavorativi di cui un'attività può slittare prima di spostare la data di fine: la data di inizio al più tardi meno quella al più presto. Con margine 0 l'attività è sul percorso critico, e un margine negativo significa che il progetto va già oltre la fine prevista.</p></details>
+                    <details><summary>Salesforce ha un percorso critico?</summary><p>Non per le attività di progetto in Sales Cloud o Service Cloud. MultiDatePick aggiunge una vista Gantt a qualsiasi oggetto Salesforce standard o personalizzato, con un pulsante Percorso critico che evidenzia le attività senza margine, una colonna Margine e, al passaggio del mouse su ogni attività, una riga che dice di quanti giorni lavorativi può slittare.</p></details>
+                    <details><summary>Come mostro il percorso critico su un diagramma di Gantt Salesforce?</summary><p>In MultiDatePick collega le attività con un lookup Attende o con un oggetto di collegamento tra attività, poi premi Percorso critico nella barra degli strumenti del Gantt. Aggiungi {Slack} alle colonne del Gantt per vedere il margine di ogni attività in giorni lavorativi, e passa il mouse su una barra per leggerne il margine in una riga. Si imposta con la configurazione guidata, senza codice.</p></details>
+                    <details><summary>Il percorso critico si aggiorna quando un'attività si sposta?</summary><p>Sì. Trascina un'attività con Spinta attiva e le attività che la attendono si spostano con lei, nei giorni lavorativi; la catena evidenziata e ogni margine si aggiornano subito. Se sposti un'attività critica oltre il piano, la fine del progetto si sposta con lei e l'attività indica In ritardo per i giorni lavorativi persi. Un solo Annulla ultima rimette a posto le attività e il percorso critico.</p></details>
+                    <details><summary>I fine settimana contano come margine?</summary><p>No. Salta i fine settimana è attivo per impostazione predefinita, quindi sabati e domeniche non contano mai per margine, sfasamento o durata di un'attività, e anche le chiusure dell'ufficio indicate nelle Date bloccate restano escluse. Disattiva Salta i fine settimana per i team che lavorano tutti i giorni.</p></details>
+                </div>
+
+                <div class="bp-end">
+                    <h2>Guarda cosa decide la tua data di fine.</h2>
+                    <p>Apri la pagina Progetti nella demo live, apri un progetto e premi Percorso critico.</p>
+                    <div class="bp-end-ctas">
+                        <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/it/projects?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=salesforce-critical-path-gantt-chart" class="btn btn-demo" target="_blank" rel="noopener">Prova la demo live</a> <a href="/it/avvisami-al-lancio.html" class="btn btn-primary">Avvisami al lancio</a> <a href="/it/diagramma-gantt-salesforce.html" class="btn btn-secondary">Diagramma di Gantt Salesforce</a>
+                    </div>
+                    <ul class="check-list"><li>$25/utente/mese, tutte le funzionalità</li><li>Prova gratuita di 30 giorni, senza carta</li><li>Senza Apex</li><li>Si configura con pochi clic</li></ul>
+                </div>
+
+                <div class="sc-related">
+                    <h3>Letture correlate</h3>
+                    <ul>
+                        <li><a href="/it/diagramma-gantt-salesforce.html">Il diagramma di Gantt Salesforce: tutte le funzionalità</a></li>
+                        <li><a href="/it/blog/miglior-diagramma-gantt-salesforce.html">Il miglior diagramma di Gantt per Salesforce, a confronto</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Sette viste calendario, Gantt compreso</a></li>
+                        <li><a href="/it/blog/cronologia-timeline-risorse-salesforce.html">La vista timeline in Salesforce</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-no-code.html">Il calendario Salesforce senza codice</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <a href="/it/" class="logo">
+                        <img src="/images/logo.png" alt="Logo MultiDatePick: componente calendario a più date e prenotazione risorse per Salesforce" width="180" height="45">
+                    </a>
+                    <p>Prenotazioni, calendari e diagrammi di Gantt su qualsiasi oggetto Salesforce. Senza codice.</p>
+                </div>
+                <div class="footer-links">
+                    <h2>Prodotto</h2>
+                    <ul>
+                        <li><a href="/it/calendario-prenotazioni-salesforce.html">Prenota sale e persone</a></li>
+                        <li><a href="/it/selettore-date-multiple-salesforce.html">Scegli più date</a></li>
+                        <li><a href="/it/selettore-data-ora-fasce-orarie-salesforce.html">Scegli date e orari</a></li>
+                        <li><a href="/it/diagramma-gantt-salesforce.html">Pianifica con il diagramma di Gantt</a></li>
+                        <li><a href="/it/blog/viste-calendario-salesforce.html">Sette viste calendario</a></li>
+                        <li><a href="/it/configurazioni-calendario-salesforce.html">Config Library</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Soluzioni</h2>
+                    <ul>
+                        <li><a href="/it/calendario-salesforce.html">Calendario Salesforce</a></li>
+                        <li><a href="/it/prenotazione-sale-riunioni-salesforce.html">Prenotazione sale riunioni</a></li>
+                        <li><a href="/it/calendario-salesforce-staffing-recruiting.html">Staffing e recruiting</a></li>
+                        <li><a href="/it/calendario-timesheet-salesforce.html">Timesheet</a></li>
+                        <li><a href="/it/blog/date-multiple-campagne-salesforce.html">Calendario delle campagne</a></li>
+                        <li><a href="/it/blog/calendario-salesforce-accessibile-pubblica-amministrazione.html">Pubblica amministrazione / Section 508</a></li>
+                        <li><a href="/it/pianificazione-corsi-salesforce.html">Pianificazione di lezioni e corsi</a></li>
+                        <li><a href="/it/calendario-prenotazioni-salesforce-experience-cloud.html">Prenotazioni su Experience Cloud</a></li>
+                        <li><a href="/it/alternativa-salesforce-lightning-scheduler.html">vs Lightning Scheduler</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Documentazione</h2>
+                    <ul>
+                        <li><a href="/it/per-iniziare.html">Per iniziare</a></li>
+                        <li><a href="/it/guida-utente.html">Guida utente</a></li>
+                        <li><a href="/it/guida-flussi-su-schermo-salesforce.html">Guida ai flussi su schermo</a></li>
+                        <li><a href="/it/pagine-app-home-experience.html">Pagine app, iniziali ed Experience</a></li>
+                        <li><a href="/it/risoluzione-problemi.html">Risoluzione dei problemi</a></li>
+                        <li><a href="/it/domande-frequenti.html">FAQ</a></li>
+                    </ul>
+                    <h2>Per sviluppatori</h2>
+                    <ul>
+                        <li><a href="/it/guida-sviluppatori-calendario-salesforce.html">Guida per sviluppatori</a></li>
+                        <li><a href="/it/distribuire-flusso-vs-code.html">Distribuire un flusso (VS Code)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h2>Azienda</h2>
+                    <ul>
+                        <li><a href="/it/prezzi.html">Prezzi</a></li>
+                        <li><a href="/it/blog/">Blog</a></li>
+                        <li><a href="/it/affidabilita-e-sicurezza.html">Affidabilità e sicurezza</a></li>
+                        <li><a href="/it/accessibilita-vpat.html">Accessibilità</a></li>
+                        <li><a href="/it/avvisami-al-lancio.html">Avvisami al lancio</a></li>
+                        <li><a href="/it/configurazione-gratuita-calendario-salesforce.html">Configurazione gratuita su misura</a></li>
+                        <li><a href="mailto:support@multidatepick.com">Supporto</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 MultiDatePick LLC. Tutti i diritti riservati.</span>
+                <!-- consent:footer --><div class="footer-social footer-legal"><a href="/it/informativa-privacy.html">Informativa sulla privacy</a><a href="/it/informativa-privacy.html#cookie-settings" data-mdp-consent="open">Impostazioni cookie</a></div><!-- /consent:footer -->
+                <div class="footer-social">
+                    <a href="https://x.com/MultiDatePick" target="_blank" rel="noopener noreferrer">X/Twitter</a> <a href="https://www.linkedin.com/company/multidatepick" target="_blank" rel="noopener noreferrer">LinkedIn</a> <a href="https://www.youtube.com/@MultiDatePick" target="_blank" rel="noopener noreferrer">YouTube</a>
+                </div>
+            </div>
+        </div>
+<!-- i18n:langnav -->
+<nav class="lang-nav" aria-label="Lingua" translate="no"><ul><li><a href="/blog/salesforce-critical-path-gantt-chart.html" hreflang="en" lang="en">English</a></li><li><a href="/de/blog/kritischer-pfad-salesforce-gantt-diagramm.html" hreflang="de" lang="de">Deutsch</a></li><li><a href="/es/blog/ruta-critica-diagrama-de-gantt-salesforce.html" hreflang="es" lang="es">Español</a></li><li><a href="/fr/blog/chemin-critique-diagramme-gantt-salesforce.html" hreflang="fr" lang="fr">Français</a></li><li><a href="/it/blog/percorso-critico-diagramma-gantt-salesforce.html" hreflang="it" lang="it" aria-current="page">Italiano</a></li><li><a href="/pt-br/blog/caminho-critico-salesforce-grafico-de-gantt.html" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="/ja/blog/salesforce-critical-path-gantt-chart.html" hreflang="ja" lang="ja">日本語</a></li><li><a href="/zh/blog/salesforce-critical-path-gantt-chart.html" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="/hi/blog/salesforce-critical-path-gantt-chart.html" hreflang="hi" lang="hi">हिन्दी</a></li></ul></nav>
+<!-- /i18n:langnav -->
+</footer>
+    <script src="/js/main.js"></script>
+    <script>
+    // Each GIF ships as a first-frame poster and swaps to the animation only when it
+    // nears the viewport, so the page loads light and every GIF starts from frame one.
+    (function () {
+        var imgs = document.querySelectorAll('main img[data-gif]');
+        function play(img) { img.src = img.getAttribute('data-gif'); img.removeAttribute('data-gif'); }
+        if (!('IntersectionObserver' in window)) { imgs.forEach(play); return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                io.unobserve(e.target);
+                play(e.target);
+            });
+        }, { rootMargin: '150px 0px' });
+        imgs.forEach(function (img) { io.observe(img); });
+    })();
+    </script>
+<!-- i18n:jsstrings -->
+    <div class="mdp-strings" hidden><p data-k="expand-image">Ingrandisci immagine</p><p data-k="expand-diagram">Ingrandisci diagramma</p><p data-k="close">Chiudi</p><p data-k="prev-image">Immagine precedente</p><p data-k="next-image">Immagine successiva</p><p data-k="image-viewer">Visualizzatore di immagini</p></div>
+    <!-- /i18n:jsstrings -->
+</body>
+</html>
