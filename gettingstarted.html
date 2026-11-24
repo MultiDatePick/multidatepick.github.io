@@ -350,6 +350,7 @@
                             <dl>
                                 <div><dt><strong>Date</strong><span class="ds-sr"> (needed)</span></dt><dd>Date</dd></div>
                                 <div><dt>Start time and End time</dt><dd>Time</dd></div>
+                                <div><dt>Duration</dt><dd>Number (minutes)</dd></div>
                                 <div><dt><strong>Resource</strong><span class="ds-sr"> (needed)</span></dt><dd>Lookup to Resource</dd></div>
                                 <div><dt>Status</dt><dd>Picklist</dd></div>
                                 <div><dt>End date</dt><dd>Date</dd></div>
@@ -362,6 +363,7 @@
                             <dl>
                                 <div><dt><strong>Name</strong><span class="ds-sr"> (needed)</span></dt><dd>Text</dd></div>
                                 <div><dt>Capacity</dt><dd>Number</dd></div>
+                                <div><dt>Daily limit</dt><dd>Number</dd></div>
                                 <div><dt>Opens and Closes</dt><dd>Time</dd></div>
                                 <div><dt>Start times offered</dt><dd>Text</dd></div>
                             </dl>
@@ -370,6 +372,9 @@
                     <ul class="ds-notes">
                         <li><strong>Bold</strong> = needed. The rest turn on extra features: <strong>Start time</strong> and <strong>End time</strong> give time slots, so leave them out to book whole days.</li>
                         <li>Booking a person instead? A Task or Event&rsquo;s Assigned To, or a custom object&rsquo;s Owner, is the resource. No resource object needed.</li>
+                        <li>No End time field? A <strong>Duration</strong> in minutes works with the Start time instead, and the calendar writes the minutes on every save, move and resize. <strong>Daily limit</strong> caps how many bookings a resource takes in one day, such as a technician&rsquo;s two jobs.</li>
+                        <li>Rooms kept as a picklist? Make them records: a room object with a name is what gets booked, drawn as a row and checked for clashes, and it holds each room&rsquo;s hours and capacity. Salesforce allows no custom lookups on Event, so to book rooms, use a custom booking object (or the MDP Schedule) with a lookup to the room.</li>
+                        <li>Booking object with record types? The wizard&rsquo;s <strong>Record Type</strong> setting gives new bookings one type or lets people choose, and the status list follows the type.</li>
                     </ul>
                 </div>
                 <div class="ds" id="shape-pick">
@@ -450,9 +455,9 @@
                 <p class="gs-lead">One managed package: the three components, the Setup Wizard and the Flow actions.</p>
                 <table class="gs-table kv">
                     <tbody>
-                        <tr><td>Install</td><td>On the <a href="/notify-me-at-launch.html">AppExchange listing</a> (at launch), click <b>Get It Now</b>. Install for admins only, all users, or specific profiles.</td></tr>
+                        <tr><td>Install</td><td>MultiDatePick is not on the AppExchange yet: <a href="/notify-me-at-launch.html">get notified at launch</a>, and try every feature on the <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/en-US/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=gettingstarted" target="_blank" rel="noopener">live demo</a> today, no login. Once it is listed, click <b>Get It Now</b> and install for admins only, all users, or specific profiles.</td></tr>
                         <tr><td>Check it</td><td><b>Setup, Installed Packages</b> lists MultiDatePick. In Lightning App Builder or Flow Builder, search <b>MultiDatePick</b> to see <b>Dates</b>, <b>Dates &amp; Times</b> and <b>Resource Booking</b>.</td></tr>
-                        <tr><td>Learn it</td><td>The package ships guided tours: <b>Intro to MultiDatePick</b> asks what you want to do, then starts the <b>Book</b>, <b>Pick</b> or <b>Plan</b> tour. Start them from the Setup Wizard.</td></tr>
+                        <tr><td>Learn it</td><td>The package ships guided tours: <b>Intro to MultiDatePick</b> asks what you want to do, then starts the <b>Book</b>, <b>Pick</b> or <b>Plan</b> tour. Start them from the Setup Wizard. In Professional Edition the tours don't run, and Salesforce allows five Screen Flows per org there in all: the four tours count toward them, so one is left for a flow of your own.</td></tr>
                         <tr><td>Languages</td><td>If your org uses the Translation Workbench, each user's language must be active in <b>Setup, Translation Workbench, Translation Language Settings</b> for MultiDatePick's translated picklist values, such as the status values, to show. Field labels and the calendar's own text are translated either way.</td></tr>
                     </tbody>
                 </table>
@@ -507,10 +512,10 @@
                 <ul class="gs-chain" aria-label="Import steps">
                     <li>Copy for Setup Wizard</li><li class="arr" aria-hidden="true">&rarr;</li>
                     <li>Import / Export tab</li><li class="arr" aria-hidden="true">&rarr;</li>
-                    <li>Map your fields</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>Match it to your org</li><li class="arr" aria-hidden="true">&rarr;</li>
                     <li>Deploy</li>
                 </ul>
-                <p class="gs-note"><b>Different object names in your org?</b> The import lists every object and field the JSON names, under <b>Map missing fields to your org's schema</b>, each with a dropdown of yours: the ones your org has are marked OK, the rest Missing. Look them over, change any you like, then <b>Apply &amp; Deploy</b>.</p>
+                <p class="gs-note"><b>Your own names are expected.</b> The import walks you through it, each answer already filled in with the closest match in your org: <b>Pick your objects</b> (where the bookings live, and what is booked), <b>Match each field</b> by its job, such as the day, the start time or the status, or choose <b>Don't use</b> for an optional one, <b>Match status values</b> to your picklist&rsquo;s values, and in <b>Actions</b> pick one of your Flows or skip a button. Then <b>Apply &amp; Deploy</b>, or <b>Open in the wizard first</b> to see it on Review before anything is saved.</p>
             </div>
         </section>
 
@@ -526,6 +531,7 @@
                         <tr><td>App and Home pages</td><td><b>Config Name</b>. <b>Static Parent Record Id</b> only when the wizard's answer is One record's.</td></tr>
                     </tbody>
                 </table>
+                <p class="gs-note"><b>On the page or behind a button.</b> <b>Show Inline (Always Visible)</b> is ticked when you drag a calendar onto a page, so the calendar sits on the page. Untick it to show a button that opens the calendar in a pop-up instead.</p>
                 <p class="gs-note"><b>New page? Activate it.</b> After <b>Save</b>, click <b>Activate</b> when Lightning App Builder asks, and assign the page as the org default or to an app and profile. Until a new page is activated, no one sees it.</p>
                 <p class="gs-note"><b>Load Existing Dates</b> shows dates already saved. Saving only adds records; it never deletes existing ones.</p>
 
@@ -568,6 +574,14 @@
                         <figcaption>The running flow: three days picked, three dates passed on.</figcaption>
                     </figure>
                 </div>
+                <h3 id="set-own-date">Set a date on the page&rsquo;s own record</h3>
+                <p class="gs-lead">MultiDatePick saves picks as records of their own. To write one picked date into a Date field on the record itself, such as a Follow-up Date on an Account, use a small Screen Flow.</p>
+                <ol style="margin:0 0 12px;padding-left:22px;line-height:1.7;">
+                    <li>In Flow Builder, make a <b>Screen Flow</b> with a Text variable named <code>recordId</code>, available for input.</li>
+                    <li>Add a Screen with <b>Dates</b>. Set <b>Max Dates Allowed</b> to 1 and leave <b>Parent Record Id</b> blank, so the pick goes to the flow instead of being saved.</li>
+                    <li>Add a <b>Loop</b> over the component&rsquo;s <b>Selected Dates (Output)</b> (it holds the one date), and inside it an <b>Update Records</b> element: the record whose Id is <code>{!recordId}</code>, your Date field set to a formula <code>DATEVALUE({!Loop_Item})</code>, with your loop&rsquo;s own name in place of Loop_Item.</li>
+                    <li>Save, activate, and add the flow to the record page with the <b>Flow</b> component (pass the record Id into <code>recordId</code>), or as a quick action.</li>
+                </ol>
             </div>
         </section>
 

@@ -220,7 +220,23 @@
                 </details>
                 <details id="faq-booking-limits">
                     <summary>Can I limit bookings per person or per day?</summary>
-                    <p>Yes. Booking Length books a whole appointment in one click, Max Bookings per Day caps how many separate bookings someone picks on one day, and Limit per Person caps each client&rsquo;s upcoming bookings, counted by an email or text field, or a Contact, Lead, Account or User lookup. The server checks Limit per Person at every save, so reloading the page never resets it. Staff can book past it after a confirmation; site visitors cannot.</p>
+                    <p>Yes. Booking Length books a whole appointment in one click, Max Bookings per Day caps how many separate bookings someone picks on one day, and Limit per Person caps each client&rsquo;s upcoming bookings, counted by an email or text field, or a Contact, Lead, Account or User lookup. The server checks Limit per Person at every save, so reloading the page never resets it. Staff can book past it after a confirmation; site visitors cannot. Daily Limit Field caps how many bookings one resource takes in a day, such as a technician&rsquo;s two jobs: it reads a Number field on the resource, a full day closes for that resource, and 0 takes no bookings.</p>
+                </details>
+                <details id="faq-duration-field">
+                    <summary>Can I store a duration instead of an end time?</summary>
+                    <p>Yes. <strong>Duration Field</strong> takes a Number field that holds each booking&rsquo;s length in minutes, on Dates &amp; Times and Resource Booking. With an End Time field as well, every save, move and resize writes the minutes beside the start and the end, so 10:00 to 10:45 saves 45. With no End Time field, each end is the start plus the minutes, so an object that keeps only a start time and a duration works as it is.</p>
+                </details>
+                <details id="faq-rooms-picklist">
+                    <summary>Our rooms are a picklist. Can people book them?</summary>
+                    <p>Make the rooms records: an object of rooms with a name is what Resource Booking books, shows as rows and checks for clashes, and each room keeps its own hours, capacity and closures there. A picklist value can do none of that; at most, one Dates &amp; Times calendar per value can be filtered to it. If your bookings are Events, note that Salesforce does not allow custom lookup fields on Event, so book rooms on a custom booking object (or the MDP Schedule that comes with MultiDatePick) with a lookup to the room.</p>
+                </details>
+                <details id="faq-record-types">
+                    <summary>Does it work with record types?</summary>
+                    <p>Yes. The <strong>Record Type</strong> setting in the Setup Wizard gives every new booking one fixed record type, or lets people choose from the types they can create. The status list then offers only the values of that record type. Left blank, each person gets their own default record type.</p>
+                </details>
+                <details id="faq-filter-busy">
+                    <summary>Can a calendar filtered to one room ignore the other rooms&rsquo; bookings?</summary>
+                    <p>Yes, on Dates &amp; Times. With <strong>Show All Records</strong> and a <strong>Record Filter</strong>, turn on <strong>Filter also decides what&rsquo;s busy</strong>: only records the filter shows take up a time, so a calendar filtered to the Garden Room ignores bookings for other rooms, while two Garden Room bookings still can&rsquo;t share a time. It is off by default. Careful with a filter on the viewer&rsquo;s own bookings (ME): turned on, other people&rsquo;s bookings no longer block a time.</p>
                 </details>
                 <details id="faq-only-these-times">
                     <summary>Can I offer only certain start times?</summary>
@@ -324,6 +340,10 @@
                     <summary>Does it work inside Salesforce Flows?</summary>
                     <p>Yes. All three are Flow screen components. Set Config Name and every option comes from your saved config. A bundled Flow action turns the selection into a list you can loop over. See the <a href="/flowcheatsheet.html">Screen Flow Guide</a>.</p>
                 </details>
+                <details id="faq-set-own-date">
+                    <summary>Can the calendar set a date field on the record it sits on?</summary>
+                    <p>Yes, with a small Screen Flow: put Dates on a screen with <strong>Max Dates Allowed</strong> 1 and no Parent Record Id, then an <strong>Update Records</strong> element writes the picked date to the record&rsquo;s own Date field. The steps are in <a href="/gettingstarted.html#set-own-date">Getting Started</a>.</p>
+                </details>
                 <h2 class="faq-section-h">Pricing &amp; availability</h2>
                 <details id="faq-pricing">
                     <summary>How much does MultiDatePick cost?</summary>
@@ -343,7 +363,7 @@
                 </details>
                 <details id="faq-salesforce-editions-supported">
                     <summary>Which Salesforce editions are supported?</summary>
-                    <p>Any edition that supports Lightning Web Components and Screen Flows: Professional, Enterprise, Unlimited, Performance, Developer and Salesforce Platform, plus industry clouds such as Nonprofit, Education, Health, Financial Services, Public Sector and Manufacturing. In Professional Edition everything works except the built-in guided tours and the Flow Parser action, because Professional doesn't run Apex Flow actions. Essentials (Starter Suite) is not supported.</p>
+                    <p>Any edition that supports Lightning Web Components and Screen Flows: Professional, Enterprise, Unlimited, Performance, Developer and Salesforce Platform, plus industry clouds such as Nonprofit, Education, Health, Financial Services, Public Sector and Manufacturing. In Professional Edition everything works except the built-in guided tours and the Flow Parser action, because Professional doesn't run Apex Flow actions. Professional Edition also allows five Screen Flows per org in all, and the package's four tours count toward them, so one is left for a Screen Flow of your own. Essentials (Starter Suite) is not supported.</p>
                 </details>
                 <details id="faq-shield-platform-encryption">
                     <summary>Does it work with Shield Platform Encryption?</summary>
@@ -527,7 +547,39 @@
           "name": "Can I limit bookings per person or per day?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. Booking Length books a whole appointment in one click, Max Bookings per Day caps how many separate bookings someone picks on one day, and Limit per Person caps each client's upcoming bookings, counted by an email or text field, or a Contact, Lead, Account or User lookup. The server checks Limit per Person at every save, so reloading the page never resets it. Staff can book past it after a confirmation; site visitors cannot."
+            "text": "Yes. Booking Length books a whole appointment in one click, Max Bookings per Day caps how many separate bookings someone picks on one day, and Limit per Person caps each client's upcoming bookings, counted by an email or text field, or a Contact, Lead, Account or User lookup. The server checks Limit per Person at every save, so reloading the page never resets it. Staff can book past it after a confirmation; site visitors cannot. Daily Limit Field caps how many bookings one resource takes in a day, such as a technician's two jobs: it reads a Number field on the resource, a full day closes for that resource, and 0 takes no bookings."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I store a duration instead of an end time?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Duration Field takes a Number field that holds each booking's length in minutes, on Dates & Times and Resource Booking. With an End Time field as well, every save, move and resize writes the minutes beside the start and the end, so 10:00 to 10:45 saves 45. With no End Time field, each end is the start plus the minutes, so an object that keeps only a start time and a duration works as it is."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Our rooms are a picklist. Can people book them?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Make the rooms records: an object of rooms with a name is what Resource Booking books, shows as rows and checks for clashes, and each room keeps its own hours, capacity and closures there. A picklist value can do none of that; at most, one Dates & Times calendar per value can be filtered to it. If your bookings are Events, note that Salesforce does not allow custom lookup fields on Event, so book rooms on a custom booking object (or the MDP Schedule that comes with MultiDatePick) with a lookup to the room."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it work with record types?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The Record Type setting in the Setup Wizard gives every new booking one fixed record type, or lets people choose from the types they can create. The status list then offers only the values of that record type. Left blank, each person gets their own default record type."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can a calendar filtered to one room ignore the other rooms' bookings?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, on Dates & Times. With Show All Records and a Record Filter, turn on Filter also decides what's busy: only records the filter shows take up a time, so a calendar filtered to the Garden Room ignores bookings for other rooms, while two Garden Room bookings still can't share a time. It is off by default. Careful with a filter on the viewer's own bookings (ME): turned on, other people's bookings no longer block a time."
           }
         },
         {
@@ -732,6 +784,14 @@
         },
         {
           "@type": "Question",
+          "name": "Can the calendar set a date field on the record it sits on?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, with a small Screen Flow: put Dates on a screen with Max Dates Allowed 1 and no Parent Record Id, then an Update Records element writes the picked date to the record's own Date field. The steps are in Getting Started."
+          }
+        },
+        {
+          "@type": "Question",
           "name": "How much does MultiDatePick cost?",
           "acceptedAnswer": {
             "@type": "Answer",
@@ -767,7 +827,7 @@
           "name": "Which Salesforce editions are supported?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Any edition that supports Lightning Web Components and Screen Flows: Professional, Enterprise, Unlimited, Performance, Developer and Salesforce Platform, plus industry clouds such as Nonprofit, Education, Health, Financial Services, Public Sector and Manufacturing. In Professional Edition everything works except the built-in guided tours and the Flow Parser action, because Professional doesn't run Apex Flow actions. Essentials (Starter Suite) is not supported."
+            "text": "Any edition that supports Lightning Web Components and Screen Flows: Professional, Enterprise, Unlimited, Performance, Developer and Salesforce Platform, plus industry clouds such as Nonprofit, Education, Health, Financial Services, Public Sector and Manufacturing. In Professional Edition everything works except the built-in guided tours and the Flow Parser action, because Professional doesn't run Apex Flow actions. Professional Edition also allows five Screen Flows per org in all, and the package's four tours count toward them, so one is left for a Screen Flow of your own. Essentials (Starter Suite) is not supported."
           }
         },
         {

@@ -209,7 +209,23 @@
                 </details>
                 <details id="faq-booking-limits">
                     <summary>Kann ich Buchungen pro Person oder pro Tag begrenzen?</summary>
-                    <p>Ja. „Buchungsdauer“ bucht einen ganzen Termin mit einem Klick, „Max. Buchungen pro Tag“ begrenzt, wie viele einzelne Buchungen jemand an einem Tag wählt, und „Limit pro Person“ begrenzt die anstehenden Buchungen jedes Kunden, gezählt über ein E-Mail- oder Textfeld oder ein Nachschlagefeld auf Kontakt, Lead, Account oder Benutzer. Der Server prüft „Limit pro Person“ bei jedem Speichern, daher setzt ein Neuladen der Seite es nie zurück. Mitarbeitende können es nach einer Bestätigung überschreiten, Website-Besucher nicht.</p>
+                    <p>Ja. „Buchungsdauer“ bucht einen ganzen Termin mit einem Klick, „Max. Buchungen pro Tag“ begrenzt, wie viele einzelne Buchungen jemand an einem Tag wählt, und „Limit pro Person“ begrenzt die anstehenden Buchungen jedes Kunden, gezählt über ein E-Mail- oder Textfeld oder ein Nachschlagefeld auf Kontakt, Lead, Account oder Benutzer. Der Server prüft „Limit pro Person“ bei jedem Speichern, daher setzt ein Neuladen der Seite es nie zurück. Mitarbeitende können es nach einer Bestätigung überschreiten, Website-Besucher nicht. „Daily Limit Field“ begrenzt, wie viele Buchungen eine Ressource an einem Tag annimmt, etwa die zwei Aufträge eines Technikers: Es liest ein Zahlenfeld an der Ressource, ein voller Tag wird für diese Ressource geschlossen, und bei 0 nimmt sie keine Buchungen an.</p>
+                </details>
+                <details id="faq-duration-field">
+                    <summary>Kann ich statt einer Endzeit eine Dauer speichern?</summary>
+                    <p>Ja. <strong>Duration Field</strong> nimmt ein Zahlenfeld auf, das die Länge jeder Buchung in Minuten enthält, bei Dates &amp; Times und Resource Booking. Gibt es zusätzlich ein Endzeitfeld, schreibt jedes Speichern, Verschieben und Ändern der Größe die Minuten neben Beginn und Ende, sodass 10:00 bis 10:45 als 45 gespeichert wird. Ohne Endzeitfeld ist jedes Ende der Beginn plus die Minuten; ein Objekt, das nur eine Startzeit und eine Dauer speichert, funktioniert also unverändert.</p>
+                </details>
+                <details id="faq-rooms-picklist">
+                    <summary>Unsere Räume sind eine Auswahlliste. Können sie trotzdem gebucht werden?</summary>
+                    <p>Machen Sie die Räume zu Datensätzen: Ein Objekt mit Räumen und einem Namen ist das, was Resource Booking bucht, als Zeilen anzeigt und auf Überschneidungen prüft, und jeder Raum hält dort seine eigenen Öffnungszeiten, seine Kapazität und seine Schließtage. Ein Auswahllistenwert kann nichts davon; höchstens lässt sich pro Wert ein Kalender Dates &amp; Times darauf filtern. Wenn Ihre Buchungen Ereignisse (Event) sind: Salesforce erlaubt keine benutzerdefinierten Nachschlagefelder auf Event, buchen Sie Räume also auf einem eigenen Buchungsobjekt (oder dem mit MultiDatePick gelieferten MDP Schedule) mit einem Nachschlagefeld auf den Raum.</p>
+                </details>
+                <details id="faq-record-types">
+                    <summary>Funktioniert es mit Datensatztypen?</summary>
+                    <p>Ja. Die Einstellung <strong>Datensatztyp</strong> im Einrichtungsassistenten gibt jeder neuen Buchung einen festen Datensatztyp oder lässt Personen aus den Typen wählen, die sie anlegen dürfen. Die Statusliste bietet dann nur die Werte dieses Datensatztyps an. Leer gelassen erhält jede Person ihren eigenen Standard-Datensatztyp.</p>
+                </details>
+                <details id="faq-filter-busy">
+                    <summary>Kann ein auf einen Raum gefilterter Kalender die Buchungen der anderen Räume ignorieren?</summary>
+                    <p>Ja, bei Dates &amp; Times. Mit <strong>Alle Datensätze anzeigen</strong> und einem <strong>Datensatzfilter</strong> schalten Sie <strong>Filter bestimmt auch, was belegt ist</strong> ein: Nur Datensätze, die der Filter zeigt, belegen eine Zeit. Ein auf den Garden Room gefilterter Kalender ignoriert also Buchungen anderer Räume, während zwei Buchungen im Garden Room weiterhin nicht dieselbe Zeit belegen können. Standardmäßig ist es aus. Vorsicht bei einem Filter auf die eigenen Buchungen der betrachtenden Person (ME): Eingeschaltet blockieren die Buchungen anderer keine Zeit mehr.</p>
                 </details>
                 <details id="faq-only-these-times">
                     <summary>Kann ich nur bestimmte Startzeiten anbieten?</summary>
@@ -313,6 +329,10 @@
                     <summary>Funktioniert es in Salesforce Flows?</summary>
                     <p>Ja. Alle drei sind Komponenten für Flow-Bildschirme. Setzen Sie Config Name, und jede Option kommt aus Ihrer gespeicherten Konfiguration. Eine mitgelieferte Flow-Aktion macht aus der Auswahl eine Liste, die Sie in einer Schleife durchlaufen können. Siehe den <a href="/de/salesforce-bildschirm-flow-leitfaden.html">Leitfaden Bildschirm-Flow</a>.</p>
                 </details>
+                <details id="faq-set-own-date">
+                    <summary>Kann der Kalender ein Datumsfeld am Datensatz setzen, auf dem er sitzt?</summary>
+                    <p>Ja, mit einem kleinen Bildschirm-Flow: Legen Sie Dates auf einen Bildschirm mit <strong>Max Dates Allowed</strong> 1 und ohne Parent Record Id; ein Element <strong>Datensätze aktualisieren</strong> schreibt dann das gewählte Datum in das eigene Datumsfeld des Datensatzes. Die Schritte stehen unter <a href="/de/erste-schritte.html#set-own-date">Erste Schritte</a>.</p>
+                </details>
                 <h2 class="faq-section-h">Preise &amp; Verfügbarkeit</h2>
                 <details id="faq-pricing">
                     <summary>Was kostet MultiDatePick?</summary>
@@ -332,7 +352,7 @@
                 </details>
                 <details id="faq-salesforce-editions-supported">
                     <summary>Welche Salesforce-Editionen werden unterstützt?</summary>
-                    <p>Jede Edition, die Lightning Web Components und Bildschirm-Flows unterstützt: Professional, Enterprise, Unlimited, Performance, Developer und Salesforce Platform sowie Branchen-Clouds wie Nonprofit, Education, Health, Financial Services, Public Sector und Manufacturing. In der Professional Edition funktioniert alles außer den integrierten geführten Touren und der Aktion Flow Parser, weil Professional keine Apex-Flow-Aktionen ausführt. Essentials (Starter Suite) wird nicht unterstützt.</p>
+                    <p>Jede Edition, die Lightning Web Components und Bildschirm-Flows unterstützt: Professional, Enterprise, Unlimited, Performance, Developer und Salesforce Platform sowie Branchen-Clouds wie Nonprofit, Education, Health, Financial Services, Public Sector und Manufacturing. In der Professional Edition funktioniert alles außer den integrierten geführten Touren und der Aktion Flow Parser, weil Professional keine Apex-Flow-Aktionen ausführt. Die Professional Edition erlaubt außerdem insgesamt fünf Bildschirm-Flows pro Org, und die vier Touren des Pakets zählen dazu, sodass einer für einen eigenen Bildschirm-Flow bleibt. Essentials (Starter Suite) wird nicht unterstützt.</p>
                 </details>
                 <details id="faq-shield-platform-encryption">
                     <summary>Funktioniert es mit Shield Platform Encryption?</summary>
@@ -512,7 +532,39 @@
                 "name": "Kann ich Buchungen pro Person oder pro Tag begrenzen?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Ja. „Buchungsdauer“ bucht einen ganzen Termin mit einem Klick, „Max. Buchungen pro Tag“ begrenzt, wie viele einzelne Buchungen jemand an einem Tag wählt, und „Limit pro Person“ begrenzt die anstehenden Buchungen jedes Kunden, gezählt über ein E-Mail- oder Textfeld oder ein Nachschlagefeld auf Kontakt, Lead, Account oder Benutzer. Der Server prüft „Limit pro Person“ bei jedem Speichern, daher setzt ein Neuladen der Seite es nie zurück. Mitarbeitende können es nach einer Bestätigung überschreiten, Website-Besucher nicht."
+                    "text": "Ja. „Buchungsdauer“ bucht einen ganzen Termin mit einem Klick, „Max. Buchungen pro Tag“ begrenzt, wie viele einzelne Buchungen jemand an einem Tag wählt, und „Limit pro Person“ begrenzt die anstehenden Buchungen jedes Kunden, gezählt über ein E-Mail- oder Textfeld oder ein Nachschlagefeld auf Kontakt, Lead, Account oder Benutzer. Der Server prüft „Limit pro Person“ bei jedem Speichern, daher setzt ein Neuladen der Seite es nie zurück. Mitarbeitende können es nach einer Bestätigung überschreiten, Website-Besucher nicht. „Daily Limit Field“ begrenzt, wie viele Buchungen eine Ressource an einem Tag annimmt, etwa die zwei Aufträge eines Technikers: Es liest ein Zahlenfeld an der Ressource, ein voller Tag wird für diese Ressource geschlossen, und bei 0 nimmt sie keine Buchungen an."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Kann ich statt einer Endzeit eine Dauer speichern?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Ja. Duration Field nimmt ein Zahlenfeld auf, das die Länge jeder Buchung in Minuten enthält, bei Dates & Times und Resource Booking. Gibt es zusätzlich ein Endzeitfeld, schreibt jedes Speichern, Verschieben und Ändern der Größe die Minuten neben Beginn und Ende, sodass 10:00 bis 10:45 als 45 gespeichert wird. Ohne Endzeitfeld ist jedes Ende der Beginn plus die Minuten; ein Objekt, das nur eine Startzeit und eine Dauer speichert, funktioniert also unverändert."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Unsere Räume sind eine Auswahlliste. Können sie trotzdem gebucht werden?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Machen Sie die Räume zu Datensätzen: Ein Objekt mit Räumen und einem Namen ist das, was Resource Booking bucht, als Zeilen anzeigt und auf Überschneidungen prüft, und jeder Raum hält dort seine eigenen Öffnungszeiten, seine Kapazität und seine Schließtage. Ein Auswahllistenwert kann nichts davon; höchstens lässt sich pro Wert ein Kalender Dates & Times darauf filtern. Wenn Ihre Buchungen Ereignisse (Event) sind: Salesforce erlaubt keine benutzerdefinierten Nachschlagefelder auf Event, buchen Sie Räume also auf einem eigenen Buchungsobjekt (oder dem mit MultiDatePick gelieferten MDP Schedule) mit einem Nachschlagefeld auf den Raum."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Funktioniert es mit Datensatztypen?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Ja. Die Einstellung Datensatztyp im Einrichtungsassistenten gibt jeder neuen Buchung einen festen Datensatztyp oder lässt Personen aus den Typen wählen, die sie anlegen dürfen. Die Statusliste bietet dann nur die Werte dieses Datensatztyps an. Leer gelassen erhält jede Person ihren eigenen Standard-Datensatztyp."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Kann ein auf einen Raum gefilterter Kalender die Buchungen der anderen Räume ignorieren?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Ja, bei Dates & Times. Mit Alle Datensätze anzeigen und einem Datensatzfilter schalten Sie „Filter bestimmt auch, was belegt ist“ ein: Nur Datensätze, die der Filter zeigt, belegen eine Zeit. Ein auf den Garden Room gefilterter Kalender ignoriert also Buchungen anderer Räume, während zwei Buchungen im Garden Room weiterhin nicht dieselbe Zeit belegen können. Standardmäßig ist es aus. Vorsicht bei einem Filter auf die eigenen Buchungen der betrachtenden Person (ME): Eingeschaltet blockieren die Buchungen anderer keine Zeit mehr."
                 }
             },
             {
@@ -717,6 +769,14 @@
             },
             {
                 "@type": "Question",
+                "name": "Kann der Kalender ein Datumsfeld am Datensatz setzen, auf dem er sitzt?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Ja, mit einem kleinen Bildschirm-Flow: Legen Sie Dates auf einen Bildschirm mit Max Dates Allowed 1 und ohne Parent Record Id; ein Element Datensätze aktualisieren schreibt dann das gewählte Datum in das eigene Datumsfeld des Datensatzes. Die Schritte stehen unter Erste Schritte."
+                }
+            },
+            {
+                "@type": "Question",
                 "name": "Was kostet MultiDatePick?",
                 "acceptedAnswer": {
                     "@type": "Answer",
@@ -752,7 +812,7 @@
                 "name": "Welche Salesforce-Editionen werden unterstützt?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Jede Edition, die Lightning Web Components und Bildschirm-Flows unterstützt: Professional, Enterprise, Unlimited, Performance, Developer und Salesforce Platform sowie Branchen-Clouds wie Nonprofit, Education, Health, Financial Services, Public Sector und Manufacturing. In der Professional Edition funktioniert alles außer den integrierten geführten Touren und der Aktion Flow Parser, weil Professional keine Apex-Flow-Aktionen ausführt. Essentials (Starter Suite) wird nicht unterstützt."
+                    "text": "Jede Edition, die Lightning Web Components und Bildschirm-Flows unterstützt: Professional, Enterprise, Unlimited, Performance, Developer und Salesforce Platform sowie Branchen-Clouds wie Nonprofit, Education, Health, Financial Services, Public Sector und Manufacturing. In der Professional Edition funktioniert alles außer den integrierten geführten Touren und der Aktion Flow Parser, weil Professional keine Apex-Flow-Aktionen ausführt. Die Professional Edition erlaubt außerdem insgesamt fünf Bildschirm-Flows pro Org, und die vier Touren des Pakets zählen dazu, sodass einer für einen eigenen Bildschirm-Flow bleibt. Essentials (Starter Suite) wird nicht unterstützt."
                 }
             },
             {

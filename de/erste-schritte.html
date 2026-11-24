@@ -469,6 +469,7 @@
                             <dl>
                                 <div><dt><strong>Datum</strong><span class="ds-sr"> (erforderlich)</span></dt><dd>Datum</dd></div>
                                 <div><dt>Startzeit und Endzeit</dt><dd>Uhrzeit</dd></div>
+                                <div><dt>Dauer</dt><dd>Zahl (Minuten)</dd></div>
                                 <div><dt><strong>Ressource</strong><span class="ds-sr"> (erforderlich)</span></dt><dd>Nachschlagefeld auf Ressource</dd></div>
                                 <div><dt>Status</dt><dd>Auswahlliste</dd></div>
                                 <div><dt>Enddatum</dt><dd>Datum</dd></div>
@@ -481,6 +482,7 @@
                             <dl>
                                 <div><dt><strong>Name</strong><span class="ds-sr"> (erforderlich)</span></dt><dd>Text</dd></div>
                                 <div><dt>Kapazität</dt><dd>Zahl</dd></div>
+                                <div><dt>Tageslimit</dt><dd>Zahl</dd></div>
                                 <div><dt>Öffnet und schließt</dt><dd>Uhrzeit</dd></div>
                                 <div><dt>Angebotene Startzeiten</dt><dd>Text</dd></div>
                             </dl>
@@ -489,6 +491,9 @@
                     <ul class="ds-notes">
                         <li><strong>Fett</strong> = erforderlich. Der Rest schaltet weitere Funktionen frei: <strong>Startzeit</strong> und <strong>Endzeit</strong> ergeben Zeitfenster; lassen Sie sie weg, um ganze Tage zu buchen.</li>
                         <li>Sie buchen stattdessen eine Person? Dann ist das Feld „Zugewiesen zu“ einer Aufgabe oder eines Ereignisses oder der Inhaber eines benutzerdefinierten Objekts die Ressource. Kein Ressourcenobjekt nötig.</li>
+                        <li>Kein Endzeitfeld? Eine <strong>Dauer</strong> in Minuten funktioniert stattdessen zusammen mit der Startzeit, und der Kalender schreibt die Minuten bei jedem Speichern, Verschieben und Ändern der Größe. <strong>Tageslimit</strong> begrenzt, wie viele Buchungen eine Ressource an einem Tag annimmt, etwa die zwei Aufträge eines Technikers.</li>
+                        <li>Räume als Auswahlliste? Machen Sie sie zu Datensätzen: Ein Raumobjekt mit einem Namen ist das, was gebucht, als Zeile gezeichnet und auf Überschneidungen geprüft wird, und es hält die Öffnungszeiten und die Kapazität jedes Raums. Salesforce erlaubt keine benutzerdefinierten Nachschlagefelder auf Event; um Räume zu buchen, nutzen Sie daher ein eigenes Buchungsobjekt (oder MDP Schedule) mit einem Nachschlagefeld auf den Raum.</li>
+                        <li>Buchungsobjekt mit Datensatztypen? Die Einstellung <strong>Datensatztyp</strong> im Assistenten gibt neuen Buchungen einen festen Typ oder lässt Personen wählen, und die Statusliste richtet sich nach dem Typ.</li>
                     </ul>
                 </div>
                 <div class="ds" id="shape-pick">
@@ -569,9 +574,9 @@
                 <p class="gs-lead">Ein verwaltetes Paket: die drei Komponenten, der Einrichtungsassistent und die Flow-Aktionen.</p>
                 <table class="gs-table kv">
                     <tbody>
-                        <tr><td>Installieren</td><td>Klicken Sie im <a href="/de/zum-start-benachrichtigen.html">AppExchange-Eintrag</a> (zum Start) auf <b>Get It Now</b>. Installieren Sie nur für Admins, für alle Benutzer oder für bestimmte Profile.</td></tr>
+                        <tr><td>Installieren</td><td>MultiDatePick ist noch nicht auf der AppExchange: <a href="/de/zum-start-benachrichtigen.html">Lassen Sie sich zum Start benachrichtigen</a> und testen Sie schon heute jede Funktion in der <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/de/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=gettingstarted" target="_blank" rel="noopener">Live-Demo</a>, ohne Anmeldung. Sobald es gelistet ist, klicken Sie auf <b>Get It Now</b> und installieren es nur für Admins, für alle Benutzer oder für bestimmte Profile.</td></tr>
                         <tr><td>Prüfen</td><td>Unter <b>Setup, Installierte Pakete</b> steht MultiDatePick. Suchen Sie im Lightning App Builder oder Flow Builder nach <b>MultiDatePick</b>, um <b>Dates</b>, <b>Dates &amp; Times</b> und <b>Resource Booking</b> zu sehen.</td></tr>
-                        <tr><td>Kennenlernen</td><td>Das Paket bringt geführte Touren mit: <b>Intro to MultiDatePick</b> fragt, was Sie vorhaben, und startet dann die Tour <b>Buchen</b>, <b>Auswählen</b> oder <b>Planen</b>. Starten Sie sie aus dem Einrichtungsassistenten.</td></tr>
+                        <tr><td>Kennenlernen</td><td>Das Paket bringt geführte Touren mit: <b>Intro to MultiDatePick</b> fragt, was Sie vorhaben, und startet dann die Tour <b>Buchen</b>, <b>Auswählen</b> oder <b>Planen</b>. Starten Sie sie aus dem Einrichtungsassistenten. In der Professional Edition laufen die Touren nicht, und Salesforce erlaubt dort insgesamt fünf Bildschirm-Flows pro Org: Die vier Touren zählen dazu, sodass einer für einen eigenen Flow bleibt.</td></tr>
                         <tr><td>Sprachen</td><td>Wenn Ihre Org die Übersetzungs-Workbench (Translation Workbench) nutzt, muss die Sprache jedes Benutzers unter <b>Setup, Übersetzungs-Workbench, Übersetzungs&shy;sprach&shy;einstellungen</b> aktiv sein, damit die übersetzten Auswahllistenwerte von MultiDatePick, etwa die Statuswerte, angezeigt werden. Feldbeschriftungen und die Texte des Kalenders selbst sind in jedem Fall übersetzt.</td></tr>
                     </tbody>
                 </table>
@@ -626,10 +631,10 @@
                 <ul class="gs-chain" aria-label="Import in Schritten">
                     <li>Für den Einrichtungsassistenten kopieren</li><li class="arr" aria-hidden="true">&rarr;</li>
                     <li>Registerkarte Importieren / Exportieren</li><li class="arr" aria-hidden="true">&rarr;</li>
-                    <li>Felder zuordnen</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>An Ihre Org anpassen</li><li class="arr" aria-hidden="true">&rarr;</li>
                     <li>Bereitstellen</li>
                 </ul>
-                <p class="gs-note"><b>Andere Objektnamen in Ihrer Org?</b> Der Import listet unter <b>Fehlende Felder dem Schema Ihrer Org zuordnen</b> jedes Objekt und Feld aus dem JSON auf, jeweils mit einem Dropdown Ihrer eigenen: Was Ihre Org hat, ist mit OK markiert, der Rest mit Fehlt. Prüfen Sie die Liste, ändern Sie nach Bedarf, dann <b>Anwenden &amp; bereitstellen</b>.</p>
+                <p class="gs-note"><b>Eigene Namen sind vorgesehen.</b> Der Import führt Sie Schritt für Schritt hindurch, jede Antwort schon mit der passendsten Entsprechung in Ihrer Org ausgefüllt: <b>Objekte wählen</b> (wo die Buchungen liegen und was gebucht wird), <b>Felder zuordnen</b> nach ihrer Aufgabe, etwa Tag, Startzeit oder Status, oder <b>Nicht verwenden</b> für ein optionales Feld wählen, <b>Statuswerte zuordnen</b> zu den Werten Ihrer Auswahlliste und unter <b>Aktionen</b> einen Ihrer Flows wählen oder eine Schaltfläche weglassen. Dann <b>Anwenden &amp; bereitstellen</b> oder <b>Zuerst im Assistenten öffnen</b>, um alles unter Prüfen zu sehen, bevor etwas gespeichert wird.</p>
             </div>
         </section>
 
@@ -645,6 +650,7 @@
                         <tr><td>App- und Startseiten</td><td><b>Config Name</b>. <b>Static Parent Record Id</b> nur, wenn die Antwort im Assistenten „Eines bestimmten Datensatzes“ lautet.</td></tr>
                     </tbody>
                 </table>
+                <p class="gs-note"><b>Auf der Seite oder hinter einer Schaltfläche.</b> <b>Show Inline (Always Visible)</b> ist angehakt, wenn Sie einen Kalender auf eine Seite ziehen, sodass der Kalender direkt auf der Seite steht. Entfernen Sie den Haken, um stattdessen eine Schaltfläche anzuzeigen, die den Kalender in einem Pop-up öffnet.</p>
                 <p class="gs-note"><b>Neue Seite? Aktivieren Sie sie.</b> Klicken Sie nach <b>Speichern</b> auf <b>Aktivieren</b>, wenn der Lightning App Builder danach fragt, und weisen Sie die Seite als Organisationsstandard oder einer App und einem Profil zu. Solange eine neue Seite nicht aktiviert ist, sieht sie niemand.</p>
                 <p class="gs-note"><b>Load Existing Dates (Vorhandene Daten laden)</b> zeigt bereits gespeicherte Termine. Speichern fügt nur Datensätze hinzu; vorhandene werden nie gelöscht.</p>
 
@@ -687,6 +693,14 @@
                         <figcaption>Der laufende Flow: drei Tage gewählt, drei Termine weitergegeben.</figcaption>
                     </figure>
                 </div>
+                <h3 id="set-own-date">Ein Datum am eigenen Datensatz der Seite setzen</h3>
+                <p class="gs-lead">MultiDatePick speichert Auswahlen als eigene Datensätze. Um ein gewähltes Datum in ein Datumsfeld des Datensatzes selbst zu schreiben, etwa ein Nachfassdatum an einem Account, verwenden Sie einen kleinen Bildschirm-Flow.</p>
+                <ol style="margin:0 0 12px;padding-left:22px;line-height:1.7;">
+                    <li>Erstellen Sie im Flow Builder einen <b>Bildschirm-Flow</b> mit einer Textvariablen namens <code>recordId</code>, für Eingabe verfügbar.</li>
+                    <li>Fügen Sie einen Bildschirm mit <b>Dates</b> hinzu. Setzen Sie <b>Max Dates Allowed</b> auf 1 und lassen Sie <b>Parent Record Id</b> leer, damit die Auswahl an den Flow geht, statt gespeichert zu werden.</li>
+                    <li>Fügen Sie eine <b>Schleife</b> über <b>Selected Dates (Output)</b> der Komponente hinzu (sie enthält das eine Datum) und darin ein Element <b>Datensätze aktualisieren</b>: der Datensatz mit der Id <code>{!recordId}</code>, Ihr Datumsfeld auf die Formel <code>DATEVALUE({!Loop_Item})</code> gesetzt, mit dem Namen Ihrer eigenen Schleife anstelle von Loop_Item.</li>
+                    <li>Speichern, aktivieren und den Flow mit der Komponente <b>Flow</b> zur Datensatzseite hinzufügen (die Datensatz-Id an <code>recordId</code> übergeben) oder als Schnellaktion einbinden.</li>
+                </ol>
             </div>
         </section>
 

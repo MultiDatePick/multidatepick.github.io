@@ -469,6 +469,7 @@
                             <dl>
                                 <div><dt><strong>Data</strong><span class="ds-sr"> (obbligatorio)</span></dt><dd>Data</dd></div>
                                 <div><dt>Ora di inizio e ora di fine</dt><dd>Ora</dd></div>
+                                <div><dt>Durata</dt><dd>Numero (minuti)</dd></div>
                                 <div><dt><strong>Risorsa</strong><span class="ds-sr"> (obbligatorio)</span></dt><dd>Lookup a Risorsa</dd></div>
                                 <div><dt>Stato</dt><dd>Elenco di selezione</dd></div>
                                 <div><dt>Data di fine</dt><dd>Data</dd></div>
@@ -481,6 +482,7 @@
                             <dl>
                                 <div><dt><strong>Nome</strong><span class="ds-sr"> (obbligatorio)</span></dt><dd>Testo</dd></div>
                                 <div><dt>Capacità</dt><dd>Numero</dd></div>
+                                <div><dt>Limite giornaliero</dt><dd>Numero</dd></div>
                                 <div><dt>Apertura e chiusura</dt><dd>Ora</dd></div>
                                 <div><dt>Orari di inizio offerti</dt><dd>Testo</dd></div>
                             </dl>
@@ -489,6 +491,9 @@
                     <ul class="ds-notes">
                         <li><strong>In grassetto</strong> = obbligatorio. Gli altri attivano funzioni in più: <strong>Ora di inizio</strong> e <strong>Ora di fine</strong> creano le fasce orarie; omettili per prenotare giornate intere.</li>
                         <li>Prenoti una persona? Il campo Assegnato a di un'attività o di un evento, o il titolare di un oggetto personalizzato, è la risorsa. Nessun oggetto risorsa necessario.</li>
+                        <li>Nessun campo ora di fine? Una <strong>Durata</strong> in minuti funziona invece con l'ora di inizio, e il calendario scrive i minuti a ogni salvataggio, spostamento e ridimensionamento. Il <strong>Limite giornaliero</strong> limita quante prenotazioni una risorsa accetta in un giorno, come i due interventi di un tecnico.</li>
+                        <li>Sale gestite come elenco di selezione? Rendile record: un oggetto sala con un nome è ciò che viene prenotato, disegnato come riga e controllato per i conflitti, e contiene gli orari e la capacità di ogni sala. Salesforce non consente campi di ricerca personalizzati su Evento, quindi per prenotare le sale usa un oggetto prenotazione personalizzato (o l'MDP Schedule) con un campo di ricerca alla sala.</li>
+                        <li>Un oggetto prenotazione con tipi di record? L'impostazione <strong>Tipo di record</strong> della configurazione guidata assegna alle nuove prenotazioni un solo tipo o lascia scegliere alle persone, e l'elenco degli stati segue il tipo.</li>
                     </ul>
                 </div>
                 <div class="ds" id="shape-pick">
@@ -569,9 +574,9 @@
                 <p class="gs-lead">Un unico pacchetto gestito: i tre componenti, la configurazione guidata e le azioni di flusso.</p>
                 <table class="gs-table kv">
                     <tbody>
-                        <tr><td>Installa</td><td>Nella <a href="/it/avvisami-al-lancio.html">scheda AppExchange</a> (al lancio), fai clic su <b>Get It Now</b>. Installa per i soli amministratori, per tutti gli utenti o per profili specifici.</td></tr>
+                        <tr><td>Installa</td><td>MultiDatePick non è ancora su AppExchange: <a href="/it/avvisami-al-lancio.html">ricevi un avviso al lancio</a> e prova oggi stesso ogni funzionalità nella <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/it/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=gettingstarted" target="_blank" rel="noopener">demo live</a>, senza login. Quando sarà pubblicato, fai clic su <b>Get It Now</b> e installa per i soli amministratori, per tutti gli utenti o per profili specifici.</td></tr>
                         <tr><td>Verifica</td><td>In <b>Imposta, Pacchetti installati</b> compare MultiDatePick. In Lightning App Builder o Flow Builder, cerca <b>MultiDatePick</b> per vedere <b>Dates</b>, <b>Dates &amp; Times</b> e <b>Resource Booking</b>.</td></tr>
-                        <tr><td>Imparalo</td><td>Il pacchetto include tour guidati: <b>Intro to MultiDatePick</b> ti chiede cosa vuoi fare, poi avvia il tour <b>Prenota</b>, <b>Scegli</b> o <b>Pianifica</b>. Avviali dalla configurazione guidata.</td></tr>
+                        <tr><td>Imparalo</td><td>Il pacchetto include tour guidati: <b>Intro to MultiDatePick</b> ti chiede cosa vuoi fare, poi avvia il tour <b>Prenota</b>, <b>Scegli</b> o <b>Pianifica</b>. Avviali dalla configurazione guidata. In Professional Edition i tour non funzionano, e lì Salesforce consente cinque flussi su schermo in tutto per organizzazione: i quattro tour rientrano nel conteggio, quindi ne resta uno per un tuo flusso.</td></tr>
                         <tr><td>Lingue</td><td>Se la tua organizzazione usa il Workbench traduzione (Translation Workbench), la lingua di ogni utente deve essere attiva in <b>Imposta, Workbench traduzione, Impostazioni lingua di traduzione</b> perché compaiano i valori tradotti degli elenchi di selezione di MultiDatePick, come i valori di stato. Le etichette dei campi e i testi del calendario sono tradotti in ogni caso.</td></tr>
                     </tbody>
                 </table>
@@ -626,10 +631,10 @@
                 <ul class="gs-chain" aria-label="Passaggi di importazione">
                     <li>Copia per la configurazione guidata</li><li class="arr" aria-hidden="true">&rarr;</li>
                     <li>Scheda Importa / Esporta</li><li class="arr" aria-hidden="true">&rarr;</li>
-                    <li>Abbina i campi</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>Adattala alla tua organizzazione</li><li class="arr" aria-hidden="true">&rarr;</li>
                     <li>Distribuisci</li>
                 </ul>
-                <p class="gs-note"><b>Nomi di oggetti diversi nella tua organizzazione?</b> L'importazione elenca ogni oggetto e campo citato nel JSON, sotto <b>Mappa i campi mancanti nello schema dell'organizzazione</b>, ciascuno con un menu a discesa dei tuoi: quelli presenti nella tua organizzazione sono segnati OK, gli altri Mancante. Controllali, cambia quelli che vuoi, poi <b>Applica e distribuisci</b>.</p>
+                <p class="gs-note"><b>Usare i tuoi nomi è previsto.</b> L'importazione ti guida passo passo, con ogni risposta già compilata con la corrispondenza più vicina nella tua organizzazione: <b>Scegli gli oggetti</b> (dove stanno le prenotazioni e cosa si prenota), <b>Abbina ogni campo</b> in base al suo ruolo, come il giorno, l'ora di inizio o lo stato, oppure scegli <b>Non usare</b> per un campo facoltativo, <b>Abbina i valori di stato</b> a quelli del tuo elenco di selezione, e in <b>Azioni</b> scegli uno dei tuoi flussi o salta un pulsante. Poi <b>Applica e distribuisci</b>, oppure <b>Apri prima nella procedura guidata</b> per vederla nel passaggio Rivedi prima che venga salvato qualcosa.</p>
             </div>
         </section>
 
@@ -645,6 +650,7 @@
                         <tr><td>Pagine app e iniziali</td><td><b>Config Name</b>. <b>Static Parent Record Id</b> solo se nella configurazione guidata scegli “Di un solo record”.</td></tr>
                     </tbody>
                 </table>
+                <p class="gs-note"><b>Nella pagina o dietro un pulsante.</b> <b>Show Inline (Always Visible)</b> è selezionato quando trascini un calendario in una pagina, così il calendario sta nella pagina. Deselezionalo per mostrare invece un pulsante che apre il calendario in un pop-up.</p>
                 <p class="gs-note"><b>Pagina nuova? Attivala.</b> Dopo <b>Salva</b>, fai clic su <b>Attiva</b> quando Lightning App Builder lo chiede e assegna la pagina come predefinita dell'organizzazione oppure a un'app e a un profilo. Finché una pagina nuova non è attivata, nessuno la vede.</p>
                 <p class="gs-note"><b>Load Existing Dates</b> mostra le date già salvate. Il salvataggio aggiunge soltanto record; non elimina mai quelli esistenti.</p>
 
@@ -687,6 +693,14 @@
                         <figcaption>Il flusso in esecuzione: tre giorni scelti, tre date passate avanti.</figcaption>
                     </figure>
                 </div>
+                <h3 id="set-own-date">Impostare una data sul record della pagina</h3>
+                <p class="gs-lead">MultiDatePick salva le selezioni come record a sé. Per scrivere una data scelta in un campo data del record stesso, come una Data di follow-up su un Account, usa un piccolo flusso su schermo.</p>
+                <ol style="margin:0 0 12px;padding-left:22px;line-height:1.7;">
+                    <li>In Flow Builder, crea un <b>flusso su schermo</b> con una variabile di tipo Testo chiamata <code>recordId</code>, disponibile per l'input.</li>
+                    <li>Aggiungi una schermata con <b>Dates</b>. Imposta <b>Max Dates Allowed</b> su 1 e lascia vuoto <b>Parent Record Id</b>, così la selezione va al flusso invece di essere salvata.</li>
+                    <li>Aggiungi un <b>Ciclo</b> su <b>Selected Dates (Output)</b> del componente (contiene l'unica data), e al suo interno un elemento <b>Aggiorna record</b>: il record con Id <code>{!recordId}</code>, con il tuo campo data impostato sulla formula <code>DATEVALUE({!Loop_Item})</code>, sostituendo Loop_Item con il nome del tuo ciclo.</li>
+                    <li>Salva, attiva e aggiungi il flusso alla pagina record con il componente <b>Flusso</b> (passando l'Id del record in <code>recordId</code>), oppure come azione rapida.</li>
+                </ol>
             </div>
         </section>
 

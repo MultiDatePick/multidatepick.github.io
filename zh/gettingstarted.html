@@ -469,6 +469,7 @@
                             <dl>
                                 <div><dt><strong>日期</strong><span class="ds-sr">（必填）</span></dt><dd>日期</dd></div>
                                 <div><dt>开始时间和结束时间</dt><dd>时间</dd></div>
+                                <div><dt>时长</dt><dd>数字（分钟）</dd></div>
                                 <div><dt><strong>资源</strong><span class="ds-sr">（必填）</span></dt><dd>查找到资源</dd></div>
                                 <div><dt>状态</dt><dd>选项列表</dd></div>
                                 <div><dt>结束日期</dt><dd>日期</dd></div>
@@ -481,6 +482,7 @@
                             <dl>
                                 <div><dt><strong>名称</strong><span class="ds-sr">（必填）</span></dt><dd>文本</dd></div>
                                 <div><dt>容量</dt><dd>数字</dd></div>
+                                <div><dt>每日上限</dt><dd>数字</dd></div>
                                 <div><dt>开放和关闭时间</dt><dd>时间</dd></div>
                                 <div><dt>提供的开始时间</dt><dd>文本</dd></div>
                             </dl>
@@ -489,6 +491,9 @@
                     <ul class="ds-notes">
                         <li><strong>粗体</strong> = 必填。其余字段开启更多功能：<strong>开始时间</strong>和<strong>结束时间</strong>提供时间段；不设置它们即可按整天预订。</li>
                         <li>要预订人员？任务或事件的“被分配人”，或自定义对象的“所有人”，就是资源。不需要资源对象。</li>
+                        <li>没有结束时间字段？可以改用以分钟计的<strong>时长</strong>配合开始时间，日历会在每次保存、移动和调整大小时写入分钟数。<strong>每日上限</strong>限制一个资源一天内可接受的预订数，例如一名技术人员每天两项工作。</li>
+                        <li>会议室存为选项列表？把它们做成记录：带名称的会议室对象才能被预订、显示为一行并检查冲突，还能保存每个会议室的开放时间和容量。Salesforce 不允许在 Event 上创建自定义查找字段，因此要预订会议室，请使用自定义预订对象（或 MDP Schedule），并添加指向会议室的查找字段。</li>
+                        <li>预订对象有记录类型？向导的<strong>记录类型</strong>设置可以为新预订指定一种类型，或让用户选择，状态列表会跟随记录类型。</li>
                     </ul>
                 </div>
                 <div class="ds" id="shape-pick">
@@ -569,9 +574,9 @@
                 <p class="gs-lead">一个托管软件包：三个组件、设置向导和 Flow 操作。</p>
                 <table class="gs-table kv">
                     <tbody>
-                        <tr><td>安装</td><td>在 <a href="/zh/notify-me-at-launch.html">AppExchange 列表页</a>（上线后）单击 <b>Get It Now</b>。可选择仅为管理员、为所有用户或为特定简档安装。</td></tr>
+                        <tr><td>安装</td><td>MultiDatePick 尚未在 AppExchange 上架：<a href="/zh/notify-me-at-launch.html">上架时通知我</a>，现在就可以在<a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/zh-CN/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=gettingstarted" target="_blank" rel="noopener">在线演示</a>中试用所有功能，无需登录。上架后，单击 <b>Get It Now</b>，可选择仅为管理员、为所有用户或为特定简档安装。</td></tr>
                         <tr><td>确认</td><td><b>“设置”中的“已安装的软件包”</b>会列出 MultiDatePick。在 Lightning App Builder 或 Flow Builder 中搜索 <b>MultiDatePick</b>，可以看到 <b>Dates</b>、<b>Dates &amp; Times</b> 和 <b>Resource Booking</b>。</td></tr>
-                        <tr><td>学习</td><td>软件包附带引导式导览：<b>Intro to MultiDatePick</b> 会先问您想做什么，然后启动<b>预订</b>、<b>选择</b>或<b>规划</b>导览。从设置向导中启动即可。</td></tr>
+                        <tr><td>学习</td><td>软件包附带引导式导览：<b>Intro to MultiDatePick</b> 会先问您想做什么，然后启动<b>预订</b>、<b>选择</b>或<b>规划</b>导览。从设置向导中启动即可。在 Professional Edition 中导览无法运行，而且 Salesforce 在该版本中每个组织总共只允许五个屏幕 Flow：四个导览计入其中，因此只剩一个可用于您自己的 Flow。</td></tr>
                         <tr><td>语言</td><td>如果您的组织使用翻译工作台 (Translation Workbench)，必须在<b>“设置”中“翻译工作台”下的“翻译语言设置”</b>中启用每位用户的语言，MultiDatePick 已翻译的选项列表值（例如状态值）才会显示。字段标签和日历本身的文字无论如何都会翻译。</td></tr>
                     </tbody>
                 </table>
@@ -626,10 +631,10 @@
                 <ul class="gs-chain" aria-label="导入步骤">
                     <li>复制供设置向导使用</li><li class="arr" aria-hidden="true">&rarr;</li>
                     <li>“导入 / 导出”选项卡</li><li class="arr" aria-hidden="true">&rarr;</li>
-                    <li>映射您的字段</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>适配您的组织</li><li class="arr" aria-hidden="true">&rarr;</li>
                     <li>部署</li>
                 </ul>
-                <p class="gs-note"><b>您组织中的对象名称不同？</b>导入时会在<b>将缺失的字段映射到您组织的架构</b>下列出 JSON 中提到的每个对象和字段，并为每一项提供您自己对象和字段的下拉列表：您组织中已有的标为“正常”，其余标为“缺失”。检查一遍，按需修改，然后单击<b>应用并部署</b>。</p>
+                <p class="gs-note"><b>使用您自己的命名完全没问题。</b>导入会一步步引导您，每个答案都已预先填好您组织中最接近的匹配项：<b>选择对象</b>（预订记录存放在哪里，以及预订的是什么）；<b>对应每个字段</b>，按用途匹配，例如日期、开始时间或状态，可选字段也可以选择<b>不使用</b>；<b>对应状态值</b>，匹配到您选项列表中的值；在<b>操作</b>中选择您的某个 Flow，或跳过某个按钮。然后单击<b>应用并部署</b>，或<b>先在向导中打开</b>，在保存任何内容之前先在“检查”步骤中查看。</p>
             </div>
         </section>
 
@@ -645,6 +650,7 @@
                         <tr><td>应用程序页面和主页</td><td><b>Config Name</b>。只有向导中的答案是“某一条记录的”时，才需要 <b>Static Parent Record Id</b>。</td></tr>
                     </tbody>
                 </table>
+                <p class="gs-note"><b>放在页面上，或藏在按钮后面。</b>把日历拖到页面上时，<b>Show Inline (Always Visible)</b> 默认已勾选，日历直接显示在页面上。取消勾选则改为显示一个按钮，点击后在弹出窗口中打开日历。</p>
                 <p class="gs-note"><b>新页面？请激活。</b>单击<b>保存</b>后，在 Lightning App Builder 提示时单击<b>激活</b>，并将页面设为组织默认值，或分配给某个应用程序和简档。新页面在激活之前，任何人都看不到。</p>
                 <p class="gs-note"><b>Load Existing Dates</b> 会显示已保存的日期。保存只会新增记录，绝不会删除现有记录。</p>
 
@@ -687,6 +693,14 @@
                         <figcaption>运行中的 Flow：选了三天，三个日期随即传给 Flow。</figcaption>
                     </figure>
                 </div>
+                <h3 id="set-own-date">在页面自身的记录上设置日期</h3>
+                <p class="gs-lead">MultiDatePick 会把选择保存为独立的记录。要把一个选中的日期写入记录本身的日期字段（例如客户上的“跟进日期”），请使用一个小型屏幕 Flow。</p>
+                <ol style="margin:0 0 12px;padding-left:22px;line-height:1.7;">
+                    <li>在 Flow Builder 中创建一个<b>屏幕 Flow</b>，并添加一个名为 <code>recordId</code>、可用于输入的文本变量。</li>
+                    <li>添加一个包含 <b>Dates</b> 的屏幕。将 <b>Max Dates Allowed</b> 设为 1，并将 <b>Parent Record Id</b> 留空，这样所选日期会传给 Flow，而不会被保存。</li>
+                    <li>添加一个<b>循环</b>，遍历组件的 <b>Selected Dates (Output)</b>（其中只有这一个日期），并在循环内添加一个<b>更新记录</b>元素：更新 Id 为 <code>{!recordId}</code> 的记录，把您的日期字段设为公式 <code>DATEVALUE({!Loop_Item})</code>，并用您的循环名称替换 Loop_Item。</li>
+                    <li>保存并激活，然后用 <b>Flow</b> 组件把它添加到记录页面（把记录 Id 传入 <code>recordId</code>），或作为快速操作添加。</li>
+                </ol>
             </div>
         </section>
 

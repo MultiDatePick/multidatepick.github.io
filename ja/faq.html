@@ -209,7 +209,23 @@
                 </details>
                 <details id="faq-booking-limits">
                     <summary>予約の件数を 1 人あたりや 1 日あたりで制限できますか?</summary>
-                    <p>はい。Booking Length（予約の長さ）を使うと 1 回のクリックで予約全体が入り、Max Bookings per Day（1 日の最大予約数）は 1 人が 1 日に入れられる個別の予約の数を制限します。Limit per Person（1 人あたりの上限）は顧客ごとの今後の予約の数を制限し、顧客はメールアドレスかテキストの項目、または取引先責任者、リード、取引先、ユーザーへの参照項目で数えます。「1 人あたりの上限」は保存のたびにサーバー側でチェックされるため、ページを再読み込みしてもリセットされません。スタッフは確認のうえで上限を超えて予約できますが、サイトの訪問者はできません。</p>
+                    <p>はい。Booking Length（予約の長さ）を使うと 1 回のクリックで予約全体が入り、Max Bookings per Day（1 日の最大予約数）は 1 人が 1 日に入れられる個別の予約の数を制限します。Limit per Person（1 人あたりの上限）は顧客ごとの今後の予約の数を制限し、顧客はメールアドレスかテキストの項目、または取引先責任者、リード、取引先、ユーザーへの参照項目で数えます。「1 人あたりの上限」は保存のたびにサーバー側でチェックされるため、ページを再読み込みしてもリセットされません。スタッフは確認のうえで上限を超えて予約できますが、サイトの訪問者はできません。Daily Limit Field（1 日の上限項目）は、1 つのリソースが 1 日に受け付ける予約の数を制限します（技術者の 1 日 2 件の作業など）。リソースの数値項目を読み込み、上限に達した日はそのリソースの受付が締め切られます。0 にすると予約を受け付けません。</p>
+                </details>
+                <details id="faq-duration-field">
+                    <summary>終了時刻の代わりに所要時間を保存できますか？</summary>
+                    <p>はい。<strong>所要時間項目</strong>には、各予約の長さを分単位で保持する数値項目を指定します（Dates &amp; Times と Resource Booking）。終了時刻の項目もある場合は、保存、移動、サイズ変更のたびに開始と終了とあわせて分数が書き込まれ、10:00 から 10:45 なら 45 と保存されます。終了時刻の項目がない場合は、開始時刻に分数を足した時刻が終了になるため、開始時刻と所要時間だけを持つオブジェクトもそのまま使えます。</p>
+                </details>
+                <details id="faq-rooms-picklist">
+                    <summary>会議室を選択リストで管理しています。予約できますか？</summary>
+                    <p>会議室をレコードにしてください。名前を持つ会議室のオブジェクトこそが、Resource Booking が予約し、行として表示し、重複をチェックする対象で、各会議室の営業時間、定員、休業日もそこで管理します。選択リストの値ではそのどれもできません。せいぜい、値ごとに Dates &amp; Times カレンダーを 1 つずつ用意して絞り込める程度です。予約が行動（Event）の場合、Salesforce では行動にカスタム参照関係項目を作成できないため、会議室への参照関係項目を持つカスタムの予約オブジェクト（または MultiDatePick に付属する MDP Schedule）で予約してください。</p>
+                </details>
+                <details id="faq-record-types">
+                    <summary>レコードタイプに対応していますか？</summary>
+                    <p>はい。セットアップウィザードの <strong>レコードタイプ</strong> 設定で、新しい予約すべてに固定のレコードタイプを 1 つ割り当てるか、各ユーザーが作成できるタイプから選べるようにします。状況リストには、そのレコードタイプの値だけが表示されます。空欄の場合は、各ユーザーのデフォルトのレコードタイプが使われます。</p>
+                </details>
+                <details id="faq-filter-busy">
+                    <summary>1 つの会議室に絞り込んだカレンダーで、ほかの会議室の予約を無視できますか？</summary>
+                    <p>はい、Dates &amp; Times で可能です。<strong>すべてのレコードを表示</strong> と <strong>レコードフィルター</strong> を使っている場合に、<strong>フィルターで予約済みの判定も行う</strong> をオンにします。フィルターで表示されるレコードだけが時間枠を占有するため、Garden Room に絞り込んだカレンダーはほかの会議室の予約を無視します。一方、Garden Room の予約同士は引き続き同じ時間に重ねられません。デフォルトはオフです。閲覧者自身の予約（ME）で絞り込む場合は注意してください。オンにすると、ほかの人の予約で時間枠がふさがらなくなります。</p>
                 </details>
                 <details id="faq-only-these-times">
                     <summary>特定の開始時刻だけを提示できますか?</summary>
@@ -313,6 +329,10 @@
                     <summary>Salesforce のフローの中で使えますか?</summary>
                     <p>はい。3 つともフロー画面コンポーネントです。Config Name（設定名） を設定すれば、すべてのオプションが保存済みの設定から読み込まれます。同梱のフローアクションで、選択内容をループ処理できるリストに変換できます。<a href="/ja/flowcheatsheet.html">画面フローガイド</a>をご覧ください。</p>
                 </details>
+                <details id="faq-set-own-date">
+                    <summary>カレンダーを置いたレコード自体の日付項目に日付を設定できますか？</summary>
+                    <p>はい、小さな画面フロー（Screen Flow）で可能です。画面に Dates を配置して <strong>Max Dates Allowed</strong> を 1 にし、Parent Record Id は指定しません。続いて <strong>レコードを更新</strong> 要素で、選んだ日付をレコード自身の日付項目に書き込みます。手順は<a href="/ja/gettingstarted.html#set-own-date">はじめに</a>にあります。</p>
+                </details>
                 <h2 class="faq-section-h">料金と提供状況</h2>
                 <details id="faq-pricing">
                     <summary>MultiDatePick の料金はいくらですか?</summary>
@@ -332,7 +352,7 @@
                 </details>
                 <details id="faq-salesforce-editions-supported">
                     <summary>どの Salesforce エディションに対応していますか?</summary>
-                    <p>Lightning Web コンポーネントと画面フローに対応したすべてのエディションです: Professional、Enterprise、Unlimited、Performance、Developer、Salesforce Platform、および Nonprofit、Education、Health、Financial Services、Public Sector、Manufacturing などの業界向けクラウド。Professional Edition では、同梱のガイド付きツアーと Flow Parser アクションを除き、すべての機能が動作します。Professional では Apex のフローアクションが実行されないためです。Essentials (Starter Suite) は対象外です。</p>
+                    <p>Lightning Web コンポーネントと画面フローに対応したすべてのエディションです: Professional、Enterprise、Unlimited、Performance、Developer、Salesforce Platform、および Nonprofit、Education、Health、Financial Services、Public Sector、Manufacturing などの業界向けクラウド。Professional Edition では、同梱のガイド付きツアーと Flow Parser アクションを除き、すべての機能が動作します。Professional では Apex のフローアクションが実行されないためです。また Professional Edition では画面フローが組織全体で 5 つまでに制限されており、パッケージの 4 つのツアーもこれに含まれるため、自社用の画面フローに使えるのは 1 つです。Essentials (Starter Suite) は対象外です。</p>
                 </details>
                 <details id="faq-shield-platform-encryption">
                     <summary>Shield Platform Encryption に対応していますか？</summary>
@@ -512,7 +532,39 @@
                 "name": "予約の件数を 1 人あたりや 1 日あたりで制限できますか?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "はい。Booking Length（予約の長さ）を使うと 1 回のクリックで予約全体が入り、Max Bookings per Day（1 日の最大予約数）は 1 人が 1 日に入れられる個別の予約の数を制限します。Limit per Person（1 人あたりの上限）は顧客ごとの今後の予約の数を制限し、顧客はメールアドレスかテキストの項目、または取引先責任者、リード、取引先、ユーザーへの参照項目で数えます。「1 人あたりの上限」は保存のたびにサーバー側でチェックされるため、ページを再読み込みしてもリセットされません。スタッフは確認のうえで上限を超えて予約できますが、サイトの訪問者はできません。"
+                    "text": "はい。Booking Length（予約の長さ）を使うと 1 回のクリックで予約全体が入り、Max Bookings per Day（1 日の最大予約数）は 1 人が 1 日に入れられる個別の予約の数を制限します。Limit per Person（1 人あたりの上限）は顧客ごとの今後の予約の数を制限し、顧客はメールアドレスかテキストの項目、または取引先責任者、リード、取引先、ユーザーへの参照項目で数えます。「1 人あたりの上限」は保存のたびにサーバー側でチェックされるため、ページを再読み込みしてもリセットされません。スタッフは確認のうえで上限を超えて予約できますが、サイトの訪問者はできません。Daily Limit Field（1 日の上限項目）は、1 つのリソースが 1 日に受け付ける予約の数を制限します（技術者の 1 日 2 件の作業など）。リソースの数値項目を読み込み、上限に達した日はそのリソースの受付が締め切られます。0 にすると予約を受け付けません。"
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "終了時刻の代わりに所要時間を保存できますか？",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "はい。所要時間項目には、各予約の長さを分単位で保持する数値項目を指定します（Dates & Times と Resource Booking）。終了時刻の項目もある場合は、保存、移動、サイズ変更のたびに開始と終了とあわせて分数が書き込まれ、10:00 から 10:45 なら 45 と保存されます。終了時刻の項目がない場合は、開始時刻に分数を足した時刻が終了になるため、開始時刻と所要時間だけを持つオブジェクトもそのまま使えます。"
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "会議室を選択リストで管理しています。予約できますか？",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "会議室をレコードにしてください。名前を持つ会議室のオブジェクトこそが、Resource Booking が予約し、行として表示し、重複をチェックする対象で、各会議室の営業時間、定員、休業日もそこで管理します。選択リストの値ではそのどれもできません。せいぜい、値ごとに Dates & Times カレンダーを 1 つずつ用意して絞り込める程度です。予約が行動（Event）の場合、Salesforce では行動にカスタム参照関係項目を作成できないため、会議室への参照関係項目を持つカスタムの予約オブジェクト（または MultiDatePick に付属する MDP Schedule）で予約してください。"
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "レコードタイプに対応していますか？",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "はい。セットアップウィザードのレコードタイプ設定で、新しい予約すべてに固定のレコードタイプを 1 つ割り当てるか、各ユーザーが作成できるタイプから選べるようにします。状況リストには、そのレコードタイプの値だけが表示されます。空欄の場合は、各ユーザーのデフォルトのレコードタイプが使われます。"
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "1 つの会議室に絞り込んだカレンダーで、ほかの会議室の予約を無視できますか？",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "はい、Dates & Times で可能です。「すべてのレコードを表示」と「レコードフィルター」を使っている場合に、「フィルターで予約済みの判定も行う」をオンにします。フィルターで表示されるレコードだけが時間枠を占有するため、Garden Room に絞り込んだカレンダーはほかの会議室の予約を無視します。一方、Garden Room の予約同士は引き続き同じ時間に重ねられません。デフォルトはオフです。閲覧者自身の予約（ME）で絞り込む場合は注意してください。オンにすると、ほかの人の予約で時間枠がふさがらなくなります。"
                 }
             },
             {
@@ -717,6 +769,14 @@
             },
             {
                 "@type": "Question",
+                "name": "カレンダーを置いたレコード自体の日付項目に日付を設定できますか？",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "はい、小さな画面フロー（Screen Flow）で可能です。画面に Dates を配置して Max Dates Allowed を 1 にし、Parent Record Id は指定しません。続いて「レコードを更新」要素で、選んだ日付をレコード自身の日付項目に書き込みます。手順は「はじめに」にあります。"
+                }
+            },
+            {
+                "@type": "Question",
                 "name": "MultiDatePick の料金はいくらですか?",
                 "acceptedAnswer": {
                     "@type": "Answer",
@@ -752,7 +812,7 @@
                 "name": "どの Salesforce エディションに対応していますか?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Lightning Web コンポーネントと画面フローに対応したすべてのエディションです: Professional、Enterprise、Unlimited、Performance、Developer、Salesforce Platform、および Nonprofit、Education、Health、Financial Services、Public Sector、Manufacturing などの業界向けクラウド。Professional Edition では、同梱のガイド付きツアーと Flow Parser アクションを除き、すべての機能が動作します。Professional では Apex のフローアクションが実行されないためです。Essentials (Starter Suite) は対象外です。"
+                    "text": "Lightning Web コンポーネントと画面フローに対応したすべてのエディションです: Professional、Enterprise、Unlimited、Performance、Developer、Salesforce Platform、および Nonprofit、Education、Health、Financial Services、Public Sector、Manufacturing などの業界向けクラウド。Professional Edition では、同梱のガイド付きツアーと Flow Parser アクションを除き、すべての機能が動作します。Professional では Apex のフローアクションが実行されないためです。また Professional Edition では画面フローが組織全体で 5 つまでに制限されており、パッケージの 4 つのツアーもこれに含まれるため、自社用の画面フローに使えるのは 1 つです。Essentials (Starter Suite) は対象外です。"
                 }
             },
             {

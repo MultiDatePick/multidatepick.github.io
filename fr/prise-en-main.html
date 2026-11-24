@@ -469,6 +469,7 @@
                             <dl>
                                 <div><dt><strong>Date</strong><span class="ds-sr"> (obligatoire)</span></dt><dd>Date</dd></div>
                                 <div><dt>Heure de début et heure de fin</dt><dd>Heure</dd></div>
+                                <div><dt>Durée</dt><dd>Nombre (minutes)</dd></div>
                                 <div><dt><strong>Ressource</strong><span class="ds-sr"> (obligatoire)</span></dt><dd>Recherche vers Ressource</dd></div>
                                 <div><dt>Statut</dt><dd>Liste de sélection</dd></div>
                                 <div><dt>Date de fin</dt><dd>Date</dd></div>
@@ -481,6 +482,7 @@
                             <dl>
                                 <div><dt><strong>Nom</strong><span class="ds-sr"> (obligatoire)</span></dt><dd>Texte</dd></div>
                                 <div><dt>Capacité</dt><dd>Nombre</dd></div>
+                                <div><dt>Limite quotidienne</dt><dd>Nombre</dd></div>
                                 <div><dt>Ouverture et fermeture</dt><dd>Heure</dd></div>
                                 <div><dt>Heures de début proposées</dt><dd>Texte</dd></div>
                             </dl>
@@ -489,6 +491,9 @@
                     <ul class="ds-notes">
                         <li><strong>En gras</strong> = obligatoire. Le reste active des fonctions en plus : <strong>Heure de début</strong> et <strong>Heure de fin</strong> donnent des créneaux horaires ; laissez-les de côté pour réserver des journées entières.</li>
                         <li>Vous réservez plutôt une personne ? Le champ Assigné à d'une tâche ou d'un événement, ou le propriétaire d'un objet personnalisé, sert de ressource. Aucun objet de ressources nécessaire.</li>
+                        <li>Pas de champ d'heure de fin ? Une <strong>Durée</strong> en minutes fonctionne avec l'heure de début à la place, et le calendrier écrit les minutes à chaque sauvegarde, déplacement et redimensionnement. La <strong>Limite quotidienne</strong> plafonne le nombre de réservations qu'une ressource accepte en une journée, comme les deux interventions d'un technicien.</li>
+                        <li>Des salles gérées en liste de sélection ? Faites-en des enregistrements : un objet salle avec un nom, c'est ce qui est réservé, affiché en ligne et contrôlé pour les conflits, et il porte les horaires et la capacité de chaque salle. Salesforce n'autorise aucun champ de référence personnalisé sur Événement : pour réserver des salles, utilisez un objet de réservation personnalisé (ou le MDP Schedule) avec un champ de référence vers la salle.</li>
+                        <li>Un objet de réservation avec des types d'enregistrement ? Le paramètre <strong>Type d'enregistrement</strong> de l'assistant donne un seul type aux nouvelles réservations ou laisse chacun choisir, et la liste des statuts suit le type.</li>
                     </ul>
                 </div>
                 <div class="ds" id="shape-pick">
@@ -569,9 +574,9 @@
                 <p class="gs-lead">Un seul package géré : les trois composants, l'assistant de configuration et les actions de flux.</p>
                 <table class="gs-table kv">
                     <tbody>
-                        <tr><td>Installer</td><td>Sur la <a href="/fr/me-prevenir-au-lancement.html">fiche AppExchange</a> (au lancement), cliquez sur <b>Get It Now</b>. Installez pour les administrateurs uniquement, pour tous les utilisateurs ou pour des profils précis.</td></tr>
+                        <tr><td>Installer</td><td>MultiDatePick n'est pas encore sur l'AppExchange : <a href="/fr/me-prevenir-au-lancement.html">soyez prévenu au lancement</a>, et essayez dès aujourd'hui chaque fonctionnalité sur la <a href="https://orgfarm-71fc21cee4-dev-ed.develop.my.site.com/acmefinancial/fr/?utm_source=multidatepick&amp;utm_medium=cta&amp;utm_campaign=live_demo&amp;utm_content=gettingstarted" target="_blank" rel="noopener">démo en direct</a>, sans connexion. Une fois la fiche publiée, cliquez sur <b>Get It Now</b> et installez pour les administrateurs uniquement, pour tous les utilisateurs ou pour des profils précis.</td></tr>
                         <tr><td>Vérifier</td><td><b>Configuration, Packages installés</b> liste MultiDatePick. Dans Lightning App Builder ou Flow Builder, recherchez <b>MultiDatePick</b> pour voir <b>Dates</b>, <b>Dates &amp; Times</b> et <b>Resource Booking</b>.</td></tr>
-                        <tr><td>Apprendre</td><td>Le package inclut des visites guidées : <b>Intro to MultiDatePick</b> vous demande ce que vous voulez faire, puis lance la visite <b>Réserver</b>, <b>Choisir</b> ou <b>Planifier</b>. Lancez-les depuis l'assistant de configuration.</td></tr>
+                        <tr><td>Apprendre</td><td>Le package inclut des visites guidées : <b>Intro to MultiDatePick</b> vous demande ce que vous voulez faire, puis lance la visite <b>Réserver</b>, <b>Choisir</b> ou <b>Planifier</b>. Lancez-les depuis l'assistant de configuration. Dans Professional Edition, les visites ne s'exécutent pas, et Salesforce y autorise cinq flux d'écran au total par org : les quatre visites en font partie, il en reste donc un pour un flux à vous.</td></tr>
                         <tr><td>Langues</td><td>Si votre org utilise le Workbench de traduction (Translation Workbench), la langue de chaque utilisateur doit être active dans <b>Configuration, Workbench de traduction, Paramètres de langue de traduction</b> pour que les valeurs de liste de sélection traduites de MultiDatePick, comme les valeurs de statut, s'affichent. Les étiquettes de champ et les textes propres au calendrier sont traduits dans tous les cas.</td></tr>
                     </tbody>
                 </table>
@@ -626,10 +631,10 @@
                 <ul class="gs-chain" aria-label="Étapes de l'import">
                     <li>Copier pour l'assistant</li><li class="arr" aria-hidden="true">&rarr;</li>
                     <li>Onglet Importer / Exporter</li><li class="arr" aria-hidden="true">&rarr;</li>
-                    <li>Faire correspondre vos champs</li><li class="arr" aria-hidden="true">&rarr;</li>
+                    <li>Adaptez-la à votre org</li><li class="arr" aria-hidden="true">&rarr;</li>
                     <li>Déployer</li>
                 </ul>
-                <p class="gs-note"><b>Des noms d'objets différents dans votre org ?</b> L'import liste chaque objet et champ cité dans le JSON, sous <b>Mappez les champs manquants vers le schéma de votre organisation</b>, chacun avec une liste déroulante des vôtres : ceux que votre org possède sont marqués OK, les autres Manquant. Vérifiez-les, modifiez ceux que vous voulez, puis <b>Appliquer et déployer</b>.</p>
+                <p class="gs-note"><b>Vos propres noms sont prévus.</b> L'import vous guide, chaque réponse étant déjà remplie avec la correspondance la plus proche dans votre org : <b>Choisissez vos objets</b> (où se trouvent les réservations, et ce qui est réservé), <b>Associez chaque champ</b> selon son rôle, comme le jour, l'heure de début ou le statut, ou choisissez <b>Ne pas utiliser</b> pour un champ facultatif, <b>Associez les valeurs de statut</b> à celles de votre liste de sélection, et dans <b>Actions</b> choisissez l'un de vos flux ou ignorez un bouton. Puis <b>Appliquer et déployer</b>, ou <b>Ouvrir d’abord dans l’assistant</b> pour la voir à l'étape Vérifier avant tout enregistrement.</p>
             </div>
         </section>
 
@@ -645,6 +650,7 @@
                         <tr><td>Pages d'application et d'accueil</td><td><b>Config Name</b>. <b>Static Parent Record Id</b> seulement si la réponse de l'assistant est « D’un seul enregistrement ».</td></tr>
                     </tbody>
                 </table>
+                <p class="gs-note"><b>Sur la page ou derrière un bouton.</b> <b>Show Inline (Always Visible)</b> est coché quand vous faites glisser un calendrier sur une page : le calendrier s'affiche directement sur la page. Décochez-le pour afficher à la place un bouton qui ouvre le calendrier dans une fenêtre contextuelle.</p>
                 <p class="gs-note"><b>Nouvelle page ? Activez-la.</b> Après <b>Enregistrer</b>, cliquez sur <b>Activer</b> quand Lightning App Builder le propose, puis attribuez la page par défaut à l'organisation ou à une application et un profil. Tant qu'une nouvelle page n'est pas activée, personne ne la voit.</p>
                 <p class="gs-note"><b>Load Existing Dates</b> affiche les dates déjà enregistrées. L'enregistrement ne fait qu'ajouter des enregistrements ; il ne supprime jamais ceux qui existent.</p>
 
@@ -687,6 +693,14 @@
                         <figcaption>Le flux en cours d'exécution : trois jours choisis, trois dates transmises.</figcaption>
                     </figure>
                 </div>
+                <h3 id="set-own-date">Renseigner une date sur l'enregistrement de la page</h3>
+                <p class="gs-lead">MultiDatePick enregistre les sélections comme des enregistrements à part entière. Pour écrire une date choisie dans un champ de date de l'enregistrement lui-même, comme une Date de relance sur un Compte, utilisez un petit flux d'écran.</p>
+                <ol style="margin:0 0 12px;padding-left:22px;line-height:1.7;">
+                    <li>Dans Flow Builder, créez un <b>flux d'écran</b> avec une variable Texte nommée <code>recordId</code>, disponible en entrée.</li>
+                    <li>Ajoutez un écran avec <b>Dates</b>. Réglez <b>Max Dates Allowed</b> sur 1 et laissez <b>Parent Record Id</b> vide : la sélection part dans le flux au lieu d'être enregistrée.</li>
+                    <li>Ajoutez une <b>Boucle</b> sur la sortie <b>Selected Dates (Output)</b> du composant (elle contient la seule date), et à l'intérieur un élément <b>Mettre à jour des enregistrements</b> : l'enregistrement dont l'Id est <code>{!recordId}</code>, avec votre champ de date défini par la formule <code>DATEVALUE({!Loop_Item})</code>, en remplaçant Loop_Item par le nom de votre propre boucle.</li>
+                    <li>Enregistrez, activez, puis ajoutez le flux à la page d'enregistrement avec le composant <b>Flux</b> (en passant l'Id de l'enregistrement dans <code>recordId</code>), ou comme action rapide.</li>
+                </ol>
             </div>
         </section>
 

@@ -209,7 +209,23 @@
                 </details>
                 <details id="faq-booking-limits">
                     <summary>Puis-je limiter les réservations par personne ou par jour ?</summary>
-                    <p>Oui. « Durée de réservation » réserve un rendez-vous complet en un clic, « Réservations max. par jour » plafonne le nombre de réservations distinctes qu'une personne choisit sur une journée, et « Limite par personne » plafonne les réservations à venir de chaque client, comptées d'après un champ e-mail ou texte, ou un champ de référence Contact, Piste, Compte ou Utilisateur. Le serveur vérifie « Limite par personne » à chaque enregistrement : recharger la page ne la remet jamais à zéro. Le personnel peut la dépasser après confirmation ; les visiteurs du site, non.</p>
+                    <p>Oui. « Durée de réservation » réserve un rendez-vous complet en un clic, « Réservations max. par jour » plafonne le nombre de réservations distinctes qu'une personne choisit sur une journée, et « Limite par personne » plafonne les réservations à venir de chaque client, comptées d'après un champ e-mail ou texte, ou un champ de référence Contact, Piste, Compte ou Utilisateur. Le serveur vérifie « Limite par personne » à chaque enregistrement : recharger la page ne la remet jamais à zéro. Le personnel peut la dépasser après confirmation ; les visiteurs du site, non. Daily Limit Field plafonne le nombre de réservations qu'une ressource accepte en une journée, comme les deux interventions d'un technicien : il lit un champ numérique sur la ressource, une journée pleine se ferme pour cette ressource, et 0 n'accepte aucune réservation.</p>
+                </details>
+                <details id="faq-duration-field">
+                    <summary>Puis-je enregistrer une durée au lieu d'une heure de fin ?</summary>
+                    <p>Oui. <strong>Duration Field</strong> utilise un champ numérique qui contient la durée de chaque réservation en minutes, sur Dates &amp; Times et Resource Booking. Avec un champ d'heure de fin en plus, chaque sauvegarde, déplacement et redimensionnement écrit les minutes à côté du début et de la fin : de 10:00 à 10:45, il enregistre 45. Sans champ d'heure de fin, chaque fin vaut le début plus les minutes, donc un objet qui ne garde qu'une heure de début et une durée fonctionne tel quel.</p>
+                </details>
+                <details id="faq-rooms-picklist">
+                    <summary>Nos salles sont une liste de sélection. Peut-on les réserver ?</summary>
+                    <p>Faites des salles des enregistrements : un objet de salles avec un nom, c'est ce que Resource Booking réserve, affiche en lignes et contrôle pour les conflits, et chaque salle y garde ses propres horaires, sa capacité et ses fermetures. Une valeur de liste de sélection ne permet rien de tout cela ; au mieux, un calendrier Dates &amp; Times par valeur peut être filtré sur celle-ci. Si vos réservations sont des Événements, notez que Salesforce n'autorise pas de champs de référence personnalisés sur Événement : réservez donc les salles sur un objet de réservation personnalisé (ou le MDP Schedule fourni avec MultiDatePick) avec un champ de référence vers la salle.</p>
+                </details>
+                <details id="faq-record-types">
+                    <summary>Fonctionne-t-il avec les types d'enregistrement ?</summary>
+                    <p>Oui. Le paramètre <strong>Type d'enregistrement</strong> de l'assistant de configuration donne à chaque nouvelle réservation un type d'enregistrement fixe, ou laisse chacun choisir parmi les types qu'il peut créer. La liste des statuts ne propose alors que les valeurs de ce type d'enregistrement. Laissé vide, chacun obtient son propre type d'enregistrement par défaut.</p>
+                </details>
+                <details id="faq-filter-busy">
+                    <summary>Un calendrier filtré sur une salle peut-il ignorer les réservations des autres salles ?</summary>
+                    <p>Oui, sur Dates &amp; Times. Avec <strong>Afficher tous les enregistrements</strong> et un <strong>Filtre d'enregistrements</strong>, activez <strong>Le filtre décide aussi de ce qui est occupé</strong> : seuls les enregistrements affichés par le filtre occupent un créneau, si bien qu'un calendrier filtré sur la Garden Room ignore les réservations des autres salles, tandis que deux réservations de la Garden Room ne peuvent toujours pas partager un créneau. C'est désactivé par défaut. Attention avec un filtre sur les propres réservations de la personne qui consulte (ME) : une fois l'option activée, les réservations des autres ne bloquent plus le créneau.</p>
                 </details>
                 <details id="faq-only-these-times">
                     <summary>Puis-je proposer uniquement certaines heures de début ?</summary>
@@ -313,6 +329,10 @@
                     <summary>Fonctionne-t-il dans les flux Salesforce ?</summary>
                     <p>Oui. Les trois sont des composants d'écran de flux. Renseignez Config Name et chaque option vient de votre configuration enregistrée. Une action de flux incluse transforme la sélection en une liste que vous pouvez parcourir en boucle. Voir le <a href="/fr/guide-flux-ecran-salesforce.html">guide des flux d'écran</a>.</p>
                 </details>
+                <details id="faq-set-own-date">
+                    <summary>Le calendrier peut-il renseigner un champ de date sur l'enregistrement où il se trouve ?</summary>
+                    <p>Oui, avec un petit flux d'écran : placez Dates sur un écran avec <strong>Max Dates Allowed</strong> à 1 et sans Parent Record Id, puis un élément <strong>Mettre à jour des enregistrements</strong> écrit la date choisie dans le champ de date de l'enregistrement. Les étapes sont dans <a href="/fr/prise-en-main.html#set-own-date">Prise en main</a>.</p>
+                </details>
                 <h2 class="faq-section-h">Tarifs &amp; disponibilité</h2>
                 <details id="faq-pricing">
                     <summary>Combien coûte MultiDatePick ?</summary>
@@ -332,7 +352,7 @@
                 </details>
                 <details id="faq-salesforce-editions-supported">
                     <summary>Quelles éditions de Salesforce sont prises en charge ?</summary>
-                    <p>Toute édition qui prend en charge les Lightning Web Components et les flux d'écran : Professional, Enterprise, Unlimited, Performance, Developer et Salesforce Platform, ainsi que les clouds sectoriels comme Nonprofit, Education, Health, Financial Services, Public Sector et Manufacturing. Dans Professional Edition, tout fonctionne sauf les visites guidées intégrées et l'action Flow Parser, car Professional n'exécute pas les actions de flux Apex. Essentials (Starter Suite) n'est pas pris en charge.</p>
+                    <p>Toute édition qui prend en charge les Lightning Web Components et les flux d'écran : Professional, Enterprise, Unlimited, Performance, Developer et Salesforce Platform, ainsi que les clouds sectoriels comme Nonprofit, Education, Health, Financial Services, Public Sector et Manufacturing. Dans Professional Edition, tout fonctionne sauf les visites guidées intégrées et l'action Flow Parser, car Professional n'exécute pas les actions de flux Apex. Professional Edition autorise aussi cinq flux d'écran au total par org, et les quatre visites du package en font partie : il en reste donc un pour un flux d'écran à vous. Essentials (Starter Suite) n'est pas pris en charge.</p>
                 </details>
                 <details id="faq-shield-platform-encryption">
                     <summary>Fonctionne-t-il avec Shield Platform Encryption ?</summary>
@@ -512,7 +532,39 @@
                 "name": "Puis-je limiter les réservations par personne ou par jour ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Oui. « Durée de réservation » réserve un rendez-vous complet en un clic, « Réservations max. par jour » plafonne le nombre de réservations distinctes qu'une personne choisit sur une journée, et « Limite par personne » plafonne les réservations à venir de chaque client, comptées d'après un champ e-mail ou texte, ou un champ de référence Contact, Piste, Compte ou Utilisateur. Le serveur vérifie « Limite par personne » à chaque enregistrement : recharger la page ne la remet jamais à zéro. Le personnel peut la dépasser après confirmation ; les visiteurs du site, non."
+                    "text": "Oui. « Durée de réservation » réserve un rendez-vous complet en un clic, « Réservations max. par jour » plafonne le nombre de réservations distinctes qu'une personne choisit sur une journée, et « Limite par personne » plafonne les réservations à venir de chaque client, comptées d'après un champ e-mail ou texte, ou un champ de référence Contact, Piste, Compte ou Utilisateur. Le serveur vérifie « Limite par personne » à chaque enregistrement : recharger la page ne la remet jamais à zéro. Le personnel peut la dépasser après confirmation ; les visiteurs du site, non. Daily Limit Field plafonne le nombre de réservations qu'une ressource accepte en une journée, comme les deux interventions d'un technicien : il lit un champ numérique sur la ressource, une journée pleine se ferme pour cette ressource, et 0 n'accepte aucune réservation."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Puis-je enregistrer une durée au lieu d'une heure de fin ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Oui. Duration Field utilise un champ numérique qui contient la durée de chaque réservation en minutes, sur Dates & Times et Resource Booking. Avec un champ d'heure de fin en plus, chaque sauvegarde, déplacement et redimensionnement écrit les minutes à côté du début et de la fin : de 10:00 à 10:45, il enregistre 45. Sans champ d'heure de fin, chaque fin vaut le début plus les minutes, donc un objet qui ne garde qu'une heure de début et une durée fonctionne tel quel."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Nos salles sont une liste de sélection. Peut-on les réserver ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Faites des salles des enregistrements : un objet de salles avec un nom, c'est ce que Resource Booking réserve, affiche en lignes et contrôle pour les conflits, et chaque salle y garde ses propres horaires, sa capacité et ses fermetures. Une valeur de liste de sélection ne permet rien de tout cela ; au mieux, un calendrier Dates & Times par valeur peut être filtré sur celle-ci. Si vos réservations sont des Événements, notez que Salesforce n'autorise pas de champs de référence personnalisés sur Événement : réservez donc les salles sur un objet de réservation personnalisé (ou le MDP Schedule fourni avec MultiDatePick) avec un champ de référence vers la salle."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Fonctionne-t-il avec les types d'enregistrement ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Oui. Le paramètre Type d'enregistrement de l'assistant de configuration donne à chaque nouvelle réservation un type d'enregistrement fixe, ou laisse chacun choisir parmi les types qu'il peut créer. La liste des statuts ne propose alors que les valeurs de ce type d'enregistrement. Laissé vide, chacun obtient son propre type d'enregistrement par défaut."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Un calendrier filtré sur une salle peut-il ignorer les réservations des autres salles ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Oui, sur Dates & Times. Avec Afficher tous les enregistrements et un Filtre d'enregistrements, activez Le filtre décide aussi de ce qui est occupé : seuls les enregistrements affichés par le filtre occupent un créneau, si bien qu'un calendrier filtré sur la Garden Room ignore les réservations des autres salles, tandis que deux réservations de la Garden Room ne peuvent toujours pas partager un créneau. C'est désactivé par défaut. Attention avec un filtre sur les propres réservations de la personne qui consulte (ME) : une fois l'option activée, les réservations des autres ne bloquent plus le créneau."
                 }
             },
             {
@@ -717,6 +769,14 @@
             },
             {
                 "@type": "Question",
+                "name": "Le calendrier peut-il renseigner un champ de date sur l'enregistrement où il se trouve ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Oui, avec un petit flux d'écran : placez Dates sur un écran avec Max Dates Allowed à 1 et sans Parent Record Id, puis un élément Mettre à jour des enregistrements écrit la date choisie dans le champ de date de l'enregistrement. Les étapes sont dans Prise en main."
+                }
+            },
+            {
+                "@type": "Question",
                 "name": "Combien coûte MultiDatePick ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
@@ -752,7 +812,7 @@
                 "name": "Quelles éditions de Salesforce sont prises en charge ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Toute édition qui prend en charge les Lightning Web Components et les flux d'écran : Professional, Enterprise, Unlimited, Performance, Developer et Salesforce Platform, ainsi que les clouds sectoriels comme Nonprofit, Education, Health, Financial Services, Public Sector et Manufacturing. Dans Professional Edition, tout fonctionne sauf les visites guidées intégrées et l'action Flow Parser, car Professional n'exécute pas les actions de flux Apex. Essentials (Starter Suite) n'est pas pris en charge."
+                    "text": "Toute édition qui prend en charge les Lightning Web Components et les flux d'écran : Professional, Enterprise, Unlimited, Performance, Developer et Salesforce Platform, ainsi que les clouds sectoriels comme Nonprofit, Education, Health, Financial Services, Public Sector et Manufacturing. Dans Professional Edition, tout fonctionne sauf les visites guidées intégrées et l'action Flow Parser, car Professional n'exécute pas les actions de flux Apex. Professional Edition autorise aussi cinq flux d'écran au total par org, et les quatre visites du package en font partie : il en reste donc un pour un flux d'écran à vous. Essentials (Starter Suite) n'est pas pris en charge."
                 }
             },
             {
