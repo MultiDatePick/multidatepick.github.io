@@ -319,3 +319,30 @@ document.addEventListener('click', function (e) {
         link_text: (link.textContent || '').trim().slice(0, 60)
     });
 });
+
+/* Feature-updates sign-up band (above the footer). The form posts to Salesforce on its own, so it works without
+   JavaScript; this only (1) re-reads the page language from <html lang> into the Preferred Language field (the build
+   already writes it), (2) treats a filled honeypot as a bot: nothing is posted, the bot just lands on the thank-you page
+   (the org also ignores such a sign-up), and (3) stops a double click from posting twice. */
+document.querySelectorAll('.ub-form').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+        var lang = (document.documentElement.lang || 'en').toLowerCase();
+        var field = form.querySelector('[data-page-lang]');
+        if (field) field.value = lang.indexOf('zh') === 0 ? 'zh' : lang.indexOf('pt') === 0 ? 'pt-BR' : lang.slice(0, 2);
+        var hp = form.querySelector('[data-hp]');
+        var ret = form.querySelector('input[name="retURL"]');
+        if (hp && hp.value) { e.preventDefault(); location.href = ret ? ret.value : '/'; return; }
+        if (form.mdpSent) { e.preventDefault(); return; }
+        form.mdpSent = true;
+        var btn = form.querySelector('button[type="submit"]');
+        if (btn) setTimeout(function () { btn.disabled = true; }, 0);
+    });
+});
+// Coming back with the Back button (page restored from the cache) lets the visitor send it again.
+window.addEventListener('pageshow', function () {
+    document.querySelectorAll('.ub-form').forEach(function (form) {
+        form.mdpSent = false;
+        var btn = form.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = false;
+    });
+});

@@ -36,6 +36,13 @@
         }
         if (err) err.hidden = true;
 
+        // The Lead's Preferred Language is the page's language (the build writes it; this keeps it right if it did not).
+        var langField = form.querySelector('[data-page-lang]');
+        if (langField) {
+            var pl = (document.documentElement.lang || 'en').toLowerCase();
+            langField.value = pl.indexOf('zh') === 0 ? 'zh' : pl.indexOf('pt') === 0 ? 'pt-BR' : pl.slice(0, 2);
+        }
+
         // 1. Salesforce: every field exactly as the form would post it (line breaks as CR LF, the way a
         // browser sends a form), never the email service's botcheck box.
         var sf = new URLSearchParams();
