@@ -1129,22 +1129,24 @@
             return s;
         }
         // Words split on spaces, quotes and punctuation in every script, so a pasted message with a record's own
-        // names in quotes still finds its entry: 60% of the words must match.
+        // names in quotes still finds its entry: when some entry holds every word, only those show; otherwise the
+        // entries holding at least 60% of the words.
         var SPLIT = /[\s"'‘’“”„«»「」『』《》（）()\[\]:：,，.。;；!！?？、…।]+/;
         cards.forEach(function (c) { c.mdpText = norm(c.textContent); c.mdpCat = c.parentNode.id; });
         function words() { return norm(q.value).split(SPLIT).filter(function (w) { return w.length > 1; }); }
-        function matches(c, w) {
-            if (!w.length) return true;
+        function score(c, w) {
             var n = 0;
             w.forEach(function (x) { if (c.mdpText.indexOf(x) >= 0) n++; });
-            return n >= Math.ceil(w.length * 0.6);
+            return n;
         }
         function isCat(id) { return id === 'all' || buttons.some(function (b) { return b.getAttribute('data-topic') === id; }); }
         function render() {
             var w = words();
             var counts = { all: 0 };
+            cards.forEach(function (c) { c.mdpScore = score(c, w); });
+            var need = !w.length ? 0 : cards.some(function (c) { return c.mdpScore === w.length; }) ? w.length : Math.ceil(w.length * 0.6);
             cards.forEach(function (c) {
-                c.mdpHit = matches(c, w);
+                c.mdpHit = c.mdpScore >= need;
                 if (c.mdpHit) { counts.all++; counts[c.mdpCat] = (counts[c.mdpCat] || 0) + 1; }
             });
             buttons.forEach(function (b) {
