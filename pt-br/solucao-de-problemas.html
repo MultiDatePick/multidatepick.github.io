@@ -279,7 +279,7 @@
                                 </ol>
                             </div>
                             <figure>
-                                <img src="/images/pt-br/troubleshooting/salesforce-reserva-configuracao-obrigatoria.png" alt="Calendário de reserva de salas do Salesforce com Configuração obrigatória: defina um Config Name do Assistente de Configuração, ou Resource Object API Name, Booking Object API Name, Booking Date Field e Booking Resource Field" width="1620" height="992" loading="lazy" data-zoomable>
+                                <img src="/images/pt-br/troubleshooting/salesforce-reserva-configuracao-obrigatoria.png" alt="Calendário de reserva de salas do Salesforce com Configuração obrigatória: defina um Config Name do Assistente de Configuração, ou Resource Object API Name (Lista de escolhas), Booking Object API Name, Booking Date Field e Booking Resource Field (Campo da reserva que guarda a escolha)" width="1620" height="992" loading="lazy" data-zoomable>
                                 <figcaption>Cada linha é uma propriedade que ainda falta definir.</figcaption>
                             </figure>
                         </article>
@@ -318,7 +318,7 @@
                             </div>
                             <figure>
                                 <img src="/images/pt-br/troubleshooting/salesforce-calendario-carregar-datas-existentes.png" alt="Calendário Salesforce com Load Existing Dates (Mostrar datas já salvas) ativado: um mês de reservas de salas do escritório já salvas, cada dia com suas barras de status" width="1620" height="1492" loading="lazy" data-zoomable>
-                                <figcaption>Com Load Existing Dates ativado, as reservas salvas aparecem assim que o calendário abre.</figcaption>
+                                <figcaption>Com Load Existing Dates (Mostrar datas já salvas) ativado, as reservas salvas aparecem assim que o calendário abre.</figcaption>
                             </figure>
                         </article>
 
@@ -344,11 +344,11 @@
                         </article>
 
                         <article class="ts-card" id="default-values-mismatch">
-                            <h3>"Valores de campo padrão: "Priority=Urgent" não corresponde a um campo e valor em Visit"</h3>
-                            <p class="ts-why"><b>Por quê:</b> <b>Preencher automaticamente</b> (App Builder: Default Field Values) define campos em cada novo registro, e um dos pares cita um campo que o objeto não tem, ou um valor que o campo não aceita, como um valor de lista de opções que não está na lista.</p>
+                            <h3>"Preencher automaticamente (Priority = High) usa Priorty__c, um campo que Visit não tem"</h3>
+                            <p class="ts-why"><b>Por quê:</b> <b>Preencher automaticamente</b> (App Builder: Default Field Values) define campos em cada novo registro, e um dos pares cita um campo que o objeto não tem. O Assistente de Configuração avisa isso em Revisar, com o nome do campo que não encontrou. Um valor que o campo não aceita, como um valor de lista de opções que não está na lista, aparece quando o calendário salva: <i>Valores de campo padrão: "Priority=Urgent" não corresponde a um campo e valor em Visit.</i></p>
                             <p class="ts-fix-h">Solução</p>
                             <ol>
-                                <li>Confira o nome de API do campo no Gerenciador de objetos.</li>
+                                <li>Abra a configuração no Assistente de Configuração e corrija o par em <b>Preencher automaticamente (Priority = High)</b>. Confira o nome de API do campo no Gerenciador de objetos.</li>
                                 <li>Escreva um valor que combine com o campo: caixas de seleção aceitam <code>true</code> ou <code>false</code>, datas aceitam <code>yyyy-mm-dd</code> ou <code>TODAY+7</code>, listas de opções aceitam um dos seus valores.</li>
                                 <li>Separe vários pares com ponto e vírgula: <code>Priority=High; Type=Call</code>.</li>
                             </ol>
@@ -460,7 +460,7 @@
 
                         <article class="ts-card" id="days-grayed-out">
                             <h3>Alguns dias ou horários aparecem em cinza</h3>
-                            <p class="ts-why"><b>Por quê:</b> uma regra de reserva os fecha. <b>Minimum Notice (Hours) (Antecedência Mínima)</b> fecha tudo o que começa cedo demais, <b>Book Up To (Days Ahead) (Reservar com até)</b> fecha os dias além da janela móvel, e Earliest ou Latest Selectable Date, as datas bloqueadas e o horário comercial de cada recurso fecham o resto.</p>
+                            <p class="ts-why"><b>Por quê:</b> uma regra de reserva os fecha. <b>Minimum Notice (Hours) (Antecedência Mínima)</b> fecha tudo o que começa cedo demais, <b>Book Up To (Days Ahead) (Reservar com até)</b> fecha os dias além da janela móvel, e Earliest ou Latest Selectable Date (Primeira ou Última Data Selecionável), as datas bloqueadas e o horário comercial de cada recurso fecham o resto.</p>
                             <p class="ts-fix-h">Solução</p>
                             <ol>
                                 <li>Confira essas definições no componente ou na configuração. O valor 0 desativa a antecedência e a janela.</li>
@@ -613,7 +613,7 @@
                                 <li>Atribua o conjunto de permissões <b>MultiDatePick - Guest</b> ao usuário convidado e dê a ele leitura em cada um dos seus próprios objetos e campos.</li>
                                 <li>Ative o site. Só publicar não basta.</li>
                             </ol>
-                            <p class="ts-note">O checklist completo de cinco passos para convidados está no <a href="/pt-br/guia-do-usuario.html#public-pages">Guia do usuário</a>. <b>Verificar meu site</b>, no Assistente de Configuração, testa cada passo para você.</p>
+                            <p class="ts-note">O checklist completo de seis passos para convidados está no <a href="/pt-br/guia-do-usuario.html#public-pages">Guia do usuário</a>. <b>Verificar meu site</b>, no Assistente de Configuração, testa cada passo para você.</p>
                         </article>
 
                         <article class="ts-card" id="check-my-site">
@@ -627,6 +627,17 @@
                                 <li><i>Um convidado não pode ver nenhum dos recursos</i>: adicione uma regra de compartilhamento de usuário convidado no objeto de recurso, em Configuração, Configurações de compartilhamento.</li>
                             </ol>
                             <p class="ts-note">Só um administrador com <b>MultiDatePick - Setup</b> pode executar a verificação.</p>
+                        </article>
+
+                        <article class="ts-card" id="no-site-yet">
+                            <h3>"Esta organização ainda não tem um site do Experience Cloud"</h3>
+                            <p class="ts-why"><b>Por quê:</b> <b>Verificar meu site</b> não encontrou nenhum site para verificar, então não há site para escolher. A mensagem completa é <i>Esta organização ainda não tem um site do Experience Cloud. Ative Experiências digitais na Configuração e crie um site; depois, verifique-o aqui.</i> A configuração em si está correta e pode ser salva.</p>
+                            <p class="ts-fix-h">Solução</p>
+                            <ol>
+                                <li>Na Configuração, pesquise <b>Experiências digitais</b>, abra <b>Configurações</b> e marque <b>Habilitar Experiências digitais</b>. O Salesforce não permite desativar isso depois.</li>
+                                <li>Crie o site em <b>Experiências digitais</b>, <b>Todos os sites</b>, <b>Novo</b>.</li>
+                                <li>Abra de novo a configuração no Assistente de Configuração e clique em <b>Verificar meu site</b> em Revisar.</li>
+                            </ol>
                         </article>
 
                         <article class="ts-card" id="guest-no-saved-config">
@@ -645,7 +656,7 @@
                             <p class="ts-fix-h">Solução</p>
                             <ol>
                                 <li>Defina o Config Name do calendário com uma configuração salva para o site, ou</li>
-                                <li>Crie uma: no Assistente de Configuração, responda <b>Onde você vai colocar este componente?</b> com <b>Site do Experience Cloud</b> e salve com um novo nome.</li>
+                                <li>Crie uma: no Assistente de Configuração, responda <b>Onde este calendário vai ficar?</b> com <b>Em um site público</b> e salve com um novo nome.</li>
                             </ol>
                         </article>
 
@@ -745,6 +756,17 @@
                             <ol>
                                 <li>Atribua <b>MultiDatePick - User</b> ao usuário, ou <b>MultiDatePick - All Access</b> a um administrador que também cria configurações.</li>
                                 <li>Em um site público, atribua <b>MultiDatePick - Guest</b> ao usuário convidado do site.</li>
+                            </ol>
+                        </article>
+
+                        <article class="ts-card" id="apex-class-access">
+                            <h3>"You do not have access to the Apex class named 'MultiDatePickConfigDeployer'"</h3>
+                            <p class="ts-why"><b>Por quê:</b> essas são palavras do próprio Salesforce e indicam que falta um conjunto de permissões: o usuário não tem nenhum conjunto de permissões do MultiDatePick, então o Salesforce não deixa o calendário executar as classes dele. O nome da classe muda conforme o que o calendário estava fazendo. A linha costuma ficar na caixa cinza abaixo do aviso vermelho, embaixo de <i>Este usuário não tem acesso ao MultiDatePick</i>.</p>
+                            <p class="ts-fix-h">Solução</p>
+                            <ol>
+                                <li>Atribua <b>MultiDatePick - User</b> ao usuário, ou <b>MultiDatePick - All Access</b> a um administrador que também cria configurações.</li>
+                                <li>Em um site público, atribua <b>MultiDatePick - Guest</b> ao usuário convidado do site.</li>
+                                <li>Recarregue a página.</li>
                             </ol>
                         </article>
 
@@ -891,10 +913,10 @@
 
                         <article class="ts-card" id="gantt-not-in-switcher">
                             <h3>A visualização de Gantt não aparece no seletor</h3>
-                            <p class="ts-why"><b>Por quê:</b> a visualização de Gantt é opcional, como a visualização Mapa. Com Available Views em branco, o seletor oferece Calendário, Linha do tempo, Semana, Ocupação e Agenda.</p>
+                            <p class="ts-why"><b>Por quê:</b> a visualização de Gantt é opcional, como a visualização Mapa. Com Available Views (Visualizações Disponíveis) em branco, o seletor oferece Calendário, Linha do tempo, Semana, Ocupação e Agenda.</p>
                             <p class="ts-fix-h">Solução</p>
                             <ol>
-                                <li>No Assistente de Configuração, marque <b>Oferecer a visualização de Gantt</b> na guia Visualizações, ou adicione <code>gantt</code> a Available Views.</li>
+                                <li>No Assistente de Configuração, marque <b>Oferecer a visualização de Gantt</b> na guia Visualizações, ou adicione <code>gantt</code> a Available Views (Visualizações Disponíveis).</li>
                                 <li>Para abrir direto nela, defina View como <code>gantt</code>.</li>
                             </ol>
                         </article>
@@ -1241,7 +1263,7 @@
                         "name": "Por que não há botão Salvar no meu calendário MultiDatePick?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "O componente não tem um registro pai e não está configurado para mostrar todos os registros. Páginas de aplicativo e iniciais não têm registro próprio, então abra a configuração no Assistente de Configuração e responda “Os registros de quem?” (“Só de quem está vendo” é a resposta mais comum), ou defina Static Parent Record Id com o registro ao qual as datas pertencem, e verifique se o objeto, o campo de data e o campo de relacionamento estão preenchidos (ou defina Config Name). Em um fluxo, o botão Salvar aparece assim que o Parent Record Id é vinculado; ele fica oculto quando a resposta do assistente para “Quem salva?” é “Meu fluxo salva”, ou quando o Parent Record Id está em branco, e então o botão Avançar do fluxo leva as datas."
+                            "text": "O componente não tem um registro pai e não está configurado para mostrar todos os registros. Páginas de aplicativo e iniciais não têm registro próprio, então abra a configuração no Assistente de Configuração e responda “Os registros de quem?” (“Só de quem está vendo” é a resposta mais comum), ou defina Static Parent Record Id (Vincular cada seleção a este registro) com o registro ao qual as datas pertencem, e verifique se o objeto, o campo de data e o campo de relacionamento estão preenchidos (ou defina Config Name). Em um fluxo, o botão Salvar aparece assim que o Parent Record Id é vinculado; ele fica oculto quando a resposta do assistente para “Quem salva?” é “Meu fluxo salva”, ou quando o Parent Record Id está em branco, e então o botão Avançar do fluxo leva as datas."
                         }
                     },
                     {
@@ -1257,7 +1279,7 @@
                         "name": "O que significa o aviso âmbar Incompatibilidade de configuração?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "O registro da página, ou o Static Parent Record Id, é de um objeto diferente daquele para o qual aponta o campo de relacionamento da configuração. Coloque o componente em uma página de registro do objeto indicado no aviso, defina Static Parent Record Id com um registro desse objeto, ou use uma configuração criada para o objeto desta página."
+                            "text": "O registro da página, ou o Static Parent Record Id (Vincular cada seleção a este registro), é de um objeto diferente daquele para o qual aponta o campo de relacionamento da configuração. Coloque o componente em uma página de registro do objeto indicado no aviso, defina Static Parent Record Id com um registro desse objeto, ou use uma configuração criada para o objeto desta página."
                         }
                     },
                     {
@@ -1281,7 +1303,7 @@
                         "name": "Por que o componente Resource Booking mostra Nenhum recurso disponível?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "A lista de recursos voltou vazia, normalmente porque o filtro de recurso não encontra nada, o objeto de recurso ou o campo de nome está errado, ou ainda não há registros de recurso. Confira Resource Filter Field e Value com um registro real, confira Resource Object API Name e Resource Name Field, ou crie um registro de recurso."
+                            "text": "A lista de recursos voltou vazia, normalmente porque o filtro de recurso não encontra nada, o objeto de recurso ou o campo de nome está errado, ou ainda não há registros de recurso. Confira Resource Filter Field e Value com um registro real, confira Resource Object API Name (Lista de escolhas) e Resource Name Field (Campo com o nome de cada um), ou crie um registro de recurso."
                         }
                     },
                     {
@@ -1289,7 +1311,7 @@
                         "name": "O que significa A capacidade precisa dos dois campos de hora?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "O Capacity Field está definido, mas o campo de hora inicial ou final da reserva está vazio, então a capacidade não pode ser aplicada. O calendário fica oculto para que nenhuma reserva escape do limite. Defina tanto Booking Start Time Field quanto Booking End Time Field, ou limpe Capacity Field."
+                            "text": "O Capacity Field (Quantos ao mesmo tempo) está definido, mas o campo de hora inicial ou final da reserva está vazio, então a capacidade não pode ser aplicada. O calendário fica oculto para que nenhuma reserva escape do limite. Defina tanto Booking Start Time Field (Começa às) quanto Booking End Time Field (Termina às), ou limpe Capacity Field."
                         }
                     },
                     {
@@ -1297,7 +1319,7 @@
                         "name": "Por que as datas salvas não aparecem quando reabro o calendário?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Load Existing Dates está desativado, então os registros foram salvos, mas o calendário abre vazio toda vez. Ative Load Existing Dates e recarregue a página; as datas salvas aparecem, coloridas por status se houver um campo de status definido."
+                            "text": "Load Existing Dates (Mostrar datas já salvas) está desativado, então os registros foram salvos, mas o calendário abre vazio toda vez. Ative Load Existing Dates e recarregue a página; as datas salvas aparecem, coloridas por status se houver um campo de status definido."
                         }
                     },
                     {
@@ -1305,7 +1327,7 @@
                         "name": "Por que não consigo escolher outra data?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "O componente tem um limite de datas: Max Dates Allowed. Desmarque uma data para escolher outra, ou aumente o limite ou defina 0 para não ter limite."
+                            "text": "O componente tem um limite de datas: Max Dates Allowed (Máximo de Datas Permitidas). Desmarque uma data para escolher outra, ou aumente o limite ou defina 0 para não ter limite."
                         }
                     },
                     {
@@ -1321,7 +1343,7 @@
                         "name": "Por que só aparecem alguns horários de início?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "“Somente estes horários” está definido, então a grade oferece só os horários de início da lista; no Resource Booking, o Only These Times Field do recurso passa a valer quando tem uma lista. O horário comercial, os fechamentos, a antecedência mínima e os conflitos continuam fechando um horário da lista. Edite ou limpe a lista para mudar os horários oferecidos."
+                            "text": "“Somente estes horários” está definido, então a grade oferece só os horários de início da lista; no Resource Booking, o Only These Times Field (Horários próprios de cada recurso) do recurso passa a valer quando tem uma lista. O horário comercial, os fechamentos, a antecedência mínima e os conflitos continuam fechando um horário da lista. Edite ou limpe a lista para mudar os horários oferecidos."
                         }
                     },
                     {
@@ -1329,7 +1351,7 @@
                         "name": "Por que a visualização de Gantt não aparece no seletor?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "A visualização de Gantt é opcional. No Assistente de Configuração, marque Oferecer a visualização de Gantt na guia Visualizações, ou adicione gantt a Available Views; defina View como gantt para abrir direto nela."
+                            "text": "A visualização de Gantt é opcional. No Assistente de Configuração, marque Oferecer a visualização de Gantt na guia Visualizações, ou adicione gantt a Available Views (Visualizações Disponíveis); defina View como gantt para abrir direto nela."
                         }
                     },
                     {
@@ -1377,7 +1399,7 @@
                         "name": "Por que alguns dias ou horários aparecem em cinza no MultiDatePick?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Uma regra de reserva os fecha: Minimum Notice (Hours) fecha tudo o que começa cedo demais, Book Up To (Days Ahead) fecha os dias além da janela móvel, e Earliest ou Latest Selectable Date, as datas bloqueadas e o horário comercial de cada recurso fecham o resto. Defina a antecedência e a janela como 0 para desativá-las."
+                            "text": "Uma regra de reserva os fecha: Minimum Notice (Hours) (Antecedência Mínima (Horas)) fecha tudo o que começa cedo demais, Book Up To (Days Ahead) (Reservar com até (Dias de Antecedência)) fecha os dias além da janela móvel, e Earliest ou Latest Selectable Date (Primeira ou Última Data Selecionável), as datas bloqueadas e o horário comercial de cada recurso fecham o resto. Defina a antecedência e a janela como 0 para desativá-las."
                         }
                     },
                     {
@@ -1385,7 +1407,7 @@
                         "name": "Por que o horário logo depois de uma reserva está ocupado?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Buffer Between Bookings (Minutes) mantém um tempo livre depois de cada reserva no mesmo recurso, para limpeza ou preparação. Diminua o valor, ou defina 0 para reservas seguidas."
+                            "text": "Buffer Between Bookings (Minutes) (Intervalo entre Reservas (Minutos)) mantém um tempo livre depois de cada reserva no mesmo recurso, para limpeza ou preparação. Diminua o valor, ou defina 0 para reservas seguidas."
                         }
                     },
                     {
@@ -1393,7 +1415,7 @@
                         "name": "Por que não aparece o botão Adicionar ao calendário depois de salvar?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Show Add to Calendar After Saving vem desativado por padrão. Ative nas propriedades do componente ou na configuração; depois de salvar, uma barra abaixo da notificação oferece um arquivo de calendário para Outlook, Google Agenda ou o Calendário da Apple."
+                            "text": "Show Add to Calendar After Saving (Mostrar \"Adicionar ao calendário\" após Salvar) vem desativado por padrão. Ative nas propriedades do componente ou na configuração; depois de salvar, uma barra abaixo da notificação oferece um arquivo de calendário para Outlook, Google Agenda ou o Calendário da Apple."
                         }
                     },
                     {
@@ -1462,15 +1484,15 @@
                     },
                     {
                         "@type": "Question",
-                        "name": "Por que Valores de campo padrão diz que não corresponde a um campo e valor?",
+                        "name": "Por que o Assistente de Configuração diz que Preencher automaticamente usa um campo que o objeto não tem?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Preencher automaticamente (App Builder: Default Field Values) define campos em cada novo registro, e um dos pares cita um campo que o objeto não tem, ou um valor que o campo não aceita, como um valor de lista de opções que não está na lista. Confira o nome de API do campo no Gerenciador de objetos. Escreva um valor que combine com o campo: caixas de seleção aceitam true ou false, datas aceitam yyyy-mm-dd ou TODAY+7, listas de opções aceitam um dos seus valores. Separe vários pares com ponto e vírgula: Priority=High; Type=Call."
+                            "text": "Preencher automaticamente (App Builder: Default Field Values) define campos em cada novo registro, e um dos pares cita um campo que o objeto não tem. O Assistente de Configuração avisa isso em Revisar, com o nome do campo que não encontrou. Um valor que o campo não aceita, como um valor de lista de opções que não está na lista, aparece quando o calendário salva: Valores de campo padrão não corresponde a um campo e valor. Abra a configuração no Assistente de Configuração e corrija o par em Preencher automaticamente (Priority = High). Confira o nome de API do campo no Gerenciador de objetos. Escreva um valor que combine com o campo: caixas de seleção aceitam true ou false, datas aceitam yyyy-mm-dd ou TODAY+7, listas de opções aceitam um dos seus valores. Separe vários pares com ponto e vírgula: Priority=High; Type=Call."
                         }
                     },
                     {
                         "@type": "Question",
-                        "name": "Por que uma reserva ocupa o dia inteiro quando há um Duration Field definido?",
+                        "name": "Por que uma reserva ocupa o dia inteiro quando há um Duration Field (Campo com os minutos) definido?",
                         "acceptedAnswer": {
                             "@type": "Answer",
                             "text": "Campo com os minutos (App Builder: Duration Field) precisa ser um campo numérico na reserva, não uma fórmula, um resumo de totalização, uma moeda ou uma porcentagem. Quando ele está definido e Termina às fica em branco, cada reserva termina no horário de início mais esses minutos, então um registro sem os minutos não tem fim e ocupa o dia inteiro. Escolha um campo numérico que guarde a duração em minutos, ou crie um. Preencha os minutos nos registros antigos uma vez, por exemplo com uma atualização de dados ou um fluxo. A partir daí, cada gravação, movimentação e redimensionamento feito no calendário os preenche."
@@ -1582,6 +1604,14 @@
                     },
                     {
                         "@type": "Question",
+                        "name": "O que significa Esta organização ainda não tem um site do Experience Cloud em Verificar meu site?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Verificar meu site não encontrou nenhum site para verificar, então não há site para escolher. A configuração em si está correta e pode ser salva. Na Configuração, pesquise Experiências digitais, abra Configurações e marque Habilitar Experiências digitais; o Salesforce não permite desativar isso depois. Crie o site em Experiências digitais, Todos os sites, Novo. Depois abra de novo a configuração no Assistente de Configuração e clique em Verificar meu site em Revisar."
+                        }
+                    },
+                    {
+                        "@type": "Question",
                         "name": "O que significa Este calendário não pode salvar aqui: ele não indica nenhuma configuração salva para este objeto?",
                         "acceptedAnswer": {
                             "@type": "Answer",
@@ -1593,7 +1623,7 @@
                         "name": "O que significa a configuração salva dele não foi feita para um site público?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "A página do site indica uma configuração feita para a equipe interna. Convidados do site e usuários do portal só podem usar uma configuração salva para um site, para que a privacidade e as regras de um calendário interno nunca cheguem ao público por engano. Defina o Config Name do calendário com uma configuração salva para o site, ou crie uma: no Assistente de Configuração, responda Onde você vai colocar este componente? com Site do Experience Cloud e salve com um novo nome."
+                            "text": "A página do site indica uma configuração feita para a equipe interna. Convidados do site e usuários do portal só podem usar uma configuração salva para um site, para que a privacidade e as regras de um calendário interno nunca cheguem ao público por engano. Defina o Config Name do calendário com uma configuração salva para o site, ou crie uma: no Assistente de Configuração, responda Onde este calendário vai ficar? com Em um site público e salve com um novo nome."
                         }
                     },
                     {
@@ -1642,6 +1672,14 @@
                         "acceptedAnswer": {
                             "@type": "Answer",
                             "text": "O usuário não tem nenhum conjunto de permissões do MultiDatePick, então o Salesforce não deixa o calendário executar as classes dele para esse usuário. O aviso vermelho mostra isso, com as palavras do próprio Salesforce na caixa cinza. Atribua MultiDatePick - User ao usuário, ou MultiDatePick - All Access a um administrador que também cria configurações. Em um site público, atribua MultiDatePick - Guest ao usuário convidado do site."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "O que significa \"You do not have access to the Apex class named 'MultiDatePickConfigDeployer'\"?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Essas são palavras do próprio Salesforce e indicam que falta um conjunto de permissões: o usuário não tem nenhum conjunto de permissões do MultiDatePick, então o Salesforce não deixa o calendário executar as classes dele. O nome da classe muda conforme o que o calendário estava fazendo. Atribua MultiDatePick - User ao usuário, ou MultiDatePick - All Access a um administrador que também cria configurações. Em um site público, atribua MultiDatePick - Guest ao usuário convidado do site. Depois recarregue a página."
                         }
                     },
                     {
@@ -1822,7 +1860,7 @@
             {
                 "@type": "ImageObject",
                 "contentUrl": "https://multidatepick.com/images/pt-br/troubleshooting/salesforce-reserva-configuracao-obrigatoria.png",
-                "caption": "Calendário de reserva de salas do Salesforce com Configuração obrigatória: defina um Config Name do Assistente de Configuração, ou Resource Object API Name, Booking Object API Name, Booking Date Field e Booking Resource Field",
+                "caption": "Calendário de reserva de salas do Salesforce com Configuração obrigatória: defina um Config Name do Assistente de Configuração, ou Resource Object API Name (Lista de escolhas), Booking Object API Name, Booking Date Field e Booking Resource Field (Campo da reserva que guarda a escolha)",
                 "creditText": "MultiDatePick",
                 "creator": {
                     "@type": "Organization",

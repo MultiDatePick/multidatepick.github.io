@@ -279,7 +279,7 @@
                                 </ol>
                             </div>
                             <figure>
-                                <img src="/images/de/troubleshooting/salesforce-buchung-konfiguration-erforderlich.png" alt="Salesforce-Kalender für Raumbuchungen mit Konfiguration erforderlich: einen Config Name aus dem Einrichtungsassistenten eintragen oder Resource Object API Name, Booking Object API Name, Booking Date Field und Booking Resource Field festlegen" width="1620" height="992" loading="lazy" data-zoomable>
+                                <img src="/images/de/troubleshooting/salesforce-buchung-konfiguration-erforderlich.png" alt="Salesforce-Kalender für Raumbuchungen mit Konfiguration erforderlich: einen Config Name aus dem Einrichtungsassistenten eintragen oder Resource Object API Name (Liste, aus der gewählt wird), Booking Object API Name (Gespeicherte Datensätze), Booking Date Field (Datum) und Booking Resource Field (Buchungsfeld für die Auswahl) festlegen" width="1620" height="992" loading="lazy" data-zoomable>
                                 <figcaption>Jede Zeile ist eine Eigenschaft, die noch fehlt.</figcaption>
                             </figure>
                         </article>
@@ -318,7 +318,7 @@
                             </div>
                             <figure>
                                 <img src="/images/de/troubleshooting/salesforce-kalender-vorhandene-termine-laden.png" alt="Salesforce-Kalender mit eingeschaltetem Load Existing Dates (Bereits gespeicherte Daten anzeigen): ein Monat gespeicherter Raumbuchungen im Kalender Büroräume, jeder Tag mit Statusbalken" width="1620" height="1492" loading="lazy" data-zoomable>
-                                <figcaption>Mit Load Existing Dates sind gespeicherte Buchungen sofort beim Öffnen des Kalenders zu sehen.</figcaption>
+                                <figcaption>Mit Load Existing Dates (Bereits gespeicherte Daten anzeigen) sind gespeicherte Buchungen sofort beim Öffnen des Kalenders zu sehen.</figcaption>
                             </figure>
                         </article>
 
@@ -344,11 +344,11 @@
                         </article>
 
                         <article class="ts-card" id="default-values-mismatch">
-                            <h3>„Standardfeldwerte: "Priority=Urgent" passt zu keinem Feld und Wert auf Visit“</h3>
-                            <p class="ts-why"><b>Warum:</b> <b>Automatisch ausfüllen</b> (App Builder: Default Field Values) setzt Felder an jedem neuen Datensatz, und eines seiner Paare nennt ein Feld, das das Objekt nicht hat, oder einen Wert, den das Feld nicht aufnehmen kann, etwa einen Auswahllistenwert, der nicht in der Liste steht.</p>
+                            <h3>„Automatisch ausfüllen (Priority = High) verwendet Priorty__c, ein Feld, das Visit nicht hat“</h3>
+                            <p class="ts-why"><b>Warum:</b> <b>Automatisch ausfüllen</b> (App Builder: Default Field Values) setzt Felder bei jedem neuen Datensatz, und eines seiner Paare nennt ein Feld, das es am Objekt nicht gibt. Der Einrichtungsassistent meldet das im Schritt Prüfen und nennt das Feld, das er nicht gefunden hat. Einen Wert, den das Feld nicht aufnehmen kann, etwa einen Auswahllistenwert, der nicht in seiner Liste steht, meldet stattdessen der Kalender beim Speichern: <i>Standardfeldwerte: "Priority=Urgent" passt zu keinem Feld und Wert auf Visit.</i></p>
                             <p class="ts-fix-h">Lösung</p>
                             <ol>
-                                <li>Prüfen Sie den API-Namen des Felds im Objekt-Manager.</li>
+                                <li>Öffnen Sie die Konfiguration im Einrichtungsassistenten und korrigieren Sie das Paar unter <b>Automatisch ausfüllen (Priority = High)</b>. Prüfen Sie den API-Namen des Felds im Objekt-Manager.</li>
                                 <li>Schreiben Sie einen Wert, der zum Feld passt: Kontrollkästchen nehmen <code>true</code> oder <code>false</code>, Datumsfelder <code>yyyy-mm-dd</code> oder <code>TODAY+7</code>, Auswahllisten einen ihrer Werte.</li>
                                 <li>Trennen Sie mehrere Paare mit Semikolons: <code>Priority=High; Type=Call</code>.</li>
                             </ol>
@@ -435,7 +435,7 @@
                         <article class="ts-card ts-tall" id="cannot-pick-more-dates">
                             <div>
                                 <h3>Ich kann keinen weiteren Termin wählen</h3>
-                                <p class="ts-why"><b>Warum:</b> Die Komponente hat ein Terminlimit: <b>Max Dates Allowed</b>.</p>
+                                <p class="ts-why"><b>Warum:</b> Die Komponente hat ein Terminlimit: <b>Max Dates Allowed</b> (Maximal zulässige Daten).</p>
                                 <p class="ts-fix-h">Lösung</p>
                                 <ol>
                                     <li>Heben Sie die Auswahl eines Termins auf, um einen anderen zu wählen, oder</li>
@@ -613,7 +613,7 @@
                                 <li>Weisen Sie dem Gastbenutzer den Berechtigungssatz <b>MultiDatePick - Guest</b> zu und geben Sie ihm Lesen auf jedes Ihrer eigenen Objekte und Felder.</li>
                                 <li>Aktivieren Sie die Site. Veröffentlichen allein reicht nicht.</li>
                             </ol>
-                            <p class="ts-note">Die vollständige Gast-Checkliste in fünf Schritten steht im <a href="/de/benutzerhandbuch.html#public-pages">Benutzerhandbuch</a>. <b>Meine Site prüfen</b> im Einrichtungsassistenten testet jeden Schritt für Sie.</p>
+                            <p class="ts-note">Die vollständige Gast-Checkliste mit sechs Schritten steht im <a href="/de/benutzerhandbuch.html#public-pages">Benutzerhandbuch</a>. <b>Meine Site prüfen</b> im Einrichtungsassistenten testet jeden Schritt für Sie.</p>
                         </article>
 
                         <article class="ts-card" id="check-my-site">
@@ -627,6 +627,17 @@
                                 <li><i>Ein Gast sieht keine der Ressourcen</i>: Fügen Sie unter Setup, Freigabeeinstellungen eine Freigaberegel für Gastbenutzer auf dem Ressourcenobjekt hinzu.</li>
                             </ol>
                             <p class="ts-note">Nur ein Admin mit <b>MultiDatePick - Setup</b> kann die Prüfung ausführen.</p>
+                        </article>
+
+                        <article class="ts-card" id="no-site-yet">
+                            <h3>„Diese Org hat noch keine Experience Cloud-Site“</h3>
+                            <p class="ts-why"><b>Warum:</b> <b>Meine Site prüfen</b> hat keine Site zum Prüfen gefunden, daher gibt es keine Site zur Auswahl. Die vollständige Meldung lautet <i>Diese Org hat noch keine Experience Cloud-Site. Aktivieren Sie „Digitale Erlebnisse“ im Setup und erstellen Sie eine Site, dann prüfen Sie sie hier.</i> Die Konfiguration selbst ist in Ordnung und lässt sich speichern.</p>
+                            <p class="ts-fix-h">Lösung</p>
+                            <ol>
+                                <li>Suchen Sie im Setup nach <b>Digitale Erlebnisse</b>, öffnen Sie <b>Einstellungen</b> und aktivieren Sie <b>Digitale Erlebnisse aktivieren</b>. Salesforce kann das nicht wieder ausschalten.</li>
+                                <li>Erstellen Sie die Site unter <b>Digitale Erlebnisse</b>, <b>Alle Sites</b>, <b>Neu</b>.</li>
+                                <li>Öffnen Sie die Konfiguration erneut im Einrichtungsassistenten und klicken Sie im Schritt Prüfen auf <b>Meine Site prüfen</b>.</li>
+                            </ol>
                         </article>
 
                         <article class="ts-card" id="guest-no-saved-config">
@@ -645,7 +656,7 @@
                             <p class="ts-fix-h">Lösung</p>
                             <ol>
                                 <li>Setzen Sie Config Name des Kalenders auf eine für die Site gespeicherte Konfiguration, oder</li>
-                                <li>erstellen Sie eine: Beantworten Sie im Einrichtungsassistenten <b>Wo möchten Sie diese Komponente platzieren?</b> mit <b>Experience Cloud-Site</b> und speichern Sie sie unter einem neuen Namen.</li>
+                                <li>legen Sie eine an: Beantworten Sie im Einrichtungsassistenten <b>Wo soll dieser Kalender angezeigt werden?</b> mit <b>Auf einer öffentlichen Website</b> und speichern Sie sie unter einem neuen Namen.</li>
                             </ol>
                         </article>
 
@@ -745,6 +756,17 @@
                             <ol>
                                 <li>Weisen Sie dem Benutzer <b>MultiDatePick - User</b> zu, oder <b>MultiDatePick - All Access</b> einem Admin, der auch Konfigurationen erstellt.</li>
                                 <li>Auf einer öffentlichen Site weisen Sie dem Gastbenutzer der Site <b>MultiDatePick - Guest</b> zu.</li>
+                            </ol>
+                        </article>
+
+                        <article class="ts-card" id="apex-class-access">
+                            <h3>„You do not have access to the Apex class named 'MultiDatePickConfigDeployer'“</h3>
+                            <p class="ts-why"><b>Warum:</b> Das ist der Originaltext von Salesforce, und er bedeutet einen fehlenden Berechtigungssatz: Der Benutzer hat keinen MultiDatePick-Berechtigungssatz, daher lässt Salesforce den Kalender seine Klassen nicht ausführen. Der Klassenname hängt davon ab, was der Kalender gerade tat. Die Zeile steht meist im grauen Kasten unter dem roten Banner, unterhalb von <i>Dieser Benutzer hat keinen Zugriff auf MultiDatePick</i>.</p>
+                            <p class="ts-fix-h">Lösung</p>
+                            <ol>
+                                <li>Weisen Sie dem Benutzer <b>MultiDatePick - User</b> zu, oder <b>MultiDatePick - All Access</b> einem Admin, der auch Konfigurationen erstellt.</li>
+                                <li>Auf einer öffentlichen Site weisen Sie dem Gastbenutzer der Site <b>MultiDatePick - Guest</b> zu.</li>
+                                <li>Laden Sie die Seite neu.</li>
                             </ol>
                         </article>
 
@@ -891,11 +913,11 @@
 
                         <article class="ts-card" id="gantt-not-in-switcher">
                             <h3>Die Gantt-Ansicht fehlt in der Ansichtsauswahl</h3>
-                            <p class="ts-why"><b>Warum:</b> Die Gantt-Ansicht muss eigens eingeschaltet werden, wie die Kartenansicht. Ist Available Views leer, werden Calendar, Timeline, Week, Utilization und Agenda angeboten.</p>
+                            <p class="ts-why"><b>Warum:</b> Die Gantt-Ansicht muss eigens eingeschaltet werden, wie die Kartenansicht. Ist Available Views (Verfügbare Ansichten) leer, werden Calendar, Timeline, Week, Utilization und Agenda angeboten.</p>
                             <p class="ts-fix-h">Lösung</p>
                             <ol>
-                                <li>Aktivieren Sie im Einrichtungsassistenten auf der Registerkarte Ansichten <b>Gantt-Ansicht anbieten</b>, oder ergänzen Sie <code>gantt</code> in Available Views.</li>
-                                <li>Damit der Kalender mit ihr öffnet, setzen Sie View auf <code>gantt</code>.</li>
+                                <li>Aktivieren Sie im Einrichtungsassistenten auf der Registerkarte Ansichten <b>Gantt-Ansicht anbieten</b>, oder ergänzen Sie <code>gantt</code> in Available Views (Verfügbare Ansichten).</li>
+                                <li>Damit der Kalender mit ihr öffnet, setzen Sie View (Ansicht) auf <code>gantt</code>.</li>
                             </ol>
                         </article>
 
@@ -1281,7 +1303,7 @@
                         "name": "Warum meldet die Komponente Resource Booking „Keine Ressourcen verfügbar“?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Die Ressourcenliste kam leer zurück, meist weil der Ressourcenfilter auf nichts passt, Ressourcenobjekt oder Namensfeld falsch sind oder es noch keine Ressourcendatensätze gibt. Prüfen Sie Resource Filter Field und Value an einem echten Datensatz, prüfen Sie Resource Object API Name und Resource Name Field, oder legen Sie einen Ressourcendatensatz an."
+                            "text": "Die Ressourcenliste kam leer zurück, meist weil der Ressourcenfilter auf nichts passt, Ressourcenobjekt oder Namensfeld falsch sind oder es noch keine Ressourcendatensätze gibt. Prüfen Sie Resource Filter Field (Nur anzeigen, wenn) und Value an einem echten Datensatz, prüfen Sie Resource Object API Name (Liste, aus der gewählt wird) und Resource Name Field (Feld mit dem Namen), oder legen Sie einen Ressourcendatensatz an."
                         }
                     },
                     {
@@ -1289,7 +1311,7 @@
                         "name": "Was bedeutet „Kapazität benötigt beide Zeitfelder“?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Capacity Field ist gesetzt, aber das Feld für Start- oder Endzeit der Buchung ist leer, die Kapazität ließe sich also nicht durchsetzen. Der Kalender bleibt ausgeblendet, damit keine Buchung das Limit umgehen kann. Setzen Sie sowohl Booking Start Time Field als auch Booking End Time Field, oder leeren Sie Capacity Field."
+                            "text": "Capacity Field (Wie viele gleichzeitig) ist gesetzt, aber das Feld für Start- oder Endzeit der Buchung ist leer, die Kapazität ließe sich also nicht durchsetzen. Der Kalender bleibt ausgeblendet, damit keine Buchung das Limit umgehen kann. Setzen Sie sowohl Booking Start Time Field (Beginn) als auch Booking End Time Field (Ende), oder leeren Sie Capacity Field."
                         }
                     },
                     {
@@ -1297,7 +1319,7 @@
                         "name": "Warum fehlen gespeicherte Termine, wenn ich den Kalender wieder öffne?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Load Existing Dates ist aus: Die Datensätze sind gespeichert, aber der Kalender öffnet sich jedes Mal leer. Schalten Sie Load Existing Dates ein und laden Sie die Seite neu; gespeicherte Termine erscheinen, nach Status eingefärbt, wenn ein Statusfeld gesetzt ist."
+                            "text": "Load Existing Dates (Bereits gespeicherte Daten anzeigen) ist aus: Die Datensätze sind gespeichert, aber der Kalender öffnet sich jedes Mal leer. Schalten Sie Load Existing Dates ein und laden Sie die Seite neu; gespeicherte Termine erscheinen, nach Status eingefärbt, wenn ein Statusfeld gesetzt ist."
                         }
                     },
                     {
@@ -1305,7 +1327,7 @@
                         "name": "Warum kann ich keinen weiteren Termin wählen?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Die Komponente hat ein Terminlimit: Max Dates Allowed. Heben Sie die Auswahl eines Termins auf, um einen anderen zu wählen, oder erhöhen Sie das Limit bzw. setzen Sie es auf 0 für kein Limit."
+                            "text": "Die Komponente hat ein Terminlimit: Max Dates Allowed (Maximal zulässige Daten). Heben Sie die Auswahl eines Termins auf, um einen anderen zu wählen, oder erhöhen Sie das Limit bzw. setzen Sie es auf 0 für kein Limit."
                         }
                     },
                     {
@@ -1329,7 +1351,7 @@
                         "name": "Warum fehlt die Gantt-Ansicht in der Ansichtsauswahl?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Die Gantt-Ansicht muss eigens eingeschaltet werden. Aktivieren Sie im Einrichtungsassistenten auf der Registerkarte Ansichten „Gantt-Ansicht anbieten“, oder ergänzen Sie gantt in Available Views; setzen Sie View auf gantt, damit der Kalender mit ihr öffnet."
+                            "text": "Die Gantt-Ansicht muss eigens eingeschaltet werden. Aktivieren Sie im Einrichtungsassistenten auf der Registerkarte Ansichten „Gantt-Ansicht anbieten“, oder ergänzen Sie gantt in Available Views (Verfügbare Ansichten); setzen Sie View (Ansicht) auf gantt, damit der Kalender mit ihr öffnet."
                         }
                     },
                     {
@@ -1377,7 +1399,7 @@
                         "name": "Warum sind in MultiDatePick einige Tage oder Uhrzeiten ausgegraut?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Eine Buchungsregel sperrt sie: Minimum Notice (Hours) sperrt alles, was zu bald beginnt, Book Up To (Days Ahead) sperrt Tage jenseits des rollierenden Zeitraums, und frühestes oder spätestes wählbares Datum, gesperrte Tage und die Geschäftszeiten jeder Ressource sperren den Rest. Setzen Sie Vorlauf und Zeitraum auf 0, um sie auszuschalten."
+                            "text": "Eine Buchungsregel sperrt sie: Minimum Notice (Hours) (Mindestvorlauf (Stunden)) sperrt alles, was zu bald beginnt, Book Up To (Days Ahead) (Buchbar bis (Tage im Voraus)) sperrt Tage jenseits des rollierenden Zeitraums, und frühestes oder spätestes wählbares Datum, gesperrte Tage und die Geschäftszeiten jeder Ressource sperren den Rest. Setzen Sie Vorlauf und Zeitraum auf 0, um sie auszuschalten."
                         }
                     },
                     {
@@ -1385,7 +1407,7 @@
                         "name": "Warum ist das Zeitfenster direkt nach einer Buchung belegt?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Buffer Between Bookings (Minutes) hält nach jeder Buchung auf derselben Ressource Zeit frei, zum Aufräumen oder Umrüsten. Verringern Sie den Wert, oder setzen Sie ihn auf 0 für Buchungen direkt hintereinander."
+                            "text": "Buffer Between Bookings (Minutes) (Puffer zwischen Buchungen (Minuten)) hält nach jeder Buchung auf derselben Ressource Zeit frei, zum Aufräumen oder Umrüsten. Verringern Sie den Wert, oder setzen Sie ihn auf 0 für Buchungen direkt hintereinander."
                         }
                     },
                     {
@@ -1393,7 +1415,7 @@
                         "name": "Warum gibt es nach dem Speichern keine Schaltfläche Zum Kalender hinzufügen?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Show Add to Calendar After Saving ist standardmäßig aus. Schalten Sie es in den Eigenschaften der Komponente oder in der Konfiguration ein; nach dem Speichern bietet eine Leiste unter der Toast-Meldung eine Kalenderdatei für Outlook, Google Kalender oder Apple Kalender an."
+                            "text": "Show Add to Calendar After Saving („Zum Kalender hinzufügen“ nach dem Speichern anzeigen) ist standardmäßig aus. Schalten Sie es in den Eigenschaften der Komponente oder in der Konfiguration ein; nach dem Speichern bietet eine Leiste unter der Toast-Meldung eine Kalenderdatei für Outlook, Google Kalender oder Apple Kalender an."
                         }
                     },
                     {
@@ -1462,15 +1484,15 @@
                     },
                     {
                         "@type": "Question",
-                        "name": "Warum meldet Standardfeldwerte, dass ein Eintrag zu keinem Feld und Wert passt?",
+                        "name": "Warum meldet der Einrichtungsassistent, dass Automatisch ausfüllen ein Feld verwendet, das es am Objekt nicht gibt?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Automatisch ausfüllen (App Builder: Default Field Values) setzt Felder an jedem neuen Datensatz, und eines seiner Paare nennt ein Feld, das das Objekt nicht hat, oder einen Wert, den das Feld nicht aufnehmen kann, etwa einen Auswahllistenwert, der nicht in der Liste steht. Prüfen Sie den API-Namen des Felds im Objekt-Manager. Schreiben Sie einen Wert, der zum Feld passt: Kontrollkästchen nehmen true oder false, Datumsfelder yyyy-mm-dd oder TODAY+7, Auswahllisten einen ihrer Werte. Trennen Sie mehrere Paare mit Semikolons: Priority=High; Type=Call."
+                            "text": "Automatisch ausfüllen (App Builder: Default Field Values) setzt Felder bei jedem neuen Datensatz, und eines seiner Paare nennt ein Feld, das es am Objekt nicht gibt. Der Einrichtungsassistent meldet das im Schritt Prüfen und nennt das Feld, das er nicht gefunden hat. Einen Wert, den das Feld nicht aufnehmen kann, etwa einen Auswahllistenwert, der nicht in seiner Liste steht, meldet stattdessen der Kalender beim Speichern: Standardfeldwerte passt zu keinem Feld und Wert. Öffnen Sie die Konfiguration im Einrichtungsassistenten und korrigieren Sie das Paar unter Automatisch ausfüllen (Priority = High). Prüfen Sie den API-Namen des Felds im Objekt-Manager. Schreiben Sie einen Wert, der zum Feld passt: Kontrollkästchen nehmen true oder false, Datumsfelder yyyy-mm-dd oder TODAY+7, Auswahllisten einen ihrer Werte. Trennen Sie mehrere Paare mit Semikolons: Priority=High; Type=Call."
                         }
                     },
                     {
                         "@type": "Question",
-                        "name": "Warum belegt eine Buchung den ganzen Tag, wenn ein Duration Field gesetzt ist?",
+                        "name": "Warum belegt eine Buchung den ganzen Tag, wenn ein Duration Field (Feld für die Minuten) gesetzt ist?",
                         "acceptedAnswer": {
                             "@type": "Answer",
                             "text": "Feld für die Minuten (App Builder: Duration Field) muss ein Zahlenfeld an der Buchung sein, kein Formel-, Rollup-Auswertungs-, Währungs- oder Prozentfeld. Ist es gesetzt und Endet um leer, endet jede Buchung zu ihrem Beginn plus diesen Minuten. Ein Datensatz ohne Minuten hat daher kein Ende und belegt den ganzen Tag. Wählen Sie ein Zahlenfeld, das die Länge in Minuten enthält, oder legen Sie eines an. Tragen Sie die Minuten an älteren Datensätzen einmal nach, zum Beispiel mit einer Datenaktualisierung oder einem Flow. Ab dann schreibt jedes Speichern, Verschieben und Ändern der Dauer im Kalender sie selbst."
@@ -1582,6 +1604,14 @@
                     },
                     {
                         "@type": "Question",
+                        "name": "Was bedeutet „Diese Org hat noch keine Experience Cloud-Site“ in „Meine Site prüfen“?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Meine Site prüfen hat keine Site zum Prüfen gefunden, daher gibt es keine Site zur Auswahl. Die Konfiguration selbst ist in Ordnung und lässt sich speichern. Suchen Sie im Setup nach Digitale Erlebnisse, öffnen Sie Einstellungen und aktivieren Sie Digitale Erlebnisse aktivieren; Salesforce kann das nicht wieder ausschalten. Erstellen Sie die Site unter Digitale Erlebnisse, Alle Sites, Neu. Öffnen Sie die Konfiguration dann erneut im Einrichtungsassistenten und klicken Sie im Schritt Prüfen auf Meine Site prüfen."
+                        }
+                    },
+                    {
+                        "@type": "Question",
                         "name": "Was bedeutet „Dieser Kalender kann hier nicht speichern: Er nennt keine gespeicherte Konfiguration für dieses Objekt“?",
                         "acceptedAnswer": {
                             "@type": "Answer",
@@ -1593,7 +1623,7 @@
                         "name": "Was bedeutet „Seine gespeicherte Konfiguration ist nicht für eine öffentliche Website eingerichtet“?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Die Site-Seite nennt eine Konfiguration, die für Mitarbeitende gebaut ist. Site-Gäste und Portalbenutzer dürfen nur eine Konfiguration nutzen, die für eine Site gespeichert ist, damit Datenschutz und Regeln eines Mitarbeiterkalenders nie versehentlich die Öffentlichkeit erreichen. Setzen Sie Config Name des Kalenders auf eine für die Site gespeicherte Konfiguration, oder erstellen Sie eine: Beantworten Sie im Einrichtungsassistenten Wo möchten Sie diese Komponente platzieren? mit Experience Cloud-Site und speichern Sie sie unter einem neuen Namen."
+                            "text": "Die Site-Seite nennt eine Konfiguration, die für Mitarbeitende gebaut ist. Site-Gäste und Portalbenutzer dürfen nur eine Konfiguration nutzen, die für eine Site gespeichert ist, damit Datenschutz und Regeln eines Mitarbeiterkalenders nie versehentlich die Öffentlichkeit erreichen. Setzen Sie Config Name des Kalenders auf eine für die Site gespeicherte Konfiguration, oder legen Sie eine an: Beantworten Sie im Einrichtungsassistenten Wo soll dieser Kalender angezeigt werden? mit Auf einer öffentlichen Website und speichern Sie sie unter einem neuen Namen."
                         }
                     },
                     {
@@ -1642,6 +1672,14 @@
                         "acceptedAnswer": {
                             "@type": "Answer",
                             "text": "Der Benutzer hat keinen MultiDatePick-Berechtigungssatz, daher lässt Salesforce den Kalender seine Klassen für ihn nicht ausführen. Das rote Banner zeigt es, mit dem Originaltext von Salesforce im grauen Kasten. Weisen Sie dem Benutzer MultiDatePick - User zu, oder MultiDatePick - All Access einem Admin, der auch Konfigurationen erstellt. Auf einer öffentlichen Site weisen Sie dem Gastbenutzer der Site MultiDatePick - Guest zu."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Was bedeutet You do not have access to the Apex class named MultiDatePickConfigDeployer?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Das ist der Originaltext von Salesforce, und er bedeutet einen fehlenden Berechtigungssatz: Der Benutzer hat keinen MultiDatePick-Berechtigungssatz, daher lässt Salesforce den Kalender seine Klassen nicht ausführen. Der Klassenname hängt davon ab, was der Kalender gerade tat. Weisen Sie dem Benutzer MultiDatePick - User zu, oder MultiDatePick - All Access einem Admin, der auch Konfigurationen erstellt. Auf einer öffentlichen Site weisen Sie dem Gastbenutzer der Site MultiDatePick - Guest zu. Laden Sie dann die Seite neu."
                         }
                     },
                     {
@@ -1822,7 +1860,7 @@
             {
                 "@type": "ImageObject",
                 "contentUrl": "https://multidatepick.com/images/de/troubleshooting/salesforce-buchung-konfiguration-erforderlich.png",
-                "caption": "Salesforce-Kalender für Raumbuchungen mit Konfiguration erforderlich: einen Config Name aus dem Einrichtungsassistenten eintragen oder Resource Object API Name, Booking Object API Name, Booking Date Field und Booking Resource Field festlegen",
+                "caption": "Salesforce-Kalender für Raumbuchungen mit Konfiguration erforderlich: einen Config Name aus dem Einrichtungsassistenten eintragen oder Resource Object API Name (Liste, aus der gewählt wird), Booking Object API Name (Gespeicherte Datensätze), Booking Date Field (Datum) und Booking Resource Field (Buchungsfeld für die Auswahl) festlegen",
                 "creditText": "MultiDatePick",
                 "creator": {
                     "@type": "Organization",
