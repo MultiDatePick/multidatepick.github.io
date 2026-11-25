@@ -2,7 +2,7 @@
 /**
  * Validate every JSON config in downloads/configs/ against resilient-badger
  * by calling MultiDatePickConfigDeployer.scanImportedConfig() — the same
- * Apex method the wizard's Import tab uses. Reports any missing
+ * Apex method the wizard's Import / Export tab uses. Reports any missing
  * objects/fields in the target org.
  */
 const fs = require('fs');

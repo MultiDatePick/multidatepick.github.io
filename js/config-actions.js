@@ -70,8 +70,8 @@
         copyFetched(url)
             .then(function () {
                 showToast(text('copied-title', 'Config Copied'), text('copied-body',
-                    'Open your Salesforce org and navigate to the <strong>MultiDatePick Setup</strong> app. ' +
-                    'Go to the <strong>Import</strong> tab, paste it and save. Then type its Config Name wherever you place the component.'));
+                    'Open the <strong>MultiDatePick Setup Wizard</strong> in your Salesforce org, go to the <strong>Import / Export</strong> tab and paste it. ' +
+                    'The import then matches it to your objects, fields and status values, one step at a time. Then type its Config Name wherever you place the component.'));
             })
             .catch(function () {
                 const link = '<a href="' + url + '" target="_blank" rel="noopener">' + text('open-json', 'Open the JSON') + '</a>';
