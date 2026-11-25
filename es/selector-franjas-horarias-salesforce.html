@@ -99,7 +99,7 @@
                 ],
                 "applicationCategory": "BusinessApplication",
                 "operatingSystem": "Salesforce",
-                "description": "Un Lightning Web Component sin código para Salesforce que selecciona fechas y franjas horarias, configurado con un asistente guiado. Los usuarios eligen varias fechas en un solo calendario y después arrastran franjas horarias en una cuadrícula o las eligen en listas desplegables, con las mismas horas para todas las fechas o distintas en cada una. Incluye detección de conflictos (block, skip o allow), periodos de Mañana, Tarde y Noche, colores de estado, intervalos consolidados con sub-bloques, un modo Time Grid Only (Solo cuadrícula de horarios), las vistas Semana, Calendario y Agenda, y salidas de flujo como selectedDatesWithTimesJson. Funciona en flujos de pantalla, páginas de registro de Lightning, páginas de aplicación, páginas de inicio y sitios de Experience Cloud, y se configura en un asistente de configuración sin Apex.",
+                "description": "Un Lightning Web Component sin código para Salesforce que selecciona fechas y franjas horarias, configurado con un asistente guiado. Los usuarios eligen varias fechas en un solo calendario y después arrastran franjas horarias en una cuadrícula o las eligen en listas desplegables, con las mismas horas para todas las fechas o distintas en cada una. Incluye detección de conflictos (block, skip o allow), periodos de Mañana, Tarde y Noche, colores de estado, intervalos consolidados con sub-bloques, un modo Time Grid Only (Solo las horas de un día, sin calendario), las vistas Semana, Calendario y Agenda, y salidas de flujo como selectedDatesWithTimesJson. Funciona en flujos de pantalla, páginas de registro de Lightning, páginas de aplicación, páginas de inicio y sitios de Experience Cloud, y se configura en un asistente de configuración sin Apex.",
                 "featureList": [
                     "Calendario de varias fechas con cuadrícula de franjas horarias o selectores de hora desplegables",
                     "Las mismas horas para todas las fechas, o horas distintas para cada fecha",
@@ -107,7 +107,7 @@
                     "Detección de conflictos: bloquear, omitir o permitir",
                     "Colores de estado en el calendario y en la cuadrícula de horarios",
                     "Tramos de tiempo consolidados con registros de sub-bloque para los huecos",
-                    "Modo Solo cuadrícula de horarios para una única fecha implícita",
+                    "Modo Time Grid Only (Solo las horas de un día, sin calendario) para una única fecha implícita",
                     "Solo estas horas de inicio: ofrece únicamente las horas que indiques",
                     "Duración de la reserva, reservas por día y un límite por cliente comprobado en el servidor",
                     "Vistas de Semana, Calendario y Agenda",
@@ -182,7 +182,7 @@
                         "name": "¿Evita las reservas duplicadas?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Sí. Conflict Behavior (Comportamiento ante conflictos) es block por defecto: las franjas ya ocupadas por registros existentes de ese calendario aparecen en gris y no se pueden elegir. Skip guarda las franjas libres y notifica las ocupadas, lo que va bien para elegir en bloque muchas fechas. Allow desactiva la comprobación. Conflict Look-Ahead Days (Días de previsión de conflictos) define hasta cuándo se comprueba, 360 días por defecto."
+                            "text": "Sí. Conflict Behavior (Cuando una hora está ocupada) es block por defecto: las franjas ya ocupadas por registros existentes de ese calendario aparecen en gris y no se pueden elegir. Skip guarda las franjas libres y notifica las ocupadas, lo que va bien para elegir en bloque muchas fechas. Allow desactiva la comprobación. Conflict Look-Ahead Days (Buscar choques con estos días de antelación) define hasta cuándo se comprueba, 360 días por defecto."
                         }
                     },
                     {
@@ -190,7 +190,7 @@
                         "name": "¿Puedo usar listas desplegables en lugar de una cuadrícula horaria?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Sí. Pon Time Display Mode (Modo de visualización de hora) en dropdown para tener selectores de hora de inicio y de fin, o deja grid para franjas en las que se hace clic y se arrastra. Time Interval (Minutes) (Intervalo de tiempo, minutos) define la duración de la franja en minutos, la que quieras (lo habitual es 15, 30 o 60), y Earliest Time (Hora más temprana) y Latest Time (Hora más tardía) marcan los límites del día, de 09:00 a 18:00 por defecto en páginas de Lightning y de Experience Cloud; si se dejan en blanco en un flujo, la cuadrícula cubre el día entero."
+                            "text": "Sí. Pon Time Display Mode (Mostrar las horas como) en dropdown para tener selectores de hora de inicio y de fin, o deja grid para franjas en las que se hace clic y se arrastra. Time Interval (Minutes) (Intervalo de tiempo, minutos) define la duración de la franja en minutos, la que quieras (lo habitual es 15, 30 o 60), y Earliest Time (Hora más temprana) y Latest Time (Hora más tardía) marcan los límites del día, de 09:00 a 18:00 por defecto en páginas de Lightning y de Experience Cloud; si se dejan en blanco en un flujo, la cuadrícula cubre el día entero."
                         }
                     },
                     {
@@ -198,7 +198,7 @@
                         "name": "¿El selector de fecha y hora de Salesforce funciona en Experience Cloud y en páginas de aplicación y de inicio?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Sí. En las páginas de aplicación, de inicio y de Experience Cloud, define Config Name y Static Parent Record Id (Id estático del registro principal), el registro al que pertenecen las horas. En Experience Cloud, activa Show In-Component Toast (Mostrar aviso en el componente) para que los visitantes vean la confirmación del guardado."
+                            "text": "Sí. En las páginas de aplicación, de inicio y de Experience Cloud, define Config Name y Static Parent Record Id (Vincular cada selección a este registro), el registro al que pertenecen las horas. En Experience Cloud, activa Show In-Component Toast (Mostrar aviso en el componente) para que los visitantes vean la confirmación del guardado."
                         }
                     },
                     {
@@ -572,8 +572,8 @@
                 <div class="dt-feats">
                     <div class="dt-feat"><b>Detección de conflictos</b>Las franjas ocupadas aparecen en gris. Skip guarda las libres; allow la desactiva.<span class="lbl">Conflict Behavior: block, skip, allow</span></div>
                     <div class="dt-feat"><b>Mañana, Tarde, Noche</b>Las jornadas largas se dividen en tres grupos fáciles de recorrer.<span class="lbl">Group Time Slots by Period</span> (Agrupar franjas horarias por periodo)</div>
-                    <div class="dt-feat"><b>Colores de estado</b>Confirmed, Tentative, Cancelled: tu lista de selección, tus colores.<span class="lbl">Status Field (Campo de estado) + Status Colors (Colores de estado de reserva)</span></div>
-                    <div class="dt-feat"><b>Las pausas se guardan solas</b>Las franjas seguidas se unen en un solo intervalo; los huecos se guardan como registros secundarios.<span class="lbl">Consolidate Time Span (Consolidar rango de tiempo) + sub-bloques</span></div>
+                    <div class="dt-feat"><b>Colores de estado</b>Confirmed, Tentative, Cancelled: tu lista de selección, tus colores.<span class="lbl">Status Field (Estado) + Status Colors (Colores de estado de reserva)</span></div>
+                    <div class="dt-feat"><b>Las pausas se guardan solas</b>Las franjas seguidas se unen en un solo intervalo; los huecos se guardan como registros secundarios.<span class="lbl">Consolidate Time Span (Un registro con pausas) + sub-bloques</span></div>
                     <div class="dt-feat"><b>Time Grid Only</b>En un registro que ya es un día, muestra solo la cuadrícula.<span class="lbl">Time Grid Only</span></div>
                     <div class="dt-feat"><b>Registros de día completo</b>Una fecha sin franjas se guarda como el día entero.<span class="lbl">Allow Whole-Day (No Times)</span> (Permitir día completo)</div>
                     <div class="dt-feat"><b>Patrones recurrentes</b>Todos los martes y jueves durante ocho semanas, en dos clics.<span class="lbl">Show Recurring Pattern Button</span> (Mostrar botón de patrón recurrente)</div>
@@ -684,7 +684,7 @@
                         <tr><td>Hora de inicio</td><td>Hora</td><td>Start Time Field</td></tr>
                         <tr><td>Hora de fin</td><td>Hora</td><td>End Time Field</td></tr>
                         <tr><td>Contacto (principal)</td><td>Búsqueda</td><td>Nombre API del campo de relación (Relationship Field API Name)</td></tr>
-                        <tr><td>Estado <small>opcional</small></td><td>Lista de selección</td><td>Campo de estado (Status Field)</td></tr>
+                        <tr><td>Estado <small>opcional</small></td><td>Lista de selección</td><td>Status Field (Estado)</td></tr>
                         <tr><td>Fecha de fin <small>opcional</small></td><td>Fecha</td><td>End Date Field API Name</td></tr>
                     </tbody>
                 </table>
@@ -693,7 +693,7 @@
                     <div class="gs-card dt"><b>Sub-bloques <small style="display:inline;font-weight:400;color:#6b7280;">opcional</small></b>Los huecos entre las franjas seleccionadas se guardan en un objeto secundario. De 08:00 a 17:00 con un hueco a las 12:00 para comer, la pausa se escribe sola.</div>
                     <div class="gs-card dt"><b>Fechas bloqueadas <small style="display:inline;font-weight:400;color:#6b7280;">opcional</small></b>Festivos o cierres de cualquier objeto, para que nadie los elija.</div>
                 </div>
-                <p class="gs-note"><b>Guardado que solo añade.</b> Guardar inserta registros nuevos y nunca elimina los existentes. Load Existing Dates (Cargar fechas existentes) muestra lo que ya está reservado, editable o en solo lectura.</p>
+                <p class="gs-note"><b>Guardado que solo añade.</b> Guardar inserta registros nuevos y nunca elimina los existentes. Load Existing Dates (Mostrar fechas ya guardadas) muestra lo que ya está reservado, editable o en solo lectura.</p>
             </div>
         </section>
 
@@ -803,15 +803,15 @@
                 </details>
                 <details>
                     <summary>¿Evita las reservas duplicadas?</summary>
-                    <p>Sí. Conflict Behavior (Comportamiento ante conflictos) es block por defecto: las franjas ya ocupadas por registros existentes de ese calendario aparecen en gris y no se pueden elegir. Skip guarda las franjas libres y notifica las ocupadas, lo que va bien para elegir en bloque muchas fechas. Allow desactiva la comprobación. Conflict Look-Ahead Days (Días de previsión de conflictos) define hasta cuándo se comprueba, 360 días por defecto.</p>
+                    <p>Sí. Conflict Behavior (Cuando una hora está ocupada) es block por defecto: las franjas ya ocupadas por registros existentes de ese calendario aparecen en gris y no se pueden elegir. Skip guarda las franjas libres y notifica las ocupadas, lo que va bien para elegir en bloque muchas fechas. Allow desactiva la comprobación. Conflict Look-Ahead Days (Buscar choques con estos días de antelación) define hasta cuándo se comprueba, 360 días por defecto.</p>
                 </details>
                 <details>
                     <summary>¿Puedo usar listas desplegables en lugar de una cuadrícula horaria?</summary>
-                    <p>Sí. Pon Time Display Mode (Modo de visualización de hora) en dropdown para tener selectores de hora de inicio y de fin, o deja grid para franjas en las que se hace clic y se arrastra. Time Interval (Minutes) (Intervalo de tiempo, minutos) define la duración de la franja en minutos, la que quieras (lo habitual es 15, 30 o 60), y Earliest Time (Hora más temprana) y Latest Time (Hora más tardía) marcan los límites del día, de 09:00 a 18:00 por defecto en páginas de Lightning y de Experience Cloud; si se dejan en blanco en un flujo, la cuadrícula cubre el día entero.</p>
+                    <p>Sí. Pon Time Display Mode (Mostrar las horas como) en dropdown para tener selectores de hora de inicio y de fin, o deja grid para franjas en las que se hace clic y se arrastra. Time Interval (Minutes) (Intervalo de tiempo, minutos) define la duración de la franja en minutos, la que quieras (lo habitual es 15, 30 o 60), y Earliest Time (Hora más temprana) y Latest Time (Hora más tardía) marcan los límites del día, de 09:00 a 18:00 por defecto en páginas de Lightning y de Experience Cloud; si se dejan en blanco en un flujo, la cuadrícula cubre el día entero.</p>
                 </details>
                 <details>
                     <summary>¿El selector de fecha y hora de Salesforce funciona en Experience Cloud y en páginas de aplicación y de inicio?</summary>
-                    <p>Sí. En las páginas de aplicación, de inicio y de Experience Cloud, define Config Name y Static Parent Record Id (Id estático del registro principal), el registro al que pertenecen las horas. En Experience Cloud, activa Show In-Component Toast (Mostrar aviso en el componente) para que los visitantes vean la confirmación del guardado.</p>
+                    <p>Sí. En las páginas de aplicación, de inicio y de Experience Cloud, define Config Name y Static Parent Record Id (Vincular cada selección a este registro), el registro al que pertenecen las horas. En Experience Cloud, activa Show In-Component Toast (Mostrar aviso en el componente) para que los visitantes vean la confirmación del guardado.</p>
                 </details>
                 <details>
                     <summary>¿Cuánto cuesta el componente Dates &amp; Times de MultiDatePick?</summary>
@@ -867,7 +867,7 @@
                         <tr id="prop-startTimeField"><td>Start Time Field<small><code>startTimeField</code></small></td><td>-</td><td>Campo Time para el inicio.</td></tr>
                         <tr id="prop-endTimeField"><td>End Time Field<small><code>endTimeField</code></small></td><td>-</td><td>Campo Time para el fin.</td></tr>
                     </tbody></table>
-                    <h3>Solo cuadrícula de horarios (Time Grid Only)</h3>
+                    <h3>Time Grid Only (Solo las horas de un día, sin calendario)</h3>
                     <table class="gs-table"><thead><tr><th>Ajuste</th><th>Predeterminado</th><th>Función</th></tr></thead><tbody>
                         <tr id="prop-timeGridOnly"><td>Time Grid Only<small><code>timeGridOnly</code></small></td><td>false</td><td>Oculta el calendario y muestra solo la cuadrícula para una fecha implícita. Las franjas se guardan en el registro anfitrión.</td></tr>
                         <tr id="prop-timeGridDate"><td>Time Grid Date<small><code>timeGridDate</code></small></td><td>-</td><td>Fecha explícita, AAAA-MM-DD.</td></tr>

@@ -540,7 +540,7 @@
                     <div class="vcard">
                         <span class="vbadge vbadge-utilization">utilization</span>
                         <h3>Heatmap della capacità</h3>
-                        <p>Percentuale di capacità usata per risorsa e per giorno, colorata dal verde al rosso. Serve un <b>Capacity Field</b> (Campo capacità) per mostrare percentuali invece di semplici conteggi.</p>
+                        <p>Percentuale di capacità usata per risorsa e per giorno, colorata dal verde al rosso. Serve un <b>Capacity Field</b> (Quanti alla volta) per mostrare percentuali invece di semplici conteggi.</p>
                         <span class="ro">Sola lettura</span>
                     </div>
                     <div class="vcard">
@@ -663,7 +663,7 @@
                         <h3>Date di chiusura delle strutture</h3>
                         <p class="config-desc">Gli amministratori segnano le date di chiusura o di blocco di una struttura. Le chiusure esistenti vengono precaricate in sola lettura, così non possono essere rimosse per errore. I colori di stato distinguono le chiusure attive, pianificate e risolte.</p>
                         <div class="config-note">
-                            <strong>Schema autoreferenziale:</strong> le date bloccate vengono lette dalla stessa tabella <code>Schedule__c</code> delle prenotazioni. Con <b>Blocked Dates Filter Field</b> (Campo filtro date bloccate) impostato su <code>Event__c</code> e nessun valore, contano solo le chiusure di questo record, così le altre prenotazioni della tabella non bloccano mai un giorno. Fai puntare <b>Blocked Dates Object</b> (Oggetto date bloccate) a un altro oggetto se preferisci tenere separate chiusure e prenotazioni.</div>
+                            <strong>Schema autoreferenziale:</strong> le date bloccate vengono lette dalla stessa tabella <code>Schedule__c</code> delle prenotazioni. Con <b>Blocked Dates Filter Field</b> (Solo le chiusure in cui) impostato su <code>Event__c</code> e nessun valore, contano solo le chiusure di questo record, così le altre prenotazioni della tabella non bloccano mai un giorno. Fai puntare <b>Blocked Dates Object</b> (Elenco dei giorni di chiusura) a un altro oggetto se preferisci tenere separate chiusure e prenotazioni.</div>
                         <div class="config-needs">
                             <span class="kp-h">Cosa serve</span>
                             <p>Un campo data per il primo giorno, un secondo campo data per l'ultimo giorno, un campo di ricerca al record della struttura, un campo di testo per il nome e un elenco di selezione Stato (Active, Planned, Resolved). Le chiusure vengono lette dallo stesso oggetto.</p>
@@ -677,9 +677,9 @@
                                 <li><b>Status Colors</b> Active/Planned/Resolved <code class="api">statusColors</code></li>
                                 <li><b>Two-Month View</b> <code class="api">twoMonthView</code></li>
                                 <li><b>Status Display (Visualizzazione stato)</b> Riempimento <code class="api">statusDisplay</code></li>
-                                <li><b>Blocked Dates Label Field (Campo etichetta date bloccate)</b> Schedule_Name__c <code class="api">blockedDatesLabelField</code></li>
+                                <li><b>Blocked Dates Label Field (Motivo mostrato)</b> Schedule_Name__c <code class="api">blockedDatesLabelField</code></li>
                                 <li><b>Show Record Names in Each Day (Mostra i nomi dei record in ogni giorno)</b> <code class="api">monthShowNames</code></li>
-                                <li><b>Blocked Dates Filter Field (Campo filtro date bloccate)</b> Event__c, solo questo record <code class="api">blockedDatesFilterField</code></li>
+                                <li><b>Blocked Dates Filter Field (Solo le chiusure in cui)</b> Event__c, solo questo record <code class="api">blockedDatesFilterField</code></li>
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Planned/Active <code class="api">selectableStatuses</code></li>
                             </ul>
@@ -913,7 +913,7 @@
                         <h3>Calendario chiusure dell'ufficio</h3>
                         <p class="config-desc">Un gestore dedicato delle chiusure. Il responsabile dell'ufficio o della struttura sceglie le date di chiusura (festività, chiusure programmate, giorni di maltempo, finestre di manutenzione) e le salva come semplice elenco di record che altre configurazioni MultiDatePick possono <em>rispettare</em> come date bloccate.</p>
                         <div class="config-note">
-                            <strong>Da abbinare a <code>Prenotazione appuntamenti con festività</code>:</strong> i record scritti da questa configurazione (con <code>Status__c = Closed</code>; aggiungi il valore Closed all'elenco di selezione dello stato) vengono letti dal calendario appuntamenti tramite tre impostazioni: <b>Blocked Dates Object</b> + <b>Blocked Dates Filter Field</b> + <b>Blocked Dates Filter Value</b> (Oggetto, Campo filtro e Valore filtro date bloccate). Più categorie di blocco (festività, manutenzione, solo attrezzature) possono condividere la stessa tabella. Ogni calendario che le legge sceglie quale categoria applicare. Ogni giorno di chiusura viene salvato come record a sé, perché il calendario appuntamenti legge una data per chiusura: una chiusura di una settimana sono cinque record, e tutti e cinque i giorni risultano chiusi.</div>
+                            <strong>Da abbinare a <code>Prenotazione appuntamenti con festività</code>:</strong> i record scritti da questa configurazione (con <code>Status__c = Closed</code>; aggiungi il valore Closed all'elenco di selezione dello stato) vengono letti dal calendario appuntamenti tramite tre impostazioni: <b>Blocked Dates Object</b> + <b>Blocked Dates Filter Field</b> + <b>Blocked Dates Filter Value</b> (Elenco dei giorni di chiusura, Solo le chiusure in cui, uguale a). Più categorie di blocco (festività, manutenzione, solo attrezzature) possono condividere la stessa tabella. Ogni calendario che le legge sceglie quale categoria applicare. Ogni giorno di chiusura viene salvato come record a sé, perché il calendario appuntamenti legge una data per chiusura: una chiusura di una settimana sono cinque record, e tutti e cinque i giorni risultano chiusi.</div>
                         <div class="config-needs">
                             <span class="kp-h">Cosa serve</span>
                             <p>Un campo data per il giorno di chiusura, un campo di ricerca al record a cui appartiene, un campo di testo per il nome e un elenco di selezione Stato con il valore Closed. Ogni giorno di chiusura viene salvato come record a sé.</p>
@@ -926,7 +926,7 @@
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Show Recurring Pattern Button</b> <code class="api">showRecurringPattern</code></li>
                                 <li><b>Show Record Names in Each Day (Mostra i nomi dei record in ogni giorno)</b> <code class="api">monthShowNames</code></li>
-                                <li><b>Default Field Values (Valori di campo predefiniti)</b> Status__c=Closed <code class="api">defaultFieldValues</code></li>
+                                <li><b>Default Field Values (Compila automaticamente)</b> Status__c=Closed <code class="api">defaultFieldValues</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> solo Closed <code class="api">selectableStatuses</code></li>
                             </ul>
                         </div>
@@ -967,12 +967,12 @@
                                 <li><b>Earliest Time (Primo orario)</b> 07:00 / <b>Latest Time (Ultimo orario)</b> 20:00 <code class="api">minTime, maxTime</code></li>
                                 <li><b>Status Colors (Colori stato)</b> Draft/Submitted/Approved/Rejected <code class="api">statusColors</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> solo Draft <code class="api">selectableStatuses</code></li>
-                                <li><b>Second Picklist Field (Secondo campo elenco di selezione)</b> Billable__c, con etichetta Fatturazione <code class="api">secondStatusField</code></li>
+                                <li><b>Second Picklist Field (Seconda scelta)</b> Billable__c, con etichetta Fatturazione <code class="api">secondStatusField</code></li>
                                 <li><b>Record Details Pop-up (Finestra dei dettagli del record)</b> Progetto, obbligatorio <code class="api">recordForm</code></li>
                                 <li><b>Show Recurring Pattern Button</b> <code class="api">showRecurringPattern</code></li>
                                 <li><b>Week Starts on Monday</b> <code class="api">weekStartsOnMonday</code></li>
                                 <li><b>Custom Actions (Azioni personalizzate)</b> Invia settimana, Segna non fatturabile (Modalità modifica, voci in Bozza) <code class="api">Custom_Actions__c</code></li>
-                                <li><b>Hover Popover Fields (Campi del popover al passaggio del mouse)</b> Progetto, Ore, Fatturazione, Stato <code class="api">hoverFields</code></li>
+                                <li><b>Hover Popover Fields (Dettagli al passaggio del mouse)</b> Progetto, Ore, Fatturazione, Stato <code class="api">hoverFields</code></li>
                                 <li><b>Show Record Names in Each Day (Mostra i nomi dei record in ogni giorno)</b> <code class="api">monthShowNames</code></li>
                             </ul>
                         </div>
@@ -1042,7 +1042,7 @@
                                 <li><b>Agenda Fields (Campi dell'agenda)</b> Reason__c, Status__c <code class="api">agendaFields</code></li>
                                 <li><b>Unscheduled List (Elenco «Da pianificare»)</b> Reason__c, Necessario entro <code class="api">Unscheduled_List__c</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> solo Planned <code class="api">selectableStatuses</code></li>
-                                <li><b>Default Record Name (Nome record predefinito)</b> {Reason__c}, così ogni finestra prende il nome del suo motivo <code class="api">defaultRecordName</code></li>
+                                <li><b>Default Record Name (Nome predefinito da inserire)</b> {Reason__c}, così ogni finestra prende il nome del suo motivo <code class="api">defaultRecordName</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1058,7 +1058,7 @@
                         <h3>Blocchi orari su un record di un solo giorno</h3>
                         <p class="config-desc">Per un record che rappresenta già un giorno preciso, come un Evento con un campo data dell'evento, inserisci il selettore direttamente nella pagina record e assegna le fasce orarie senza calendario. La data viene letta dal record, quindi l'utente apre la giornata, sceglie i blocchi di tempo e le fasce si salvano automaticamente sul record.</p>
                         <div class="config-note">
-                            <strong>Modalità Time Grid Only:</strong> <b>Time Grid Only</b> (Solo griglia oraria) nasconde il calendario e mostra solo la griglia delle fasce orarie per una data implicita. La data arriva da <b>Time Grid Date Field</b>, il Campo data griglia oraria (qui <code>Event_Date__c</code> sul record che ospita il componente); in alternativa imposta un <b>Time Grid Date</b> esplicito, oppure ometti entrambi per usare la data di oggi. Ideale in una pagina record dove la data è già nota.</div>
+                            <strong>Modalità Time Grid Only:</strong> <b>Time Grid Only</b> (Solo gli orari di un giorno, senza calendario) nasconde il calendario e mostra solo la griglia delle fasce orarie per una data implicita. La data arriva da <b>Time Grid Date Field</b> (Giorno preso da), qui <code>Event_Date__c</code> sul record che ospita il componente; in alternativa imposta un <b>Time Grid Date</b> (Giorno fisso) esplicito, oppure ometti entrambi per usare la data di oggi. Ideale in una pagina record dove la data è già nota.</div>
                         <div class="config-needs">
                             <span class="kp-h">Cosa serve</span>
                             <p>Un campo data per il giorno, campi ora di inizio e di fine, un campo di ricerca al record a cui appartiene, un campo di testo per il nome e un elenco di selezione Stato (Planned, Confirmed, Cancelled). Anche il record su cui si trova ha bisogno di un campo data: il giorno dei blocchi.</p>
@@ -1205,10 +1205,10 @@
                                 <li><b>Hover Popover Fields</b> Type/Notes <code class="api">hoverFields</code></li>
                                 <li><b>Status Display (Visualizzazione stato)</b> Punti <code class="api">statusDisplay</code></li>
                                 <li><b>Show Record Names in Each Day (Mostra i nomi dei record in ogni giorno)</b> <code class="api">monthShowNames</code></li>
-                                <li><b>Second Picklist Field (Secondo campo elenco di selezione)</b> Appointment_Type__c <code class="api">secondStatusField</code></li>
+                                <li><b>Second Picklist Field (Seconda scelta)</b> Appointment_Type__c <code class="api">secondStatusField</code></li>
                                 <li><b>Save Button Label (Etichetta pulsante salvataggio)</b> Book Appointment <code class="api">saveButtonLabel</code></li>
-                                <li><b>Default Record Name (Nome record predefinito)</b> {Appointment_Type__c}, così ogni appuntamento prende il nome del suo tipo <code class="api">defaultRecordName</code></li>
-                                <li><b>Show Ignored Statuses as a Pill (Mostra gli stati ignorati come filtro)</b> attivo: gli appuntamenti annullati ricompaiono quando vuoi rivederli <code class="api">showIgnoredStatusPills</code></li>
+                                <li><b>Default Record Name (Nome predefinito da inserire)</b> {Appointment_Type__c}, così ogni appuntamento prende il nome del suo tipo <code class="api">defaultRecordName</code></li>
+                                <li><b>Show Ignored Statuses as a Pill (Consenti di mostrare anche quelli)</b> attivo: gli appuntamenti annullati ricompaiono quando vuoi rivederli <code class="api">showIgnoredStatusPills</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1240,11 +1240,11 @@
                                 <li><b>Consolidate Time Span</b> <code class="api">consolidateTimeSpan</code></li>
                                 <li><b>Time Interval (Minutes)</b> 30 min <code class="api">timeInterval</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> solo Pending (prenota il cliente) <code class="api">selectableStatuses</code></li>
-                                <li><b>Blocked Dates Label Field (Campo etichetta date bloccate)</b> Schedule_Name__c <code class="api">blockedDatesLabelField</code></li>
+                                <li><b>Blocked Dates Label Field (Motivo mostrato)</b> Schedule_Name__c <code class="api">blockedDatesLabelField</code></li>
                                 <li><b>Show Other People's Bookings As (Mostra le prenotazioni degli altri come)</b> Solo occupato, utenti guest del sito <code class="api">bookingPrivacy</code></li>
                                 <li><b>Record Details Pop-up (Finestra dei dettagli del record)</b> nome ed email <code class="api">recordForm</code></li>
                                 <li><b>Limit per Person (Limite per persona)</b> 1 per cliente <code class="api">limitPerPerson</code></li>
-                                <li><b>Limit per Person Client Field (Campo cliente del limite per persona)</b> Customer_Email__c <code class="api">limitPerPersonClientField</code></li>
+                                <li><b>Limit per Person Client Field (Per chi è)</b> Customer_Email__c <code class="api">limitPerPersonClientField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1325,7 +1325,7 @@
                                 <li><b>Timeline Zoom (Zoom della timeline)</b> Giorno <code class="api">timelineZoom</code></li>
                                 <li><b>Location Picker (Selettore di sede)</b> elenco <code class="api">Location_Picker__c</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> solo Confirmed <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (Campo luogo del file di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (Luogo negli inviti di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1357,7 +1357,7 @@
                                 <li><b>Status Display (Visualizzazione stato)</b> Badge numerico <code class="api">statusDisplay</code></li>
                                 <li><b>Timeline Zoom (Zoom della timeline)</b> Giorno <code class="api">timelineZoom</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> solo Confirmed <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (Campo luogo del file di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (Luogo negli inviti di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1393,7 +1393,7 @@
                                 <li><b>Hover Popover Fields</b> prima il titolare, così al passaggio del mouse si vede chi ha la postazione <code class="api">hoverFields</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> solo Reserved <code class="api">selectableStatuses</code></li>
                                 <li><b>Default Record Name</b> Desk Reservation <code class="api">defaultRecordName</code></li>
-                                <li><b>Calendar File Location Field (Campo luogo del file di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (Luogo negli inviti di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1423,8 +1423,8 @@
                                 <li><b>Timeline Group By Field (Raggruppa la timeline per)</b> Resource_Type__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Ignored Statuses</b> Returned <code class="api">hideBookingsWithStatus</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> solo Reserved <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (Campo luogo del file di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
-                                <li><b>Show Ignored Statuses as a Pill (Mostra gli stati ignorati come filtro)</b> attivo: le attrezzature restituite ricompaiono quando serve lo storico <code class="api">showIgnoredStatusPills</code></li>
+                                <li><b>Calendar File Location Field (Luogo negli inviti di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Show Ignored Statuses as a Pill (Consenti di mostrare anche quelli)</b> attivo: le attrezzature restituite ricompaiono quando serve lo storico <code class="api">showIgnoredStatusPills</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1456,7 +1456,7 @@
                                 <li><b>Group Time Slots by Period</b> <code class="api">groupTimeSlotsByPeriod</code></li>
                                 <li><b>Timeline Group By Field (Raggruppa la timeline per)</b> Location__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> solo Reserved <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (Campo luogo del file di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (Luogo negli inviti di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1472,7 +1472,7 @@
                         <h3>Noleggio veicoli su più giorni</h3>
                         <p class="config-desc">I clienti noleggiano un veicolo per più giorni consecutivi. I giorni adiacenti si uniscono in un unico record di prenotazione per veicolo. Un noleggio da lunedì a venerdì crea un solo record (inizio: lun, fine: ven) invece di cinque record giornalieri. Nessuna fascia oraria, perché il noleggio copre giornate intere.</p>
                         <div class="config-note">
-                            <strong>Resource Booking su più giorni senza griglia oraria:</strong> <b>End Date Field</b> (Campo data di fine) + <b>Disable Time Slot Grid (Full-Day Mode)</b>, cioè Disabilita griglia fasce orarie, insieme rappresentano un noleggio di più giorni come un unico record con inizio e fine. Un noleggio da lunedì a venerdì è una sola riga, e i report restano semplici.</div>
+                            <strong>Resource Booking su più giorni senza griglia oraria:</strong> <b>End Date Field</b> (Data di fine, per gli intervalli) + <b>Disable Time Slot Grid (Full-Day Mode)</b>, cioè “Solo giorni interi, senza orari”, insieme rappresentano un noleggio di più giorni come un unico record con inizio e fine. Un noleggio da lunedì a venerdì è una sola riga, e i report restano semplici.</div>
                         <div class="config-needs">
                             <span class="kp-h">Cosa serve</span>
                             <p>Sulla prenotazione: un campo data per il giorno di ritiro, un secondo campo data per il giorno di riconsegna, un campo di ricerca al veicolo, un campo di ricerca al record a cui appartiene, un campo di testo per il nome e un elenco di selezione Stato (Confirmed, Pending, Returned, Cancelled). Sul veicolo: il nome, un campo indirizzo e campi di latitudine e longitudine per la selezione sulla mappa.</p>
@@ -1492,7 +1492,7 @@
                                 <li><b>Location Picker (Selettore di sede)</b> mappa ed elenco <code class="api">Location_Picker__c</code></li>
                                 <li><b>Show Other People's Bookings As (Mostra le prenotazioni degli altri come)</b> Solo occupato, utenti guest del sito <code class="api">bookingPrivacy</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> solo Pending <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (Campo luogo del file di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (Luogo negli inviti di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1621,10 +1621,10 @@
                                 <li><b>Allow Past Dates</b> attivo <code class="api">allowPastDates</code></li>
                                 <li><b>Capacity Field</b> <code class="api">capacityField</code></li>
                                 <li><b>Hover Popover Fields</b> <code class="api">hoverFields</code></li>
-                                <li><b>Show All Records (Mostra tutti i record)</b> <code class="api">showAllRecords</code></li>
+                                <li><b>Show All Records (Mostra i record di tutti)</b> <code class="api">showAllRecords</code></li>
                                 <li><b>Timeline Group By Field (Raggruppa la timeline per)</b> Resource_Type__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Map View (Vista mappa)</b> Location__c <code class="api">Map_View__c</code></li>
-                                <li><b>Max View Resources (Max risorse nella vista)</b> Mostra tutte <code class="api">maxViewResources</code></li>
+                                <li><b>Max View Resources (Righe da mostrare)</b> Mostra tutte <code class="api">maxViewResources</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1720,7 +1720,7 @@
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Timeline Group By Field (Raggruppa la timeline per)</b> Location__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> solo Enrolled <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (Campo luogo del file di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (Luogo negli inviti di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1817,7 +1817,7 @@
                                 <li><b>Timeline Group By Field (Raggruppa la timeline per)</b> Resource_Type__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Time Interval (Minutes)</b> 30 min <code class="api">timeInterval</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Reserved/Maintenance <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (Campo luogo del file di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (Luogo negli inviti di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1831,7 +1831,7 @@
                     <div class="config-card" id="bulk-site-booking" data-config-file="Bulk_Site_Booking.json" data-shape="multi-resource">
                         <span class="config-badge badge-booking">Resource Booking</span>
                         <h3>Prenotazione di più cantieri in blocco</h3>
-                        <p class="config-desc">I dispatcher assegnano in blocco tecnici e veicoli a oltre 20 cantieri in un solo passaggio. Alcuni cantieri sono già al completo. Con <b>Conflict Behavior</b> (Comportamento conflitto) impostato su <strong>skip</strong>, il salvataggio prenota senza clamore i cantieri liberi e salta quelli pieni, invece di far fallire l'intero lotto. <b>Allow Multiple Resources</b> mostra l'elenco dei cantieri come caselle di controllo con i conteggi di capacità combinata.</p>
+                        <p class="config-desc">I dispatcher assegnano in blocco tecnici e veicoli a oltre 20 cantieri in un solo passaggio. Alcuni cantieri sono già al completo. Con <b>Conflict Behavior</b> (Quando un orario è occupato) impostato su <strong>skip</strong>, il salvataggio prenota senza clamore i cantieri liberi e salta quelli pieni, invece di far fallire l'intero lotto. <b>Allow Multiple Resources</b> mostra l'elenco dei cantieri come caselle di controllo con i conteggi di capacità combinata.</p>
                         <div class="config-note">
                             <strong>Perché skip per l'assegnazione in blocco:</strong> su decine di cantieri, <code>block</code> rifiuterebbe l'intera assegnazione appena UN cantiere è pieno. <strong>Skip</strong> salva ciò che può: i cantieri liberi vengono prenotati e quelli pieni vengono segnalati come saltati, così un dispatcher non deve mai rilanciare l'intero lotto per un solo conflitto.</div>
                         <div class="config-needs">
@@ -1890,15 +1890,15 @@
                                 <li><b>Timeline Group By Field (Raggruppa la timeline per)</b> Resource_Type__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Timeline Zoom</b> Giorno: tutti i campi da gioco in un giorno, ora per ora <code class="api">timelineZoom</code></li>
                                 <li><b>Limit per Person (Limite per persona)</b> 2 per socio <code class="api">limitPerPerson</code></li>
-                                <li><b>Limit per Person Client Field (Campo cliente del limite per persona)</b> Member__c <code class="api">limitPerPersonClientField</code></li>
+                                <li><b>Limit per Person Client Field (Per chi è)</b> Member__c <code class="api">limitPerPersonClientField</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Reserved/Walk-In <code class="api">selectableStatuses</code></li>
                                 <li><b>Default Record Name</b> Court Booking <code class="api">defaultRecordName</code></li>
-                                <li><b>Calendar File Location Field (Campo luogo del file di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (Luogo negli inviti di calendario)</b> Location__c <code class="api">calendarLocationField</code></li>
                                 <li><b>Show Other People's Bookings As (Mostra le prenotazioni degli altri come)</b> Solo occupato, utenti guest del sito <code class="api">bookingPrivacy</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
-                            <strong>Viste:</strong> <span class="vbadge vbadge-timeline vbadge-default">Cronologia (predefinita)</span> <span class="vbadge vbadge-calendar">Calendario</span> <span class="vbadge vbadge-week">Settimana</span> <span class="cv-meta">Finestra cronologia 14 giorni, Max risorse nella vista 10</span>
+                            <strong>Viste:</strong> <span class="vbadge vbadge-timeline vbadge-default">Cronologia (predefinita)</span> <span class="vbadge vbadge-calendar">Calendario</span> <span class="vbadge vbadge-week">Settimana</span> <span class="cv-meta">Finestra cronologia 14 giorni, Max View Resources (Righe da mostrare) 10</span>
                         </div>
                         <div class="config-btn-group">
                             <button class="btn btn-primary btn-sm btn-copy-json">Copia per la configurazione guidata</button>
@@ -1964,7 +1964,7 @@
                                 <li><b>Show Other People's Bookings As (Mostra le prenotazioni degli altri come)</b> Solo occupato, utenti guest del sito <code class="api">bookingPrivacy</code></li>
                                 <li><b>Record Details Pop-up (Finestra dei dettagli del record)</b> nome ed email <code class="api">recordForm</code></li>
                                 <li><b>Limit per Person (Limite per persona)</b> 2 per cliente <code class="api">limitPerPerson</code></li>
-                                <li><b>Limit per Person Client Field (Campo cliente del limite per persona)</b> Client_Email__c <code class="api">limitPerPersonClientField</code></li>
+                                <li><b>Limit per Person Client Field (Per chi è)</b> Client_Email__c <code class="api">limitPerPersonClientField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1996,11 +1996,11 @@
                                 <li><b>Conflict Behavior</b> block <code class="api">conflictBehavior</code></li>
                                 <li><b>Blocked Dates Object</b> <code class="api">blockedDatesSourceObject</code></li>
                                 <li><b>Hover Popover Fields</b> <code class="api">hoverFields</code></li>
-                                <li><b>Blocked Dates Label Field (Campo etichetta date bloccate)</b> Reason__c <code class="api">blockedDatesLabelField</code></li>
+                                <li><b>Blocked Dates Label Field (Motivo mostrato)</b> Reason__c <code class="api">blockedDatesLabelField</code></li>
                                 <li><b>Limit per Person (Limite per persona)</b> 2 per cliente <code class="api">limitPerPerson</code></li>
-                                <li><b>Limit per Person Client Field (Campo cliente del limite per persona)</b> Client__c <code class="api">limitPerPersonClientField</code></li>
-                                <li><b>Default Record Name (Nome record predefinito)</b> {Meeting_Type__c}, così ogni incontro prende il nome del suo tipo <code class="api">defaultRecordName</code></li>
-                                <li><b>Show Ignored Statuses as a Pill (Mostra gli stati ignorati come filtro)</b> attivo: gli appuntamenti annullati ricompaiono quando vuoi rivederli <code class="api">showIgnoredStatusPills</code></li>
+                                <li><b>Limit per Person Client Field (Per chi è)</b> Client__c <code class="api">limitPerPersonClientField</code></li>
+                                <li><b>Default Record Name (Nome predefinito da inserire)</b> {Meeting_Type__c}, così ogni incontro prende il nome del suo tipo <code class="api">defaultRecordName</code></li>
+                                <li><b>Show Ignored Statuses as a Pill (Consenti di mostrare anche quelli)</b> attivo: gli appuntamenti annullati ricompaiono quando vuoi rivederli <code class="api">showIgnoredStatusPills</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -2045,7 +2045,7 @@
                                 <li><b>Gantt Planned Start Field</b> / <b>Gantt Planned End Field</b> Planned_Start__c, Planned_End__c: la baseline <code class="api">ganttBaselineStartField, ganttBaselineEndField</code></li>
                                 <li><b>Carico di lavoro</b> attivo: chi è sovraccarico su tutti i progetti <code class="api">Gantt_Workload__c</code></li>
                                 <li><b>Gantt Columns (Colonne del Gantt)</b> Inizio, Fine, Giorni, Completato, Responsabile, Attende <code class="api">ganttColumns</code></li>
-                                <li><b>This Record Only (Solo questo record)</b> le attività di questo progetto <code class="api">recordBookingsOnly</code></li>
+                                <li><b>This Record Only (Solo le prenotazioni di questo record)</b> le attività di questo progetto <code class="api">recordBookingsOnly</code></li>
                                 <li><b>Resource Object API Name</b> User <code class="api">resourceObjectApiName</code></li>
                                 <li><b>Conflict Behavior (Comportamento in caso di conflitto)</b> allow, perché le persone lavorano a più attività alla volta <code class="api">conflictBehavior</code></li>
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
@@ -2080,7 +2080,7 @@
                                 <li><b>Gantt Milestone Field (Campo Traguardo del Gantt)</b> Milestone__c <code class="api">ganttMilestoneField</code></li>
                                 <li><b>Gantt Dependency Mode (Quando un'attività si sposta)</b> push: un'attività spostata sposta anche le attività che la attendono <code class="api">ganttDependencyMode</code></li>
                                 <li><b>Gantt Columns (Colonne del Gantt)</b> Responsabile, Fine, Scostamento, Margine, Completato <code class="api">ganttColumns</code></li>
-                                <li><b>This Record Only (Solo questo record)</b> le attività di questo progetto <code class="api">recordBookingsOnly</code></li>
+                                <li><b>This Record Only (Solo le prenotazioni di questo record)</b> le attività di questo progetto <code class="api">recordBookingsOnly</code></li>
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Record Details Pop-up (Finestra dei dettagli del record)</b> nome, responsabile, fase, stato, percentuale completata e traguardo per Aggiungi attività <code class="api">recordForm</code></li>
                             </ul>
@@ -2112,7 +2112,7 @@
                                 <li><b>Gantt Columns (Colonne del Gantt)</b> Responsabile, Fine, Scostamento, Completato, Andamento <code class="api">ganttColumns</code></li>
                                 <li><b>Gantt Phase Field (Campo Fase del Gantt)</b> Phase__c <code class="api">ganttPhaseField</code></li>
                                 <li><b>Gantt Waits On Field (Campo Attende del Gantt)</b> Waits_On__c <code class="api">ganttDependsOnField</code></li>
-                                <li><b>Show All Records (Mostra tutti i record)</b> <code class="api">showAllRecords</code></li>
+                                <li><b>Show All Records (Mostra i record di tutti)</b> <code class="api">showAllRecords</code></li>
                                 <li><b>Display Only</b> attivo <code class="api">displayOnly</code></li>
                             </ul>
                         </div>
@@ -2141,7 +2141,7 @@
                                 <li><b>Gantt Waits On Field (Campo Attende del Gantt)</b> Waits_On__c <code class="api">ganttDependsOnField</code></li>
                                 <li><b>Gantt Phase Field (Campo Fase del Gantt)</b> Phase__c <code class="api">ganttPhaseField</code></li>
                                 <li><b>Gantt Percent Done Field (Campo Percentuale completata del Gantt)</b> Percent_Done__c <code class="api">ganttProgressField</code></li>
-                                <li><b>This Record Only (Solo questo record)</b> le attività di questo progetto <code class="api">recordBookingsOnly</code></li>
+                                <li><b>This Record Only (Solo le prenotazioni di questo record)</b> le attività di questo progetto <code class="api">recordBookingsOnly</code></li>
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Record Details Pop-up (Finestra dei dettagli del record)</b> nome, responsabile, fase, stato, percentuale completata e traguardo per Aggiungi attività <code class="api">recordForm</code></li>
                             </ul>
@@ -2168,10 +2168,10 @@
                                 <li><b>Gantt Skip Weekends (Salta i fine settimana)</b> disattivato: sabato e domenica sono giorni lavorativi <code class="api">ganttSkipWeekends</code></li>
                                 <li><b>Gantt Dependency Mode (Quando un'attività si sposta)</b> lines: i collegamenti vengono disegnati, niente viene spostato <code class="api">ganttDependencyMode</code></li>
                                 <li><b>Gantt Columns (Colonne del Gantt)</b> Inizio, Fine, Giorni, Responsabile, Budgeted Cost <code class="api">ganttColumns</code></li>
-                                <li><b>Ignored Statuses (Stati ignorati)</b> Aborted <code class="api">hideBookingsWithStatus</code></li>
-                                <li><b>Show Ignored Statuses as a Pill (Mostra gli stati ignorati come filtro)</b> attivo <code class="api">showIgnoredStatusPills</code></li>
+                                <li><b>Ignored Statuses (Stati che liberano l'orario)</b> Aborted <code class="api">hideBookingsWithStatus</code></li>
+                                <li><b>Show Ignored Statuses as a Pill (Consenti di mostrare anche quelli)</b> attivo <code class="api">showIgnoredStatusPills</code></li>
                                 <li><b>Booking Resource Field (Campo risorsa della prenotazione)</b> OwnerId <code class="api">bookingResourceField</code></li>
-                                <li><b>Show All Records (Mostra tutti i record)</b> <code class="api">showAllRecords</code></li>
+                                <li><b>Show All Records (Mostra i record di tutti)</b> <code class="api">showAllRecords</code></li>
                                 <li><b>Record Details Pop-up (Finestra dei dettagli del record)</b> nome, tipo, stato e budget per una nuova campagna <code class="api">recordForm</code></li>
                             </ul>
                         </div>
@@ -2203,7 +2203,7 @@
                                 <li><b>Gantt Waits On Field (Campo Attende del Gantt)</b> Waits_On__c <code class="api">ganttDependsOnField</code></li>
                                 <li><b>Gantt Dependency Mode (Quando un'attività si sposta)</b> push: un'attività spostata sposta anche le attività che la attendono <code class="api">ganttDependencyMode</code></li>
                                 <li><b>Gantt Skip Weekends (Salta i fine settimana)</b> attivo <code class="api">ganttSkipWeekends</code></li>
-                                <li><b>Show All Records (Mostra tutti i record)</b> <code class="api">showAllRecords</code></li>
+                                <li><b>Show All Records (Mostra i record di tutti)</b> <code class="api">showAllRecords</code></li>
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Record Details Pop-up (Finestra dei dettagli del record)</b> nome, squadra, cantiere, fase, stato, percentuale completata e traguardo per Aggiungi attività <code class="api">recordForm</code></li>
                             </ul>
@@ -2246,7 +2246,7 @@
                         </div>
                         <div class="diagram-bottom-single">
                             <div class="obj-box obj-red">
-                                <div class="obj-header">Oggetto date bloccate <span class="badge-tag">Facoltativo</span></div>
+                                <div class="obj-header">Blocked Dates Object (Elenco dei giorni di chiusura) <span class="badge-tag">Facoltativo</span></div>
                                 <div class="obj-body">
                                     <div class="obj-field"><span class="prop-name">Blocked_Dates_Source_Object__c</span><span class="field-label">Nome API dell'oggetto</span></div>
                                     <div class="obj-field"><span class="prop-name">Blocked_Dates_Date_Field__c</span><span class="field-label">Campo data</span></div>
@@ -2280,7 +2280,7 @@
                         </div>
                         <div class="diagram-bottom-row">
                             <div class="obj-box obj-purple">
-                                <div class="obj-header">Oggetto Sub-Block <span class="badge-tag">Facoltativo</span></div>
+                                <div class="obj-header">Sub-Block Object (Elenco in cui si salvano le pause) <span class="badge-tag">Facoltativo</span></div>
                                 <div class="obj-body">
                                     <div class="obj-field"><span class="prop-name">Sub_Block_Object_Api_Name__c</span><span class="field-label">Nome API dell'oggetto</span></div>
                                     <div class="obj-field lookup-purple-orange"><span class="prop-name">Sub_Block_Parent_Lookup_Field__c</span><span class="field-label">Lookup al padre</span></div>
@@ -2291,7 +2291,7 @@
                                 </div>
                             </div>
                             <div class="obj-box obj-red">
-                                <div class="obj-header">Oggetto date bloccate <span class="badge-tag">Facoltativo</span></div>
+                                <div class="obj-header">Blocked Dates Object (Elenco dei giorni di chiusura) <span class="badge-tag">Facoltativo</span></div>
                                 <div class="obj-body">
                                     <div class="obj-field"><span class="prop-name">Blocked_Dates_Source_Object__c</span><span class="field-label">Nome API dell'oggetto</span></div>
                                     <div class="obj-field"><span class="prop-name">Blocked_Dates_Date_Field__c</span><span class="field-label">Campo data</span></div>
@@ -2301,7 +2301,7 @@
                         </div>
                         <div class="examples-box">
                             <h3>Casi d'uso dei sub-block</h3>
-                            <p style="font-size:.83rem;color:#5B21B6;margin-bottom:10px;">Quando Consolidate Time Span (Consolida arco di tempo) è attivo, i vuoti tra le fasce orarie selezionate vengono rilevati automaticamente e salvati come record separati su un oggetto figlio. Gli utenti possono anche segnare a mano le fasce come sub-block.</p>
+                            <p style="font-size:.83rem;color:#5B21B6;margin-bottom:10px;">Quando Consolidate Time Span (Un record con pause) è attivo, i vuoti tra le fasce orarie selezionate vengono rilevati automaticamente e salvati come record separati su un oggetto figlio. Gli utenti possono anche segnare a mano le fasce come sub-block.</p>
                             <ul>
                                 <li><strong>Turni con pause</strong>: il dipendente seleziona dalle 8 alle 17; la pausa pranzo dalle 12 alle 13 crea automaticamente un record su un oggetto Break__c</li>
                                 <li><strong>Itinerari di viaggio</strong>: l'utente blocca le finestre di viaggio; gli scali tra un volo e l'altro diventano record Travel_Leg__c</li>
@@ -2354,7 +2354,7 @@
                         </div>
                         <div class="diagram-bottom-row">
                             <div class="obj-box obj-purple">
-                                <div class="obj-header">Oggetto Sub-Block <span class="badge-tag">Facoltativo</span></div>
+                                <div class="obj-header">Sub-Block Object (Elenco in cui si salvano le pause) <span class="badge-tag">Facoltativo</span></div>
                                 <div class="obj-body">
                                     <div class="obj-field"><span class="prop-name">Sub_Block_Object_Api_Name__c</span><span class="field-label">Nome API dell'oggetto</span></div>
                                     <div class="obj-field lookup-purple-orange"><span class="prop-name">Sub_Block_Parent_Lookup_Field__c</span><span class="field-label">Lookup al padre</span></div>
@@ -2365,7 +2365,7 @@
                                 </div>
                             </div>
                             <div class="obj-box obj-red">
-                                <div class="obj-header">Oggetto date bloccate <span class="badge-tag">Facoltativo</span></div>
+                                <div class="obj-header">Blocked Dates Object (Elenco dei giorni di chiusura) <span class="badge-tag">Facoltativo</span></div>
                                 <div class="obj-body">
                                     <div class="obj-field"><span class="prop-name">Blocked_Dates_Source_Object__c</span><span class="field-label">Nome API dell'oggetto</span></div>
                                     <div class="obj-field"><span class="prop-name">Blocked_Dates_Date_Field__c</span><span class="field-label">Campo data</span></div>
@@ -2379,7 +2379,7 @@
                 </div>
                 <!-- HOVER FIELDS EXAMPLE -->
                 <div class="diagram-section" style="margin-bottom:0;">
-                    <div class="diagram-label">Esempio di campi del popover al passaggio del mouse</div>
+                    <div class="diagram-label">Esempio di Hover Popover Fields (Dettagli al passaggio del mouse)</div>
                     <div class="diagram-sublabel">Con Hover Popover Fields impostato (qui Meeting_Type__c, Status__c, Start_Time__c), passando sopra un giorno o una fascia prenotata si vedono quei campi per ogni prenotazione:</div>
                     <figure style="margin:0 auto;max-width:420px;">
                         <img src="/images/it/views/salesforce-calendario-scheda-hover.png" alt="Scheda al passaggio del calendario Salesforce: 11 novembre, 3 prenotazioni, Lakeside Bakery e The Whitfield Family, tipo, stato, ora, Visualizza record" loading="lazy" data-zoomable width="636" height="854" style="width:100%;height:auto;border-radius:10px;border:1px solid #E2E8F0;display:block;">

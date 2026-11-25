@@ -663,7 +663,7 @@
                         <h3>施設の利用停止日</h3>
                         <p class="config-desc">管理者が施設の休業日や利用停止日を登録します。既存の休業日は読み取り専用で読み込まれるため、誤って削除されることはありません。状況の色で、実施中、予定、解除済みの休業日を区別します。</p>
                         <div class="config-note">
-                            <strong>自己参照のパターン:</strong> ブロック日付は、予約そのものと同じ <code>Schedule__c</code> テーブルから読み込まれます。<b>Blocked Dates Filter Field</b>（ブロック日付フィルター項目） を <code>Event__c</code> にして値を空にしておくと、対象はこのレコード自身の休業日だけになるため、テーブル内の他の予約で日付がブロックされることはありません。休業日を予約と分けたい場合は、<b>Blocked Dates Object</b>（ブロック日付オブジェクト） に別のオブジェクトを指定してください。</div>
+                            <strong>自己参照のパターン:</strong> ブロック日付は、予約そのものと同じ <code>Schedule__c</code> テーブルから読み込まれます。<b>Blocked Dates Filter Field</b> (次の条件の休業のみ) を <code>Event__c</code> にして値を空にしておくと、対象はこのレコード自身の休業日だけになるため、テーブル内の他の予約で日付がブロックされることはありません。休業日を予約と分けたい場合は、<b>Blocked Dates Object</b> (休業日のリスト) に別のオブジェクトを指定してください。</div>
                         <div class="config-needs">
                             <span class="kp-h">必要なもの</span>
                             <p>日付項目（初日）、2 つ目の日付項目（最終日）、施設レコードへの参照関係項目、名前のテキスト項目、状況の選択リスト（Active、Planned、Resolved）。休業日も同じオブジェクトから読み込みます。</p>
@@ -913,7 +913,7 @@
                         <h3>オフィス休業日カレンダー</h3>
                         <p class="config-desc">休業日の管理専用の設定です。オフィスや施設の管理者が休業日 (祝日、計画的な休業、悪天候による休業、メンテナンス期間) を選び、単純なレコードの一覧として保存します。他の MultiDatePick の設定は、これをブロック日付として<em>反映</em>できます。</p>
                         <div class="config-note">
-                            <strong><code>祝日を考慮したアポイント予約</code> と組み合わせて使います:</strong> この設定が書き込むレコード (<code>Status__c = Closed</code>。状況の選択リストに Closed の値を追加してください) は、3 つの設定 <b>Blocked Dates Object</b> + <b>Blocked Dates Filter Field</b>（ブロック日付フィルター項目） + <b>Blocked Dates Filter Value</b>（ブロック日付フィルター値） によって予約カレンダーに読み込まれます。複数のブロック区分 (祝日、メンテナンス、設備のみ) で同じテーブルを共有でき、どの区分を適用するかは利用する側のカレンダーごとに選べます。予約カレンダーは休業 1 件につき 1 つの日付を読み込むため、休業日は 1 日ごとに個別のレコードとして保存されます。1 週間の休業なら 5 件のレコードになり、5 日すべてが休業になります。</div>
+                            <strong><code>祝日を考慮したアポイント予約</code> と組み合わせて使います:</strong> この設定が書き込むレコード (<code>Status__c = Closed</code>。状況の選択リストに Closed の値を追加してください) は、3 つの設定 <b>Blocked Dates Object</b> + <b>Blocked Dates Filter Field</b> (次の条件の休業のみ) + <b>Blocked Dates Filter Value</b> (次の値と等しい) によって予約カレンダーに読み込まれます。複数のブロック区分 (祝日、メンテナンス、設備のみ) で同じテーブルを共有でき、どの区分を適用するかは利用する側のカレンダーごとに選べます。予約カレンダーは休業 1 件につき 1 つの日付を読み込むため、休業日は 1 日ごとに個別のレコードとして保存されます。1 週間の休業なら 5 件のレコードになり、5 日すべてが休業になります。</div>
                         <div class="config-needs">
                             <span class="kp-h">必要なもの</span>
                             <p>日付項目（休業日）、所属先レコードへの参照関係項目、名前のテキスト項目、Closed の値を含む状況の選択リスト。休業日は 1 日ごとに個別のレコードとして保存されます。</p>
@@ -926,7 +926,7 @@
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Show Recurring Pattern Button</b> <code class="api">showRecurringPattern</code></li>
                                 <li><b>Show Record Names in Each Day (各日にレコード名を表示)</b> <code class="api">monthShowNames</code></li>
-                                <li><b>Default Field Values (既定の項目値)</b> Status__c=Closed <code class="api">defaultFieldValues</code></li>
+                                <li><b>Default Field Values (自動で入力)</b> Status__c=Closed <code class="api">defaultFieldValues</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Closed のみ <code class="api">selectableStatuses</code></li>
                             </ul>
                         </div>
@@ -967,12 +967,12 @@
                                 <li><b>Earliest Time (最も早い時刻)</b> 07:00 / <b>Latest Time (最も遅い時刻)</b> 20:00 <code class="api">minTime, maxTime</code></li>
                                 <li><b>Status Colors (状況の色)</b> Draft/Submitted/Approved/Rejected <code class="api">statusColors</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Draftのみ <code class="api">selectableStatuses</code></li>
-                                <li><b>Second Picklist Field (2 つ目の選択リスト項目)</b> Billable__c、ラベルは「請求区分」 <code class="api">secondStatusField</code></li>
+                                <li><b>Second Picklist Field (2 つ目の選択肢)</b> Billable__c、ラベルは「請求区分」 <code class="api">secondStatusField</code></li>
                                 <li><b>Record Details Pop-up (レコード詳細のポップアップ)</b> プロジェクト、必須 <code class="api">recordForm</code></li>
                                 <li><b>Show Recurring Pattern Button</b> <code class="api">showRecurringPattern</code></li>
                                 <li><b>Week Starts on Monday</b> <code class="api">weekStartsOnMonday</code></li>
                                 <li><b>Custom Actions (カスタムアクション)</b> 週を提出、非請求にする (編集モード、下書きのエントリ) <code class="api">Custom_Actions__c</code></li>
-                                <li><b>Hover Popover Fields (ホバーポップオーバー項目)</b> プロジェクト、時間、請求区分、状況 <code class="api">hoverFields</code></li>
+                                <li><b>Hover Popover Fields (ホバー時の詳細)</b> プロジェクト、時間、請求区分、状況 <code class="api">hoverFields</code></li>
                                 <li><b>Show Record Names in Each Day (各日にレコード名を表示)</b> <code class="api">monthShowNames</code></li>
                             </ul>
                         </div>
@@ -1058,7 +1058,7 @@
                         <h3>1 日分のレコードに時間ブロックを割り当て</h3>
                         <p class="config-desc">行事の日付項目を持つ行事レコードのように、特定の 1 日を表すレコード向けの設定です。レコードページに時刻の選択を直接配置し、カレンダーなしで時間枠を割り当てます。日付はレコードから読み取られるので、ユーザーはその日を開いて時間帯を選ぶだけで、時間枠は自動的にレコードに保存されます。</p>
                         <div class="config-note">
-                            <strong>Time Grid Only（タイムグリッドのみ） モード:</strong> <b>Time Grid Only</b> はカレンダーを非表示にし、決まった 1 日の時間枠グリッドだけを表示します。日付は <b>Time Grid Date Field</b> (ここではホストレコードの <code>Event_Date__c</code>) から読み取ります。代わりに <b>Time Grid Date</b>（タイムグリッド日付） を明示することもでき、どちらも省略すると今日になります。日付がすでに決まっているレコードページに最適です。</div>
+                            <strong>Time Grid Only (1 日の時刻のみ、カレンダーなし) モード:</strong> <b>Time Grid Only</b> はカレンダーを非表示にし、決まった 1 日の時間枠グリッドだけを表示します。日付は <b>Time Grid Date Field</b> (ここではホストレコードの <code>Event_Date__c</code>) から読み取ります。代わりに <b>Time Grid Date</b> (固定の日付) を明示することもでき、どちらも省略すると今日になります。日付がすでに決まっているレコードページに最適です。</div>
                         <div class="config-needs">
                             <span class="kp-h">必要なもの</span>
                             <p>日付項目（対象日）、開始時刻と終了時刻の項目、所属先レコードへの参照関係項目、名前のテキスト項目、状況の選択リスト（Planned、Confirmed、Cancelled）。カレンダーを置くレコードにも日付項目（ブロックを入れる日）が必要です。</p>
@@ -1091,7 +1091,7 @@
                         <h3>法令に基づく休息時間</h3>
                         <p class="config-desc">法令で休憩時間が義務付けられているシフト (運輸、医療、製造) 向けの設定です。シフトは全体の時間帯をカバーする 1 件の親レコードとして保存され、必要な休憩時間は監査担当者が確認できるサブブロックの子レコードになります。15 分単位で休憩を細かく記録できます。</p>
                         <div class="config-note">
-                            <strong>サブブロック:</strong> 休憩時間は、付属の <code>Sub_Block__c</code> オブジェクトに子レコードとして保存されます。追加のスキーマ設定は不要です。独自の名前を使いたい場合は、<b>Sub-Block Object API Name</b>（サブブロックオブジェクト API 名） に自社の子オブジェクトを指定してください。</div>
+                            <strong>サブブロック:</strong> 休憩時間は、付属の <code>Sub_Block__c</code> オブジェクトに子レコードとして保存されます。追加のスキーマ設定は不要です。独自の名前を使いたい場合は、<b>Sub-Block Object API Name</b> (休憩の保存先リスト) に自社の子オブジェクトを指定してください。</div>
                         <div class="config-needs">
                             <span class="kp-h">必要なもの</span>
                             <p>日付項目（対象日）、開始時刻と終了時刻の項目、所属先レコードへの参照関係項目、名前のテキスト項目、状況の選択リスト（Compliant、Review、Flagged）、さらに休憩時間用の子オブジェクト（日付、開始時刻と終了時刻、名前、シフトへの参照関係項目）。MultiDatePick に付属する Sub-Block オブジェクトをその子オブジェクトとして使えます。</p>
@@ -1208,7 +1208,7 @@
                                 <li><b>Second Picklist Field</b> Appointment_Type__c <code class="api">secondStatusField</code></li>
                                 <li><b>Save Button Label (保存ボタンラベル)</b> Book Appointment <code class="api">saveButtonLabel</code></li>
                                 <li><b>Default Record Name</b> {Appointment_Type__c}：各予約の名前が予約の種類になります <code class="api">defaultRecordName</code></li>
-                                <li><b>Show Ignored Statuses as a Pill (無視する状況をフィルターボタンとして表示)</b> オン：キャンセルされた予約も、必要なときに表示して確認できます <code class="api">showIgnoredStatusPills</code></li>
+                                <li><b>Show Ignored Statuses as a Pill (それらも表示できるようにする)</b> オン：キャンセルされた予約も、必要なときに表示して確認できます <code class="api">showIgnoredStatusPills</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1325,7 +1325,7 @@
                                 <li><b>Timeline Zoom (タイムラインのズーム)</b> 日 <code class="api">timelineZoom</code></li>
                                 <li><b>Location Picker (場所の選択)</b> リスト <code class="api">Location_Picker__c</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Confirmed のみ <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (カレンダーファイルの場所項目)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (カレンダー招待の場所)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1339,7 +1339,7 @@
                     <div class="config-card" id="active-conference-rooms" data-config-file="Active_Conference_Rooms.json" data-shape="multi-resource">
                         <span class="config-badge badge-booking">Resource Booking</span>
                         <h3>有効な会議室 (絞り込み付きの選択)</h3>
-                        <p class="config-desc"><b>Resource Filter Field</b> + <b>Resource Filter Value</b>（リソースフィルター値） を<strong>複数項目の AND</strong> 構文で使う例です。選択肢には、<code>Active__c = true</code> かつ <code>Resource_Type__c = 'Conference Room'</code> のリソースだけが表示されます。セミコロン区切りで 2 つの絞り込みを組み合わせています。リソースオブジェクトの任意の項目と値の組み合わせに置き換えられます。</p>
+                        <p class="config-desc"><b>Resource Filter Field</b> + <b>Resource Filter Value</b> (次の値と等しい) を<strong>複数項目の AND</strong> 構文で使う例です。選択肢には、<code>Active__c = true</code> かつ <code>Resource_Type__c = 'Conference Room'</code> のリソースだけが表示されます。セミコロン区切りで 2 つの絞り込みを組み合わせています。リソースオブジェクトの任意の項目と値の組み合わせに置き換えられます。</p>
                         <div class="config-note">
                             <strong>絞り込み構文の早見表:</strong> 項目間の <code>;</code> は AND、値の間の <code>,</code> は OR です。<code>;</code> の両側で項目の数を揃える必要があります。例: <code>Resource_Type__c=Conference Room</code> · <code>Building__c=North,South</code> (OR) · <code>Resource_Type__c;Building__c=Conference Room;North,South</code> (AND で、2 つ目の項目の中は OR)。</div>
                         <div class="config-needs">
@@ -1357,7 +1357,7 @@
                                 <li><b>Status Display (ステータス表示)</b> 数字バッジ <code class="api">statusDisplay</code></li>
                                 <li><b>Timeline Zoom (タイムラインのズーム)</b> 日 <code class="api">timelineZoom</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Confirmed のみ <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (カレンダーファイルの場所項目)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (カレンダー招待の場所)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1393,7 +1393,7 @@
                                 <li><b>Hover Popover Fields</b> 所有者を先頭に表示し、ホバーするだけで誰がデスクを使っているかがわかります <code class="api">hoverFields</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Reserved のみ <code class="api">selectableStatuses</code></li>
                                 <li><b>Default Record Name</b> Desk Reservation <code class="api">defaultRecordName</code></li>
-                                <li><b>Calendar File Location Field (カレンダーファイルの場所項目)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (カレンダー招待の場所)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1423,8 +1423,8 @@
                                 <li><b>Timeline Group By Field (タイムラインのグループ化)</b> Resource_Type__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Ignored Statuses</b> Returned <code class="api">hideBookingsWithStatus</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Reserved のみ <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (カレンダーファイルの場所項目)</b> Location__c <code class="api">calendarLocationField</code></li>
-                                <li><b>Show Ignored Statuses as a Pill (無視する状況をフィルターボタンとして表示)</b> オン：返却済みの備品も、履歴が必要なときに表示できます <code class="api">showIgnoredStatusPills</code></li>
+                                <li><b>Calendar File Location Field (カレンダー招待の場所)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Show Ignored Statuses as a Pill (それらも表示できるようにする)</b> オン：返却済みの備品も、履歴が必要なときに表示できます <code class="api">showIgnoredStatusPills</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1456,7 +1456,7 @@
                                 <li><b>Group Time Slots by Period</b> <code class="api">groupTimeSlotsByPeriod</code></li>
                                 <li><b>Timeline Group By Field (タイムラインのグループ化)</b> Location__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Reserved のみ <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (カレンダーファイルの場所項目)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (カレンダー招待の場所)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1472,7 +1472,7 @@
                         <h3>複数日の車両レンタル</h3>
                         <p class="config-desc">顧客が連続する複数日にわたって車両を予約します。連続した日は、車両ごとに 1 件の予約レコードにまとめられます。月曜から金曜のレンタルは、1 日ごとに 5 件ではなく 1 件のレコード (開始: 月曜、終了: 金曜) になります。レンタルは終日単位なので、時間枠はありません。</p>
                         <div class="config-note">
-                            <strong>タイムグリッドなしの期間予約:</strong> <b>End Date Field</b>（終了日項目） と <b>Disable Time Slot Grid (Full-Day Mode)</b> を組み合わせると、複数日のレンタルを開始日と終了日を持つ 1 件のレコードとして表現できます。月曜から金曜のレンタルが 1 行になるので、レポートもシンプルです。</div>
+                            <strong>タイムグリッドなしの期間予約:</strong> <b>End Date Field</b> (期間の終了日) と <b>Disable Time Slot Grid (Full-Day Mode)</b> を組み合わせると、複数日のレンタルを開始日と終了日を持つ 1 件のレコードとして表現できます。月曜から金曜のレンタルが 1 行になるので、レポートもシンプルです。</div>
                         <div class="config-needs">
                             <span class="kp-h">必要なもの</span>
                             <p>予約側：日付項目（受け取り日）、2 つ目の日付項目（返却日）、車両への参照関係項目、所属先レコードへの参照関係項目、名前のテキスト項目、状況の選択リスト（Confirmed、Pending、Returned、Cancelled）。車両側：名前、住所項目、地図で選ぶための緯度と経度の項目。</p>
@@ -1492,7 +1492,7 @@
                                 <li><b>Location Picker (場所の選択)</b> 地図とリスト <code class="api">Location_Picker__c</code></li>
                                 <li><b>Show Other People's Bookings As (他のユーザーの予約の表示方法)</b> 予約済みのみ表示、対象はサイトのゲストユーザー <code class="api">bookingPrivacy</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Pending のみ <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (カレンダーファイルの場所項目)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (カレンダー招待の場所)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1576,7 +1576,7 @@
                         <h3>チームのキャパシティ計画</h3>
                         <p class="config-desc">リソースの参照先を <strong>User</strong> にすると、コンポーネントは会議室予約ではなく人の予定管理になります。タイムラインで開き、全員の 2 週間分を一度に表示して、そこで仕事を割り当てられます。ワンクリックで稼働率に切り替えれば定員を超えている人がわかり、週表示では特定の時間に仕事を配置できます。</p>
                         <div class="config-note">
-                            <strong>User をリソースにする:</strong> <b>Resource Object API Name</b> を <code>User</code> にし、<b>Resource Filter Field</b> <code>IsActive;UserType</code> を <code>true;Standard</code> に設定します。これで有効な内部ユーザーだけが表示され、連携ユーザーやシステムユーザーは表示されません。User には定員に当たる標準項目がないため、カスタム項目 <code>Daily_Capacity__c</code> を追加してください。追加しない場合、ヒートマップにはパーセントではなく件数が表示されます。User の <b>Business Hours Start Field</b>（営業時間開始項目） と <b>Business Hours End Field</b>（営業時間終了項目） で、週グリッドに各メンバーの勤務時間が反映されます。</div>
+                            <strong>User をリソースにする:</strong> <b>Resource Object API Name</b> を <code>User</code> にし、<b>Resource Filter Field</b> <code>IsActive;UserType</code> を <code>true;Standard</code> に設定します。これで有効な内部ユーザーだけが表示され、連携ユーザーやシステムユーザーは表示されません。User には定員に当たる標準項目がないため、カスタム項目 <code>Daily_Capacity__c</code> を追加してください。追加しない場合、ヒートマップにはパーセントではなく件数が表示されます。User の <b>Business Hours Start Field</b> (個別の営業開始時刻) と <b>Business Hours End Field</b> (個別の営業終了時刻) で、週グリッドに各メンバーの勤務時間が反映されます。</div>
                         <div class="config-needs">
                             <span class="kp-h">必要なもの</span>
                             <p>割り当てオブジェクト：日付項目（対象日）、開始時刻と終了時刻の項目、User への参照関係項目、プロジェクトへの参照関係項目、名前のテキスト項目、状況の選択リスト（Confirmed、Tentative、Pending、Cancelled）。User 側：1 日の稼働上限の数値項目と勤務時間の時間項目。任意：「期日」表示用の日付項目。</p>
@@ -1621,10 +1621,10 @@
                                 <li><b>Allow Past Dates</b> オン <code class="api">allowPastDates</code></li>
                                 <li><b>Capacity Field</b> <code class="api">capacityField</code></li>
                                 <li><b>Hover Popover Fields</b> <code class="api">hoverFields</code></li>
-                                <li><b>Show All Records (すべてのレコードを表示)</b> <code class="api">showAllRecords</code></li>
+                                <li><b>Show All Records (全員のレコードを表示)</b> <code class="api">showAllRecords</code></li>
                                 <li><b>Timeline Group By Field (タイムラインのグループ化)</b> Resource_Type__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Map View (地図ビュー)</b> Location__c <code class="api">Map_View__c</code></li>
-                                <li><b>Max View Resources (ビューのリソース最大数)</b> すべて表示 <code class="api">maxViewResources</code></li>
+                                <li><b>Max View Resources (表示する行数)</b> すべて表示 <code class="api">maxViewResources</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1720,7 +1720,7 @@
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Timeline Group By Field (タイムラインのグループ化)</b> Location__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Enrolled のみ <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (カレンダーファイルの場所項目)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (カレンダー招待の場所)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1817,7 +1817,7 @@
                                 <li><b>Timeline Group By Field (タイムラインのグループ化)</b> Resource_Type__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Time Interval (Minutes)</b> 30 分 <code class="api">timeInterval</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Reserved/Maintenance <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (カレンダーファイルの場所項目)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (カレンダー招待の場所)</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1831,7 +1831,7 @@
                     <div class="config-card" id="bulk-site-booking" data-config-file="Bulk_Site_Booking.json" data-shape="multi-resource">
                         <span class="config-badge badge-booking">Resource Booking</span>
                         <h3>複数現場の一括予約</h3>
-                        <p class="config-desc">配車・手配担当者が、20 か所以上の現場に技術者と車両を一度に割り当てます。すでに定員に達している現場もあります。<b>Conflict Behavior</b>（競合の動作） を <strong>skip</strong> にすると、一括処理全体を失敗させる代わりに、空いている現場だけを予約し、満員の現場はそのままスキップします。<b>Allow Multiple Resources</b> により、現場の一覧が合計の定員付きのチェックボックスで表示されます。</p>
+                        <p class="config-desc">配車・手配担当者が、20 か所以上の現場に技術者と車両を一度に割り当てます。すでに定員に達している現場もあります。<b>Conflict Behavior</b> (時間が埋まっているとき) を <strong>skip</strong> にすると、一括処理全体を失敗させる代わりに、空いている現場だけを予約し、満員の現場はそのままスキップします。<b>Allow Multiple Resources</b> により、現場の一覧が合計の定員付きのチェックボックスで表示されます。</p>
                         <div class="config-note">
                             <strong>一括手配で skip を使う理由:</strong> 数十か所の現場がある場合、<code>block</code> では 1 か所でも満員になった時点で割り当て全体が拒否されます。<strong>Skip</strong> なら保存できる分を保存します。空いている現場は予約され、満員の現場はスキップとして報告されるので、1 件の競合のために一括処理全体をやり直す必要はありません。</div>
                         <div class="config-needs">
@@ -1893,7 +1893,7 @@
                                 <li><b>Limit per Person Client Field (1 人あたりの上限の顧客項目)</b> Member__c <code class="api">limitPerPersonClientField</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Reserved/Walk-In <code class="api">selectableStatuses</code></li>
                                 <li><b>Default Record Name</b> Court Booking <code class="api">defaultRecordName</code></li>
-                                <li><b>Calendar File Location Field (カレンダーファイルの場所項目)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field (カレンダー招待の場所)</b> Location__c <code class="api">calendarLocationField</code></li>
                                 <li><b>Show Other People's Bookings As (他のユーザーの予約の表示方法)</b> 予約済みのみ表示、対象はサイトのゲストユーザー <code class="api">bookingPrivacy</code></li>
                             </ul>
                         </div>
@@ -1988,7 +1988,7 @@
                         <div class="config-props">
                             <span class="kp-h">主な設定</span>
                             <ul>
-                                <li><b>Resource Picker Label (リソース選択の表示ラベル)</b> アドバイザー <code class="api">resourcePickerLabel</code></li>
+                                <li><b>Resource Picker Label (選択欄の上のラベル)</b> アドバイザー <code class="api">resourcePickerLabel</code></li>
                                 <li><b>Resource Object API Name</b> User <code class="api">resourceObjectApiName</code></li>
                                 <li><b>Resource Filter Field (optional)</b> Is_Advisor__c <code class="api">resourceFilterField</code></li>
                                 <li><b>Booking Resource Field</b> <code class="api">bookingResourceField</code></li>
@@ -2000,7 +2000,7 @@
                                 <li><b>Limit per Person (1 人あたりの上限)</b> 顧客ごとに 2 件 <code class="api">limitPerPerson</code></li>
                                 <li><b>Limit per Person Client Field (1 人あたりの上限の顧客項目)</b> Client__c <code class="api">limitPerPersonClientField</code></li>
                                 <li><b>Default Record Name</b> {Meeting_Type__c}：各面談の名前が面談の種類になります <code class="api">defaultRecordName</code></li>
-                                <li><b>Show Ignored Statuses as a Pill (無視する状況をフィルターボタンとして表示)</b> オン：キャンセルされた予約も、必要なときに表示して確認できます <code class="api">showIgnoredStatusPills</code></li>
+                                <li><b>Show Ignored Statuses as a Pill (それらも表示できるようにする)</b> オン：キャンセルされた予約も、必要なときに表示して確認できます <code class="api">showIgnoredStatusPills</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -2045,7 +2045,7 @@
                                 <li><b>Gantt Planned Start Field</b> / <b>Gantt Planned End Field</b> Planned_Start__c、Planned_End__c：ベースライン <code class="api">ganttBaselineStartField, ganttBaselineEndField</code></li>
                                 <li><b>作業負荷</b> オン：すべてのプロジェクトをまたいで、誰が予定を入れすぎているかを表示 <code class="api">Gantt_Workload__c</code></li>
                                 <li><b>Gantt Columns (ガントの列)</b> 開始、終了、日数、完了、担当、待ち先 <code class="api">ganttColumns</code></li>
-                                <li><b>This Record Only (このレコードのみ)</b> このプロジェクトのタスク <code class="api">recordBookingsOnly</code></li>
+                                <li><b>This Record Only (このレコードの予約のみ)</b> このプロジェクトのタスク <code class="api">recordBookingsOnly</code></li>
                                 <li><b>Resource Object API Name</b> User <code class="api">resourceObjectApiName</code></li>
                                 <li><b>Conflict Behavior</b> allow：1 人で複数のタスクを同時に進めるため <code class="api">conflictBehavior</code></li>
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
@@ -2080,7 +2080,7 @@
                                 <li><b>Gantt Milestone Field (ガントのマイルストーン項目)</b> Milestone__c <code class="api">ganttMilestoneField</code></li>
                                 <li><b>Gantt Dependency Mode (ガントの依存関係モード)</b> push：タスクを移動すると、それを待つタスクも一緒に移動します <code class="api">ganttDependencyMode</code></li>
                                 <li><b>Gantt Columns (ガントの列)</b> 担当、終了、差異、余裕日数、完了 <code class="api">ganttColumns</code></li>
-                                <li><b>This Record Only (このレコードのみ)</b> このプロジェクトのタスク <code class="api">recordBookingsOnly</code></li>
+                                <li><b>This Record Only (このレコードの予約のみ)</b> このプロジェクトのタスク <code class="api">recordBookingsOnly</code></li>
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Record Details Pop-up (レコード詳細のポップアップ)</b> 「タスクを追加」で入力する名前、担当、フェーズ、状況、完了率、マイルストーン <code class="api">recordForm</code></li>
                             </ul>
@@ -2112,7 +2112,7 @@
                                 <li><b>Gantt Columns (ガントの列)</b> 担当、終了、差異、完了、健全性 <code class="api">ganttColumns</code></li>
                                 <li><b>Gantt Phase Field (ガントのフェーズ項目)</b> Phase__c <code class="api">ganttPhaseField</code></li>
                                 <li><b>Gantt Waits On Field (ガントの待ち先項目)</b> Waits_On__c <code class="api">ganttDependsOnField</code></li>
-                                <li><b>Show All Records (すべてのレコードを表示)</b> <code class="api">showAllRecords</code></li>
+                                <li><b>Show All Records (全員のレコードを表示)</b> <code class="api">showAllRecords</code></li>
                                 <li><b>Display Only</b> オン <code class="api">displayOnly</code></li>
                             </ul>
                         </div>
@@ -2141,7 +2141,7 @@
                                 <li><b>Gantt Waits On Field (ガントの待ち先項目)</b> Waits_On__c <code class="api">ganttDependsOnField</code></li>
                                 <li><b>Gantt Phase Field (ガントのフェーズ項目)</b> Phase__c <code class="api">ganttPhaseField</code></li>
                                 <li><b>Gantt Percent Done Field (ガントの完了率項目)</b> Percent_Done__c <code class="api">ganttProgressField</code></li>
-                                <li><b>This Record Only (このレコードのみ)</b> このプロジェクトのタスク <code class="api">recordBookingsOnly</code></li>
+                                <li><b>This Record Only (このレコードの予約のみ)</b> このプロジェクトのタスク <code class="api">recordBookingsOnly</code></li>
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Record Details Pop-up (レコード詳細のポップアップ)</b> 「タスクを追加」で入力する名前、担当、フェーズ、状況、完了率、マイルストーン <code class="api">recordForm</code></li>
                             </ul>
@@ -2169,9 +2169,9 @@
                                 <li><b>Gantt Dependency Mode (ガントの依存関係モード)</b> lines：リンクは線で表示するだけで、ほかのタスクは動きません <code class="api">ganttDependencyMode</code></li>
                                 <li><b>Gantt Columns (ガントの列)</b> 開始、終了、日数、担当、予算原価 <code class="api">ganttColumns</code></li>
                                 <li><b>Ignored Statuses</b> Aborted <code class="api">hideBookingsWithStatus</code></li>
-                                <li><b>Show Ignored Statuses as a Pill (無視する状況をフィルターボタンとして表示)</b> オン <code class="api">showIgnoredStatusPills</code></li>
+                                <li><b>Show Ignored Statuses as a Pill (それらも表示できるようにする)</b> オン <code class="api">showIgnoredStatusPills</code></li>
                                 <li><b>Booking Resource Field</b> OwnerId <code class="api">bookingResourceField</code></li>
-                                <li><b>Show All Records (すべてのレコードを表示)</b> <code class="api">showAllRecords</code></li>
+                                <li><b>Show All Records (全員のレコードを表示)</b> <code class="api">showAllRecords</code></li>
                                 <li><b>Record Details Pop-up (レコード詳細のポップアップ)</b> 新しいキャンペーンの名前、種別、状況、予算 <code class="api">recordForm</code></li>
                             </ul>
                         </div>
@@ -2203,7 +2203,7 @@
                                 <li><b>Gantt Waits On Field (ガントの待ち先項目)</b> Waits_On__c <code class="api">ganttDependsOnField</code></li>
                                 <li><b>Gantt Dependency Mode (ガントの依存関係モード)</b> push：タスクを移動すると、それを待つタスクも一緒に移動します <code class="api">ganttDependencyMode</code></li>
                                 <li><b>Gantt Skip Weekends (ガントで週末を除外)</b> オン <code class="api">ganttSkipWeekends</code></li>
-                                <li><b>Show All Records (すべてのレコードを表示)</b> <code class="api">showAllRecords</code></li>
+                                <li><b>Show All Records (全員のレコードを表示)</b> <code class="api">showAllRecords</code></li>
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Record Details Pop-up (レコード詳細のポップアップ)</b> 「タスクを追加」で入力する名前、作業班、現場、フェーズ、状況、完了率、マイルストーン <code class="api">recordForm</code></li>
                             </ul>
@@ -2301,7 +2301,7 @@
                         </div>
                         <div class="examples-box">
                             <h3>サブブロックの活用例</h3>
-                            <p style="font-size:.83rem;color:#5B21B6;margin-bottom:10px;">Consolidate Time Span（時間範囲を統合） を有効にすると、選択した時間枠の間の空き時間が自動的に検出され、子オブジェクトに別のレコードとして保存されます。ユーザーが手動で時間枠をサブブロックに指定することもできます。</p>
+                            <p style="font-size:.83rem;color:#5B21B6;margin-bottom:10px;">Consolidate Time Span (休憩付きの1レコード) を有効にすると、選択した時間枠の間の空き時間が自動的に検出され、子オブジェクトに別のレコードとして保存されます。ユーザーが手動で時間枠をサブブロックに指定することもできます。</p>
                             <ul>
                                 <li><strong>休憩付きのシフト管理</strong>: 従業員が 8 時から 17 時を選ぶと、12 時から 13 時の昼休みの空き時間が Break__c オブジェクトのレコードとして自動作成されます</li>
                                 <li><strong>出張の行程</strong>: ユーザーが移動の時間帯を確保すると、フライト間の乗り継ぎが Travel_Leg__c レコードになります</li>
@@ -2379,7 +2379,7 @@
                 </div>
                 <!-- HOVER FIELDS EXAMPLE -->
                 <div class="diagram-section" style="margin-bottom:0;">
-                    <div class="diagram-label">ホバーポップオーバー項目の例</div>
+                    <div class="diagram-label">Hover Popover Fields (ホバー時の詳細) の例</div>
                     <div class="diagram-sublabel">Hover Popover Fields を設定すると（ここでは Meeting_Type__c、Status__c、Start_Time__c）、予約のある日や時間枠にマウスを合わせたときに、各予約のその項目が表示されます：</div>
                     <figure style="margin:0 auto;max-width:420px;">
                         <img src="/images/ja/views/salesforce-calendar-hover-card.png" alt="Salesforce カレンダーのホバーカード: 11 月 11 日の予約 3 件、Lakeside Bakery や The Whitfield Family、会議の種類、状況、開始時刻、「レコードを表示」" loading="lazy" data-zoomable width="600" height="854" style="width:100%;height:auto;border-radius:10px;border:1px solid #E2E8F0;display:block;">

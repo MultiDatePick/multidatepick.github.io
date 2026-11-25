@@ -114,7 +114,7 @@
                     "Zeitfenster-Raster mit beliebigem Minutenintervall",
                     "Kapazitätsbuchung mit Live-Anzeige „gebucht von Kapazität“",
                     "Konfliktprüfung beim Speichern: blockieren, überspringen oder zulassen",
-                    "Buchung mehrerer Ressourcen mit kombinierter oder eindeutiger Kapazität",
+                    "Buchung mehrerer Ressourcen mit Kapazität Combined (Addieren) oder Distinct (Einmal zählen)",
                     "Geschäftszeiten pro Ressource",
                     "Gesperrte Tage, ganztägig oder stundenweise, für alle oder eine Ressource",
                     "Statusfarben aus jeder Auswahlliste",
@@ -197,7 +197,7 @@
                         "name": "Wie verhindere ich Doppelbuchungen in Salesforce?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Legen Sie an der Resource Booking-Komponente das Konfliktverhalten (Conflict Behavior) fest. Blockieren macht belegte Zeitfenster unklickbar, Überspringen speichert bei einer Buchung über mehrere Tage die freien Tage und nennt die übersprungenen, Zulassen erlaubt Überschneidungen. Mit einem Kapazitätsfeld bleibt ein Zeitfenster offen, bis es voll ist, angezeigt als Live-Anzeige wie 3/10."
+                            "text": "Legen Sie an der Resource Booking-Komponente das Conflict Behavior (Wenn eine Zeit belegt ist) fest. Blockieren macht belegte Zeitfenster unklickbar, Überspringen speichert bei einer Buchung über mehrere Tage die freien Tage und nennt die übersprungenen, Zulassen erlaubt Überschneidungen. Mit einem Capacity Field (Wie viele gleichzeitig) bleibt ein Zeitfenster offen, bis es voll ist, angezeigt als Live-Anzeige wie 3/10."
                         }
                     },
                     {
@@ -719,10 +719,10 @@
                 <table class="gs-table">
                     <thead><tr><th>Einstellung</th><th>Funktion</th></tr></thead>
                     <tbody>
-                        <tr><td>Kapazitätsfeld (Capacity Field)</td><td>Eine Zahl an der Ressource. Zeitfenster bleiben buchbar, bis sie voll sind, mit Live-Anzeigen wie 3/10</td></tr>
+                        <tr><td>Capacity Field (Wie viele gleichzeitig)</td><td>Eine Zahl an der Ressource. Zeitfenster bleiben buchbar, bis sie voll sind, mit Live-Anzeigen wie 3/10</td></tr>
                         <tr><td>Capacity Aggregation (Kapazitäts-Aggregation)</td><td><b>Combined</b> summiert mehrere Ressourcen (4 Räume mit je 5 = 20 Plätze). <b>Distinct</b> zählt ein Ereignis über mehrere Räume nur einmal; kombinieren Sie es mit Blockieren, damit das Ereignis nur gespeichert wird, wenn jeder Raum frei ist</td></tr>
-                        <tr><td>Ignored Statuses (Ignorierte Status)</td><td>Stornierte Buchungen verschwinden aus dem Raster und geben ihre Kapazität frei</td></tr>
-                        <tr><td>Conflict Look-Ahead Days (Konflikt-Vorausschau in Tagen)</td><td>Wie weit im Voraus Anzeigen und Konflikte geprüft werden. Standard 360</td></tr>
+                        <tr><td>Ignored Statuses (Status, die die Zeit freigeben)</td><td>Stornierte Buchungen verschwinden aus dem Raster und geben ihre Kapazität frei</td></tr>
+                        <tr><td>Conflict Look-Ahead Days (So viele Tage voraus auf Überschneidungen prüfen)</td><td>Wie weit im Voraus Anzeigen und Konflikte geprüft werden. Standard 360</td></tr>
                         <tr><td>Buffer Between Bookings (Puffer zwischen Buchungen)</td><td>Minuten für Reinigung oder Umrüstung, die nach jeder Buchung frei bleiben, pro Ressource. Zeitfensterraster, Kapazitätsanzeige, Ziehen in der Woche und die Prüfung beim Speichern berücksichtigen sie</td></tr>
                         <tr><td>Book Up To (Days Ahead)</td><td>Ein gleitendes Fenster: buchbar ab heute plus N Tage, jeden Tag einen Tag weiter</td></tr>
                         <tr><td>Minimum Notice (Hours)</td><td>Keine Buchung, die früher als in N Stunden beginnt, beim Speichern erneut geprüft</td></tr>
@@ -807,7 +807,7 @@
                             <li><span>Booking Object API Name</span><code>Room_Booking__c</code></li>
                             <li id="prop-Booking_Date__c"><span>Booking Date Field</span><code>Booking_Date__c</code></li>
                             <li id="prop-Start_Time__c"><span>Booking Start / End Time Field</span><code id="prop-End_Time__c">Start_Time__c</code></li>
-                            <li id="prop-Meeting_Room__c"><span>Booking Resource Field (Buchungsressourcen-Feld)</span><code>Meeting_Room__c</code></li>
+                            <li id="prop-Meeting_Room__c"><span>Booking Resource Field (Buchungsfeld für die Auswahl)</span><code>Meeting_Room__c</code></li>
                             <li id="prop-Contact__c"><span>Parent Record Relationship Field</span><code>Contact__c</code></li>
                             <li id="prop-End_Date__c"><span>End Date Field (optional)</span><code>End_Date__c</code></li>
                             <li id="prop-Status__c"><span>Status Field (optional)</span><code>Status__c</code></li>
@@ -820,21 +820,21 @@
                             <li id="prop-Name"><span>Resource Name Field</span><code>Name</code></li>
                             <li id="prop-Business_Hours_Start__c"><span>Business Hours Start / End Field</span><code id="prop-Business_Hours_End__c">Business_Hours_Start__c</code></li>
                             <li id="prop-Capacity__c"><span>Capacity Field (optional)</span><code>Capacity__c</code></li>
-                            <li id="prop-Active__c"><span>Resource Filter Field (optional) / Ressourcenfilterfeld (optional)</span><code>Active__c</code></li>
+                            <li id="prop-Active__c"><span>Resource Filter Field (optional) / Nur anzeigen, wenn</span><code>Active__c</code></li>
                         </ul>
                     </div>
                     <div class="gs-card bl">
                         <b>Gesperrte Tage <span class="opt">Optional</span></b>
                         <ul class="bk-fields">
-                            <li><span>Blocked Dates Object (Objekt für gesperrte Daten)</span><code>Closure__c</code></li>
+                            <li><span>Blocked Dates Object (Liste geschlossener Tage)</span><code>Closure__c</code></li>
                             <li><span>Blocked Dates Date Field (Datumsfeld für gesperrte Daten)</span><code>Date__c</code></li>
                             <li><span>Start / End Time Field</span><small>Schließung für einen Teil des Tages</small></li>
-                            <li><span>Blocked Dates Resource Field (Ressourcenfeld für gesperrte Daten)</span><small>nur eine Ressource</small></li>
+                            <li><span>Blocked Dates Resource Field (Feld am geschlossenen Tag für Raum oder Person)</span><small>nur eine Ressource</small></li>
                         </ul>
                     </div>
                 </div>
                 <h3 id="resource-filter">Ressourcenauswahl nach beliebigem Feld filtern</h3>
-                <p class="gs-lead" style="margin-bottom:12px;">Resource Filter Field und Value schränken die Liste ein. Ein Komma bedeutet ODER, ein Semikolon verknüpft Felder mit UND. Der Assistent zeigt das passende Steuerelement für den Feldtyp.</p>
+                <p class="gs-lead" style="margin-bottom:12px;">Resource Filter Field und Value schränken die Liste ein. Ein Komma bedeutet ODER, ein Semikolon verknüpft Felder mit UND. Im Assistenten heißen sie <b>Nur anzeigen, wenn</b> und <b>gleich</b>, jeweils mit dem passenden Steuerelement für den Feldtyp.</p>
                 <div class="hm-scroll">
                 <table class="gs-table">
                     <thead><tr><th>Nur anzeigen</th><th>Filter Field</th><th>Filter Value</th></tr></thead>
@@ -991,7 +991,7 @@
                 </details>
                 <details>
                     <summary>Wie verhindere ich Doppelbuchungen in Salesforce?</summary>
-                    <p>Legen Sie an der Resource Booking-Komponente das Konfliktverhalten (Conflict Behavior) fest. Blockieren macht belegte Zeitfenster unklickbar, Überspringen speichert bei einer Buchung über mehrere Tage die freien Tage und nennt die übersprungenen, Zulassen erlaubt Überschneidungen. Mit einem Kapazitätsfeld bleibt ein Zeitfenster offen, bis es voll ist, angezeigt als Live-Anzeige wie 3/10.</p>
+                    <p>Legen Sie an der Resource Booking-Komponente das Conflict Behavior (Wenn eine Zeit belegt ist) fest. Blockieren macht belegte Zeitfenster unklickbar, Überspringen speichert bei einer Buchung über mehrere Tage die freien Tage und nennt die übersprungenen, Zulassen erlaubt Überschneidungen. Mit einem Capacity Field (Wie viele gleichzeitig) bleibt ein Zeitfenster offen, bis es voll ist, angezeigt als Live-Anzeige wie 3/10.</p>
                 </details>
                 <details>
                     <summary>Gibt es in Salesforce einen Kalender für alle Räume oder Ressourcen?</summary>
@@ -1043,8 +1043,8 @@
                             <tr id="prop-timelineWindowDays"><td>Zeitachsenfenster in Tagen (Timeline Window (Days))</td><td><code>timelineWindowDays</code></td><td>14</td><td>Wie viele Tage die Zeitachse auf einmal zeigt. 0 für den ganzen Monat</td></tr>
                             <tr id="prop-timelineZoom"><td>Zeitachsen-Zoom (Timeline Zoom)</td><td><code>timelineZoom</code></td><td>week</td><td>Anfangszoom: day, week oder month. Benutzer können wechseln</td></tr>
                             <tr id="prop-timelineGroupByField"><td>Timeline Group By Field</td><td><code>timelineGroupByField</code></td><td></td><td>Gruppiert die Zeilen der Zeitachse unter Überschriften, z. B. nach Gebäude, jeweils mit Kapazitätsleiste</td></tr>
-                            <tr id="prop-maxViewResources"><td>Max. Ressourcen in der Ansicht (Max View Resources)</td><td><code>maxViewResources</code></td><td>5</td><td>Maximale Zahl an Ressourcenzeilen in Zeitachse und Auslastung, die meistgebuchten zuerst; 999 zeichnet jede Ressource. Begrenzt die gezeichneten Zeilen, nicht die gezählten</td></tr>
-                            <tr id="prop-resourceViewFilter"><td>Ressourcenzeilen (Resource Rows)</td><td><code>resourceViewFilter</code></td><td>all</td><td>all, oder booked, um nur Ressourcen mit einer Buchung im Zeitraum zu zeigen</td></tr>
+                            <tr id="prop-maxViewResources"><td>Max View Resources (Angezeigte Zeilen)</td><td><code>maxViewResources</code></td><td>5</td><td>Maximale Zahl an Ressourcenzeilen in Zeitachse und Auslastung, die meistgebuchten zuerst; 999 zeichnet jede Ressource. Begrenzt die gezeichneten Zeilen, nicht die gezählten</td></tr>
+                            <tr id="prop-resourceViewFilter"><td>Resource Rows (Welche Zeilen)</td><td><code>resourceViewFilter</code></td><td>all</td><td>all, oder booked, um nur Ressourcen mit einer Buchung im Zeitraum zu zeigen</td></tr>
                             <tr id="prop-agendaFields"><td>Agenda Fields</td><td><code>agendaFields</code></td><td></td><td>Zusätzliche Felder in jeder Agenda-Zeile. Leer übernimmt die Hover Popover Fields</td></tr>
                             <tr id="prop-ganttPhaseField"><td>Gantt Phase Field</td><td><code>ganttPhaseField</code></td><td></td><td>Gantt-Ansicht: eine Auswahlliste, ein Textfeld oder ein Nachschlagefeld, das Aufgaben in Phasen gruppiert. Leer gruppiert sie nach Ressource</td></tr>
                             <tr id="prop-ganttDependsOnField"><td>Gantt Waits On Field</td><td><code>ganttDependsOnField</code></td><td></td><td>Gantt-Ansicht: ein Nachschlagefeld auf die Aufgabe, die zuerst enden muss. Ein Verknüpfungsobjekt, im Einrichtungsassistenten festgelegt, ermöglicht mehrere Verknüpfungen pro Aufgabe, Verknüpfungstypen und Verzögerung</td></tr>
@@ -1085,7 +1085,7 @@
                             <tr id="prop-businessHoursStartField"><td>Business Hours Start Field</td><td><code>businessHoursStartField</code></td><td></td><td>Zeitfeld: wann jede Ressource öffnet</td></tr>
                             <tr id="prop-businessHoursEndField"><td>Business Hours End Field</td><td><code>businessHoursEndField</code></td><td></td><td>Zeitfeld: wann jede Ressource schließt</td></tr>
                             <tr id="prop-minTime"><td>Früheste Uhrzeit / Späteste Uhrzeit (Einrichtungsassistent)</td><td><code>minTime, maxTime</code></td><td></td><td>Schränkt die Zeiten jeder Ressource ein. Die Späteste Uhrzeit ist das Tagesende: Bei 30-Minuten-Zeitfenstern ist mit 16:30 das Zeitfenster 16:00 bis 16:30 Uhr das letzte. Leer gelten die eigenen Zeiten jeder Ressource</td></tr>
-                            <tr id="prop-capacityField"><td>Kapazitätsfeld (Capacity Field)</td><td><code>capacityField</code></td><td></td><td>Erlaubte Buchungen pro Zeitfenster. Schaltet den Kapazitätsmodus und die Prozentwerte der Auslastung ein</td></tr>
+                            <tr id="prop-capacityField"><td>Capacity Field (Wie viele gleichzeitig)</td><td><code>capacityField</code></td><td></td><td>Erlaubte Buchungen pro Zeitfenster. Schaltet den Kapazitätsmodus und die Prozentwerte der Auslastung ein</td></tr>
                             <tr id="prop-showAvailabilityCount"><td>Show Availability Count</td><td><code>showAvailabilityCount</code></td><td>true</td><td>Live-Anzeigen wie 3/10 an den Zeitfenstern, mit einem Capacity Field</td></tr>
                             <tr id="prop-allowMultipleResources"><td>Allow Multiple Resources</td><td><code>allowMultipleResources</code></td><td>false</td><td>Mehrere Ressourcen anhaken und gemeinsam buchen</td></tr>
                             <tr id="prop-capacityAggregation"><td>Capacity Aggregation (multi-resource)</td><td><code>capacityAggregation</code></td><td>Combined</td><td>Combined summiert Buchungen und Kapazitäten. Distinct zählt ein Ereignis über mehrere Ressourcen nur einmal</td></tr>
@@ -1107,7 +1107,7 @@
                             <tr id="prop-relationshipFieldApiName"><td>Parent Record Relationship Field</td><td><code>relationshipFieldApiName</code></td><td></td><td>Lookup-Feld von jeder Buchung zum übergeordneten Datensatz</td></tr>
                             <tr id="prop-endDateField"><td>End Date Field API Name</td><td><code>endDateField</code></td><td></td><td>Aufeinanderfolgende Tage werden als ein Datensatz mit Start- und Enddatum gespeichert (Miete Mo bis Fr = 1 Datensatz)</td></tr>
                             <tr id="prop-resourceBookButtonLabel"><td>Book Button Label</td><td><code>resourceBookButtonLabel</code></td><td>Buchen (Book)</td><td>z. B. Reservieren oder Einplanen</td></tr>
-                            <tr id="prop-recordNameField"><td>Record Name Field</td><td><code>recordNameField</code></td><td></td><td>Textfeld für einen lesbaren Datensatznamen. Das Eingabefeld wird ausgeblendet, wenn der Standardname des Datensatzes einen Feldplatzhalter enthält.</td></tr>
+                            <tr id="prop-recordNameField"><td>Record Name Field</td><td><code>recordNameField</code></td><td></td><td>Textfeld für einen lesbaren Datensatznamen. Das Eingabefeld wird ausgeblendet, wenn Default Record Name (Vorgegebener Name) einen Feldplatzhalter enthält.</td></tr>
                             <tr id="prop-defaultRecordName"><td>Default Record Name</td><td><code>defaultRecordName</code></td><td></td><td>z. B. Raumbuchung. Oder bilden Sie den Namen aus einem Feld, das der Benutzer auswählt: <code>{Closure_Reason__c}</code> übernimmt den Wert dieses Felds und blendet das Eingabefeld für den Namen aus.</td></tr>
                             <tr id="prop-appendDateTimeToName"><td>Append Date/Time to Record Name</td><td><code>appendDateTimeToName</code></td><td>true</td><td>Hängt Datum und Uhrzeit an den Namen an</td></tr>
                         </tbody>
@@ -1129,7 +1129,7 @@
                             <tr id="prop-limitPerPerson"><td>Limit per Person</td><td><code>limitPerPerson</code></td><td>0</td><td>Anstehende Buchungen, die ein Kunde haben kann, bei jedem Speichern auf dem Server geprüft. Mitarbeitende können das Limit nach einer Bestätigung überschreiten. 0 = kein Limit</td></tr>
                             <tr id="prop-limitPerPersonClientField"><td>Limit per Person Client Field</td><td><code>limitPerPersonClientField</code></td><td></td><td>Für wen die Buchung ist: ein E-Mail- oder Textfeld oder ein Nachschlagefeld auf Kontakt, Lead, Account oder Benutzer</td></tr>
                             <tr id="prop-allowWholeDayNoTimes"><td>Allow Whole-Day (No Times)</td><td><code>allowWholeDayNoTimes</code></td><td>false</td><td>Ein Tag ohne gewählte Zeitfenster wird als ganztägiger Datensatz gespeichert</td></tr>
-                            <tr id="prop-timeGridOnly"><td>Nur Zeitraster (Time Grid Only)</td><td><code>timeGridOnly</code></td><td>false</td><td>Blendet den Kalender aus; zeigt nur das Zeitfensterraster für ein vorgegebenes Datum</td></tr>
+                            <tr id="prop-timeGridOnly"><td>Time Grid Only (Nur die Zeiten eines Tages, kein Kalender)</td><td><code>timeGridOnly</code></td><td>false</td><td>Blendet den Kalender aus; zeigt nur das Zeitfensterraster für ein vorgegebenes Datum</td></tr>
                             <tr id="prop-timeGridDate"><td>Time Grid Date</td><td><code>timeGridDate</code></td><td></td><td>Festes Datum (YYYY-MM-DD) für Time Grid Only</td></tr>
                             <tr id="prop-timeGridDateField"><td>Time Grid Date Field</td><td><code>timeGridDateField</code></td><td></td><td>Datumsfeld am Host-Datensatz. Reihenfolge: Time Grid Date, dann dieses Feld, dann heute</td></tr>
                         </tbody>
@@ -1139,10 +1139,10 @@
                     <div class="hm-scroll"><table class="gs-table ref">
                         <thead><tr><th>Einstellung</th><th>API-Name</th><th>Standard</th><th>Funktion</th></tr></thead>
                         <tbody>
-                            <tr id="prop-conflictBehavior"><td>Konfliktverhalten (Conflict Behavior)</td><td><code>conflictBehavior</code></td><td>block</td><td>block: belegte Zeitfenster können nicht gewählt werden. skip: Buchungen über mehrere Tage speichern die freien Tage und listen die übersprungenen auf. allow: keine Prüfung</td></tr>
+                            <tr id="prop-conflictBehavior"><td>Conflict Behavior (Wenn eine Zeit belegt ist)</td><td><code>conflictBehavior</code></td><td>block</td><td>block: belegte Zeitfenster können nicht gewählt werden. skip: Buchungen über mehrere Tage speichern die freien Tage und listen die übersprungenen auf. allow: keine Prüfung</td></tr>
 <tr id="prop-bufferMinutes"><td>Buffer Between Bookings (Minutes)</td><td><code>bufferMinutes</code></td><td>0</td><td>Umrüstzeit, die nach jeder Buchung auf derselben Ressource frei bleibt</td></tr>
-                            <tr id="prop-conflictLookAheadDays"><td>Conflict Look-Ahead Days (Konflikt-Vorausschau in Tagen)</td><td><code>conflictLookAheadDays</code></td><td>360</td><td>Zeitraum für die Verfügbarkeitsanzeigen und für die Konfliktprüfung beim Speichern</td></tr>
-                            <tr id="prop-hideBookingsWithStatus"><td>Ignored Statuses (Ignorierte Status)</td><td><code>hideBookingsWithStatus</code></td><td></td><td>z. B. Cancelled: aus dem Raster ausgeblendet und nicht in der Kapazität gezählt</td></tr>
+                            <tr id="prop-conflictLookAheadDays"><td>Conflict Look-Ahead Days (So viele Tage voraus auf Überschneidungen prüfen)</td><td><code>conflictLookAheadDays</code></td><td>360</td><td>Zeitraum für die Verfügbarkeitsanzeigen und für die Konfliktprüfung beim Speichern</td></tr>
+                            <tr id="prop-hideBookingsWithStatus"><td>Ignored Statuses (Status, die die Zeit freigeben)</td><td><code>hideBookingsWithStatus</code></td><td></td><td>z. B. Cancelled: aus dem Raster ausgeblendet und nicht in der Kapazität gezählt</td></tr>
                         </tbody>
                     </table></div>
 
@@ -1150,7 +1150,7 @@
                     <div class="hm-scroll"><table class="gs-table ref">
                         <thead><tr><th>Einstellung</th><th>API-Name</th><th>Standard</th><th>Funktion</th></tr></thead>
                         <tbody>
-                            <tr id="prop-statusField"><td>Statusfeld (Status Field)</td><td><code>statusField</code></td><td></td><td>Auswahlliste, die die Farben steuert</td></tr>
+                            <tr id="prop-statusField"><td>Status Field (Status)</td><td><code>statusField</code></td><td></td><td>Auswahlliste, die die Farben steuert</td></tr>
                             <tr id="prop-statusColors"><td>Statusfarben (Status Colors)</td><td><code>statusColors</code></td><td></td><td>z. B. <code>Confirmed:green,Pending:orange,Cancelled:red</code></td></tr>
                             <tr id="prop-statusColorDisplay"><td>Status Color Display</td><td><code>statusColorDisplay</code></td><td>both</td><td>grid (Zeitfenster), calendar (Tage) oder both</td></tr>
                             <tr id="prop-statusFieldLabel"><td>Status Field Label</td><td><code>statusFieldLabel</code></td><td></td><td>Bezeichnung der Statusauswahl</td></tr>
@@ -1158,7 +1158,7 @@
                             <tr id="prop-secondStatusField"><td>Second Picklist Field</td><td><code>secondStatusField</code></td><td></td><td>Eine zweite Auswahlliste, die beim Speichern gewählt wird, z. B. ein Grund. Ohne Farbcodierung</td></tr>
                             <tr id="prop-secondStatusFieldLabel"><td>Second Picklist Label</td><td><code>secondStatusFieldLabel</code></td><td></td><td>Bezeichnung der zweiten Auswahlliste</td></tr>
                             <tr id="prop-selectableSecondStatuses"><td>Selectable Second-Picklist Values</td><td><code>selectableSecondStatuses</code></td><td></td><td>Erlaubte Werte der zweiten Auswahlliste</td></tr>
-                            <tr id="prop-hoverFields"><td>Felder im Hover-Popover (Hover Popover Fields)</td><td><code>hoverFields</code></td><td></td><td>Felder, die beim Hover über eine Buchung erscheinen</td></tr>
+                            <tr id="prop-hoverFields"><td>Hover Popover Fields (Details beim Daraufzeigen)</td><td><code>hoverFields</code></td><td></td><td>Felder, die beim Hover über eine Buchung erscheinen</td></tr>
                             <tr id="prop-bookingPrivacy"><td>Show Other People&rsquo;s Bookings As</td><td><code>bookingPrivacy</code></td><td>Details</td><td>Details, Busy (für alle ein schraffierter Block „Nicht verfügbar“ ohne Namen) oder Busy for site guests. Namen werden auf dem Server entfernt</td></tr>
                             <tr id="prop-showSuccessToast"><td>Show In-Component Toast</td><td><code>showSuccessToast</code></td><td>false</td><td>Bestätigung, die in der Komponente selbst angezeigt wird. Erforderlich in Experience Cloud</td></tr>
 <tr id="prop-showAddToCalendar"><td>Show Add to Calendar After Saving</td><td><code>showAddToCalendar</code></td><td>false</td><td>Nach dem Speichern eine .ics-Datei mit allen soeben angelegten Buchungen, für Outlook, Google oder Apple</td></tr>

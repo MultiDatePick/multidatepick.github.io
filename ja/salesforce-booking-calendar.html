@@ -197,7 +197,7 @@
                         "name": "Salesforce でダブルブッキングを防ぐには?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Resource Booking コンポーネントで Conflict Behavior（競合の動作） を設定します。Block は予約済みの時間枠をクリックできなくし、Skip は複数日の予約のうち空いている日付だけを保存して除外した日付を表示し、Allow は重複を許可します。Capacity Field（定員項目） を設定すると、時間枠は満員になるまで受け付け、3/10 のようなバッジがリアルタイムで表示されます。"
+                            "text": "Resource Booking コンポーネントで Conflict Behavior (時間が埋まっているとき) を設定します。Block は予約済みの時間枠をクリックできなくし、Skip は複数日の予約のうち空いている日付だけを保存して除外した日付を表示し、Allow は重複を許可します。Capacity Field (同時に予約できる数) を設定すると、時間枠は満員になるまで受け付け、3/10 のようなバッジがリアルタイムで表示されます。"
                         }
                     },
                     {
@@ -721,8 +721,8 @@
                     <tbody>
                         <tr><td>定員項目（Capacity Field）</td><td>リソースに設定する数値。満員になるまで予約でき、3/10 のバッジをリアルタイム表示</td></tr>
                         <tr><td>定員の集計（Capacity Aggregation）</td><td><b>Combined</b> は複数のリソースを合算します (5 席の会議室 4 つ = 20 席)。<b>Distinct</b> は複数の会議室にまたがる 1 つのイベントを 1 回だけ数えます。Block と組み合わせると、すべての会議室が空いているときだけイベントが保存されます</td></tr>
-                        <tr><td>無視する状況（Ignored Statuses）</td><td>キャンセルされた予約はグリッドから消え、その分の定員が空きます</td></tr>
-                        <tr><td>競合先読み日数（Conflict Look-Ahead Days）</td><td>バッジと競合をどこまで先までチェックするか。デフォルトは 360</td></tr>
+                        <tr><td>Ignored Statuses（時間を空ける状況）</td><td>キャンセルされた予約はグリッドから消え、その分の定員が空きます</td></tr>
+                        <tr><td>Conflict Look-Ahead Days（競合を確認する日数）</td><td>バッジと競合をどこまで先までチェックするか。デフォルトは 360</td></tr>
                         <tr><td>予約間のバッファー（Buffer Between Bookings）</td><td>リソースごとに、各予約の後に空けておく片付けや準備の時間 (分)。時間枠グリッド、定員バッジ、週表示でのドラッグ、保存時のチェックのすべてに反映されます</td></tr>
                         <tr><td>Book Up To (Days Ahead)</td><td>移動する受付期間: 今日から N 日先まで予約を受け付け、毎日前に進みます</td></tr>
                         <tr><td>Minimum Notice (Hours)</td><td>現在から N 時間以内に始まる予約は不可。保存時にも再チェック</td></tr>
@@ -829,12 +829,12 @@
                             <li><span>Blocked Dates Object</span><code>Closure__c</code></li>
                             <li><span>Blocked Dates Date Field</span><code>Date__c</code></li>
                             <li><span>Start / End Time Field</span><small>時間単位の休業</small></li>
-                            <li><span>Blocked Dates Resource Field</span>（ブロック日付リソース項目）<small>1 つのリソースのみ</small></li>
+                            <li><span>Blocked Dates Resource Field</span>（対象の会議室や人を示す休業日の項目）<small>1 つのリソースのみ</small></li>
                         </ul>
                     </div>
                 </div>
                 <h3 id="resource-filter">任意の項目でリソースの選択肢を絞り込む</h3>
-                <p class="gs-lead" style="margin-bottom:12px;">Resource Filter Field と Value で一覧の範囲を決めます。カンマは OR、セミコロンは複数の項目を AND で組み合わせます。ウィザードには項目の型に合った入力欄が表示されます。</p>
+                <p class="gs-lead" style="margin-bottom:12px;">Resource Filter Field と Value で一覧の範囲を決めます。カンマは OR、セミコロンは複数の項目を AND で組み合わせます。ウィザードでは <b>次の条件のものだけ表示</b> と <b>次の値と等しい</b> という名前で、項目の型に合った入力欄が表示されます。</p>
                 <div class="hm-scroll">
                 <table class="gs-table">
                     <thead><tr><th>表示するもの</th><th>Filter Field</th><th>Filter Value</th></tr></thead>
@@ -885,7 +885,7 @@
                         <table class="gs-table" id="rp-output">
                             <thead><tr><th>予約の後</th><th>得られるもの</th></tr></thead>
                             <tbody>
-                                <tr><td>レコード</td><td>[予約] で保存。隣り合う時間枠は 1 件の予約にまとまり、End Date Field（終了日項目） を設定すれば隣り合う日付もまとまります</td></tr>
+                                <tr><td>レコード</td><td>[予約] で保存。隣り合う時間枠は 1 件の予約にまとまり、End Date Field (期間の終了日) を設定すれば隣り合う日付もまとまります</td></tr>
                                 <tr><td>Successful Bookings Count</td><td>フローの出力: 保存できた件数</td></tr>
                                 <tr><td>Conflict Dates</td><td>フローの出力: 予約できなかった日付</td></tr>
                                 <tr id="rp-summary-view"><td>[完了] ボタン</td><td>ページ上で概要カードに折りたたまれる</td></tr>
@@ -991,7 +991,7 @@
                 </details>
                 <details>
                     <summary>Salesforce でダブルブッキングを防ぐには?</summary>
-                    <p>Resource Booking コンポーネントで Conflict Behavior（競合の動作） を設定します。Block は予約済みの時間枠をクリックできなくし、Skip は複数日の予約のうち空いている日付だけを保存して除外した日付を表示し、Allow は重複を許可します。Capacity Field（定員項目） を設定すると、時間枠は満員になるまで受け付け、3/10 のようなバッジがリアルタイムで表示されます。</p>
+                    <p>Resource Booking コンポーネントで Conflict Behavior (時間が埋まっているとき) を設定します。Block は予約済みの時間枠をクリックできなくし、Skip は複数日の予約のうち空いている日付だけを保存して除外した日付を表示し、Allow は重複を許可します。Capacity Field (同時に予約できる数) を設定すると、時間枠は満員になるまで受け付け、3/10 のようなバッジがリアルタイムで表示されます。</p>
                 </details>
                 <details>
                     <summary>Salesforce ですべての会議室やリソースのカレンダーを見られますか?</summary>
@@ -1043,8 +1043,8 @@
                             <tr id="prop-timelineWindowDays"><td>タイムラインの表示期間 (日)（Timeline Window (Days)）</td><td><code>timelineWindowDays</code></td><td>14</td><td>タイムラインに一度に表示する日数。0 で 1 か月全体</td></tr>
                             <tr id="prop-timelineZoom"><td>タイムラインのズーム（Timeline Zoom）</td><td><code>timelineZoom</code></td><td>week</td><td>最初のズーム: day、week、month。ユーザーが切り替え可能</td></tr>
                             <tr id="prop-timelineGroupByField"><td>Timeline Group By Field</td><td><code>timelineGroupByField</code></td><td></td><td>タイムラインの行を見出しの下にグループ化 (例: 建物ごと)。各グループに定員バー付き</td></tr>
-                            <tr id="prop-maxViewResources"><td>ビューのリソース最大数（Max View Resources）</td><td><code>maxViewResources</code></td><td>5</td><td>タイムラインと稼働率に描画するリソース行の最大数。予約の多い順。999 ですべてのリソースを描画。描画する行数を制限するだけで、集計対象は制限しません</td></tr>
-                            <tr id="prop-resourceViewFilter"><td>リソース行（Resource Rows）</td><td><code>resourceViewFilter</code></td><td>all</td><td>all、または表示期間内に予約のあるリソースだけを描画する booked</td></tr>
+                            <tr id="prop-maxViewResources"><td>Max View Resources（表示する行数）</td><td><code>maxViewResources</code></td><td>5</td><td>タイムラインと稼働率に描画するリソース行の最大数。予約の多い順。999 ですべてのリソースを描画。描画する行数を制限するだけで、集計対象は制限しません</td></tr>
+                            <tr id="prop-resourceViewFilter"><td>Resource Rows（表示する行）</td><td><code>resourceViewFilter</code></td><td>all</td><td>all、または表示期間内に予約のあるリソースだけを描画する booked</td></tr>
                             <tr id="prop-agendaFields"><td>Agenda Fields</td><td><code>agendaFields</code></td><td></td><td>予定一覧の各行に追加する項目。空欄なら Hover Popover Fields を流用</td></tr>
                             <tr id="prop-ganttPhaseField"><td>Gantt Phase Field</td><td><code>ganttPhaseField</code></td><td></td><td>ガントビュー: タスクをフェーズにまとめる選択リスト、テキスト、または参照項目。空欄ならリソースごとにまとめます</td></tr>
                             <tr id="prop-ganttDependsOnField"><td>Gantt Waits On Field</td><td><code>ganttDependsOnField</code></td><td></td><td>ガントビュー: 先に終わる必要があるタスクへの参照項目。セットアップウィザードでリンクオブジェクトを設定すると、1 つのタスクに複数のリンク、リンクの種類、ラグを持たせられます</td></tr>
@@ -1107,7 +1107,7 @@
                             <tr id="prop-relationshipFieldApiName"><td>Parent Record Relationship Field</td><td><code>relationshipFieldApiName</code></td><td></td><td>各予約から親レコードへの参照</td></tr>
                             <tr id="prop-endDateField"><td>End Date Field API Name</td><td><code>endDateField</code></td><td></td><td>隣り合う日付を、開始日と終了日を持つ 1 件のレコードとして保存 (月曜から金曜のレンタル = 1 レコード)</td></tr>
                             <tr id="prop-resourceBookButtonLabel"><td>Book Button Label</td><td><code>resourceBookButtonLabel</code></td><td>Book</td><td>例: Reserve、Schedule</td></tr>
-                            <tr id="prop-recordNameField"><td>Record Name Field</td><td><code>recordNameField</code></td><td></td><td>わかりやすいレコード名を入れるテキスト項目。デフォルトレコード名に項目トークンが含まれている場合、この入力欄は非表示になります。</td></tr>
+                            <tr id="prop-recordNameField"><td>Record Name Field</td><td><code>recordNameField</code></td><td></td><td>わかりやすいレコード名を入れるテキスト項目。Default Record Name (既定で入力する名前) に項目トークンが含まれている場合、この入力欄は非表示になります。</td></tr>
                             <tr id="prop-defaultRecordName"><td>Default Record Name</td><td><code>defaultRecordName</code></td><td></td><td>例: Room Booking。ユーザーが選んだ項目から作成することもできます。<code>{Closure_Reason__c}</code> はその項目の値を使い、名前の入力欄を非表示にします。</td></tr>
                             <tr id="prop-appendDateTimeToName"><td>Append Date/Time to Record Name</td><td><code>appendDateTimeToName</code></td><td>true</td><td>名前に日付と時刻を追加</td></tr>
                         </tbody>
@@ -1129,9 +1129,9 @@
                             <tr id="prop-limitPerPerson"><td>1 人あたりの上限（Limit per Person）</td><td><code>limitPerPerson</code></td><td>0</td><td>1 人の顧客が持てる今後の予約の数。保存のたびにサーバー側でチェックします。スタッフは確認のうえで上限を超えて予約できます。0 = 無制限</td></tr>
                             <tr id="prop-limitPerPersonClientField"><td>Limit per Person Client Field</td><td><code>limitPerPersonClientField</code></td><td></td><td>予約の対象者を示す項目。メールアドレスかテキストの項目、または取引先責任者、リード、取引先、ユーザーへの参照項目</td></tr>
                             <tr id="prop-allowWholeDayNoTimes"><td>Allow Whole-Day (No Times)</td><td><code>allowWholeDayNoTimes</code></td><td>false</td><td>時間枠を選ばずに選んだ日付は終日のレコードとして保存</td></tr>
-                            <tr id="prop-timeGridOnly"><td>タイムグリッドのみ（Time Grid Only）</td><td><code>timeGridOnly</code></td><td>false</td><td>カレンダーを非表示にし、暗黙の 1 日分の時間枠グリッドだけを表示</td></tr>
-                            <tr id="prop-timeGridDate"><td>Time Grid Date</td><td><code>timeGridDate</code></td><td></td><td>Time Grid Only（タイムグリッドのみ） 用の明示的な日付 (YYYY-MM-DD)</td></tr>
-                            <tr id="prop-timeGridDateField"><td>Time Grid Date Field</td><td><code>timeGridDateField</code></td><td></td><td>ホストレコードの日付項目。優先順位: Time Grid Date（タイムグリッド日付）、この項目、今日</td></tr>
+                            <tr id="prop-timeGridOnly"><td>Time Grid Only（1 日の時刻のみ、カレンダーなし）</td><td><code>timeGridOnly</code></td><td>false</td><td>カレンダーを非表示にし、暗黙の 1 日分の時間枠グリッドだけを表示</td></tr>
+                            <tr id="prop-timeGridDate"><td>Time Grid Date</td><td><code>timeGridDate</code></td><td></td><td>Time Grid Only (1 日の時刻のみ、カレンダーなし) 用の明示的な日付 (YYYY-MM-DD)</td></tr>
+                            <tr id="prop-timeGridDateField"><td>Time Grid Date Field</td><td><code>timeGridDateField</code></td><td></td><td>ホストレコードの日付項目。優先順位: Time Grid Date（固定の日付）、この項目、今日</td></tr>
                         </tbody>
                     </table></div>
 
@@ -1139,10 +1139,10 @@
                     <div class="hm-scroll"><table class="gs-table ref">
                         <thead><tr><th>設定</th><th>API 参照名</th><th>デフォルト</th><th>機能</th></tr></thead>
                         <tbody>
-                            <tr id="prop-conflictBehavior"><td>競合の動作（Conflict Behavior）</td><td><code>conflictBehavior</code></td><td>block</td><td>block: 予約済みの時間枠は選べない。skip: 複数日の予約では空いている日付を保存し、除外した日付を一覧表示。allow: チェックなし</td></tr>
+                            <tr id="prop-conflictBehavior"><td>Conflict Behavior（時間が埋まっているとき）</td><td><code>conflictBehavior</code></td><td>block</td><td>block: 予約済みの時間枠は選べない。skip: 複数日の予約では空いている日付を保存し、除外した日付を一覧表示。allow: チェックなし</td></tr>
 <tr id="prop-bufferMinutes"><td>Buffer Between Bookings (Minutes)</td><td><code>bufferMinutes</code></td><td>0</td><td>同じリソースで各予約の後に空けておく準備時間</td></tr>
-                            <tr id="prop-conflictLookAheadDays"><td>競合先読み日数（Conflict Look-Ahead Days）</td><td><code>conflictLookAheadDays</code></td><td>360</td><td>空き状況のバッジと保存時の競合チェックの両方に使う期間</td></tr>
-                            <tr id="prop-hideBookingsWithStatus"><td>無視する状況（Ignored Statuses）</td><td><code>hideBookingsWithStatus</code></td><td></td><td>例: Cancelled。グリッドから非表示にし、定員の集計からも除外</td></tr>
+                            <tr id="prop-conflictLookAheadDays"><td>Conflict Look-Ahead Days（競合を確認する日数）</td><td><code>conflictLookAheadDays</code></td><td>360</td><td>空き状況のバッジと保存時の競合チェックの両方に使う期間</td></tr>
+                            <tr id="prop-hideBookingsWithStatus"><td>Ignored Statuses（時間を空ける状況）</td><td><code>hideBookingsWithStatus</code></td><td></td><td>例: Cancelled。グリッドから非表示にし、定員の集計からも除外</td></tr>
                         </tbody>
                     </table></div>
 
@@ -1158,7 +1158,7 @@
                             <tr id="prop-secondStatusField"><td>Second Picklist Field</td><td><code>secondStatusField</code></td><td></td><td>保存時に選ぶ 2 つ目の選択リスト (例: 理由)。色分けはされません</td></tr>
                             <tr id="prop-secondStatusFieldLabel"><td>Second Picklist Label</td><td><code>secondStatusFieldLabel</code></td><td></td><td>2 つ目の選択リストのラベル</td></tr>
                             <tr id="prop-selectableSecondStatuses"><td>Selectable Second-Picklist Values</td><td><code>selectableSecondStatuses</code></td><td></td><td>2 つ目の選択リストで選べる値</td></tr>
-                            <tr id="prop-hoverFields"><td>ホバーポップオーバー項目（Hover Popover Fields）</td><td><code>hoverFields</code></td><td></td><td>予約にカーソルを合わせたときに表示する項目</td></tr>
+                            <tr id="prop-hoverFields"><td>Hover Popover Fields（ホバー時の詳細）</td><td><code>hoverFields</code></td><td></td><td>予約にカーソルを合わせたときに表示する項目</td></tr>
                             <tr id="prop-bookingPrivacy"><td>Show Other People&rsquo;s Bookings As</td><td><code>bookingPrivacy</code></td><td>Details</td><td>Details、Busy (全員に対して名前のない斜線の「利用不可」ブロックで表示)、または Busy for site guests。名前はサーバー側で取り除かれます</td></tr>
                             <tr id="prop-showSuccessToast"><td>Show In-Component Toast</td><td><code>showSuccessToast</code></td><td>false</td><td>コンポーネント内に描画される確認メッセージ。Experience Cloud では必須</td></tr>
 <tr id="prop-showAddToCalendar"><td>Show Add to Calendar After Saving</td><td><code>showAddToCalendar</code></td><td>false</td><td>保存後、作成したすべての予約を含む 1 つの .ics ファイルを Outlook、Google、Apple 用に提供</td></tr>
@@ -1234,7 +1234,7 @@
                             <tr id="prop-subBlockDateField"><td>Sub-Block Date Field</td><td><code>subBlockDateField</code></td><td></td><td>子の日付項目</td></tr>
                             <tr id="prop-subBlockStartTimeField"><td>Sub-Block Start Time Field</td><td><code>subBlockStartTimeField</code></td><td></td><td>子の開始時刻</td></tr>
                             <tr id="prop-subBlockEndTimeField"><td>Sub-Block End Time Field</td><td><code>subBlockEndTimeField</code></td><td></td><td>子の終了時刻</td></tr>
-                            <tr id="prop-subBlockNameField"><td>Sub-Block Name Field</td><td><code>subBlockNameField</code></td><td></td><td>Sub-Block Button Label（サブブロックボタンラベル） の値が入る</td></tr>
+                            <tr id="prop-subBlockNameField"><td>Sub-Block Name Field</td><td><code>subBlockNameField</code></td><td></td><td>Sub-Block Button Label (休憩ボタンの文字) の値が入る</td></tr>
                             <tr id="prop-subBlockModeButtonLabel"><td>Sub-Block Button Label</td><td><code>subBlockModeButtonLabel</code></td><td></td><td>例: Mark as Break</td></tr>
                             <tr id="prop-showSubBlockButton"><td>Show Sub-Block Toggle Button</td><td><code>showSubBlockButton</code></td><td>false</td><td>グリッドにその切り替えボタンを表示</td></tr>
                         </tbody>

@@ -114,7 +114,7 @@
                     "Grille de créneaux horaires avec n'importe quel intervalle en minutes",
                     "Réservation par capacité avec badges « réservés / capacité » en temps réel",
                     "Détection des conflits à l'enregistrement : bloquer, ignorer ou autoriser",
-                    "Réservation multi-ressources avec capacité combinée ou distincte",
+                    "Réservation multi-ressources avec capacité additionnée ou comptée une fois",
                     "Heures ouvrables par ressource",
                     "Dates bloquées, journée entière ou partielle, pour toutes les ressources ou une seule",
                     "Couleurs de statut issues de n'importe quelle liste de sélection",
@@ -197,7 +197,7 @@
                         "name": "Comment éviter les doubles réservations dans Salesforce ?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Réglez Conflict Behavior (Comportement en cas de conflit) sur le composant Resource Booking. Bloquer rend les créneaux pris non cliquables, Ignorer enregistre les dates libres d'une réservation multi-dates et indique celles qui ont été ignorées, et Autoriser accepte le chevauchement. Avec un champ de capacité, un créneau reste ouvert jusqu'à ce qu'il soit complet, avec des badges en temps réel comme 3/10."
+                            "text": "Réglez Conflict Behavior (Quand un horaire est pris) sur le composant Resource Booking. Bloquer rend les créneaux pris non cliquables, Ignorer enregistre les dates libres d'une réservation multi-dates et indique celles qui ont été ignorées, et Autoriser accepte le chevauchement. Avec un champ de capacité, un créneau reste ouvert jusqu'à ce qu'il soit complet, avec des badges en temps réel comme 3/10."
                         }
                     },
                     {
@@ -719,7 +719,7 @@
                 <table class="gs-table">
                     <thead><tr><th>Paramètre</th><th>Rôle</th></tr></thead>
                     <tbody>
-                        <tr><td>Champ Capacité (Capacity Field)</td><td>Un nombre sur la ressource. Les créneaux restent réservables jusqu'à ce qu'ils soient complets, avec des badges 3/10 en temps réel</td></tr>
+                        <tr><td>Capacity Field (Combien à la fois)</td><td>Un nombre sur la ressource. Les créneaux restent réservables jusqu'à ce qu'ils soient complets, avec des badges 3/10 en temps réel</td></tr>
                         <tr><td>Capacity Aggregation</td><td><b>Combined</b> additionne plusieurs ressources (4 salles de 5 = 20 places). <b>Distinct</b> compte une seule fois un événement réparti sur plusieurs salles ; associez-le à Bloquer pour que l'événement ne soit enregistré que si toutes les salles sont libres</td></tr>
                         <tr><td>Ignored Statuses</td><td>Les réservations annulées disparaissent de la grille et libèrent leur capacité</td></tr>
                         <tr><td>Conflict Look-Ahead Days</td><td>Jusqu'où les badges et les conflits sont contrôlés à l'avance. 360 par défaut</td></tr>
@@ -805,36 +805,36 @@
                         <b>Objet de réservation</b>
                         <ul class="bk-fields">
                             <li><span>Booking Object API Name</span><code>Room_Booking__c</code></li>
-                            <li id="prop-Booking_Date__c"><span>Booking Date Field</span> (Champ Date)<code>Booking_Date__c</code></li>
+                            <li id="prop-Booking_Date__c"><span>Booking Date Field</span> (Date)<code>Booking_Date__c</code></li>
                             <li id="prop-Start_Time__c"><span>Booking Start / End Time Field</span> (Champ Heure de début / de fin)<code id="prop-End_Time__c">Start_Time__c</code></li>
-                            <li id="prop-Meeting_Room__c"><span>Booking Resource Field</span> (Champ ressource de réservation)<code>Meeting_Room__c</code></li>
-                            <li id="prop-Contact__c"><span>Parent Record Relationship Field</span> (Champ relation)<code>Contact__c</code></li>
-                            <li id="prop-End_Date__c"><span>End Date Field (facultatif)</span> (Champ Date de fin)<code>End_Date__c</code></li>
-                            <li id="prop-Status__c"><span>Status Field (facultatif)</span> (Champ de statut)<code>Status__c</code></li>
+                            <li id="prop-Meeting_Room__c"><span>Booking Resource Field</span> (Champ de réservation qui contient le choix)<code>Meeting_Room__c</code></li>
+                            <li id="prop-Contact__c"><span>Parent Record Relationship Field</span> (Champ de réservation lié à cette page)<code>Contact__c</code></li>
+                            <li id="prop-End_Date__c"><span>End Date Field (facultatif)</span> (Date de fin, pour les plages)<code>End_Date__c</code></li>
+                            <li id="prop-Status__c"><span>Status Field (facultatif)</span> (Statut)<code>Status__c</code></li>
                         </ul>
                     </div>
                     <div class="gs-card rs">
                         <b>Objet ressource</b>
                         <ul class="bk-fields">
                             <li><span>Resource Object API Name</span> (Nom d'API de l'objet ressource)<code>Meeting_Room__c</code></li>
-                            <li id="prop-Name"><span>Resource Name Field</span> (Champ Nom de ressource)<code>Name</code></li>
+                            <li id="prop-Name"><span>Resource Name Field</span> (Champ du nom de chacun)<code>Name</code></li>
                             <li id="prop-Business_Hours_Start__c"><span>Business Hours Start / End Field</span><code id="prop-Business_Hours_End__c">Business_Hours_Start__c</code></li>
-                            <li id="prop-Capacity__c"><span>Capacity Field (facultatif)</span> (Champ Capacité)<code>Capacity__c</code></li>
+                            <li id="prop-Capacity__c"><span>Capacity Field (facultatif)</span> (Combien à la fois)<code>Capacity__c</code></li>
                             <li id="prop-Active__c"><span>Resource Filter Field (facultatif)</span> (Champ filtre de ressource)<code>Active__c</code></li>
                         </ul>
                     </div>
                     <div class="gs-card bl">
                         <b>Dates bloquées <span class="opt">Facultatif</span></b>
                         <ul class="bk-fields">
-                            <li><span>Blocked Dates Object</span> (Objet des dates bloquées)<code>Closure__c</code></li>
-                            <li><span>Blocked Dates Date Field</span> (Champ date des dates bloquées)<code>Date__c</code></li>
+                            <li><span>Blocked Dates Object</span> (Liste des jours fermés)<code>Closure__c</code></li>
+                            <li><span>Blocked Dates Date Field</span> (Date de fermeture)<code>Date__c</code></li>
                             <li><span>Start / End Time Field</span><small>fermeture sur une partie de la journée</small></li>
-                            <li><span>Blocked Dates Resource Field</span> (Champ ressource des dates bloquées)<small>une seule ressource</small></li>
+                            <li><span>Blocked Dates Resource Field</span> (Champ du jour fermé qui désigne la salle ou la personne)<small>une seule ressource</small></li>
                         </ul>
                     </div>
                 </div>
                 <h3 id="resource-filter">Filtrer le sélecteur de ressources sur n'importe quel champ</h3>
-                <p class="gs-lead" style="margin-bottom:12px;">Resource Filter Field et Resource Filter Value (Valeur du filtre de ressource) délimitent la liste. Une virgule signifie OU, un point-virgule combine des champs avec ET. L'assistant affiche le contrôle adapté au type de champ.</p>
+                <p class="gs-lead" style="margin-bottom:12px;">Resource Filter Field et Resource Filter Value délimitent la liste. Une virgule signifie OU, un point-virgule combine des champs avec ET. Dans l'assistant, ce sont <b>N'afficher que ceux où</b> et <b>est égal à</b>, avec le contrôle adapté au type de champ.</p>
                 <div class="hm-scroll">
                 <table class="gs-table">
                     <thead><tr><th>Afficher uniquement</th><th>Champ de filtre</th><th>Valeur de filtre</th></tr></thead>
@@ -991,7 +991,7 @@
                 </details>
                 <details>
                     <summary>Comment éviter les doubles réservations dans Salesforce ?</summary>
-                    <p>Réglez Conflict Behavior (Comportement en cas de conflit) sur le composant Resource Booking. Bloquer rend les créneaux pris non cliquables, Ignorer enregistre les dates libres d'une réservation multi-dates et indique celles qui ont été ignorées, et Autoriser accepte le chevauchement. Avec un champ de capacité, un créneau reste ouvert jusqu'à ce qu'il soit complet, avec des badges en temps réel comme 3/10.</p>
+                    <p>Réglez Conflict Behavior (Quand un horaire est pris) sur le composant Resource Booking. Bloquer rend les créneaux pris non cliquables, Ignorer enregistre les dates libres d'une réservation multi-dates et indique celles qui ont été ignorées, et Autoriser accepte le chevauchement. Avec un champ de capacité, un créneau reste ouvert jusqu'à ce qu'il soit complet, avec des badges en temps réel comme 3/10.</p>
                 </details>
                 <details>
                     <summary>Puis-je voir un calendrier pour chaque salle ou ressource dans Salesforce ?</summary>
@@ -1043,8 +1043,8 @@
                             <tr id="prop-timelineWindowDays"><td>Fenêtre de la chronologie, en jours (Timeline Window (Days))</td><td><code>timelineWindowDays</code></td><td>14</td><td>Nombre de jours affichés à la fois par la chronologie. 0 pour le mois complet</td></tr>
                             <tr id="prop-timelineZoom"><td>Zoom de la chronologie (Timeline Zoom)</td><td><code>timelineZoom</code></td><td>week</td><td>Zoom de départ : day, week ou month. Les utilisateurs peuvent en changer</td></tr>
                             <tr id="prop-timelineGroupByField"><td>Timeline Group By Field</td><td><code>timelineGroupByField</code></td><td></td><td>Regroupe les lignes de la chronologie sous des en-têtes, par exemple par bâtiment, chacun avec sa bande de capacité</td></tr>
-                            <tr id="prop-maxViewResources"><td>Nombre max. de ressources affichées (Max View Resources)</td><td><code>maxViewResources</code></td><td>5</td><td>Nombre maximal de lignes de ressources que la Chronologie et l'Occupation affichent, les plus chargées en premier ; 999 les affiche toutes. Limite les lignes affichées, pas les lignes comptées</td></tr>
-                            <tr id="prop-resourceViewFilter"><td>Lignes de ressources (Resource Rows)</td><td><code>resourceViewFilter</code></td><td>all</td><td>all, ou booked pour n'afficher que les ressources ayant une réservation dans la fenêtre</td></tr>
+                            <tr id="prop-maxViewResources"><td>Max View Resources (Lignes affichées)</td><td><code>maxViewResources</code></td><td>5</td><td>Nombre maximal de lignes de ressources que la Chronologie et l'Occupation affichent, les plus chargées en premier ; 999 les affiche toutes. Limite les lignes affichées, pas les lignes comptées</td></tr>
+                            <tr id="prop-resourceViewFilter"><td>Resource Rows (Quelles lignes)</td><td><code>resourceViewFilter</code></td><td>all</td><td>all, ou booked pour n'afficher que les ressources ayant une réservation dans la fenêtre</td></tr>
                             <tr id="prop-agendaFields"><td>Agenda Fields</td><td><code>agendaFields</code></td><td></td><td>Champs supplémentaires sur chaque ligne de l'agenda. Vide : reprend Hover Popover Fields</td></tr>
                             <tr id="prop-ganttPhaseField"><td>Gantt Phase Field</td><td><code>ganttPhaseField</code></td><td></td><td>Vue Gantt : une liste de sélection, un champ texte ou un champ de référence qui regroupe les tâches en phases. Vide, les tâches sont regroupées par ressource</td></tr>
                             <tr id="prop-ganttDependsOnField"><td>Gantt Waits On Field</td><td><code>ganttDependsOnField</code></td><td></td><td>Vue Gantt : un champ de référence vers la tâche qui doit se terminer avant. Un objet de lien, défini dans l'assistant de configuration, permet plusieurs liens par tâche, des types de lien et un décalage</td></tr>
@@ -1085,7 +1085,7 @@
                             <tr id="prop-businessHoursStartField"><td>Business Hours Start Field</td><td><code>businessHoursStartField</code></td><td></td><td>Champ heure : ouverture de chaque ressource</td></tr>
                             <tr id="prop-businessHoursEndField"><td>Business Hours End Field</td><td><code>businessHoursEndField</code></td><td></td><td>Champ heure : fermeture de chaque ressource</td></tr>
                             <tr id="prop-minTime"><td>Heure la plus tôt / Heure la plus tardive (assistant de configuration)</td><td><code>minTime, maxTime</code></td><td></td><td>Resserre les horaires de chaque ressource. Heure la plus tardive marque la fin de la journée : avec des créneaux de 30 minutes, 16:30 fait du créneau de 16:00 à 16:30 le dernier. Vide, chaque ressource garde ses propres horaires</td></tr>
-                            <tr id="prop-capacityField"><td>Champ Capacité (Capacity Field)</td><td><code>capacityField</code></td><td></td><td>Réservations autorisées par créneau. Active le mode capacité et les pourcentages de l'Occupation</td></tr>
+                            <tr id="prop-capacityField"><td>Capacity Field (Combien à la fois)</td><td><code>capacityField</code></td><td></td><td>Réservations autorisées par créneau. Active le mode capacité et les pourcentages de l'Occupation</td></tr>
                             <tr id="prop-showAvailabilityCount"><td>Show Availability Count</td><td><code>showAvailabilityCount</code></td><td>true</td><td>Badges 3/10 en temps réel sur les créneaux, avec un Capacity Field</td></tr>
                             <tr id="prop-allowMultipleResources"><td>Allow Multiple Resources</td><td><code>allowMultipleResources</code></td><td>false</td><td>Cochez plusieurs ressources et réservez-les ensemble</td></tr>
                             <tr id="prop-capacityAggregation"><td>Capacity Aggregation (multi-resource)</td><td><code>capacityAggregation</code></td><td>Combined</td><td>Combined additionne réservations et capacités. Distinct compte une seule fois un événement réparti sur plusieurs ressources</td></tr>
@@ -1107,7 +1107,7 @@
                             <tr id="prop-relationshipFieldApiName"><td>Parent Record Relationship Field</td><td><code>relationshipFieldApiName</code></td><td></td><td>Référence de chaque réservation vers l'enregistrement parent</td></tr>
                             <tr id="prop-endDateField"><td>End Date Field API Name</td><td><code>endDateField</code></td><td></td><td>Les dates contiguës s'enregistrent en un seul enregistrement avec une date de début et de fin (location du lundi au vendredi = 1 enregistrement)</td></tr>
                             <tr id="prop-resourceBookButtonLabel"><td>Book Button Label</td><td><code>resourceBookButtonLabel</code></td><td>Réserver (Book)</td><td>par exemple Réserver ou Planifier</td></tr>
-                            <tr id="prop-recordNameField"><td>Record Name Field</td><td><code>recordNameField</code></td><td></td><td>Champ texte pour un nom d'enregistrement lisible. Sa zone est masquée lorsque le Nom d'enregistrement par défaut contient un jeton de champ.</td></tr>
+                            <tr id="prop-recordNameField"><td>Record Name Field</td><td><code>recordNameField</code></td><td></td><td>Champ texte pour un nom d'enregistrement lisible. Sa zone est masquée lorsque Default Record Name (Nom à remplir par défaut) contient un jeton de champ.</td></tr>
                             <tr id="prop-defaultRecordName"><td>Default Record Name</td><td><code>defaultRecordName</code></td><td></td><td>par exemple Réservation de salle. Ou composez le nom à partir d'un champ choisi par l'utilisateur : <code>{Closure_Reason__c}</code> reprend la valeur de ce champ et masque la zone du nom.</td></tr>
                             <tr id="prop-appendDateTimeToName"><td>Append Date/Time to Record Name</td><td><code>appendDateTimeToName</code></td><td>true</td><td>Ajoute la date et l'heure au nom</td></tr>
                         </tbody>
@@ -1129,7 +1129,7 @@
                             <tr id="prop-limitPerPerson"><td>Limit per Person</td><td><code>limitPerPerson</code></td><td>0</td><td>Nombre de réservations à venir qu'un client peut avoir, vérifié sur le serveur à chaque enregistrement. Le personnel peut le dépasser après confirmation. 0 = illimité</td></tr>
                             <tr id="prop-limitPerPersonClientField"><td>Limit per Person Client Field</td><td><code>limitPerPersonClientField</code></td><td></td><td>Pour qui est la réservation : un champ e-mail ou texte, ou un champ de référence Contact, Piste, Compte ou Utilisateur</td></tr>
                             <tr id="prop-allowWholeDayNoTimes"><td>Allow Whole-Day (No Times)</td><td><code>allowWholeDayNoTimes</code></td><td>false</td><td>Une date choisie sans créneau s'enregistre comme une réservation à la journée</td></tr>
-                            <tr id="prop-timeGridOnly"><td>Grille horaire uniquement (Time Grid Only)</td><td><code>timeGridOnly</code></td><td>false</td><td>Masque le calendrier ; n'affiche que la grille des créneaux pour une date implicite</td></tr>
+                            <tr id="prop-timeGridOnly"><td>Time Grid Only (Heures d'un seul jour, sans calendrier)</td><td><code>timeGridOnly</code></td><td>false</td><td>Masque le calendrier ; n'affiche que la grille des créneaux pour une date implicite</td></tr>
                             <tr id="prop-timeGridDate"><td>Time Grid Date</td><td><code>timeGridDate</code></td><td></td><td>Date explicite (AAAA-MM-JJ) pour Time Grid Only</td></tr>
                             <tr id="prop-timeGridDateField"><td>Time Grid Date Field</td><td><code>timeGridDateField</code></td><td></td><td>Champ date de l'enregistrement hôte. Priorité : Time Grid Date, puis ce champ, puis aujourd'hui</td></tr>
                         </tbody>
@@ -1139,7 +1139,7 @@
                     <div class="hm-scroll"><table class="gs-table ref">
                         <thead><tr><th>Paramètre</th><th>Nom d'API</th><th>Par défaut</th><th>Rôle</th></tr></thead>
                         <tbody>
-                            <tr id="prop-conflictBehavior"><td>Comportement en cas de conflit (Conflict Behavior)</td><td><code>conflictBehavior</code></td><td>block</td><td>block : les créneaux pris ne peuvent pas être choisis. skip : les réservations multi-dates enregistrent les dates libres et listent celles ignorées. allow : aucun contrôle</td></tr>
+                            <tr id="prop-conflictBehavior"><td>Conflict Behavior (Quand un horaire est pris)</td><td><code>conflictBehavior</code></td><td>block</td><td>block : les créneaux pris ne peuvent pas être choisis. skip : les réservations multi-dates enregistrent les dates libres et listent celles ignorées. allow : aucun contrôle</td></tr>
 <tr id="prop-bufferMinutes"><td>Buffer Between Bookings (Minutes)</td><td><code>bufferMinutes</code></td><td>0</td><td>Battement gardé libre après chaque réservation sur la même ressource</td></tr>
                             <tr id="prop-conflictLookAheadDays"><td>Conflict Look-Ahead Days</td><td><code>conflictLookAheadDays</code></td><td>360</td><td>Fenêtre utilisée à la fois pour les badges de disponibilité et pour le contrôle des conflits à l'enregistrement</td></tr>
                             <tr id="prop-hideBookingsWithStatus"><td>Ignored Statuses</td><td><code>hideBookingsWithStatus</code></td><td></td><td>par exemple Cancelled : masqué dans la grille et exclu de la capacité</td></tr>
@@ -1150,7 +1150,7 @@
                     <div class="hm-scroll"><table class="gs-table ref">
                         <thead><tr><th>Paramètre</th><th>Nom d'API</th><th>Par défaut</th><th>Rôle</th></tr></thead>
                         <tbody>
-                            <tr id="prop-statusField"><td>Champ de statut (Status Field)</td><td><code>statusField</code></td><td></td><td>Liste de sélection qui pilote les couleurs</td></tr>
+                            <tr id="prop-statusField"><td>Status Field (Statut)</td><td><code>statusField</code></td><td></td><td>Liste de sélection qui pilote les couleurs</td></tr>
                             <tr id="prop-statusColors"><td>Couleurs de statut (Status Colors)</td><td><code>statusColors</code></td><td></td><td>par exemple <code>Confirmed:green,Pending:orange,Cancelled:red</code></td></tr>
                             <tr id="prop-statusColorDisplay"><td>Status Color Display</td><td><code>statusColorDisplay</code></td><td>both</td><td>grid (créneaux), calendar (jours) ou both</td></tr>
                             <tr id="prop-statusFieldLabel"><td>Status Field Label</td><td><code>statusFieldLabel</code></td><td></td><td>Libellé du sélecteur de statut</td></tr>
@@ -1158,7 +1158,7 @@
                             <tr id="prop-secondStatusField"><td>Second Picklist Field</td><td><code>secondStatusField</code></td><td></td><td>Une seconde liste de sélection choisie à l'enregistrement, par exemple un motif. Sans code couleur</td></tr>
                             <tr id="prop-secondStatusFieldLabel"><td>Second Picklist Label</td><td><code>secondStatusFieldLabel</code></td><td></td><td>Libellé de la seconde liste de sélection</td></tr>
                             <tr id="prop-selectableSecondStatuses"><td>Selectable Second-Picklist Values</td><td><code>selectableSecondStatuses</code></td><td></td><td>Valeurs autorisées pour la seconde liste de sélection</td></tr>
-                            <tr id="prop-hoverFields"><td>Champs de la fenêtre au survol (Hover Popover Fields)</td><td><code>hoverFields</code></td><td></td><td>Champs affichés au survol d'une réservation</td></tr>
+                            <tr id="prop-hoverFields"><td>Hover Popover Fields (Détails au survol)</td><td><code>hoverFields</code></td><td></td><td>Champs affichés au survol d'une réservation</td></tr>
                             <tr id="prop-bookingPrivacy"><td>Show Other People&rsquo;s Bookings As</td><td><code>bookingPrivacy</code></td><td>Details</td><td>Details, Busy (un bloc hachuré Indisponible, sans nom, pour tout le monde) ou Busy for site guests. Les noms sont retirés sur le serveur</td></tr>
                             <tr id="prop-showSuccessToast"><td>Show In-Component Toast</td><td><code>showSuccessToast</code></td><td>false</td><td>Confirmation affichée dans le composant. Nécessaire sur Experience Cloud</td></tr>
 <tr id="prop-showAddToCalendar"><td>Show Add to Calendar After Saving</td><td><code>showAddToCalendar</code></td><td>false</td><td>Après l'enregistrement, un fichier .ics avec toutes les réservations qui viennent d'être faites, pour Outlook, Google ou Apple</td></tr>

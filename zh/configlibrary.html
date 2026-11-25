@@ -663,7 +663,7 @@
                         <h3>设施停用日期</h3>
                         <p class="config-desc">管理员标记设施停用日或禁用日期。现有停用日以只读模式预加载，不会被误删。状态颜色区分进行中、已计划和已解除的停用。</p>
                         <div class="config-note">
-                            <strong>自引用模式：</strong>屏蔽日期与预订本身来自同一张 <code>Schedule__c</code> 表。将 <b>Blocked Dates Filter Field</b>（屏蔽日期筛选字段）设为 <code>Event__c</code> 且不填值，就只读取此记录自己的停用日，表中其他地方的预订不会屏蔽任何日期。如果想把停用日与预订分开，请把 <b>Blocked Dates Object</b>（屏蔽日期对象）指向另一个对象。</div>
+                            <strong>自引用模式：</strong>屏蔽日期与预订本身来自同一张 <code>Schedule__c</code> 表。将 <b>Blocked Dates Filter Field</b>（仅限符合条件的关闭）设为 <code>Event__c</code> 且不填值，就只读取此记录自己的停用日，表中其他地方的预订不会屏蔽任何日期。如果想把停用日与预订分开，请把 <b>Blocked Dates Object</b>（关闭日期列表）指向另一个对象。</div>
                         <div class="config-needs">
                             <span class="kp-h">所需内容</span>
                             <p>一个记录首日的日期字段，第二个记录末日的日期字段，一个指向设施记录的查找字段，一个用于名称的文本字段和一个状态选项列表（Active、Planned、Resolved）。停业日也从同一对象读取。</p>
@@ -913,7 +913,7 @@
                         <h3>办公室停业日历</h3>
                         <p class="config-desc">专门用于管理停业日。办公室或设施经理选择办公室关闭的日期（节假日、计划停业、恶劣天气、维护窗口），保存为一组平铺的记录，供其他 MultiDatePick 配置作为屏蔽日期<em>遵守</em>。</p>
                         <div class="config-note">
-                            <strong>与 <code>避开节假日的预约排期</code> 搭配使用：</strong>此配置写入的记录（<code>Status__c = Closed</code>；请在状态选项列表中添加 Closed 值）会通过三项设置被预约选择器读取：<b>Blocked Dates Object</b> + <b>Blocked Dates Filter Field</b>（屏蔽日期筛选字段）+ <b>Blocked Dates Filter Value</b>（屏蔽日期筛选值）。多种屏蔽类别（节假日、维护、仅限设备）可以共用同一张表。每个使用它的日历自行选择适用哪个类别。每个停业日都单独保存为一条记录，因为预约选择器每次停业只读取一个日期：停业一周就是五条记录，五天中的每一天都会关闭。</div>
+                            <strong>与 <code>避开节假日的预约排期</code> 搭配使用：</strong>此配置写入的记录（<code>Status__c = Closed</code>；请在状态选项列表中添加 Closed 值）会通过三项设置被预约选择器读取：<b>Blocked Dates Object</b> + <b>Blocked Dates Filter Field</b>（仅限符合条件的关闭）+ <b>Blocked Dates Filter Value</b>（等于）。多种屏蔽类别（节假日、维护、仅限设备）可以共用同一张表。每个使用它的日历自行选择适用哪个类别。每个停业日都单独保存为一条记录，因为预约选择器每次停业只读取一个日期：停业一周就是五条记录，五天中的每一天都会关闭。</div>
                         <div class="config-needs">
                             <span class="kp-h">所需内容</span>
                             <p>一个记录停业日的日期字段，一个指向所属记录的查找字段，一个用于名称的文本字段，以及一个包含 Closed 值的状态选项列表。每个停业日都单独保存为一条记录。</p>
@@ -926,7 +926,7 @@
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Show Recurring Pattern Button</b> <code class="api">showRecurringPattern</code></li>
                                 <li><b>Show Record Names in Each Day (在每天显示记录名称)</b> <code class="api">monthShowNames</code></li>
-                                <li><b>Default Field Values (默认字段值)</b> Status__c=Closed <code class="api">defaultFieldValues</code></li>
+                                <li><b>Default Field Values（自动填写）</b> Status__c=Closed <code class="api">defaultFieldValues</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> 仅 Closed <code class="api">selectableStatuses</code></li>
                             </ul>
                         </div>
@@ -967,12 +967,12 @@
                                 <li><b>Earliest Time（最早时间）</b> 07:00 / <b>Latest Time（最晚时间）</b> 20:00 <code class="api">minTime, maxTime</code></li>
                                 <li><b>Status Colors（状态颜色）</b> Draft/Submitted/Approved/Rejected <code class="api">statusColors</code></li>
                                 <li><b>Selectable Statuses (Status Picker)（可选状态）</b> 仅Draft <code class="api">selectableStatuses</code></li>
-                                <li><b>Second Picklist Field（第二个选项列表字段）</b> Billable__c，标签为“计费” <code class="api">secondStatusField</code></li>
+                                <li><b>Second Picklist Field（第二个选项）</b> Billable__c，标签为“计费” <code class="api">secondStatusField</code></li>
                                 <li><b>Record Details Pop-up（记录详情弹窗）</b> 项目，必填 <code class="api">recordForm</code></li>
                                 <li><b>Show Recurring Pattern Button</b> <code class="api">showRecurringPattern</code></li>
                                 <li><b>Week Starts on Monday</b> <code class="api">weekStartsOnMonday</code></li>
                                 <li><b>Custom Actions（自定义操作）</b> 提交本周、标记为不可计费（编辑模式，草稿记录） <code class="api">Custom_Actions__c</code></li>
-                                <li><b>Hover Popover Fields（悬停弹出框字段）</b> 项目、工时、计费、状态 <code class="api">hoverFields</code></li>
+                                <li><b>Hover Popover Fields（悬停时显示的详细信息）</b> 项目、工时、计费、状态 <code class="api">hoverFields</code></li>
                                 <li><b>Show Record Names in Each Day (在每天显示记录名称)</b> <code class="api">monthShowNames</code></li>
                             </ul>
                         </div>
@@ -1058,7 +1058,7 @@
                         <h3>为单日记录分配时间块</h3>
                         <p class="config-desc">对于本身就代表某一天的记录，例如带有活动日期字段的 Event，可以把选择器直接放到记录页面上，不显示日历即可分配时间段。日期从记录中读取，用户只需打开这一天，选好时间块，时间段就会自动保存回记录。</p>
                         <div class="config-note">
-                            <strong>仅时间网格模式：</strong><b>Time Grid Only</b> 会隐藏日历，只显示某个已确定日期的时间段网格。日期来自 <b>Time Grid Date Field</b>（这里是宿主记录上的 <code>Event_Date__c</code>）；也可以直接设置 <b>Time Grid Date</b>（时间网格日期），或两者都不设，默认使用今天。最适合用在日期已知的记录页面上。</div>
+                            <strong>Time Grid Only 模式：</strong><b>Time Grid Only</b>（仅一天的时间，不显示日历）会隐藏日历，只显示某个已确定日期的时间段网格。日期来自 <b>Time Grid Date Field</b>（这里是宿主记录上的 <code>Event_Date__c</code>）；也可以直接设置 <b>Time Grid Date</b>（固定日期），或两者都不设，默认使用今天。最适合用在日期已知的记录页面上。</div>
                         <div class="config-needs">
                             <span class="kp-h">所需内容</span>
                             <p>一个记录当天的日期字段，开始时间和结束时间字段，一个指向所属记录的查找字段，一个用于名称的文本字段和一个状态选项列表（Planned、Confirmed、Cancelled）。所在的记录也需要一个日期字段：即这些时间块所在的日期。</p>
@@ -1208,7 +1208,7 @@
                                 <li><b>Second Picklist Field</b> Appointment_Type__c <code class="api">secondStatusField</code></li>
                                 <li><b>Save Button Label (保存按钮标签)</b> Book Appointment <code class="api">saveButtonLabel</code></li>
                                 <li><b>Default Record Name</b> {Appointment_Type__c}，每个预约都以其类型命名 <code class="api">defaultRecordName</code></li>
-                                <li><b>Show Ignored Statuses as a Pill (将忽略的状态显示为筛选按钮)</b> 开启：已取消的预约可以随时调出来查看 <code class="api">showIgnoredStatusPills</code></li>
+                                <li><b>Show Ignored Statuses as a Pill（也允许用户显示它们）</b> 开启：已取消的预约可以随时调出来查看 <code class="api">showIgnoredStatusPills</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1325,7 +1325,7 @@
                                 <li><b>Timeline Zoom (时间线缩放)</b> 日 <code class="api">timelineZoom</code></li>
                                 <li><b>Location Picker (地点选择器)</b> 列表 <code class="api">Location_Picker__c</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> 仅 Confirmed <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (日历文件地点字段)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field（日历邀请中的地点）</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1339,7 +1339,7 @@
                     <div class="config-card" id="active-conference-rooms" data-config-file="Active_Conference_Rooms.json" data-shape="multi-resource">
                         <span class="config-badge badge-booking">Resource Booking</span>
                         <h3>启用中的会议室（筛选选择器）</h3>
-                        <p class="config-desc">演示如何用<strong>多字段 AND</strong> 语法设置 <b>Resource Filter Field</b> + <b>Resource Filter Value</b>（资源筛选值）。选择器只显示 <code>Active__c = true</code> 且 <code>Resource_Type__c = 'Conference Room'</code> 的资源。分号分隔符把两个筛选条件组合起来；管理员可以换成资源对象上的任意字段/值组合。</p>
+                        <p class="config-desc">演示如何用<strong>多字段 AND</strong> 语法设置 <b>Resource Filter Field</b> + <b>Resource Filter Value</b>（等于）。选择器只显示 <code>Active__c = true</code> 且 <code>Resource_Type__c = 'Conference Room'</code> 的资源。分号分隔符把两个筛选条件组合起来；管理员可以换成资源对象上的任意字段/值组合。</p>
                         <div class="config-note">
                             <strong>筛选语法速查：</strong>字段之间用 <code>;</code> 表示 AND，值之间用 <code>,</code> 表示 OR。<code>;</code> 两侧的字段数必须一致。示例：<code>Resource_Type__c=Conference Room</code> · <code>Building__c=North,South</code>（OR）· <code>Resource_Type__c;Building__c=Conference Room;North,South</code>（AND，第二个字段内为 OR）。</div>
                         <div class="config-needs">
@@ -1357,7 +1357,7 @@
                                 <li><b>Status Display (状态显示)</b> 数字徽章 <code class="api">statusDisplay</code></li>
                                 <li><b>Timeline Zoom (时间线缩放)</b> 日 <code class="api">timelineZoom</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> 仅 Confirmed <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (日历文件地点字段)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field（日历邀请中的地点）</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1374,7 +1374,7 @@
                         <h3>共享工位预订</h3>
                         <p class="config-desc">员工在混合办公环境中预订共享工位。时间段网格被禁用，因此工位按整天预订。容量跟踪显示共享办公桌还剩多少座位。可以预订当天，也可以最多提前两周预订。</p>
                         <div class="config-note">
-                            <strong>只按日期预订：</strong><b>Disable Time Slot Grid (Full-Day Mode)</b>（禁用时间段网格（全天模式））会完全去掉按小时划分的时间段网格。最适合按整天预订、只受容量限制的场景。与 <b>Capacity Field</b>（容量字段）结合，可以表示任何共享资源（工位、储物柜、停车位）。</div>
+                            <strong>只按日期预订：</strong><b>Disable Time Slot Grid (Full-Day Mode)</b>（仅整天，不选时间）会完全去掉按小时划分的时间段网格。最适合按整天预订、只受容量限制的场景。与 <b>Capacity Field</b>（同时可容纳数量）结合，可以表示任何共享资源（工位、储物柜、停车位）。</div>
                         <div class="config-needs">
                             <span class="kp-h">所需内容</span>
                             <p>预订对象上：一个记录当天的日期字段，一个指向工位的查找字段，一个指向所属记录的查找字段，一个用于名称的文本字段和一个状态选项列表（Reserved、Checked In、Cancelled）。工位对象上：名称、一个表示可同时预订人数的数字字段，以及一个位置字段。谁预订，谁就是该预订记录的所有人。</p>
@@ -1393,7 +1393,7 @@
                                 <li><b>Hover Popover Fields</b> 所有人排在最前，悬停即可看到谁占用了工位 <code class="api">hoverFields</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> 仅 Reserved <code class="api">selectableStatuses</code></li>
                                 <li><b>Default Record Name</b> Desk Reservation <code class="api">defaultRecordName</code></li>
-                                <li><b>Calendar File Location Field (日历文件地点字段)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field（日历邀请中的地点）</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1423,8 +1423,8 @@
                                 <li><b>Timeline Group By Field (时间线分组依据)</b> Resource_Type__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Ignored Statuses</b> Returned <code class="api">hideBookingsWithStatus</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> 仅 Reserved <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (日历文件地点字段)</b> Location__c <code class="api">calendarLocationField</code></li>
-                                <li><b>Show Ignored Statuses as a Pill (将忽略的状态显示为筛选按钮)</b> 开启：需要查看历史记录时，可以把已归还的物品重新调出来 <code class="api">showIgnoredStatusPills</code></li>
+                                <li><b>Calendar File Location Field（日历邀请中的地点）</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Show Ignored Statuses as a Pill（也允许用户显示它们）</b> 开启：需要查看历史记录时，可以把已归还的物品重新调出来 <code class="api">showIgnoredStatusPills</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1456,7 +1456,7 @@
                                 <li><b>Group Time Slots by Period</b> <code class="api">groupTimeSlotsByPeriod</code></li>
                                 <li><b>Timeline Group By Field (时间线分组依据)</b> Location__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> 仅 Reserved <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (日历文件地点字段)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field（日历邀请中的地点）</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1492,7 +1492,7 @@
                                 <li><b>Location Picker (地点选择器)</b> 地图和列表 <code class="api">Location_Picker__c</code></li>
                                 <li><b>Show Other People's Bookings As (他人预订的显示方式)</b> 仅显示为已占用，适用于站点访客 <code class="api">bookingPrivacy</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> 仅 Pending <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (日历文件地点字段)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field（日历邀请中的地点）</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1576,7 +1576,7 @@
                         <h3>团队容量规划</h3>
                         <p class="config-desc">把资源查找指向 <strong>User</strong>，组件就从会议室预订变成了人员排期。默认打开时间轴：一次看到每个人两周的安排，并可直接在上面分配工作。单击一次即可切换到使用率，查看谁超出了容量；周视图则可把工作安排到具体的小时。</p>
                         <div class="config-note">
-                            <strong>以 User 作为资源：</strong><b>Resource Object API Name</b>（资源对象 API 名称）设为 <code>User</code>，并将 <b>Resource Filter Field</b> <code>IsActive;UserType</code> 设为 <code>true;Standard</code>，因此只显示活动的内部用户，绝不会显示集成用户或系统用户。User 上没有表示容量的标准字段，因此请添加自定义字段 <code>Daily_Capacity__c</code>，否则热力图只显示数量而不是百分比。User 上的 <b>Business Hours Start Field</b>（营业时间开始字段）和 <b>Business Hours End Field</b>（营业时间结束字段）决定周网格中每个人的工作时间。</div>
+                            <strong>以 User 作为资源：</strong><b>Resource Object API Name</b>（资源对象 API 名称）设为 <code>User</code>，并将 <b>Resource Filter Field</b> <code>IsActive;UserType</code> 设为 <code>true;Standard</code>，因此只显示活动的内部用户，绝不会显示集成用户或系统用户。User 上没有表示容量的标准字段，因此请添加自定义字段 <code>Daily_Capacity__c</code>，否则热力图只显示数量而不是百分比。User 上的 <b>Business Hours Start Field</b>（各自的开放时间）和 <b>Business Hours End Field</b>（各自的关闭时间）决定周网格中每个人的工作时间。</div>
                         <div class="config-needs">
                             <span class="kp-h">所需内容</span>
                             <p>一个分配对象：一个记录当天的日期字段，开始时间和结束时间字段，一个指向 User 的查找字段，一个指向项目的查找字段，一个用于名称的文本字段和一个状态选项列表（Confirmed、Tentative、Pending、Cancelled）。User 上：一个表示每日容量的数字字段和表示工作时间的时间字段。可选：一个用于“截止日期”标记的日期字段。</p>
@@ -1621,10 +1621,10 @@
                                 <li><b>Allow Past Dates（允许过去日期）</b>开启 <code class="api">allowPastDates</code></li>
                                 <li><b>Capacity Field</b> <code class="api">capacityField</code></li>
                                 <li><b>Hover Popover Fields</b> <code class="api">hoverFields</code></li>
-                                <li><b>Show All Records (显示所有记录)</b> <code class="api">showAllRecords</code></li>
+                                <li><b>Show All Records（显示所有人的记录）</b> <code class="api">showAllRecords</code></li>
                                 <li><b>Timeline Group By Field (时间线分组依据)</b> Resource_Type__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Map View (地图视图)</b> Location__c <code class="api">Map_View__c</code></li>
-                                <li><b>Max View Resources (视图中的最大资源数)</b> 显示全部 <code class="api">maxViewResources</code></li>
+                                <li><b>Max View Resources（显示的行数）</b> 显示全部 <code class="api">maxViewResources</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1670,7 +1670,7 @@
                         <h3>含休息的培训师全天预订</h3>
                         <p class="config-desc">培训师在某个资源（房间、车辆、设备）上预订一整天。这一天从第一个时间段到最后一个时间段保存为一条父记录；午餐和休息成为子块 (Sub-Block) 子记录。单击“Mark as Break”可以手动标记某个时间段，也可以直接留出空档，系统会自动识别。</p>
                         <div class="config-note">
-                            <strong>Resource Booking 上的子块：</strong>随附的 <code>Sub_Block__c</code> 子对象存储休息记录，并通过 <b>Sub-Block Parent Lookup Field</b>（子块父级查找字段）关联到父 Schedule 记录。无需额外设置数据结构：两个对象都随软件包提供。</div>
+                            <strong>Resource Booking 上的子块：</strong>随附的 <code>Sub_Block__c</code> 子对象存储休息记录，并通过 <b>Sub-Block Parent Lookup Field</b>（指向主预订的休息字段）关联到父 Schedule 记录。无需额外设置数据结构：两个对象都随软件包提供。</div>
                         <div class="config-needs">
                             <span class="kp-h">所需内容</span>
                             <p>培训场次上：一个记录当天的日期字段，开始时间和结束时间字段，一个指向培训师的查找字段，一个指向所属记录的查找字段，一个用于名称的文本字段和一个状态选项列表（Confirmed、Tentative、Pending、Cancelled）。培训师对象上：姓名和表示工作时间的时间字段。另需一个记录休息时间的子对象（MultiDatePick 自带的子块（Sub-Block）对象即可）。</p>
@@ -1720,7 +1720,7 @@
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Timeline Group By Field (时间线分组依据)</b> Location__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> 仅 Enrolled <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (日历文件地点字段)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field（日历邀请中的地点）</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1817,7 +1817,7 @@
                                 <li><b>Timeline Group By Field (时间线分组依据)</b> Resource_Type__c <code class="api">timelineGroupByField</code></li>
                                 <li><b>Time Interval (Minutes)</b>（时间间隔（分钟））30 分钟 <code class="api">timeInterval</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Reserved/Maintenance <code class="api">selectableStatuses</code></li>
-                                <li><b>Calendar File Location Field (日历文件地点字段)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field（日历邀请中的地点）</b> Location__c <code class="api">calendarLocationField</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -1893,12 +1893,12 @@
                                 <li><b>Limit per Person Client Field (每人上限的客户字段)</b> Member__c <code class="api">limitPerPersonClientField</code></li>
                                 <li><b>Selectable Statuses (Status Picker)</b> Reserved/Walk-In <code class="api">selectableStatuses</code></li>
                                 <li><b>Default Record Name</b> Court Booking <code class="api">defaultRecordName</code></li>
-                                <li><b>Calendar File Location Field (日历文件地点字段)</b> Location__c <code class="api">calendarLocationField</code></li>
+                                <li><b>Calendar File Location Field（日历邀请中的地点）</b> Location__c <code class="api">calendarLocationField</code></li>
                                 <li><b>Show Other People's Bookings As (他人预订的显示方式)</b> 仅显示为已占用，适用于站点访客 <code class="api">bookingPrivacy</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
-                            <strong>视图：</strong> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-week">周</span> <span class="cv-meta">时间轴窗口 14 天，视图中的最大资源数 10</span>
+                            <strong>视图：</strong> <span class="vbadge vbadge-timeline vbadge-default">时间轴（默认）</span> <span class="vbadge vbadge-calendar">日历</span> <span class="vbadge vbadge-week">周</span> <span class="cv-meta">时间轴窗口 14 天，Max View Resources（显示的行数）10</span>
                         </div>
                         <div class="config-btn-group">
                             <button class="btn btn-primary btn-sm btn-copy-json">复制供设置向导使用</button>
@@ -2000,7 +2000,7 @@
                                 <li><b>Limit per Person (每人上限)</b> 每位客户 2 个 <code class="api">limitPerPerson</code></li>
                                 <li><b>Limit per Person Client Field (每人上限的客户字段)</b> Client__c <code class="api">limitPerPersonClientField</code></li>
                                 <li><b>Default Record Name</b> {Meeting_Type__c}，每场会议都以其类型命名 <code class="api">defaultRecordName</code></li>
-                                <li><b>Show Ignored Statuses as a Pill (将忽略的状态显示为筛选按钮)</b> 开启：已取消的预约可以随时调出来查看 <code class="api">showIgnoredStatusPills</code></li>
+                                <li><b>Show Ignored Statuses as a Pill（也允许用户显示它们）</b> 开启：已取消的预约可以随时调出来查看 <code class="api">showIgnoredStatusPills</code></li>
                             </ul>
                         </div>
                         <div class="config-views">
@@ -2112,7 +2112,7 @@
                                 <li><b>Gantt Columns (甘特图列)</b> 负责人、结束、偏差、进度、状况 <code class="api">ganttColumns</code></li>
                                 <li><b>Gantt Phase Field (甘特图阶段字段)</b> Phase__c <code class="api">ganttPhaseField</code></li>
                                 <li><b>Gantt Waits On Field (甘特图“等待”字段)</b> Waits_On__c <code class="api">ganttDependsOnField</code></li>
-                                <li><b>Show All Records (显示所有记录)</b> <code class="api">showAllRecords</code></li>
+                                <li><b>Show All Records（显示所有人的记录）</b> <code class="api">showAllRecords</code></li>
                                 <li><b>Display Only（仅显示）</b>开启 <code class="api">displayOnly</code></li>
                             </ul>
                         </div>
@@ -2169,9 +2169,9 @@
                                 <li><b>Gantt Dependency Mode (甘特图依赖模式)</b> lines：只画出链接，不推移任何任务 <code class="api">ganttDependencyMode</code></li>
                                 <li><b>Gantt Columns (甘特图列)</b> 开始、结束、天数、负责人、预算成本 <code class="api">ganttColumns</code></li>
                                 <li><b>Ignored Statuses</b> Aborted <code class="api">hideBookingsWithStatus</code></li>
-                                <li><b>Show Ignored Statuses as a Pill (将忽略的状态显示为筛选按钮)</b> 开启 <code class="api">showIgnoredStatusPills</code></li>
+                                <li><b>Show Ignored Statuses as a Pill（也允许用户显示它们）</b> 开启 <code class="api">showIgnoredStatusPills</code></li>
                                 <li><b>Booking Resource Field</b> OwnerId <code class="api">bookingResourceField</code></li>
-                                <li><b>Show All Records (显示所有记录)</b> <code class="api">showAllRecords</code></li>
+                                <li><b>Show All Records（显示所有人的记录）</b> <code class="api">showAllRecords</code></li>
                                 <li><b>Record Details Pop-up (记录详情弹窗)</b> 新建市场活动时填写的名称、类型、状态和预算 <code class="api">recordForm</code></li>
                             </ul>
                         </div>
@@ -2203,7 +2203,7 @@
                                 <li><b>Gantt Waits On Field (甘特图“等待”字段)</b> Waits_On__c <code class="api">ganttDependsOnField</code></li>
                                 <li><b>Gantt Dependency Mode (甘特图依赖模式)</b> push：移动一个任务时，等待它的任务会随之移动 <code class="api">ganttDependencyMode</code></li>
                                 <li><b>Gantt Skip Weekends (甘特图跳过周末)</b> 开启 <code class="api">ganttSkipWeekends</code></li>
-                                <li><b>Show All Records (显示所有记录)</b> <code class="api">showAllRecords</code></li>
+                                <li><b>Show All Records（显示所有人的记录）</b> <code class="api">showAllRecords</code></li>
                                 <li><b>Enable Edit Mode</b> <code class="api">enableEditMode</code></li>
                                 <li><b>Record Details Pop-up (记录详情弹窗)</b> “添加任务”时填写的名称、施工队、工程、阶段、状态、完成百分比和里程碑 <code class="api">recordForm</code></li>
                             </ul>
@@ -2246,7 +2246,7 @@
                         </div>
                         <div class="diagram-bottom-single">
                             <div class="obj-box obj-red">
-                                <div class="obj-header">屏蔽日期对象 <span class="badge-tag">可选</span></div>
+                                <div class="obj-header">Blocked Dates Object（关闭日期列表） <span class="badge-tag">可选</span></div>
                                 <div class="obj-body">
                                     <div class="obj-field"><span class="prop-name">Blocked_Dates_Source_Object__c</span><span class="field-label">对象 API 名称</span></div>
                                     <div class="obj-field"><span class="prop-name">Blocked_Dates_Date_Field__c</span><span class="field-label">日期字段</span></div>
@@ -2291,7 +2291,7 @@
                                 </div>
                             </div>
                             <div class="obj-box obj-red">
-                                <div class="obj-header">屏蔽日期对象 <span class="badge-tag">可选</span></div>
+                                <div class="obj-header">Blocked Dates Object（关闭日期列表） <span class="badge-tag">可选</span></div>
                                 <div class="obj-body">
                                     <div class="obj-field"><span class="prop-name">Blocked_Dates_Source_Object__c</span><span class="field-label">对象 API 名称</span></div>
                                     <div class="obj-field"><span class="prop-name">Blocked_Dates_Date_Field__c</span><span class="field-label">日期字段</span></div>
@@ -2365,7 +2365,7 @@
                                 </div>
                             </div>
                             <div class="obj-box obj-red">
-                                <div class="obj-header">屏蔽日期对象 <span class="badge-tag">可选</span></div>
+                                <div class="obj-header">Blocked Dates Object（关闭日期列表） <span class="badge-tag">可选</span></div>
                                 <div class="obj-body">
                                     <div class="obj-field"><span class="prop-name">Blocked_Dates_Source_Object__c</span><span class="field-label">对象 API 名称</span></div>
                                     <div class="obj-field"><span class="prop-name">Blocked_Dates_Date_Field__c</span><span class="field-label">日期字段</span></div>
@@ -2379,7 +2379,7 @@
                 </div>
                 <!-- HOVER FIELDS EXAMPLE -->
                 <div class="diagram-section" style="margin-bottom:0;">
-                    <div class="diagram-label">悬停弹出框字段示例</div>
+                    <div class="diagram-label">Hover Popover Fields（悬停时显示的详细信息）示例</div>
                     <div class="diagram-sublabel">设置 Hover Popover Fields 后（此处为 Meeting_Type__c、Status__c、Start_Time__c），将鼠标悬停在已预订的日期或时段上，会列出其中每个预订的这些字段：</div>
                     <figure style="margin:0 auto;max-width:420px;">
                         <img src="/images/zh/views/salesforce-calendar-hover-card.png" alt="Salesforce 日历悬停卡片：11 月 11 日共 3 个预订，Lakeside Bakery 和 The Whitfield Family，含会议类型、状态、开始时间和“查看记录”" loading="lazy" data-zoomable width="600" height="854" style="width:100%;height:auto;border-radius:10px;border:1px solid #E2E8F0;display:block;">
